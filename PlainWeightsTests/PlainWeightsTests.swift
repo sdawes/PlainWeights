@@ -5,12 +5,27 @@
 //  Created by Stephen Dawes on 16/08/2025.
 //
 
-import Testing
+import XCTest
+import SwiftUI
+@testable import PlainWeights
 
-struct PlainWeightsTests {
+final class PlainWeightsTests: XCTestCase {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    func testAddExerciseViewRenderingPerformance() throws {
+        measure {
+            let _ = AddExerciseView()
+        }
+    }
+    
+    func testTextFieldInteractionPerformance() throws {
+        // Performance test for text field creation and setup
+        // This gives us a baseline for how quickly text input can be prepared
+        measure {
+            // Create a text field and simulate focus preparation
+            let textField = UITextField()
+            textField.placeholder = "Exercise Name"
+            textField.becomeFirstResponder()
+        }
     }
 
 }

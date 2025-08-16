@@ -1,0 +1,19 @@
+# All_Code reference file - not part of the app
+All_Code.swift
+
+# Xcode
+.DS_Store
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+xcuserdata/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+Package.pins
+Package.resolved

@@ -10,11 +10,13 @@ import SwiftData
 
 @Model
 final class Exercise {
+    var id = UUID()
     var name: String
     var category: String
     var createdDate: Date
     
     init(name: String, category: String, createdDate: Date = Date()) {
+        self.id = UUID()
         self.name = name
         self.category = category
         self.createdDate = createdDate

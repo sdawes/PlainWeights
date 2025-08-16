@@ -154,3 +154,11 @@ final class MetricsCache {
 - Use Instruments to profile performance bottlenecks
 - Implement proper SwiftData error handling
 - Consider memory usage with large datasets
+
+## Development Approach
+- **INCREMENTAL DELIVERY**: Break down implementation into small, testable chunks
+- Provide one feature or component at a time
+- Allow testing and verification between each step
+- Show progress gradually rather than delivering complete solutions
+- Each code change should be functional and runnable
+- Wait for feedback before proceeding to next step

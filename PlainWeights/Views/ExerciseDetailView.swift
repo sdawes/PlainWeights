@@ -8,27 +8,14 @@
 import SwiftUI
 
 struct ExerciseDetailView: View {
-    @Environment(\.dismiss) private var dismiss
     let exercise: Exercise
-    
+
     var body: some View {
-        NavigationStack {
-            VStack {
-                // Content will be added later
-            }
-            .navigationTitle(exercise.name)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
+        Form {
+            LabeledContent("Category", value: exercise.category)
+            LabeledContent("Created", value: exercise.createdDate.formatted(date: .abbreviated, time: .shortened))
         }
+        .navigationTitle(exercise.name)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

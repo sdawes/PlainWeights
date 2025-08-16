@@ -11,35 +11,28 @@ import SwiftData
 struct ExerciseListView: View {
     @Query private var exercises: [Exercise]
     @State private var showingAddExercise = false
-    
+
     var body: some View {
-        NavigationStack {
-            List(exercises) { exercise in
+        List(exercises) { exercise in
+            NavigationLink(value: exercise) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(exercise.name)
-                        .font(.headline)
-                    Text(exercise.category)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    Text(exercise.name).font(.headline)
+                    Text(exercise.category).font(.subheadline).foregroundStyle(.secondary)
                     Text(exercise.createdDate, format: .dateTime)
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .font(.caption).foregroundStyle(.tertiary)
                 }
                 .padding(.vertical, 4)
             }
-            .navigationTitle("Exercises")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddExercise = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                }
+        }
+        .navigationTitle("Exercises")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button { showingAddExercise = true } label: { Image(systemName: "plus") }
             }
-            .sheet(isPresented: $showingAddExercise) {
-                AddExerciseView()
-            }
+        }
+        .sheet(isPresented: $showingAddExercise) { AddExerciseView() }
+        .navigationDestination(for: Exercise.self) { exercise in
+            ExerciseDetailView(exercise: exercise)
         }
     }
 }

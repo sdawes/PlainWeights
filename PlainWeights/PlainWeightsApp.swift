@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct PlainWeightsApp: App {
@@ -13,5 +14,6 @@ struct PlainWeightsApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Exercise.self)
     }
 }

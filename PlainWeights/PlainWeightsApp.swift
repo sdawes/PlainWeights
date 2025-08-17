@@ -12,6 +12,6 @@ import SwiftData
 struct PlainWeightsApp: App {
     var body: some Scene {
         WindowGroup { ContentView() }
-            .modelContainer(for: [Exercise.self])
+            .modelContainer(for: [Exercise.self, ExerciseSet.self])
     }
 }

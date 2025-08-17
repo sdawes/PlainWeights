@@ -26,7 +26,7 @@ struct ExerciseListView: View {
         }
         .navigationTitle("Exercises")
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .primaryAction) {
                 Button { showingAddExercise = true } label: { Image(systemName: "plus") }
             }
         }

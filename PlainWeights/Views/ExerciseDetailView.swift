@@ -13,7 +13,13 @@ struct ExerciseDetailView: View {
     let exercise: Exercise
     @Query private var sets: [ExerciseSet]
 
-    @State private var showingAdd = false
+    @State private var weightText = ""
+    @State private var repsText = ""
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case weight, reps
+    }
 
     init(exercise: Exercise) {
         self.exercise = exercise
@@ -25,48 +31,85 @@ struct ExerciseDetailView: View {
     }
 
     var body: some View {
-        List {
-            Section("History") {
-                if sets.isEmpty {
-                    Text("No sets yet").foregroundStyle(.secondary)
-                } else {
-                    ForEach(sets) { set in
-                        HStack {
-                            Text("\(formatWeight(set.weight)) kg × \(set.reps)")
-                                .monospacedDigit()
-                            Spacer()
-                            VStack(alignment: .trailing) {
-                                Text(set.timestamp, format: .dateTime.day().month().year())
-                                Text(set.timestamp, format: .dateTime.hour().minute())
-                            }
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        }
+        VStack(spacing: 0) {
+            // Quick Add section at top (fixed position)
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Quick Add")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                HStack(spacing: 12) {
+                    TextField("Weight", text: $weightText)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .weight)
+                        .frame(maxWidth: .infinity)
+                    
+                    TextField("Reps", text: $repsText)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .reps)
+                        .frame(maxWidth: .infinity)
+                    
+                    Button(action: addSet) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.tint)
                     }
-                    .onDelete(perform: delete)
+                    .disabled(weightText.isEmpty || repsText.isEmpty)
+                }
+            }
+            .padding()
+            .background(.regularMaterial)
+            
+            // History list below (scrollable)
+            List {
+                Section("History") {
+                    if sets.isEmpty {
+                        Text("No sets yet").foregroundStyle(.secondary)
+                    } else {
+                        ForEach(sets) { set in
+                            HStack {
+                                Text("\(formatWeight(set.weight)) kg × \(set.reps)")
+                                    .monospacedDigit()
+                                Spacer()
+                                VStack(alignment: .trailing) {
+                                    Text(set.timestamp, format: .dateTime.day().month().year())
+                                    Text(set.timestamp, format: .dateTime.hour().minute())
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            }
+                        }
+                        .onDelete(perform: delete)
+                    }
                 }
             }
         }
         .navigationTitle(exercise.name)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingAdd = true
-                } label: {
-                    Label("Add", systemImage: "plus.circle.fill")
+        .toolbar { 
+            if !sets.isEmpty {
+                ToolbarItem(placement: .secondaryAction) {
+                    EditButton()
                 }
             }
-            if !sets.isEmpty {
-                ToolbarItem(placement: .navigationBarTrailing) { EditButton() }
-            }
         }
-        .sheet(isPresented: $showingAdd) {
-            AddSetForm(exercise: exercise) { newSet in
-                context.insert(newSet)
-                try? context.save()
-            }
-            .presentationDetents([.medium])
-        }
+    }
+
+    private func addSet() {
+        guard let weight = Double(weightText),
+              let reps = Int(repsText),
+              weight > 0,
+              reps > 0 else { return }
+        
+        let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
+        context.insert(set)
+        try? context.save()
+        
+        // Clear fields after adding
+        weightText = ""
+        repsText = ""
+        focusedField = nil
     }
 
     private func delete(at offsets: IndexSet) {
@@ -76,65 +119,5 @@ struct ExerciseDetailView: View {
 
     private func formatWeight(_ value: Double) -> String {
         value.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", value) : String(format: "%.1f", value)
-    }
-}
-
-struct AddSetForm: View {
-    let exercise: Exercise
-    var onSave: (ExerciseSet) -> Void
-
-    @State private var weight: Double? = nil
-    @State private var reps: Int? = nil
-    @State private var showValidation = false
-    @FocusState private var focus: Field?
-    enum Field { case weight, reps }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Add set") {
-                    LabeledContent("Weight (kg)") {
-                        TextField("0", value: $weight, format: .number.precision(.fractionLength(0...1)))
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .monospacedDigit()
-                            .focused($focus, equals: .weight)
-                            .submitLabel(.next)
-                    }
-                    LabeledContent("Reps") {
-                        TextField("0", value: $reps, format: .number)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .monospacedDigit()
-                            .focused($focus, equals: .reps)
-                            .submitLabel(.done)
-                    }
-                    if showValidation {
-                        Text("Enter a positive weight and reps.")
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                    }
-                }
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("Add set")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }.bold()
-                }
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
-                }
-            }
-            .onAppear { focus = .weight }
-            .onSubmit { focus == .weight ? (focus = .reps) : save() }
-        }
-    }
-
-    @Environment(\.dismiss) private var dismiss
-    private func save() {
-        guard let w = weight, let r = reps, w > 0, r > 0 else { showValidation = true; return }
-        onSave(ExerciseSet(weight: w, reps: r, exercise: exercise))
-        dismiss()
     }
 }

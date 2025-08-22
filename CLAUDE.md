@@ -30,14 +30,16 @@ PlainWeights is a high-performance gym workout tracking app built with SwiftUI a
   - Includes `bumpUpdated()` helper method for manual timestamp updates
   - lastUpdated automatically updated when sets are added
 - **WorkoutSession**: Date, exercises performed
-- **ExerciseSet**: Reps, weight, non-optional exercise reference, timestamp
+- **ExerciseSet**: Reps, weight, optional exercise reference, timestamp
   - Automatically updates parent Exercise.lastUpdated when created
+  - Exercise relationship is optional to handle SwiftData cascade deletion
 - **Metrics**: Cached/computed statistics for performance
 
 **IMPORTANT**: 
 - Exercise category is a free-text String field. Users can type any category name they want (e.g., "Biceps", "Triceps", "Cardio", "Custom Category"). DO NOT change this to an enum or dropdown - keep it as open text input.
-- ExerciseSet.exercise is NON-OPTIONAL - sets always belong to an exercise
+- ExerciseSet.exercise is OPTIONAL to handle cascade deletion properly (SwiftData requirement)
 - Exercise.lastUpdated is automatically updated in ExerciseSet.init() for reliable ordering
+- Use optional chaining (?.) when querying ExerciseSet relationships in predicates
 
 #### Performance Optimizations
 - Use SwiftData's `@Model` with indexed properties for frequent queries

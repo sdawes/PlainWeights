@@ -27,7 +27,7 @@ struct ExerciseDetailView: View {
         self.exercise = exercise
         let id = exercise.persistentModelID
         _sets = Query(
-            filter: #Predicate<ExerciseSet> { $0.exercise.persistentModelID == id },
+            filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
         _name = State(initialValue: exercise.name)
@@ -75,7 +75,8 @@ struct ExerciseDetailView: View {
                 if sets.isEmpty {
                     Text("No sets yet").foregroundStyle(.secondary)
                 } else {
-                    ForEach(Array(sets.enumerated()), id: \.element) { index, set in
+                    ForEach(sets.indices, id: \.self) { index in
+                        let set = sets[index]
                         HStack {
                             Text("\(formatWeight(set.weight)) kg × \(set.reps)")
                                 .monospacedDigit()

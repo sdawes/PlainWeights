@@ -33,6 +33,28 @@ struct ExerciseListView: View {
             ToolbarItem(placement: .primaryAction) {
                 Button { showingAddExercise = true } label: { Image(systemName: "plus") }
             }
+            #if DEBUG
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button("Generate Set 1 (1 Month)") {
+                        TestDataGenerator.generateTestDataSet1(modelContext: modelContext)
+                    }
+                    Button("Generate Set 2 (1 Year)") {
+                        TestDataGenerator.generateTestDataSet2(modelContext: modelContext)
+                    }
+                    Button("Generate Set 3 (2 Weeks)") {
+                        TestDataGenerator.generateTestDataSet3(modelContext: modelContext)
+                    }
+                    Divider()
+                    Button("Clear All Data", role: .destructive) {
+                        TestDataGenerator.clearAllData(modelContext: modelContext)
+                    }
+                } label: {
+                    Image(systemName: "ladybug.fill")
+                        .foregroundColor(.orange)
+                }
+            }
+            #endif
         }
         .sheet(isPresented: $showingAddExercise) { AddExerciseView() }
         .navigationDestination(for: Exercise.self) { exercise in

@@ -37,13 +37,13 @@ struct ExerciseDetailView: View {
                 HStack(spacing: 12) {
                     TextField("Weight", text: $weightText)
                         .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                         .focused($focusedField, equals: .weight)
                         .frame(maxWidth: .infinity)
                     
                     TextField("Reps", text: $repsText)
                         .keyboardType(.numberPad)
-                        .textFieldStyle(.roundedBorder)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                         .focused($focusedField, equals: .reps)
                         .frame(maxWidth: .infinity)
                     

@@ -58,15 +58,20 @@ When implementing features, ALWAYS:
 
 ### Building the Project
 ```bash
-# Build for Debug configuration
+# Build for Debug configuration (iOS Simulator - RECOMMENDED FOR TESTING)
+xcodebuild -scheme PlainWeights -configuration Debug build -destination "platform=iOS Simulator,name=iPhone 16"
+
+# Build for Debug configuration (any platform - may default to macOS and fail)
 xcodebuild -scheme PlainWeights -configuration Debug build
 
 # Build for Release configuration  
-xcodebuild -scheme PlainWeights -configuration Release build
+xcodebuild -scheme PlainWeights -configuration Release build -destination "platform=iOS Simulator,name=iPhone 16"
 
 # Clean build folder
 xcodebuild -scheme PlainWeights clean
 ```
+
+**IMPORTANT**: Always use the iOS Simulator destination when testing builds, as this is an iOS app and building without a destination may default to macOS and fail.
 
 ### Running Tests
 ```bash
@@ -147,6 +152,31 @@ final class MetricsCache {
 - **Services/**: Data aggregation and chart data services
 - **Cache/**: Performance caching layer
 - **Extensions/**: SwiftData and SwiftUI extensions
+- **TestDataGenerator.swift**: Debug-only test data generation for development and testing
+
+## Debug Tools and Test Data
+
+### TestDataGenerator
+Available only in DEBUG builds, accessible via the ladybug menu in ExerciseListView:
+
+**Test Data Sets:**
+- **Set 1 (1 Month)**: 20 exercises, ~76 sets, realistic gym routine with progressive overload
+- **Set 2 (1 Year)**: 50 exercises, ~150+ workouts, full year performance test data
+- **Set 3 (2 Weeks)**: 5 basic exercises, 18 sets, simple testing data
+- **Live Data**: 28 exercises, 119 sets from real gym sessions (Aug 17-22, 2025)
+
+**Key Features:**
+- `printCurrentData()`: Exports all workout data to console using `os.Logger`
+- Preserves original category names (Biceps, Triceps, Shoulders, etc.)
+- Realistic timestamps and progressive overload patterns
+- Background-compatible logging for device testing
+
+**Usage:**
+```swift
+// In ExerciseListView debug menu
+TestDataGenerator.generateTestDataSet4(modelContext: modelContext) // Live Data
+TestDataGenerator.printCurrentData(modelContext: modelContext)    // Export to console
+```
 
 ## Important Notes
 - Always consult latest documentation when implementing new features

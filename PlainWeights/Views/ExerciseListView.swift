@@ -36,6 +36,10 @@ struct ExerciseListView: View {
             #if DEBUG
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
+                    Button("Print Data to Console") {
+                        TestDataGenerator.printCurrentData(modelContext: modelContext)
+                    }
+                    Divider()
                     Button("Generate Set 1 (1 Month)") {
                         TestDataGenerator.generateTestDataSet1(modelContext: modelContext)
                     }
@@ -44,6 +48,9 @@ struct ExerciseListView: View {
                     }
                     Button("Generate Set 3 (2 Weeks)") {
                         TestDataGenerator.generateTestDataSet3(modelContext: modelContext)
+                    }
+                    Button("Generate Live Data (Real Workouts)") {
+                        TestDataGenerator.generateTestDataSet4(modelContext: modelContext)
                     }
                     Divider()
                     Button("Clear All Data", role: .destructive) {

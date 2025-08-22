@@ -15,6 +15,8 @@ struct ExerciseDetailView: View {
 
     @State private var weightText = ""
     @State private var repsText = ""
+    @State private var name: String
+    @FocusState private var nameFocused: Bool
     @FocusState private var focusedField: Field?
     
     enum Field {
@@ -28,10 +30,21 @@ struct ExerciseDetailView: View {
             filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
+        _name = State(initialValue: exercise.name)
     }
 
     var body: some View {
         List {
+            // Title field like Apple Notes
+            Section {
+                TextField("Title", text: $name)
+                    .font(.largeTitle).bold()
+                    .textFieldStyle(.plain)
+                    .focused($nameFocused)
+                    .submitLabel(.done)
+                    .onSubmit { endEditing() }
+            }
+            
             // Add Set section with custom styling
             Section("Add set") {
                 HStack(spacing: 12) {
@@ -97,7 +110,16 @@ struct ExerciseDetailView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .navigationTitle(exercise.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if nameFocused { Button("Done") { endEditing() } }
+            }
+
+            ToolbarItem(placement: .keyboard) {
+                HStack { Spacer(); Button("Done") { endEditing() } }
+            }
+        }
     }
 
     private func addSet() {
@@ -133,5 +155,13 @@ struct ExerciseDetailView: View {
 
     private func formatWeight(_ value: Double) -> String {
         value.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", value) : String(format: "%.1f", value)
+    }
+    
+    private func endEditing() {
+        nameFocused = false
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != exercise.name else { return }
+        exercise.name = trimmed
+        try? context.save()
     }
 }

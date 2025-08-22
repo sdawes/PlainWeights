@@ -226,6 +226,26 @@ init(searchText: String) {
 - Consider memory usage with large datasets
 - Use database-level filtering with #Predicate for search, not in-memory filtering
 
+## SwiftUI Best Practices
+
+### ForEach Identity Management
+- Always use proper identity keys to avoid "Invalid frame dimension" warnings
+- For arrays with stable indices, use `ForEach(array.indices, id: \.self)` pattern
+- Avoid `Array(enumerated())` in ForEach as it can cause identity issues
+- Example:
+```swift
+// ✅ Good - stable identity with indices
+ForEach(sets.indices, id: \.self) { index in
+    let set = sets[index]
+    // Use set here
+}
+
+// ❌ Avoid - can cause frame dimension warnings  
+ForEach(Array(sets.enumerated()), id: \.element) { (index, set) in
+    // Identity issues with SwiftUI updates
+}
+```
+
 ## Development Approach
 - **INCREMENTAL DELIVERY**: Break down implementation into small, testable chunks
 - Provide one feature or component at a time

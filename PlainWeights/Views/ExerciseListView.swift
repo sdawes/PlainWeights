@@ -11,16 +11,39 @@ import SwiftData
 struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showingAddExercise = false
+    @State private var searchText = ""
 
     var body: some View {
-        SortedExerciseListView(showingAddExercise: $showingAddExercise)
+        FilteredExerciseListView(searchText: searchText, showingAddExercise: $showingAddExercise)
+            .searchable(text: $searchText, prompt: "Search by name or category")
     }
 }
 
-struct SortedExerciseListView: View {
+struct FilteredExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: [SortDescriptor(\Exercise.lastUpdated, order: .reverse)]) private var exercises: [Exercise]
+    @Query private var exercises: [Exercise]
     @Binding var showingAddExercise: Bool
+    let searchText: String
+    
+    init(searchText: String, showingAddExercise: Binding<Bool>) {
+        self.searchText = searchText
+        self._showingAddExercise = showingAddExercise
+        
+        // Dynamic query based on search text
+        if searchText.isEmpty {
+            _exercises = Query(
+                sort: [SortDescriptor(\Exercise.lastUpdated, order: .reverse)]
+            )
+        } else {
+            _exercises = Query(
+                filter: #Predicate<Exercise> { exercise in
+                    exercise.name.localizedStandardContains(searchText) ||
+                    exercise.category.localizedStandardContains(searchText)
+                },
+                sort: [SortDescriptor(\Exercise.lastUpdated, order: .reverse)]
+            )
+        }
+    }
 
     var body: some View {
         List {

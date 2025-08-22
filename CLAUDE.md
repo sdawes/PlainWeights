@@ -158,7 +158,10 @@ final class MetricsCache {
   - Exercise model includes lastUpdated tracking and bumpUpdated() helper
   - ExerciseSet automatically updates parent Exercise.lastUpdated
 - **Views/**: SwiftUI views organized by feature
-  - ExerciseListView uses SortDescriptor to order by lastUpdated
+  - ExerciseListView has efficient SwiftData-powered search with .searchable
+  - FilteredExerciseListView uses dynamic Query with #Predicate for database-level filtering
+  - Searches both exercise name and category using localizedStandardContains
+  - Maintains SortDescriptor to order by lastUpdated (most recent first)
   - ExerciseDetailView has Apple Notes-style inline name editing
 - **ViewModels/**: `@Observable` view models for complex logic
 - **Services/**: Data aggregation and chart data services
@@ -190,12 +193,36 @@ TestDataGenerator.generateTestDataSet4(modelContext: modelContext) // Live Data
 TestDataGenerator.printCurrentData(modelContext: modelContext)    // Export to console
 ```
 
+## Search Implementation Details
+
+### SwiftData Dynamic Query Pattern
+- Use initializer-based Query construction for dynamic filtering
+- Never use manual .filter() on arrays in SwiftUI (inefficient)
+- Let SwiftData handle filtering at database level for performance
+- Example pattern:
+```swift
+init(searchText: String) {
+    if searchText.isEmpty {
+        _exercises = Query(sort: [SortDescriptor(\.lastUpdated, order: .reverse)])
+    } else {
+        _exercises = Query(
+            filter: #Predicate<Exercise> { 
+                $0.name.localizedStandardContains(searchText) ||
+                $0.category.localizedStandardContains(searchText)
+            },
+            sort: [SortDescriptor(\.lastUpdated, order: .reverse)]
+        )
+    }
+}
+```
+
 ## Important Notes
 - Always consult latest documentation when implementing new features
 - Performance is critical - measure before and after optimizations
 - Use Instruments to profile performance bottlenecks
 - Implement proper SwiftData error handling
 - Consider memory usage with large datasets
+- Use database-level filtering with #Predicate for search, not in-memory filtering
 
 ## Development Approach
 - **INCREMENTAL DELIVERY**: Break down implementation into small, testable chunks

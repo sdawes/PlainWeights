@@ -1,0 +1,769 @@
+// File: ./PlainWeightsTests/ExerciseDetailView_PerformanceTests.swift
+//=
+//
+//  ExerciseDetailView_PerformanceTests.swift
+//  PlainWeightsTests
+//
+//  Performance tests for the Exercise Detail view with inline set entry
+//
+
+import XCTest
+import SwiftUI
+import SwiftData
+@testable import PlainWeights
+
+final class ExerciseDetailView_PerformanceTests: XCTestCase {
+    
+    // Test how quickly the Exercise Detail view loads
+    func testLoadingExerciseDetailView() throws {
+        let exercise = Exercise(name: "Bench Press", category: "Chest")
+        
+        measure {
+            let _ = ExerciseDetailView(exercise: exercise)
+        }
+    }
+    
+    // Test performance of entering weight value in inline form
+    func testEnteringWeightValueInline() throws {
+        measure {
+            let textField = UITextField()
+            textField.placeholder = "0"
+            textField.keyboardType = .decimalPad
+            textField.textAlignment = .right
+            textField.becomeFirstResponder()
+            
+            // Simulate typing weight value
+            textField.text = "75.5"
+            textField.sendActions(for: .editingChanged)
+        }
+    }
+    
+    // Test performance of entering reps value in inline form
+    func testEnteringRepsValueInline() throws {
+        measure {
+            let textField = UITextField()
+            textField.placeholder = "0"
+            textField.keyboardType = .numberPad
+            textField.textAlignment = .right
+            textField.becomeFirstResponder()
+            
+            // Simulate typing reps value
+            textField.text = "12"
+            textField.sendActions(for: .editingChanged)
+        }
+    }
+    
+    // Test performance of adding a set inline (validation + data creation)
+    func testAddingSetInline() throws {
+        measure {
+            // Simulate validation checks
+            let weightText = "75.5"
+            let repsText = "12"
+            
+            let weight = Double(weightText)
+            let reps = Int(repsText)
+            
+            // Validation logic
+            let isValid = weight != nil && reps != nil && weight! > 0 && reps! > 0
+            
+            // Create ExerciseSet if valid
+            if isValid {
+                let exercise = Exercise(name: "Test", category: "Test")
+                let _ = ExerciseSet(weight: weight!, reps: reps!, exercise: exercise)
+            }
+        }
+    }
+}
+
+
+// File: ./PlainWeightsTests/AddExerciseScreen_PerformanceTests.swift
+//=
+//
+//  AddExerciseScreen_PerformanceTests.swift
+//  PlainWeightsTests
+//
+//  Performance tests for the Add Exercise screen functionality
+//
+
+import XCTest
+import SwiftUI
+@testable import PlainWeights
+
+final class AddExerciseScreen_PerformanceTests: XCTestCase {
+    
+    // Test how quickly the Add Exercise view loads
+    func testLoadingAddExerciseView() throws {
+        measure {
+            let _ = AddExerciseView()
+        }
+    }
+    
+    // Test performance of entering exercise name
+    func testEnteringExerciseName() throws {
+        measure {
+            let textField = UITextField()
+            textField.placeholder = "Exercise Name"
+            textField.becomeFirstResponder()
+            
+            // Simulate typing exercise name
+            textField.text = "Bench Press"
+            textField.sendActions(for: .editingChanged)
+        }
+    }
+}
+
+
+// File: ./PlainWeights/Models/ExerciseSet.swift
+//=
+//
+//  ExerciseSet.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import Foundation
+import SwiftData
+
+@Model
+final class ExerciseSet {
+    var timestamp: Date
+    var weight: Double       // kg (or lbs) — Double is fine for 0.25 increments
+    var reps: Int
+    var exercise: Exercise?  // parent (now optional to fix cascade delete)
+
+    init(timestamp: Date = .init(), weight: Double, reps: Int, exercise: Exercise) {
+        self.timestamp = timestamp
+        self.weight = weight
+        self.reps = reps
+        self.exercise = exercise
+    }
+}
+
+
+// File: ./PlainWeights/Models/Exercise.swift
+//=
+//
+//  Exercise.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import Foundation
+import SwiftData
+
+@Model
+final class Exercise {
+    var name: String
+    var category: String
+    var createdDate: Date
+
+    // Inverse to the child relationship; cascade so sets are removed with the exercise
+    @Relationship(deleteRule: .cascade, inverse: \ExerciseSet.exercise)
+    var sets: [ExerciseSet] = []
+
+    init(name: String, category: String, createdDate: Date = .init()) {
+        self.name = name
+        self.category = category
+        self.createdDate = createdDate
+    }
+}
+
+
+// File: ./PlainWeights/Views/ExerciseDetailView.swift
+//=
+//
+//  ExerciseDetailView.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+struct ExerciseDetailView: View {
+    @Environment(\.modelContext) private var context
+    let exercise: Exercise
+    @Query private var sets: [ExerciseSet]
+
+    @State private var weightText = ""
+    @State private var repsText = ""
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case weight, reps
+    }
+
+    init(exercise: Exercise) {
+        self.exercise = exercise
+        let id = exercise.persistentModelID
+        _sets = Query(
+            filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
+            sort: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+    }
+
+    var body: some View {
+        List {
+            // Add Set section with custom styling
+            Section("Add set") {
+                HStack(spacing: 12) {
+                    TextField("Weight", text: $weightText)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .weight)
+                        .frame(maxWidth: .infinity)
+                    
+                    TextField("Reps", text: $repsText)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .reps)
+                        .frame(maxWidth: .infinity)
+                    
+                    Button(action: addSet) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.tint)
+                    }
+                    .disabled(weightText.isEmpty || repsText.isEmpty)
+                }
+                .listRowBackground(Color(.systemGroupedBackground))
+                .listRowSeparator(.hidden)
+            }
+            
+            Section("History") {
+                if sets.isEmpty {
+                    Text("No sets yet").foregroundStyle(.secondary)
+                } else {
+                    ForEach(Array(sets.enumerated()), id: \.element) { index, set in
+                        HStack {
+                            Text("\(formatWeight(set.weight)) kg × \(set.reps)")
+                                .monospacedDigit()
+                            
+                            Spacer()
+                            
+                            HStack(spacing: 8) {
+                                Text(set.timestamp.formatted(
+                                    Date.FormatStyle()
+                                        .day().month(.abbreviated).year(.twoDigits)
+                                        .hour().minute()
+                                        .locale(Locale(identifier: "en_GB_POSIX")) // prevents the "at"
+                                ))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                
+                                // Add repeat button only for first item (most recent)
+                                if index == 0 {
+                                    Button {
+                                        repeatSet(set)
+                                    } label: {
+                                        Image(systemName: "arrow.clockwise.circle.fill")
+                                            .font(.title3)
+                                            .foregroundStyle(.tint)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .onDelete(perform: delete)
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .navigationTitle(exercise.name)
+    }
+
+    private func addSet() {
+        guard let weight = Double(weightText),
+              let reps = Int(repsText),
+              weight > 0,
+              reps > 0 else { return }
+        
+        let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
+        context.insert(set)
+        try? context.save()
+        
+        // Clear fields after adding
+        weightText = ""
+        repsText = ""
+        focusedField = nil
+    }
+    
+    private func repeatSet(_ set: ExerciseSet) {
+        let newSet = ExerciseSet(
+            weight: set.weight,
+            reps: set.reps,
+            exercise: exercise
+        )
+        context.insert(newSet)
+        try? context.save()
+    }
+
+    private func delete(at offsets: IndexSet) {
+        offsets.map { sets[$0] }.forEach(context.delete)
+        try? context.save()
+    }
+
+    private func formatWeight(_ value: Double) -> String {
+        value.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", value) : String(format: "%.1f", value)
+    }
+}
+
+
+
+// File: ./PlainWeights/Views/ExerciseListView.swift
+//=
+//
+//  ExerciseListView.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+struct ExerciseListView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var exercises: [Exercise]
+    @State private var showingAddExercise = false
+
+    var body: some View {
+        List {
+            ForEach(exercises) { exercise in
+                NavigationLink(value: exercise) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(exercise.name).font(.headline)
+                        Text(exercise.category).font(.subheadline).foregroundStyle(.secondary)
+                        Text(exercise.createdDate, format: .dateTime)
+                            .font(.caption).foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .onDelete(perform: deleteExercises)
+        }
+        .navigationTitle("Exercises")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { showingAddExercise = true } label: { Image(systemName: "plus") }
+            }
+        }
+        .sheet(isPresented: $showingAddExercise) { AddExerciseView() }
+        .navigationDestination(for: Exercise.self) { exercise in
+            ExerciseDetailView(exercise: exercise)
+        }
+    }
+    
+    private func deleteExercises(at offsets: IndexSet) {
+        offsets.forEach { index in
+            modelContext.delete(exercises[index])
+        }
+    }
+}
+
+
+// File: ./PlainWeights/Views/AddExerciseView.swift
+//=
+//
+//  AddExerciseView.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+struct AddExerciseView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name = ""
+    @State private var category = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Exercise Name", text: $name)
+                TextField("Category", text: $category)
+            }
+            .navigationTitle("Add Exercise")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        modelContext.insert(Exercise(name: name, category: category))
+                        try? modelContext.save()
+                        dismiss()
+                    }
+                    .disabled(name.isEmpty || category.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+
+// File: ./PlainWeights/PlainWeightsApp.swift
+//=
+//
+//  PlainWeightsApp.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+@main
+struct PlainWeightsApp: App {
+    var body: some Scene {
+        WindowGroup { ContentView() }
+            .modelContainer(for: [Exercise.self, ExerciseSet.self])
+    }
+}
+
+
+
+// File: ./PlainWeights/ContentView.swift
+//=
+//
+//  ContentView.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        NavigationStack {
+            ExerciseListView()
+        }
+    }
+}
+
+
+
+// File: ./All_Code.swift
+//=
+// ====================
+// File: PlainWeights/Models/ExerciseSet.swift
+// ====================
+//
+//  ExerciseSet.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import Foundation
+import SwiftData
+
+@Model
+final class ExerciseSet {
+    var timestamp: Date
+    var weight: Double       // kg (or lbs) — Double is fine for 0.25 increments
+    var reps: Int
+    var exercise: Exercise?  // parent (now optional to fix cascade delete)
+
+    init(timestamp: Date = .init(), weight: Double, reps: Int, exercise: Exercise) {
+        self.timestamp = timestamp
+        self.weight = weight
+        self.reps = reps
+        self.exercise = exercise
+    }
+}
+// ====================
+// File: PlainWeights/Models/Exercise.swift
+// ====================
+//
+//  Exercise.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import Foundation
+import SwiftData
+
+@Model
+final class Exercise {
+    var name: String
+    var category: String
+    var createdDate: Date
+
+    // Inverse to the child relationship; cascade so sets are removed with the exercise
+    @Relationship(deleteRule: .cascade, inverse: \ExerciseSet.exercise)
+    var sets: [ExerciseSet] = []
+
+    init(name: String, category: String, createdDate: Date = .init()) {
+        self.name = name
+        self.category = category
+        self.createdDate = createdDate
+    }
+}
+// ====================
+// File: PlainWeights/Views/ExerciseDetailView.swift
+// ====================
+//
+//  ExerciseDetailView.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+struct ExerciseDetailView: View {
+    @Environment(\.modelContext) private var context
+    let exercise: Exercise
+    @Query private var sets: [ExerciseSet]
+
+    @State private var weightText = ""
+    @State private var repsText = ""
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case weight, reps
+    }
+
+    init(exercise: Exercise) {
+        self.exercise = exercise
+        let id = exercise.persistentModelID
+        _sets = Query(
+            filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
+            sort: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Quick Add section at top (fixed position)
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Quick Add")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                HStack(spacing: 12) {
+                    TextField("Weight", text: $weightText)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .weight)
+                        .frame(maxWidth: .infinity)
+                    
+                    TextField("Reps", text: $repsText)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .reps)
+                        .frame(maxWidth: .infinity)
+                    
+                    Button(action: addSet) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.tint)
+                    }
+                    .disabled(weightText.isEmpty || repsText.isEmpty)
+                }
+            }
+            .padding()
+            .background(.regularMaterial)
+            
+            // History list below (scrollable)
+            List {
+                Section("History") {
+                    if sets.isEmpty {
+                        Text("No sets yet").foregroundStyle(.secondary)
+                    } else {
+                        ForEach(sets) { set in
+                            HStack {
+                                Text("\(formatWeight(set.weight)) kg × \(set.reps)")
+                                    .monospacedDigit()
+                                Spacer()
+                                VStack(alignment: .trailing) {
+                                    Text(set.timestamp, format: .dateTime.day().month().year())
+                                    Text(set.timestamp, format: .dateTime.hour().minute())
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            }
+                        }
+                        .onDelete(perform: delete)
+                    }
+                }
+            }
+        }
+        .navigationTitle(exercise.name)
+    }
+
+    private func addSet() {
+        guard let weight = Double(weightText),
+              let reps = Int(repsText),
+              weight > 0,
+              reps > 0 else { return }
+        
+        let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
+        context.insert(set)
+        try? context.save()
+        
+        // Clear fields after adding
+        weightText = ""
+        repsText = ""
+        focusedField = nil
+    }
+
+    private func delete(at offsets: IndexSet) {
+        offsets.map { sets[$0] }.forEach(context.delete)
+        try? context.save()
+    }
+
+    private func formatWeight(_ value: Double) -> String {
+        value.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", value) : String(format: "%.1f", value)
+    }
+}
+// ====================
+// File: PlainWeights/Views/ExerciseListView.swift
+// ====================
+//
+//  ExerciseListView.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+struct ExerciseListView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var exercises: [Exercise]
+    @State private var showingAddExercise = false
+
+    var body: some View {
+        List {
+            ForEach(exercises) { exercise in
+                NavigationLink(value: exercise) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(exercise.name).font(.headline)
+                        Text(exercise.category).font(.subheadline).foregroundStyle(.secondary)
+                        Text(exercise.createdDate, format: .dateTime)
+                            .font(.caption).foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .onDelete(perform: deleteExercises)
+        }
+        .navigationTitle("Exercises")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { showingAddExercise = true } label: { Image(systemName: "plus") }
+            }
+        }
+        .sheet(isPresented: $showingAddExercise) { AddExerciseView() }
+        .navigationDestination(for: Exercise.self) { exercise in
+            ExerciseDetailView(exercise: exercise)
+        }
+    }
+    
+    private func deleteExercises(at offsets: IndexSet) {
+        offsets.forEach { index in
+            modelContext.delete(exercises[index])
+        }
+    }
+}
+// ====================
+// File: PlainWeights/Views/AddExerciseView.swift
+// ====================
+//
+//  AddExerciseView.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+struct AddExerciseView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name = ""
+    @State private var category = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Exercise Name", text: $name)
+                TextField("Category", text: $category)
+            }
+            .navigationTitle("Add Exercise")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        modelContext.insert(Exercise(name: name, category: category))
+                        try? modelContext.save()
+                        dismiss()
+                    }
+                    .disabled(name.isEmpty || category.isEmpty)
+                }
+            }
+        }
+    }
+}
+// ====================
+// File: PlainWeights/PlainWeightsApp.swift
+// ====================
+//
+//  PlainWeightsApp.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+import SwiftData
+
+@main
+struct PlainWeightsApp: App {
+    var body: some Scene {
+        WindowGroup { ContentView() }
+            .modelContainer(for: [Exercise.self, ExerciseSet.self])
+    }
+}
+
+// ====================
+// File: PlainWeights/ContentView.swift
+// ====================
+//
+//  ContentView.swift
+//  PlainWeights
+//
+//  Created by Stephen Dawes on 16/08/2025.
+//
+
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        NavigationStack {
+            ExerciseListView()
+        }
+    }
+}
+
+
+
+

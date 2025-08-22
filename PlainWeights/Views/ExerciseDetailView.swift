@@ -25,19 +25,15 @@ struct ExerciseDetailView: View {
         self.exercise = exercise
         let id = exercise.persistentModelID
         _sets = Query(
-            filter: #Predicate<ExerciseSet> { $0.exercise.persistentModelID == id },
+            filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Quick Add section at top (fixed position)
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Quick Add")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
+        List {
+            // Add Set section with custom styling
+            Section("Add set") {
                 HStack(spacing: 12) {
                     TextField("Weight", text: $weightText)
                         .keyboardType(.decimalPad)
@@ -58,42 +54,50 @@ struct ExerciseDetailView: View {
                     }
                     .disabled(weightText.isEmpty || repsText.isEmpty)
                 }
+                .listRowBackground(Color(.systemGroupedBackground))
+                .listRowSeparator(.hidden)
             }
-            .padding()
-            .background(.regularMaterial)
             
-            // History list below (scrollable)
-            List {
-                Section("History") {
-                    if sets.isEmpty {
-                        Text("No sets yet").foregroundStyle(.secondary)
-                    } else {
-                        ForEach(sets) { set in
-                            HStack {
-                                Text("\(formatWeight(set.weight)) kg × \(set.reps)")
-                                    .monospacedDigit()
-                                Spacer()
-                                VStack(alignment: .trailing) {
-                                    Text(set.timestamp, format: .dateTime.day().month().year())
-                                    Text(set.timestamp, format: .dateTime.hour().minute())
-                                }
+            Section("History") {
+                if sets.isEmpty {
+                    Text("No sets yet").foregroundStyle(.secondary)
+                } else {
+                    ForEach(Array(sets.enumerated()), id: \.element) { index, set in
+                        HStack {
+                            Text("\(formatWeight(set.weight)) kg × \(set.reps)")
+                                .monospacedDigit()
+                            
+                            Spacer()
+                            
+                            HStack(spacing: 8) {
+                                Text(set.timestamp.formatted(
+                                    Date.FormatStyle()
+                                        .day().month(.abbreviated).year(.twoDigits)
+                                        .hour().minute()
+                                        .locale(Locale(identifier: "en_GB_POSIX")) // prevents the "at"
+                                ))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                                
+                                // Add repeat button only for first item (most recent)
+                                if index == 0 {
+                                    Button {
+                                        repeatSet(set)
+                                    } label: {
+                                        Image(systemName: "arrow.clockwise.circle.fill")
+                                            .font(.title3)
+                                            .foregroundStyle(.tint)
+                                    }
+                                }
                             }
                         }
-                        .onDelete(perform: delete)
                     }
+                    .onDelete(perform: delete)
                 }
             }
         }
+        .scrollContentBackground(.hidden)
         .navigationTitle(exercise.name)
-        .toolbar { 
-            if !sets.isEmpty {
-                ToolbarItem(placement: .secondaryAction) {
-                    EditButton()
-                }
-            }
-        }
     }
 
     private func addSet() {
@@ -110,6 +114,16 @@ struct ExerciseDetailView: View {
         weightText = ""
         repsText = ""
         focusedField = nil
+    }
+    
+    private func repeatSet(_ set: ExerciseSet) {
+        let newSet = ExerciseSet(
+            weight: set.weight,
+            reps: set.reps,
+            exercise: exercise
+        )
+        context.insert(newSet)
+        try? context.save()
     }
 
     private func delete(at offsets: IndexSet) {

@@ -13,7 +13,7 @@ final class ExerciseSet {
     var timestamp: Date
     var weight: Double       // kg (or lbs) — Double is fine for 0.25 increments
     var reps: Int
-    var exercise: Exercise  // parent (required, not optional)
+    var exercise: Exercise?  // parent (now optional to fix cascade delete)
 
     init(timestamp: Date = .init(), weight: Double, reps: Int, exercise: Exercise) {
         self.timestamp = timestamp

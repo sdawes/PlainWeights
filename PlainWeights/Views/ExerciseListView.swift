@@ -10,8 +10,17 @@ import SwiftData
 
 struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var exercises: [Exercise]
     @State private var showingAddExercise = false
+
+    var body: some View {
+        SortedExerciseListView(showingAddExercise: $showingAddExercise)
+    }
+}
+
+struct SortedExerciseListView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: [SortDescriptor(\Exercise.lastUpdated, order: .reverse)]) private var exercises: [Exercise]
+    @Binding var showingAddExercise: Bool
 
     var body: some View {
         List {
@@ -20,7 +29,7 @@ struct ExerciseListView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(exercise.name).font(.headline)
                         Text(exercise.category).font(.subheadline).foregroundStyle(.secondary)
-                        Text(exercise.createdDate, format: .dateTime)
+                        Text(exercise.lastUpdated, format: .relative(presentation: .named))
                             .font(.caption).foregroundStyle(.tertiary)
                     }
                     .padding(.vertical, 4)

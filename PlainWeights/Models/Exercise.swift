@@ -13,6 +13,7 @@ final class Exercise {
     var name: String
     var category: String
     var createdDate: Date
+    var lastUpdated: Date
 
     // Inverse to the child relationship; cascade so sets are removed with the exercise
     @Relationship(deleteRule: .cascade, inverse: \ExerciseSet.exercise)
@@ -22,5 +23,6 @@ final class Exercise {
         self.name = name
         self.category = category
         self.createdDate = createdDate
+        self.lastUpdated = createdDate // Initialize with creation date
     }
 }

@@ -130,6 +130,10 @@ struct ExerciseDetailView: View {
         
         let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
         context.insert(set)
+        
+        // Update exercise lastUpdated timestamp
+        exercise.lastUpdated = Date()
+        
         try? context.save()
         
         // Clear fields after adding
@@ -145,6 +149,10 @@ struct ExerciseDetailView: View {
             exercise: exercise
         )
         context.insert(newSet)
+        
+        // Update exercise lastUpdated timestamp
+        exercise.lastUpdated = Date()
+        
         try? context.save()
     }
 
@@ -162,6 +170,10 @@ struct ExerciseDetailView: View {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, trimmed != exercise.name else { return }
         exercise.name = trimmed
+        
+        // Update exercise lastUpdated timestamp when name changes
+        exercise.lastUpdated = Date()
+        
         try? context.save()
     }
 }

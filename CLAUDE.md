@@ -26,12 +26,18 @@ PlainWeights is a high-performance gym workout tracking app built with SwiftUI a
 ### Data Model Architecture
 
 #### Core Entities
-- **Exercise**: Name, category (free text String - user can type anything), created date
+- **Exercise**: Name, category (free text String - user can type anything), created date, lastUpdated date
+  - Includes `bumpUpdated()` helper method for manual timestamp updates
+  - lastUpdated automatically updated when sets are added
 - **WorkoutSession**: Date, exercises performed
-- **Set**: Reps, weight, exercise reference, timestamp
+- **ExerciseSet**: Reps, weight, non-optional exercise reference, timestamp
+  - Automatically updates parent Exercise.lastUpdated when created
 - **Metrics**: Cached/computed statistics for performance
 
-**IMPORTANT**: Exercise category is a free-text String field. Users can type any category name they want (e.g., "Biceps", "Triceps", "Cardio", "Custom Category"). DO NOT change this to an enum or dropdown - keep it as open text input.
+**IMPORTANT**: 
+- Exercise category is a free-text String field. Users can type any category name they want (e.g., "Biceps", "Triceps", "Cardio", "Custom Category"). DO NOT change this to an enum or dropdown - keep it as open text input.
+- ExerciseSet.exercise is NON-OPTIONAL - sets always belong to an exercise
+- Exercise.lastUpdated is automatically updated in ExerciseSet.init() for reliable ordering
 
 #### Performance Optimizations
 - Use SwiftData's `@Model` with indexed properties for frequent queries
@@ -148,8 +154,12 @@ final class MetricsCache {
 ```
 
 ### Key Files Structure
-- **Models/**: SwiftData models (Exercise, Set, WorkoutSession)
+- **Models/**: SwiftData models (Exercise, ExerciseSet, WorkoutSession)
+  - Exercise model includes lastUpdated tracking and bumpUpdated() helper
+  - ExerciseSet automatically updates parent Exercise.lastUpdated
 - **Views/**: SwiftUI views organized by feature
+  - ExerciseListView uses SortDescriptor to order by lastUpdated
+  - ExerciseDetailView has Apple Notes-style inline name editing
 - **ViewModels/**: `@Observable` view models for complex logic
 - **Services/**: Data aggregation and chart data services
 - **Cache/**: Performance caching layer

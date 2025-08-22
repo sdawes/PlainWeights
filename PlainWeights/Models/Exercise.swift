@@ -26,3 +26,9 @@ final class Exercise {
         self.lastUpdated = createdDate // Initialize with creation date
     }
 }
+
+extension Exercise {
+    func bumpUpdated() {
+        lastUpdated = Date()
+    }
+}

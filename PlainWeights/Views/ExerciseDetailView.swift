@@ -27,7 +27,7 @@ struct ExerciseDetailView: View {
         self.exercise = exercise
         let id = exercise.persistentModelID
         _sets = Query(
-            filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
+            filter: #Predicate<ExerciseSet> { $0.exercise.persistentModelID == id },
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
         _name = State(initialValue: exercise.name)
@@ -130,9 +130,7 @@ struct ExerciseDetailView: View {
         
         let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
         context.insert(set)
-        
-        // Update exercise lastUpdated timestamp
-        exercise.lastUpdated = Date()
+        // lastUpdated is now automatically updated in ExerciseSet.init
         
         try? context.save()
         
@@ -149,9 +147,7 @@ struct ExerciseDetailView: View {
             exercise: exercise
         )
         context.insert(newSet)
-        
-        // Update exercise lastUpdated timestamp
-        exercise.lastUpdated = Date()
+        // lastUpdated is now automatically updated in ExerciseSet.init
         
         try? context.save()
     }
@@ -172,7 +168,7 @@ struct ExerciseDetailView: View {
         exercise.name = trimmed
         
         // Update exercise lastUpdated timestamp when name changes
-        exercise.lastUpdated = Date()
+        exercise.bumpUpdated()
         
         try? context.save()
     }

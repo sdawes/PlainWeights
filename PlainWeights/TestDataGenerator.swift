@@ -137,8 +137,13 @@ class TestDataGenerator {
     static func generateTestDataSet4(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
         logger.info("Generating Test Data Set 4 (Live gym data)...")
-        clearAllData(modelContext: modelContext)
-        generateLiveData(modelContext: modelContext)
+        
+        do {
+            clearAllData(modelContext: modelContext)
+            generateLiveData(modelContext: modelContext)
+        } catch {
+            logger.error("Failed to generate Live Data: \(error.localizedDescription)")
+        }
     }
     
     static func clearAllData(modelContext: ModelContext) {

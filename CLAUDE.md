@@ -26,10 +26,12 @@ PlainWeights is a high-performance gym workout tracking app built with SwiftUI a
 ### Data Model Architecture
 
 #### Core Entities
-- **Exercise**: Name, category (enum: chest, back, legs, shoulders, arms, core, cardio)
+- **Exercise**: Name, category (free text String - user can type anything), created date
 - **WorkoutSession**: Date, exercises performed
 - **Set**: Reps, weight, exercise reference, timestamp
 - **Metrics**: Cached/computed statistics for performance
+
+**IMPORTANT**: Exercise category is a free-text String field. Users can type any category name they want (e.g., "Biceps", "Triceps", "Cardio", "Custom Category"). DO NOT change this to an enum or dropdown - keep it as open text input.
 
 #### Performance Optimizations
 - Use SwiftData's `@Model` with indexed properties for frequent queries
@@ -124,7 +126,7 @@ xcrun simctl list devices
 ```swift
 // Example patterns to follow:
 // 1. Use @Query with predicates
-@Query(filter: #Predicate<Exercise> { $0.category == .chest })
+@Query(filter: #Predicate<Exercise> { $0.category == "Chest" })
 private var chestExercises: [Exercise]
 
 // 2. Batch operations
@@ -167,7 +169,7 @@ Available only in DEBUG builds, accessible via the ladybug menu in ExerciseListV
 
 **Key Features:**
 - `printCurrentData()`: Exports all workout data to console using `os.Logger`
-- Preserves original category names (Biceps, Triceps, Shoulders, etc.)
+- Preserves original category names (Biceps, Triceps, Shoulders, etc.) as free text
 - Realistic timestamps and progressive overload patterns
 - Background-compatible logging for device testing
 

@@ -15,13 +15,15 @@ PlainWeights is a high-performance gym workout tracking app built with SwiftUI a
 - **Swift Charts**: For data visualization
 - **Minimum iOS Target**: iOS 17+ (to use latest SwiftData and SwiftUI features)
 
-### Performance Priorities
-- All data operations must be optimized for speed
-- Implement aggressive caching strategies for computed metrics
-- Use lazy loading and pagination for large datasets
+### Performance Priorities - CRITICAL
+**PERFORMANCE IS THE #1 PRIORITY - Every millisecond matters**
+- All data operations MUST be database-level (NEVER in-memory filtering)
+- Implement aggressive caching with smart invalidation
+- Use lazy loading and pagination for ALL datasets
 - Minimize view re-renders using computed properties and `@Observable` macro
-- Background processing for heavy calculations
-- Batch operations for data updates
+- Background processing mandatory for any operation > 16ms
+- Batch operations required for all multi-item updates
+- Profile with Instruments before and after EVERY feature
 
 ### Data Model Architecture
 
@@ -195,14 +197,16 @@ TestDataGenerator.generateTestDataSet4(modelContext: modelContext) // Live Data
 TestDataGenerator.printCurrentData(modelContext: modelContext)    // Export to console
 ```
 
-## Search Implementation Details
+## SwiftData Performance Best Practices
 
-### SwiftData Dynamic Query Pattern
-- Use initializer-based Query construction for dynamic filtering
-- Never use manual .filter() on arrays in SwiftUI (inefficient)
-- Let SwiftData handle filtering at database level for performance
-- Example pattern:
+### CRITICAL: Database-Level Operations Only
+**NEVER load data into memory for filtering/sorting. ALWAYS use SwiftData predicates and descriptors.**
+
+### Query Optimization Patterns
+
+#### 1. Dynamic Query Construction (FASTEST)
 ```swift
+// ✅ CORRECT - Database-level filtering
 init(searchText: String) {
     if searchText.isEmpty {
         _exercises = Query(sort: [SortDescriptor(\.lastUpdated, order: .reverse)])
@@ -216,7 +220,205 @@ init(searchText: String) {
         )
     }
 }
+
+// ❌ WRONG - In-memory filtering (SLOW)
+var filteredExercises: [Exercise] {
+    exercises.filter { $0.name.contains(searchText) }  // NEVER DO THIS
+}
 ```
+
+#### 2. Complex Predicates for Performance
+```swift
+// Compound predicates with AND/OR
+@Query(filter: #Predicate<ExerciseSet> { set in
+    set.weight > 100 && 
+    set.reps >= 8 &&
+    (set.exercise?.category == "Chest" || set.exercise?.category == "Back")
+})
+private var heavySets: [ExerciseSet]
+
+// Date range queries (efficient)
+let startDate = Date.now.addingTimeInterval(-7 * 24 * 60 * 60)
+_recentSets = Query(
+    filter: #Predicate<ExerciseSet> { $0.timestamp > startDate },
+    sort: [SortDescriptor(\.timestamp, order: .reverse)]
+)
+
+// Relationship traversal (use optional chaining)
+@Query(filter: #Predicate<ExerciseSet> { 
+    $0.exercise?.lastUpdated > Date.now.addingTimeInterval(-86400)
+})
+private var todaysSets: [ExerciseSet]
+```
+
+#### 3. Pagination for Large Datasets
+```swift
+// Use FetchDescriptor with fetchLimit
+let descriptor = FetchDescriptor<Exercise>(
+    predicate: #Predicate { $0.category == category },
+    sortBy: [SortDescriptor(\.lastUpdated, order: .reverse)]
+)
+descriptor.fetchLimit = 20  // Only load 20 at a time
+descriptor.fetchOffset = currentPage * 20
+
+let exercises = try modelContext.fetch(descriptor)
+```
+
+#### 4. Batch Operations (Required for Multi-Updates)
+```swift
+// ✅ CORRECT - Single transaction
+modelContext.transaction {
+    for exercise in exercises {
+        exercise.bumpUpdated()
+    }
+}
+
+// ❌ WRONG - Multiple save calls
+for exercise in exercises {
+    exercise.bumpUpdated()
+    try? modelContext.save()  // NEVER save in a loop
+}
+```
+
+#### 5. Background Context for Heavy Operations
+```swift
+// Create background context for intensive work
+let container = modelContext.container
+Task.detached(priority: .background) {
+    let context = ModelContext(container)
+    let descriptor = FetchDescriptor<ExerciseSet>()
+    let sets = try context.fetch(descriptor)
+    
+    // Heavy computation here
+    let stats = calculateStatistics(sets)
+    
+    // Update on main context
+    await MainActor.run {
+        updateCache(with: stats)
+    }
+}
+```
+
+### Indexing for Speed
+```swift
+@Model
+final class Exercise {
+    @Attribute(.unique) var id: UUID
+    @Attribute(.spotlight) var name: String  // Indexed for search
+    @Attribute(.spotlight) var category: String  // Indexed for filtering
+    var lastUpdated: Date  // Consider indexing if frequently sorted
+}
+```
+
+### Query Result Caching
+```swift
+@Observable
+final class ExerciseCache {
+    private var cache = [String: [Exercise]]()
+    private var cacheTimestamps = [String: Date]()
+    
+    func getExercises(for category: String, context: ModelContext) -> [Exercise] {
+        let key = category
+        let now = Date()
+        
+        // Check cache validity (5 minute TTL)
+        if let cached = cache[key],
+           let timestamp = cacheTimestamps[key],
+           now.timeIntervalSince(timestamp) < 300 {
+            return cached
+        }
+        
+        // Fetch from database
+        let descriptor = FetchDescriptor<Exercise>(
+            predicate: #Predicate { $0.category == category }
+        )
+        let exercises = (try? context.fetch(descriptor)) ?? []
+        
+        // Update cache
+        cache[key] = exercises
+        cacheTimestamps[key] = now
+        
+        return exercises
+    }
+    
+    func invalidate() {
+        cache.removeAll()
+        cacheTimestamps.removeAll()
+    }
+}
+```
+
+### Performance Anti-Patterns (NEVER DO THESE)
+
+#### ❌ In-Memory Filtering
+```swift
+// NEVER filter after fetching
+let filtered = exercises.filter { $0.name.contains(search) }
+```
+
+#### ❌ N+1 Query Problem
+```swift
+// WRONG - Triggers query for each exercise
+for exercise in exercises {
+    let setCount = exercise.sets.count  // Lazy loads each time
+}
+
+// CORRECT - Use aggregate query
+let descriptor = FetchDescriptor<Exercise>()
+// Include relationship in initial fetch
+```
+
+#### ❌ Synchronous Heavy Operations
+```swift
+// WRONG - Blocks UI
+let stats = calculateHeavyStatistics(allSets)
+
+// CORRECT - Use background queue
+Task.detached { 
+    let stats = calculateHeavyStatistics(allSets)
+}
+```
+
+#### ❌ Unnecessary View Updates
+```swift
+// WRONG - Causes re-render on every change
+@Query var allExercises: [Exercise]
+var filtered: [Exercise] {
+    allExercises.filter { ... }  // Recomputes on any exercise change
+}
+
+// CORRECT - Database-level filtering
+@Query(filter: #Predicate<Exercise> { ... })
+var filteredExercises: [Exercise]
+```
+
+### Performance Monitoring
+
+#### Use Instruments Profiling
+1. **Time Profiler**: Identify slow methods
+2. **SwiftData Profiler**: Monitor query performance
+3. **Memory Graph**: Detect retention cycles
+4. **Main Thread Checker**: Find UI blocking operations
+
+#### Add Performance Logging
+```swift
+let startTime = CFAbsoluteTimeGetCurrent()
+let results = try context.fetch(descriptor)
+let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+if timeElapsed > 0.016 {  // More than one frame (60fps)
+    logger.warning("Slow query: \(timeElapsed * 1000)ms")
+}
+```
+
+### Optimization Checklist
+- [ ] All queries use #Predicate (database-level)
+- [ ] No in-memory filtering or sorting
+- [ ] Batch operations for multiple updates
+- [ ] Background contexts for heavy work
+- [ ] Indexed attributes for frequent queries
+- [ ] Query result caching where appropriate
+- [ ] Pagination for lists > 50 items
+- [ ] Profile with Instruments before ship
 
 ## Important Notes
 - Always consult latest documentation when implementing new features

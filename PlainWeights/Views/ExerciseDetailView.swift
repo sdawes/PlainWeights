@@ -32,6 +32,76 @@ struct ExerciseDetailView: View {
         )
         _name = State(initialValue: exercise.name)
     }
+    
+    // MARK: - Volume Metrics Computation
+    
+    private var todaysSets: [ExerciseSet] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return sets.filter { calendar.startOfDay(for: $0.timestamp) == today }
+    }
+    
+    private var todayVolume: Double {
+        todaysSets.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
+    }
+    
+    private var lastCompletedDayInfo: (date: Date, volume: Double)? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        // Group sets by day
+        let setsByDay = Dictionary(grouping: sets) { set in
+            calendar.startOfDay(for: set.timestamp)
+        }
+        
+        // Find the most recent day before today with sets
+        let pastDays = setsByDay.keys.filter { $0 < today }.sorted(by: >)
+        
+        guard let lastDay = pastDays.first,
+              let lastDaySets = setsByDay[lastDay] else {
+            return nil
+        }
+        
+        let volume = lastDaySets.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
+        return (lastDay, volume)
+    }
+    
+    private var progressRatio: Double {
+        guard let lastInfo = lastCompletedDayInfo, lastInfo.volume > 0 else { return 0 }
+        return min(todayVolume / lastInfo.volume, 1.2)
+    }
+    
+    private var deltaText: String {
+        guard let lastInfo = lastCompletedDayInfo else {
+            return "Baseline day"
+        }
+        
+        let delta = todayVolume - lastInfo.volume
+        let sign = delta >= 0 ? "+" : ""
+        let dateFormatted = formatDeltaDate(lastInfo.date)
+        
+        return "\(sign)\(formatVolume(delta)) kg vs \(dateFormatted)"
+    }
+    
+    private var showProgressBar: Bool {
+        lastCompletedDayInfo != nil && lastCompletedDayInfo!.volume > 0
+    }
+    
+    // MARK: - Formatting Helpers
+    
+    private func formatVolume(_ volume: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        formatter.groupingSeparator = ","
+        return formatter.string(from: NSNumber(value: volume)) ?? "0"
+    }
+    
+    private func formatDeltaDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "E d MMM"  // e.g., "Thu 14 Aug"
+        return formatter.string(from: date)
+    }
 
     var body: some View {
         List {
@@ -43,6 +113,42 @@ struct ExerciseDetailView: View {
                     .focused($nameFocused)
                     .submitLabel(.done)
                     .onSubmit { endEditing() }
+            }
+            
+            // Volume tracking header
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    // Today's volume
+                    Text("Today \(formatVolume(todayVolume)) kg")
+                        .font(.title2)
+                        .bold()
+                        .monospacedDigit()
+                    
+                    // Delta chip
+                    Text(deltaText)
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.secondary.opacity(0.2))
+                        .clipShape(Capsule())
+                    
+                    // Progress bar (if applicable)
+                    if showProgressBar {
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                Rectangle()
+                                    .fill(Color.secondary.opacity(0.2))
+                                Rectangle()
+                                    .fill(Color.accentColor)
+                                    .frame(width: geometry.size.width * progressRatio)
+                                    .animation(.easeInOut(duration: 0.3), value: progressRatio)
+                            }
+                        }
+                        .frame(height: 4)
+                        .clipShape(Capsule())
+                    }
+                }
+                .padding(.vertical, 8)
             }
             
             // Add Set section with custom styling

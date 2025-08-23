@@ -406,61 +406,65 @@ class TestDataGenerator {
             exercises.append(exercise)
         }
         
-        // Generate workouts for the entire year
-        // ~3 workouts per week = ~156 workouts per year
-        // Rotating through different exercises with progressive overload
+        // Hardcoded performance test data - 60-100 sets per exercise
+        var sets: [ExerciseSet] = []
         
-        var workoutCount = 0
-        
-        // Initial strength levels (will progress throughout the year)
-        var strengthMultiplier = 1.0
-        
-        for month in 0..<12 {
-            // Adjust patterns based on season
-            let isNewYear = month == 0 || month == 1  // January-February
-            let isSummer = month >= 4 && month <= 7    // May-August
-            let isHolidaySeason = month == 11          // December
+        // Generate sets for each exercise with realistic weights and reps
+        for (index, exercise) in exercises.enumerated() {
+            let setsCount = Int.random(in: 60...100)
+            let baseWeight = getBaseWeight(for: exercise.category, index: index)
             
-            // More frequent workouts during New Year and Summer
-            let workoutsPerWeek = isNewYear || isSummer ? 4 : isHolidaySeason ? 2 : 3
-            
-            // Monthly strength progression (1-2% per month)
-            strengthMultiplier += 0.015
-            
-            for week in 0..<4 {
-                for workout in 0..<workoutsPerWeek {
-                    // Calculate workout date
-                    let daysOffset = (month * 30) + (week * 7) + (workout * 2) + workout
-                    guard let workoutDate = calendar.date(byAdding: .day, value: daysOffset, to: startDate) else { continue }
-                    
-                    // Determine workout type based on day
-                    let workoutType = workout % 6
-                    
-                    switch workoutType {
-                    case 0: // Push Day (Chest, Shoulders, Triceps)
-                        generatePushWorkout(date: workoutDate, exercises: exercises, strengthMultiplier: strengthMultiplier, modelContext: modelContext)
-                    case 1: // Pull Day (Back, Biceps)
-                        generatePullWorkout(date: workoutDate, exercises: exercises, strengthMultiplier: strengthMultiplier, modelContext: modelContext)
-                    case 2: // Legs Day
-                        generateLegsWorkout(date: workoutDate, exercises: exercises, strengthMultiplier: strengthMultiplier, modelContext: modelContext)
-                    case 3: // Upper Body
-                        generateUpperWorkout(date: workoutDate, exercises: exercises, strengthMultiplier: strengthMultiplier, modelContext: modelContext)
-                    case 4: // Lower Body
-                        generateLowerWorkout(date: workoutDate, exercises: exercises, strengthMultiplier: strengthMultiplier, modelContext: modelContext)
-                    case 5: // Full Body
-                        generateFullBodyWorkout(date: workoutDate, exercises: exercises, strengthMultiplier: strengthMultiplier, modelContext: modelContext)
-                    default:
-                        break
-                    }
-                    
-                    workoutCount += 1
-                }
+            for setIndex in 0..<setsCount {
+                let variation = Double.random(in: 0.8...1.2)
+                let weight = baseWeight * variation
+                let reps = Int.random(in: 6...15)
+                
+                // Spread timestamps across past year
+                let daysBack = Int.random(in: 1...365)
+                let hoursBack = Int.random(in: 0...23)
+                let minutesBack = Int.random(in: 0...59)
+                let timestamp = calendar.date(byAdding: .day, value: -daysBack, to: Date())?
+                    .addingTimeInterval(TimeInterval(-hoursBack * 3600 - minutesBack * 60)) ?? Date()
+                
+                let set = ExerciseSet(
+                    timestamp: timestamp,
+                    weight: weight,
+                    reps: reps,
+                    exercise: exercise
+                )
+                sets.append(set)
             }
+        }
+        
+        // Insert all sets
+        for set in sets {
+            modelContext.insert(set)
         }
         
         try? modelContext.save()
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
-        logger.info("Test Data Set 2 generated: 50 exercises, \(workoutCount) workouts over 1 year")
+        logger.info("Test Data Set 2 generated: 50 exercises, \(sets.count) total sets for performance testing")
+    }
+    
+    private static func getBaseWeight(for category: String, index: Int) -> Double {
+        switch category {
+        case "Chest":
+            return [80.0, 40.0, 85.0, 45.0, 75.0, 25.0, 30.0, 0.0][index % 8]
+        case "Back":
+            return [140.0, 120.0, 0.0, 0.0, 80.0, 70.0, 60.0, 55.0, 50.0, 90.0][index % 10]
+        case "Legs":
+            return [120.0, 100.0, 30.0, 90.0, 200.0, 50.0, 60.0, 25.0, 100.0, 0.0][index % 10]
+        case "Shoulders":
+            return [60.0, 35.0, 30.0, 15.0, 12.0, 20.0, 70.0][index % 7]
+        case "Arms":
+            return [65.0, 25.0, 40.0, 20.0, 35.0, 15.0, 80.0, 45.0][index % 8]
+        case "Core":
+            return [0.0, 0.0, 0.0, 20.0, 50.0][index % 5]
+        case "Cardio":
+            return [0.0, 0.0][index % 2]
+        default:
+            return 50.0 + Double(index) * 5.0
+        }
     }
     
     // MARK: - Test Data Set 3: 2 Weeks Simple Data
@@ -882,114 +886,5 @@ class TestDataGenerator {
         }
     }
     
-    // MARK: - Workout Templates for Set 2
-    
-    private static func generatePushWorkout(date: Date, exercises: [Exercise], strengthMultiplier: Double, modelContext: ModelContext) {
-        // Select push exercises (chest, shoulders, triceps)
-        let selectedExercises = [
-            exercises[0],  // Barbell Bench Press
-            exercises[3],  // Incline Dumbbell Press
-            exercises[30], // Military Press
-            exercises[33], // Lateral Raises
-            exercises[38], // Cable Tricep Extension
-            exercises[39]  // Diamond Push-ups
-        ]
-        
-        let baseWeights = [80.0, 35.0, 50.0, 12.0, 30.0, 0.0]
-        let weights = baseWeights.map { $0 * strengthMultiplier }
-        let reps = [[8,8,8,6], [10,10,9,8], [8,8,6,6], [12,12,12], [12,12,10], [15,12,10]]
-        
-        generateWorkoutSession(date: date, exercises: selectedExercises, weights: weights, reps: reps, modelContext: modelContext)
-    }
-    
-    private static func generatePullWorkout(date: Date, exercises: [Exercise], strengthMultiplier: Double, modelContext: ModelContext) {
-        // Select pull exercises (back, biceps)
-        let selectedExercises = [
-            exercises[8],  // Deadlift
-            exercises[10], // Pull-ups
-            exercises[12], // Barbell Row
-            exercises[15], // Lat Pulldown
-            exercises[37], // Barbell Curl
-            exercises[39]  // Hammer Curl
-        ]
-        
-        let baseWeights = [140.0, 0.0, 70.0, 60.0, 40.0, 15.0]
-        let weights = baseWeights.map { $0 * strengthMultiplier }
-        let reps = [[5,5,5,3], [8,7,6,5], [10,10,8], [12,12,10], [10,10,8], [12,12,10]]
-        
-        generateWorkoutSession(date: date, exercises: selectedExercises, weights: weights, reps: reps, modelContext: modelContext)
-    }
-    
-    private static func generateLegsWorkout(date: Date, exercises: [Exercise], strengthMultiplier: Double, modelContext: ModelContext) {
-        // Select leg exercises
-        let selectedExercises = [
-            exercises[18], // Back Squat
-            exercises[21], // Romanian Deadlift
-            exercises[22], // Leg Press
-            exercises[23], // Leg Curl
-            exercises[26], // Calf Raises
-            exercises[45]  // Plank (core)
-        ]
-        
-        let baseWeights = [100.0, 80.0, 150.0, 40.0, 80.0, 0.0]
-        let weights = baseWeights.map { $0 * strengthMultiplier }
-        let reps = [[8,8,6,6], [10,10,10], [12,12,10,10], [12,12,12], [15,15,15], [60,45,30]]
-        
-        generateWorkoutSession(date: date, exercises: selectedExercises, weights: weights, reps: reps, modelContext: modelContext)
-    }
-    
-    private static func generateUpperWorkout(date: Date, exercises: [Exercise], strengthMultiplier: Double, modelContext: ModelContext) {
-        // Mixed upper body workout
-        let selectedExercises = [
-            exercises[1],  // Dumbbell Bench Press
-            exercises[11], // Chin-ups
-            exercises[31], // Dumbbell Shoulder Press
-            exercises[13], // T-Bar Row
-            exercises[36], // Close-Grip Bench Press
-            exercises[38]  // Dumbbell Curl
-        ]
-        
-        let baseWeights = [35.0, 0.0, 25.0, 60.0, 60.0, 17.5]
-        let weights = baseWeights.map { $0 * strengthMultiplier }
-        let reps = [[10,10,10,8], [8,7,6], [10,10,8], [10,10,10], [10,10,8], [12,12,10]]
-        
-        generateWorkoutSession(date: date, exercises: selectedExercises, weights: weights, reps: reps, modelContext: modelContext)
-    }
-    
-    private static func generateLowerWorkout(date: Date, exercises: [Exercise], strengthMultiplier: Double, modelContext: ModelContext) {
-        // Lower body focused workout
-        let selectedExercises = [
-            exercises[19], // Front Squat
-            exercises[20], // Bulgarian Split Squat
-            exercises[24], // Leg Extension
-            exercises[25], // Walking Lunges
-            exercises[27], // Box Jumps
-            exercises[47]  // Hanging Leg Raises
-        ]
-        
-        let baseWeights = [70.0, 20.0, 50.0, 20.0, 0.0, 0.0]
-        let weights = baseWeights.map { $0 * strengthMultiplier }
-        let reps = [[8,8,8], [10,10,10], [12,12,12], [10,10,10], [8,8,8], [12,10,8]]
-        
-        generateWorkoutSession(date: date, exercises: selectedExercises, weights: weights, reps: reps, modelContext: modelContext)
-    }
-    
-    private static func generateFullBodyWorkout(date: Date, exercises: [Exercise], strengthMultiplier: Double, modelContext: ModelContext) {
-        // Full body workout hitting all major muscle groups
-        let selectedExercises = [
-            exercises[0],  // Barbell Bench Press
-            exercises[18], // Back Squat
-            exercises[10], // Pull-ups
-            exercises[30], // Military Press
-            exercises[8],  // Deadlift
-            exercises[45]  // Plank
-        ]
-        
-        let baseWeights = [70.0, 80.0, 0.0, 40.0, 100.0, 0.0]
-        let weights = baseWeights.map { $0 * strengthMultiplier }
-        let reps = [[10,10,10], [10,10,10], [6,5,5], [10,10,8], [5,5,5], [45,30,30]]
-        
-        generateWorkoutSession(date: date, exercises: selectedExercises, weights: weights, reps: reps, modelContext: modelContext)
-    }
 }
 #endif

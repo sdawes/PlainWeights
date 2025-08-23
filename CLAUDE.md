@@ -420,6 +420,64 @@ if timeElapsed > 0.016 {  // More than one frame (60fps)
 - [ ] Pagination for lists > 50 items
 - [ ] Profile with Instruments before ship
 
+## SwiftData + SwiftUI List Best Practices
+
+### CRITICAL: ForEach Identity with Deletable Lists
+**NEVER use array indices for ForEach when items can be deleted - causes SIGTERM crashes**
+
+#### ❌ WRONG - Causes SIGTERM crashes during deletion
+```swift
+ForEach(sets.indices, id: \.self) { index in  
+    let set = sets[index]  // Array positions change during deletion
+    // ... row content
+}
+.onDelete(perform: delete)
+```
+
+**Problem**: When SwiftData updates the @Query after deletion, SwiftUI gets confused about which row is which because array indices shift. This causes diffing mismatches and SIGTERM crashes.
+
+#### ✅ CORRECT - Use stable SwiftData identity
+```swift
+ForEach(sets, id: \.persistentModelID) { set in  
+    // ... row content - each row has permanent unique ID
+}
+.onDelete(perform: delete)
+```
+
+### Deletion Best Practices
+- **Use ONE deletion method**: Either `.onDelete()` OR `.swipeActions()`, never both
+- **Wrap deletions in `withAnimation`** for smooth UI updates
+- **Use existing delete functions** instead of direct context manipulation
+
+#### Safe Deletion Pattern
+```swift
+private func delete(at offsets: IndexSet) {
+    withAnimation {
+        for i in offsets {
+            context.delete(sets[i])
+        }
+        try? context.save()
+    }
+}
+```
+
+### ID Comparison Best Practices
+When comparing SwiftData objects (e.g., for "first item" logic):
+```swift
+// ✅ CORRECT - Use persistentModelID
+if set.persistentModelID == sets.first?.persistentModelID {
+    // Show special UI for first item
+}
+
+// ❌ WRONG - Object identity can change with re-fetches
+if set === sets.first {
+    // May fail with SwiftData re-fetching
+}
+```
+
+### Why This Matters
+SwiftData automatically updates @Query results when data changes. If ForEach uses unstable identity (like array indices), SwiftUI's diffing algorithm cannot track which views correspond to which data items during mutations, leading to crashes.
+
 ## Important Notes
 - Always consult latest documentation when implementing new features
 - Performance is critical - measure before and after optimizations

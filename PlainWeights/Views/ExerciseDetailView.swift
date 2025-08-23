@@ -118,7 +118,7 @@ struct ExerciseDetailView: View {
             // Volume tracking metrics row
             VStack(alignment: .leading, spacing: 6) {
                 // Today's volume
-                Text("Today \(formatVolume(todayVolume)) kg")
+                Text("Today: \(formatVolume(todayVolume)) kg")
                     .font(.title2)
                     .bold()
                     .monospacedDigit()
@@ -188,7 +188,7 @@ struct ExerciseDetailView: View {
                     .foregroundStyle(.secondary)
                     .listRowSeparator(.hidden)
             } else {
-                ForEach(sets) { set in
+                ForEach(sets, id: \.persistentModelID) { set in
                     HStack {
                         Text("\(formatWeight(set.weight)) kg × \(set.reps)")
                             .monospacedDigit()
@@ -206,7 +206,7 @@ struct ExerciseDetailView: View {
                             .foregroundStyle(.secondary)
                             
                             // Add repeat button only for first item (most recent)
-                            if set.id == sets.first?.id {
+                            if set.persistentModelID == sets.first?.persistentModelID {
                                 Button {
                                     repeatSet(set)
                                 } label: {
@@ -215,14 +215,6 @@ struct ExerciseDetailView: View {
                                         .foregroundStyle(.tint)
                                 }
                             }
-                        }
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            context.delete(set)
-                            try? context.save()
-                        } label: {
-                            Label("Delete", systemImage: "trash")
                         }
                     }
                 }
@@ -273,8 +265,12 @@ struct ExerciseDetailView: View {
     }
 
     private func delete(at offsets: IndexSet) {
-        offsets.map { sets[$0] }.forEach(context.delete)
-        try? context.save()
+        withAnimation {
+            for i in offsets {
+                context.delete(sets[i])
+            }
+            try? context.save()
+        }
     }
 
     private func formatWeight(_ value: Double) -> String {

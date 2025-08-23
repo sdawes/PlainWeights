@@ -105,119 +105,132 @@ struct ExerciseDetailView: View {
 
     var body: some View {
         List {
-            // Title field like Apple Notes
-            Section {
-                TextField("Title", text: $name)
-                    .font(.largeTitle).bold()
-                    .textFieldStyle(.plain)
-                    .focused($nameFocused)
-                    .submitLabel(.done)
-                    .onSubmit { endEditing() }
-            }
-            
-            // Volume tracking header
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    // Today's volume
-                    Text("Today \(formatVolume(todayVolume)) kg")
-                        .font(.title2)
-                        .bold()
-                        .monospacedDigit()
-                    
-                    // Delta chip
-                    Text(deltaText)
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.secondary.opacity(0.2))
-                        .clipShape(Capsule())
-                    
-                    // Progress bar (if applicable)
-                    if showProgressBar {
-                        GeometryReader { geometry in
-                            ZStack(alignment: .leading) {
-                                Rectangle()
-                                    .fill(Color.secondary.opacity(0.2))
-                                Rectangle()
-                                    .fill(Color.accentColor)
-                                    .frame(width: geometry.size.width * progressRatio)
-                                    .animation(.easeInOut(duration: 0.3), value: progressRatio)
-                            }
-                        }
-                        .frame(height: 4)
-                        .clipShape(Capsule())
-                    }
-                }
-                .padding(.vertical, 8)
-            }
-            
-            // Add Set section with custom styling
-            Section("Add set") {
-                HStack(spacing: 12) {
-                    TextField("Weight", text: $weightText)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .focused($focusedField, equals: .weight)
-                        .frame(maxWidth: .infinity)
-                    
-                    TextField("Reps", text: $repsText)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .focused($focusedField, equals: .reps)
-                        .frame(maxWidth: .infinity)
-                    
-                    Button(action: addSet) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.tint)
-                    }
-                    .disabled(weightText.isEmpty || repsText.isEmpty)
-                }
-                .listRowBackground(Color(.systemGroupedBackground))
+            // Title row (no Section wrapper)
+            TextField("Title", text: $name)
+                .font(.largeTitle.bold())
+                .textFieldStyle(.plain)
+                .focused($nameFocused)
+                .submitLabel(.done)
+                .onSubmit { endEditing() }
                 .listRowSeparator(.hidden)
-            }
+                .padding(.vertical, 8)
             
-            Section("History") {
-                if sets.isEmpty {
-                    Text("No sets yet").foregroundStyle(.secondary)
-                } else {
-                    ForEach(sets.indices, id: \.self) { index in
-                        let set = sets[index]
-                        HStack {
-                            Text("\(formatWeight(set.weight)) kg × \(set.reps)")
-                                .monospacedDigit()
+            // Volume tracking metrics row
+            VStack(alignment: .leading, spacing: 6) {
+                // Today's volume
+                Text("Today \(formatVolume(todayVolume)) kg")
+                    .font(.title2)
+                    .bold()
+                    .monospacedDigit()
+                
+                // Delta chip
+                Text(deltaText)
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.secondary.opacity(0.2))
+                    .clipShape(Capsule())
+                
+                // Progress bar (if applicable)
+                if showProgressBar {
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Rectangle()
+                                .fill(Color.secondary.opacity(0.2))
+                            Rectangle()
+                                .fill(Color.accentColor)
+                                .frame(width: geometry.size.width * progressRatio)
+                                .animation(.easeInOut(duration: 0.3), value: progressRatio)
+                        }
+                    }
+                    .frame(height: 4)
+                    .clipShape(Capsule())
+                }
+            }
+            .listRowSeparator(.hidden)
+            .padding(.vertical, 10)
+            
+            // Quick-add row
+            HStack(spacing: 12) {
+                TextField("Weight", text: $weightText)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focusedField, equals: .weight)
+                    .frame(maxWidth: .infinity)
+                
+                TextField("Reps", text: $repsText)
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focusedField, equals: .reps)
+                    .frame(maxWidth: .infinity)
+                
+                Button(action: addSet) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.tint)
+                }
+                .disabled(weightText.isEmpty || repsText.isEmpty)
+            }
+            .listRowSeparator(.hidden)
+            .padding(.vertical, 8)
+            
+            // History label row
+            Text("HISTORY")
+                .font(.footnote)
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
+                .listRowSeparator(.hidden)
+                .padding(.vertical, 4)
+            
+            // History rows (with separators)
+            if sets.isEmpty {
+                Text("No sets yet")
+                    .foregroundStyle(.secondary)
+                    .listRowSeparator(.hidden)
+            } else {
+                ForEach(sets) { set in
+                    HStack {
+                        Text("\(formatWeight(set.weight)) kg × \(set.reps)")
+                            .monospacedDigit()
+                        
+                        Spacer()
+                        
+                        HStack(spacing: 8) {
+                            Text(set.timestamp.formatted(
+                                Date.FormatStyle()
+                                    .day().month(.abbreviated).year(.twoDigits)
+                                    .hour().minute()
+                                    .locale(Locale(identifier: "en_GB_POSIX"))
+                            ))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                             
-                            Spacer()
-                            
-                            HStack(spacing: 8) {
-                                Text(set.timestamp.formatted(
-                                    Date.FormatStyle()
-                                        .day().month(.abbreviated).year(.twoDigits)
-                                        .hour().minute()
-                                        .locale(Locale(identifier: "en_GB_POSIX")) // prevents the "at"
-                                ))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                
-                                // Add repeat button only for first item (most recent)
-                                if index == 0 {
-                                    Button {
-                                        repeatSet(set)
-                                    } label: {
-                                        Image(systemName: "arrow.clockwise.circle.fill")
-                                            .font(.title3)
-                                            .foregroundStyle(.tint)
-                                    }
+                            // Add repeat button only for first item (most recent)
+                            if set.id == sets.first?.id {
+                                Button {
+                                    repeatSet(set)
+                                } label: {
+                                    Image(systemName: "arrow.clockwise.circle.fill")
+                                        .font(.title3)
+                                        .foregroundStyle(.tint)
                                 }
                             }
                         }
                     }
-                    .onDelete(perform: delete)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            context.delete(set)
+                            try? context.save()
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
                 }
+                .onDelete(perform: delete)
             }
         }
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if nameFocused { Button("Done") { endEditing() } }

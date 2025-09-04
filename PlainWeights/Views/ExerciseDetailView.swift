@@ -87,6 +87,16 @@ struct ExerciseDetailView: View {
         lastCompletedDayInfo != nil && lastCompletedDayInfo!.volume > 0
     }
     
+    // MARK: - Data Grouping
+    
+    private var groupedByDay: [(Date, [ExerciseSet])] {
+        let calendar = Calendar.current
+        let grouped = Dictionary(grouping: sets) { set in
+            calendar.startOfDay(for: set.timestamp)
+        }
+        return grouped.sorted { $0.key > $1.key }  // Most recent first
+    }
+    
     // MARK: - Formatting Helpers
     
     private func formatVolume(_ volume: Double) -> String {
@@ -100,6 +110,12 @@ struct ExerciseDetailView: View {
     private func formatDeltaDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "E d MMM"  // e.g., "Thu 14 Aug"
+        return formatter.string(from: date)
+    }
+    
+    private func formatDayHeader(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, d MMMM yyyy"  // e.g., "Thursday, 14 August 2025"
         return formatter.string(from: date)
     }
 
@@ -182,43 +198,55 @@ struct ExerciseDetailView: View {
                 .listRowSeparator(.hidden)
                 .padding(.vertical, 4)
             
-            // History rows (with separators)
+            // Grouped history rows
             if sets.isEmpty {
                 Text("No sets yet")
                     .foregroundStyle(.secondary)
                     .listRowSeparator(.hidden)
             } else {
-                ForEach(sets, id: \.persistentModelID) { set in
-                    HStack {
-                        Text("\(formatWeight(set.weight)) kg × \(set.reps)")
-                            .monospacedDigit()
-                        
-                        Spacer()
-                        
-                        HStack(spacing: 8) {
-                            Text(set.timestamp.formatted(
-                                Date.FormatStyle()
-                                    .day().month(.abbreviated).year(.twoDigits)
-                                    .hour().minute()
-                                    .locale(Locale(identifier: "en_GB_POSIX"))
-                            ))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            
-                            // Add repeat button only for first item (most recent)
-                            if set.persistentModelID == sets.first?.persistentModelID {
-                                Button {
-                                    repeatSet(set)
-                                } label: {
-                                    Image(systemName: "arrow.clockwise.circle.fill")
-                                        .font(.title3)
-                                        .foregroundStyle(.tint)
+                ForEach(groupedByDay, id: \.0) { day, daySets in
+                    Section {
+                        ForEach(daySets, id: \.persistentModelID) { set in
+                            HStack {
+                                Text("\(formatWeight(set.weight)) kg × \(set.reps)")
+                                    .monospacedDigit()
+                                
+                                Spacer()
+                                
+                                HStack(spacing: 8) {
+                                    Text(set.timestamp.formatted(
+                                        Date.FormatStyle()
+                                            .hour().minute()
+                                            .locale(Locale(identifier: "en_GB_POSIX"))
+                                    ))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    
+                                    // Add repeat button only for first item (most recent overall)
+                                    if set.persistentModelID == sets.first?.persistentModelID {
+                                        Button {
+                                            repeatSet(set)
+                                        } label: {
+                                            Image(systemName: "arrow.clockwise.circle.fill")
+                                                .font(.title3)
+                                                .foregroundStyle(.tint)
+                                        }
+                                    }
+                                }
+                            }
+                            .swipeActions {
+                                Button("Delete", role: .destructive) {
+                                    deleteSet(set)
                                 }
                             }
                         }
+                    } header: {
+                        Text(formatDayHeader(day))
+                            .font(.subheadline)
+                            .foregroundStyle(.primary)
+                            .textCase(.none)
                     }
                 }
-                .onDelete(perform: delete)
             }
         }
         .listStyle(.plain)
@@ -264,11 +292,9 @@ struct ExerciseDetailView: View {
         try? context.save()
     }
 
-    private func delete(at offsets: IndexSet) {
+    private func deleteSet(_ set: ExerciseSet) {
         withAnimation {
-            for i in offsets {
-                context.delete(sets[i])
-            }
+            context.delete(set)
             try? context.save()
         }
     }

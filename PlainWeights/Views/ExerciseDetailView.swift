@@ -66,25 +66,58 @@ struct ExerciseDetailView: View {
         return (lastDay, volume)
     }
     
-    private var progressRatio: Double {
+    private var progressRatioUnclamped: Double {
         guard let lastInfo = lastCompletedDayInfo, lastInfo.volume > 0 else { return 0 }
-        return min(todayVolume / lastInfo.volume, 1.2)
+        return todayVolume / lastInfo.volume
+    }
+
+    private var progressBarRatio: Double {
+        min(progressRatioUnclamped, 1.0) // bar caps at 100%
+    }
+
+    private var percentOfLast: Int {
+        Int(round(progressRatioUnclamped * 100)) // can exceed 100
+    }
+    
+    private var gainsPercent: Int {
+        guard let lastInfo = lastCompletedDayInfo, lastInfo.volume > 0 else { return 0 }
+        let gain = (todayVolume - lastInfo.volume) / lastInfo.volume * 100
+        return Int(round(gain))
     }
     
     private var deltaText: String {
         guard let lastInfo = lastCompletedDayInfo else {
             return "Baseline day"
         }
-        
+
         let delta = todayVolume - lastInfo.volume
         let sign = delta >= 0 ? "+" : ""
         let dateFormatted = formatDeltaDate(lastInfo.date)
-        
-        return "\(sign)\(formatVolume(delta)) kg vs \(dateFormatted)"
+
+        let percentPart: String
+        if lastInfo.volume > 0 {
+            let deltaPercent = Int(round((delta / lastInfo.volume) * 100))
+            let pSign = deltaPercent >= 0 ? "+" : ""
+            percentPart = " (\(pSign)\(deltaPercent)%)"
+        } else {
+            percentPart = ""
+        }
+
+        return "\(sign)\(formatVolume(delta)) kg\(percentPart) vs \(dateFormatted)"
     }
     
     private var showProgressBar: Bool {
         lastCompletedDayInfo != nil && lastCompletedDayInfo!.volume > 0
+    }
+    
+    private var barFillColor: Color {
+        percentOfLast >= 100 ? .green : .accentColor
+    }
+
+    private var gainsColor: Color {
+        if gainsPercent > 0 { return .green }
+        if gainsPercent < 0 { return .red }
+        return .secondary
     }
     
     // MARK: - Data Grouping
@@ -134,10 +167,21 @@ struct ExerciseDetailView: View {
             // Volume tracking metrics row
             VStack(alignment: .leading, spacing: 6) {
                 // Today's volume
-                Text("Today: \(formatVolume(todayVolume)) kg")
-                    .font(.title2)
-                    .bold()
-                    .monospacedDigit()
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("Today: \(formatVolume(todayVolume)) kg")
+                        .font(.title2)
+                        .bold()
+                        .monospacedDigit()
+
+                    if showProgressBar {
+                        // Achievement: percent of last (matches progress bar color)
+                        Text("· \(percentOfLast)% of last")
+                            .font(.headline)
+                            .monospacedDigit()
+                            .foregroundStyle(barFillColor)
+                            .accessibilityLabel("You have reached \(percentOfLast) percent of your last daily total")
+                    }
+                }
                 
                 // Delta chip
                 Text(deltaText)
@@ -154,9 +198,9 @@ struct ExerciseDetailView: View {
                             Rectangle()
                                 .fill(Color.secondary.opacity(0.2))
                             Rectangle()
-                                .fill(Color.accentColor)
-                                .frame(width: geometry.size.width * progressRatio)
-                                .animation(.easeInOut(duration: 0.3), value: progressRatio)
+                                .fill(barFillColor)
+                                .frame(width: geometry.size.width * progressBarRatio)
+                                .animation(.easeInOut(duration: 0.3), value: progressBarRatio)
                         }
                     }
                     .frame(height: 4)

@@ -175,7 +175,7 @@ struct ExerciseDetailView: View {
             .padding(.vertical, 8)
             
             // History label row
-            Text("HISTORY")
+            Text("HISTORIC SETS")
                 .font(.footnote)
                 .textCase(.uppercase)
                 .foregroundStyle(.secondary)

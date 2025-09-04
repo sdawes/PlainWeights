@@ -250,7 +250,13 @@ struct ExerciseDetailView: View {
             } else {
                 ForEach(groupedByDay, id: \.0) { day, daySets in
                     Section {
+                        let firstID = daySets.first?.persistentModelID
+                        let lastID = daySets.last?.persistentModelID
+                        
                         ForEach(daySets, id: \.persistentModelID) { set in
+                            let isFirst = (set.persistentModelID == firstID)
+                            let isLast = (set.persistentModelID == lastID)
+                            
                             HStack {
                                 Text("\(formatWeight(set.weight)) kg × \(set.reps)")
                                     .monospacedDigit()
@@ -278,6 +284,8 @@ struct ExerciseDetailView: View {
                                     }
                                 }
                             }
+                            .listRowSeparator(isFirst ? .hidden : .visible, edges: .top)
+                            .listRowSeparator(isLast ? .hidden : .visible, edges: .bottom)
                             .swipeActions {
                                 Button("Delete", role: .destructive) {
                                     deleteSet(set)
@@ -285,10 +293,18 @@ struct ExerciseDetailView: View {
                             }
                         }
                     } header: {
-                        Text(formatDayHeader(day))
-                            .font(.subheadline)
-                            .foregroundStyle(.primary)
-                            .textCase(.none)
+                        HStack {
+                            Text(day.formatted(Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated)))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            
+                            Spacer()
+                            
+                            let dayVolume = daySets.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
+                            Text("\(formatVolume(dayVolume)) kg")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
                     }
                 }
             }

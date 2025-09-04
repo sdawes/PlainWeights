@@ -157,21 +157,241 @@ final class MetricsCache {
 }
 ```
 
-### Key Files Structure
-- **Models/**: SwiftData models (Exercise, ExerciseSet, WorkoutSession)
-  - Exercise model includes lastUpdated tracking and bumpUpdated() helper
-  - ExerciseSet automatically updates parent Exercise.lastUpdated
-- **Views/**: SwiftUI views organized by feature
-  - ExerciseListView has efficient SwiftData-powered search with .searchable
-  - FilteredExerciseListView uses dynamic Query with #Predicate for database-level filtering
-  - Searches both exercise name and category using localizedStandardContains
-  - Maintains SortDescriptor to order by lastUpdated (most recent first)
-  - ExerciseDetailView has Apple Notes-style inline name editing
-- **ViewModels/**: `@Observable` view models for complex logic
-- **Services/**: Data aggregation and chart data services
-- **Cache/**: Performance caching layer
-- **Extensions/**: SwiftData and SwiftUI extensions
-- **TestDataGenerator.swift**: Debug-only test data generation for development and testing
+## Clean Architecture Structure (UPDATED SEPTEMBER 2025)
+
+**IMPORTANT: The codebase has been refactored to use clean architecture with proper separation of concerns. All new code must follow these patterns.**
+
+### 📁 **Current Folder Structure:**
+```
+PlainWeights/
+├── Models/ (SwiftData models - keep simple)
+│   ├── Exercise.swift ✅ Clean data model
+│   └── ExerciseSet.swift ✅ Clean data model
+├── Views/ (SwiftUI views - UI ONLY)
+│   ├── ExerciseDetailView.swift (refactored - clean UI only)
+│   ├── ExerciseListView.swift ✅ Clean
+│   └── AddExerciseView.swift ✅ Clean
+├── ViewModels/ (State management & coordination)
+│   └── ExerciseDetailViewModel.swift ✅ Coordinates services
+├── Services/ (Business logic & calculations)
+│   ├── VolumeAnalytics.swift ✅ All volume calculations
+│   ├── ProgressTracker.swift ✅ Progress states & colors
+│   └── ExerciseDataGrouper.swift ✅ Data grouping logic
+├── Utilities/ (Shared helpers)
+│   └── Formatters.swift ✅ All formatting functions
+└── TestDataGenerator.swift (debug-only test data)
+```
+
+### 🏗️ **Architecture Principles:**
+
+**1. Services** (`Services/`)
+- **Purpose**: Pure business logic, calculations, data transformations
+- **Rules**: Stateless classes with static methods OR @Observable classes
+- **Examples**: Volume calculations, progress tracking, data grouping
+- **Pattern**: 
+```swift
+@Observable
+final class ServiceName {
+    static func calculateSomething(input: Data) -> Result {
+        // Pure business logic here
+    }
+}
+```
+
+**2. ViewModels** (`ViewModels/`)
+- **Purpose**: Coordinate services, manage view state, handle user actions
+- **Rules**: Use @Observable macro, inject ModelContext, delegate to services
+- **Pattern**:
+```swift
+@Observable
+final class ViewNameViewModel {
+    private let context: ModelContext
+    private let someService: SomeService
+    
+    var viewState: ViewState
+    
+    func handleUserAction() {
+        let result = SomeService.doBusinessLogic(data)
+        updateViewState(with: result)
+    }
+}
+```
+
+**3. Views** (`Views/`)
+- **Purpose**: UI layout and presentation ONLY
+- **Rules**: No business logic, delegate all actions to ViewModel
+- **Pattern**:
+```swift
+struct ViewName: View {
+    @Bindable var viewModel: ViewNameViewModel
+    
+    var body: some View {
+        // Pure SwiftUI layout
+        Button("Action") { viewModel.handleAction() }
+    }
+}
+```
+
+**4. Utilities** (`Utilities/`)
+- **Purpose**: Shared helper functions, formatters, extensions
+- **Rules**: Static functions, no state, pure functions
+- **Pattern**:
+```swift
+enum UtilityName {
+    static func formatSomething(_ input: Type) -> String {
+        // Pure formatting logic
+    }
+}
+```
+
+### 📋 **When to Create New Files/Folders:**
+
+**Create New Service When:**
+- ✅ Adding complex business logic (>3 computed properties)
+- ✅ Need calculations used by multiple views
+- ✅ Adding new feature with data processing needs
+- ✅ Logic exceeds ~100 lines
+
+**Create New ViewModel When:**
+- ✅ View has complex state management
+- ✅ Need to coordinate multiple services
+- ✅ Form handling or user interaction logic
+- ✅ View needs >5 computed properties
+
+**Create New Utility When:**
+- ✅ Same formatting/helper code appears in 2+ places
+- ✅ Adding new data transformation functions
+- ✅ SwiftUI or SwiftData extensions
+
+**Create New Folder When:**
+- ✅ More than 5 files of the same type
+- ✅ Adding new major feature area
+- ✅ Clear logical grouping emerges
+
+### 🎯 **Best Practices for New Development:**
+
+**DO:**
+- ✅ Extract business logic to Services immediately
+- ✅ Keep Views under 200 lines
+- ✅ Use ViewModels for state coordination
+- ✅ Make Services testable with static methods
+- ✅ Share utilities across the app
+- ✅ Use @Observable macro for modern SwiftUI
+
+**DON'T:**
+- ❌ Put business logic in Views
+- ❌ Create massive ViewModels (split into multiple services)
+- ❌ Duplicate formatting logic
+- ❌ Mix UI concerns with data processing
+- ❌ Create tightly coupled dependencies
+
+### 📈 **Migration Status:**
+- ✅ **ExerciseDetailView**: REFACTORED (377→255 lines, clean architecture)
+- ✅ **VolumeAnalytics**: EXTRACTED (all volume calculations)
+- ✅ **ProgressTracker**: EXTRACTED (progress states & colors)
+- ✅ **ExerciseDataGrouper**: EXTRACTED (data grouping logic)
+- ✅ **Formatters**: EXTRACTED (all formatting utilities)
+- ⚠️ **TestDataGenerator**: NEEDS SPLITTING (980 lines - too large)
+
+### 🔄 **Future Refactoring Targets:**
+1. **TestDataGenerator.swift** → Split into `TestData/` folder with multiple files
+2. **Extensions/** → Create folder when we have SwiftUI/SwiftData extensions
+3. **Cache/** → Add when implementing performance caching layer
+
+### 🛠️ **Implementation Examples:**
+
+**Adding a New Feature (e.g., Workout Analytics Dashboard):**
+
+1. **Create Service First:**
+```swift
+// Services/WorkoutAnalytics.swift
+@Observable
+final class WorkoutAnalytics {
+    static func calculateWeeklyStats(exercises: [Exercise]) -> WeeklyStats {
+        // Business logic here
+    }
+    
+    static func getTrendData(sets: [ExerciseSet], period: TimePeriod) -> [TrendPoint] {
+        // More business logic
+    }
+}
+```
+
+2. **Create ViewModel for Coordination:**
+```swift
+// ViewModels/WorkoutDashboardViewModel.swift
+@Observable
+final class WorkoutDashboardViewModel {
+    private let context: ModelContext
+    
+    var weeklyStats: WeeklyStats?
+    var trendData: [TrendPoint] = []
+    
+    func loadAnalytics() {
+        let exercises = fetchExercises()
+        weeklyStats = WorkoutAnalytics.calculateWeeklyStats(exercises: exercises)
+        trendData = WorkoutAnalytics.getTrendData(sets: fetchSets(), period: .month)
+    }
+}
+```
+
+3. **Create Clean View:**
+```swift
+// Views/WorkoutDashboardView.swift
+struct WorkoutDashboardView: View {
+    @Bindable var viewModel: WorkoutDashboardViewModel
+    
+    var body: some View {
+        // Pure UI only - delegate all actions to viewModel
+        VStack {
+            if let stats = viewModel.weeklyStats {
+                WeeklyStatsCard(stats: stats)
+            }
+            TrendChart(data: viewModel.trendData)
+        }
+        .onAppear { viewModel.loadAnalytics() }
+    }
+}
+```
+
+**Adding Shared Utilities:**
+```swift
+// Utilities/ChartHelpers.swift
+enum ChartHelpers {
+    static func generateChartPoints(from data: [DataPoint]) -> [ChartPoint] {
+        // Reusable chart logic
+    }
+    
+    static func formatAxisLabel(_ value: Double) -> String {
+        // Reusable formatting
+    }
+}
+```
+
+**Extending Existing Services:**
+```swift
+// Services/VolumeAnalytics.swift - ADD new functions to existing service
+extension VolumeAnalytics {
+    static func calculateMonthlyVolume(from sets: [ExerciseSet]) -> [MonthlyVolume] {
+        // New functionality in existing service
+    }
+}
+```
+
+### ⚡ **Quick Decision Guide:**
+
+**"Where should this code go?"**
+- **Business logic/calculations?** → `Services/`
+- **View state management?** → `ViewModels/`
+- **UI layout/presentation?** → `Views/`  
+- **Shared formatting/helpers?** → `Utilities/`
+- **Data models?** → `Models/` (keep simple)
+
+**"Should I create a new file?"**
+- **Service >100 lines?** → Split into focused services
+- **View >200 lines?** → Extract subviews or simplify ViewModel  
+- **ViewModel >150 lines?** → Split services or simplify coordination
+- **Utility functions used in 2+ places?** → Extract to shared utility
 
 ## Debug Tools and Test Data
 

@@ -54,13 +54,18 @@ final class ExerciseDetailViewModel {
         guard let weight = Double(weightText),
               let reps = Int(repsText),
               weight > 0,
-              reps > 0 else { return }
+              reps > 0 else { 
+            print("AddSet failed: Invalid input - weight: \(weightText), reps: \(repsText)")
+            return 
+        }
         
+        print("Adding set: \(weight)kg x \(reps) reps")
         let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
         context.insert(set)
         
         do {
             try context.save()
+            print("Set saved successfully")
             // Clear form fields after successful save
             clearForm()
         } catch {
@@ -71,6 +76,7 @@ final class ExerciseDetailViewModel {
     
     /// Repeat a specific set
     func repeatSet(_ set: ExerciseSet) {
+        print("Repeating set: \(set.weight)kg x \(set.reps) reps")
         let newSet = ExerciseSet(
             weight: set.weight,
             reps: set.reps,
@@ -80,6 +86,7 @@ final class ExerciseDetailViewModel {
         
         do {
             try context.save()
+            print("Repeated set saved successfully")
         } catch {
             print("Error repeating set: \(error)")
         }

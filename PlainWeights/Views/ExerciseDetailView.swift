@@ -13,7 +13,17 @@ struct ExerciseDetailView: View {
     let exercise: Exercise
     @Query private var sets: [ExerciseSet]
     
-    @State private var viewModel: ExerciseDetailViewModel?
+    // Local form state
+    @State private var weightText = ""
+    @State private var repsText = ""
+    @State private var exerciseName: String = ""
+    
+    @FocusState private var nameFocused: Bool
+    @FocusState private var focusedField: Field?
+    
+    enum Field {
+        case weight, reps
+    }
 
     init(exercise: Exercise) {
         self.exercise = exercise
@@ -22,57 +32,37 @@ struct ExerciseDetailView: View {
             filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
+        _exerciseName = State(initialValue: exercise.name)
     }
 
-    var body: some View {
-        Group {
-            if let vm = viewModel {
-                ExerciseDetailContent(viewModel: vm, sets: sets)
-            } else {
-                ProgressView()
-                    .onAppear {
-                        viewModel = ExerciseDetailViewModel(exercise: exercise, context: context)
-                        viewModel?.updateComputedProperties(with: sets)
-                    }
-            }
-        }
-        .onChange(of: sets) { _, newSets in
-            viewModel?.updateComputedProperties(with: newSets)
-        }
-    }
-}
-
-// MARK: - Content View
-
-private struct ExerciseDetailContent: View {
-    @Bindable var viewModel: ExerciseDetailViewModel
-    let sets: [ExerciseSet]
-    
-    @FocusState private var nameFocused: Bool
-    @FocusState private var focusedField: ExerciseDetailViewModel.Field?
-    
     var body: some View {
         List {
             // Title row
-            TextField("Title", text: $viewModel.name)
+            TextField("Title", text: $exerciseName)
                 .font(.largeTitle.bold())
                 .textFieldStyle(.plain)
                 .focused($nameFocused)
                 .submitLabel(.done)
                 .onSubmit { 
                     nameFocused = false
-                    viewModel.endEditing() 
+                    updateExerciseName()
                 }
                 .listRowSeparator(.hidden)
                 .padding(.vertical, 8)
             
             // Volume tracking metrics row
-            if let progressState = viewModel.progressState {
+            if let progressState = createProgressState() {
                 VolumeMetricsView(progressState: progressState)
             }
             
             // Quick-add row
-            QuickAddView(viewModel: viewModel, focusedField: $focusedField)
+            QuickAddView(
+                weightText: $weightText,
+                repsText: $repsText,
+                focusedField: $focusedField,
+                canAddSet: canAddSet,
+                addSet: addSet
+            )
             
             // History label row
             Text("HISTORIC SETS")
@@ -88,7 +78,13 @@ private struct ExerciseDetailContent: View {
                     .foregroundStyle(.secondary)
                     .listRowSeparator(.hidden)
             } else {
-                HistorySectionView(viewModel: viewModel, sets: sets)
+                HistorySectionView(
+                    sets: sets,
+                    dayGroups: createDayGroups(),
+                    isMostRecentSet: isMostRecentSet,
+                    repeatSet: repeatSet,
+                    deleteSet: deleteSet
+                )
             }
         }
         .listStyle(.plain)
@@ -98,7 +94,7 @@ private struct ExerciseDetailContent: View {
                 if nameFocused { 
                     Button("Done") { 
                         nameFocused = false
-                        viewModel.endEditing() 
+                        updateExerciseName()
                     } 
                 }
             }
@@ -115,6 +111,92 @@ private struct ExerciseDetailContent: View {
         .onTapGesture {
             focusedField = nil
         }
+    }
+
+    // MARK: - Business Logic Methods
+    
+    private func createProgressState() -> ProgressTracker.ProgressState? {
+        ProgressTracker.createProgressState(from: sets)
+    }
+    
+    private func createDayGroups() -> [ExerciseDataGrouper.DayGroup] {
+        ExerciseDataGrouper.createDayGroups(from: sets)
+    }
+    
+    private func addSet() {
+        guard let weight = Double(weightText),
+              let reps = Int(repsText),
+              weight > 0,
+              reps > 0 else { 
+            print("AddSet failed: Invalid input - weight: \(weightText), reps: \(repsText)")
+            return 
+        }
+        
+        print("Adding set: \(weight)kg x \(reps) reps")
+        let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
+        context.insert(set)
+        
+        do {
+            try context.save()
+            print("Set saved successfully")
+            clearForm()
+        } catch {
+            print("Error saving set: \(error)")
+        }
+    }
+    
+    private func repeatSet(_ set: ExerciseSet) {
+        print("Repeating set: \(set.weight)kg x \(set.reps) reps")
+        let newSet = ExerciseSet(
+            weight: set.weight,
+            reps: set.reps,
+            exercise: exercise
+        )
+        context.insert(newSet)
+        
+        do {
+            try context.save()
+            print("Repeated set saved successfully")
+        } catch {
+            print("Error repeating set: \(error)")
+        }
+    }
+    
+    private func deleteSet(_ set: ExerciseSet) {
+        context.delete(set)
+        
+        do {
+            try context.save()
+        } catch {
+            print("Error deleting set: \(error)")
+        }
+    }
+    
+    private func updateExerciseName() {
+        let trimmed = exerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != exercise.name else { return }
+        
+        exercise.name = trimmed
+        exercise.bumpUpdated()
+        
+        do {
+            try context.save()
+        } catch {
+            print("Error updating exercise name: \(error)")
+        }
+    }
+    
+    private func clearForm() {
+        weightText = ""
+        repsText = ""
+    }
+    
+    private var canAddSet: Bool {
+        !weightText.isEmpty && !repsText.isEmpty
+    }
+    
+    private func isMostRecentSet(_ set: ExerciseSet, in sets: [ExerciseSet]) -> Bool {
+        set.persistentModelID == sets.first?.persistentModelID
     }
 }
 
@@ -173,29 +255,33 @@ private struct VolumeMetricsView: View {
 // MARK: - Quick Add View
 
 private struct QuickAddView: View {
-    @Bindable var viewModel: ExerciseDetailViewModel
-    @FocusState.Binding var focusedField: ExerciseDetailViewModel.Field?
+    @Binding var weightText: String
+    @Binding var repsText: String
+    @FocusState.Binding var focusedField: ExerciseDetailView.Field?
+    let canAddSet: Bool
+    let addSet: () -> Void
     
     var body: some View {
         HStack(spacing: 12) {
-            TextField("Weight", text: $viewModel.weightText)
+            TextField("Weight", text: $weightText)
                 .keyboardType(.decimalPad)
                 .textFieldStyle(.roundedBorder)
                 .focused($focusedField, equals: .weight)
                 .frame(maxWidth: .infinity)
             
-            TextField("Reps", text: $viewModel.repsText)
+            TextField("Reps", text: $repsText)
                 .keyboardType(.numberPad)
                 .textFieldStyle(.roundedBorder)
                 .focused($focusedField, equals: .reps)
                 .frame(maxWidth: .infinity)
             
-            Button(action: viewModel.addSet) {
+            Button(action: addSet) {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
                     .foregroundStyle(.tint)
             }
-            .disabled(!viewModel.canAddSet)
+            .buttonStyle(.borderless)
+            .disabled(!canAddSet)
         }
         .listRowSeparator(.hidden)
         .padding(.vertical, 8)
@@ -205,15 +291,18 @@ private struct QuickAddView: View {
 // MARK: - History Section View
 
 private struct HistorySectionView: View {
-    let viewModel: ExerciseDetailViewModel
     let sets: [ExerciseSet]
+    let dayGroups: [ExerciseDataGrouper.DayGroup]
+    let isMostRecentSet: (ExerciseSet, [ExerciseSet]) -> Bool
+    let repeatSet: (ExerciseSet) -> Void
+    let deleteSet: (ExerciseSet) -> Void
     
     var body: some View {
-        ForEach(viewModel.dayGroups, id: \.date) { dayGroup in
+        ForEach(dayGroups, id: \.date) { dayGroup in
             Section {
                 ForEach(dayGroup.sets, id: \.persistentModelID) { set in
                     HStack {
-                        Text("\(viewModel.formattedWeight(set.weight)) kg × \(set.reps)")
+                        Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
                             .monospacedDigit()
                         
                         Spacer()
@@ -228,14 +317,15 @@ private struct HistorySectionView: View {
                             .foregroundStyle(.secondary)
                             
                             // Add repeat button only for most recent set overall
-                            if viewModel.isMostRecentSet(set, in: sets) {
+                            if isMostRecentSet(set, sets) {
                                 Button {
-                                    viewModel.repeatSet(set)
+                                    repeatSet(set)
                                 } label: {
                                     Image(systemName: "arrow.clockwise.circle.fill")
                                         .font(.title3)
                                         .foregroundStyle(.tint)
                                 }
+                                .buttonStyle(.borderless)
                             }
                         }
                     }
@@ -243,19 +333,19 @@ private struct HistorySectionView: View {
                     .listRowSeparator(dayGroup.isLast(set) ? .hidden : .visible, edges: .bottom)
                     .swipeActions {
                         Button("Delete", role: .destructive) {
-                            viewModel.deleteSet(set)
+                            deleteSet(set)
                         }
                     }
                 }
             } header: {
                 HStack {
-                    Text(viewModel.formattedDayHeader(for: dayGroup.date))
+                    Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     
                     Spacer()
                     
-                    Text("\(viewModel.formattedVolume(dayGroup.volume)) kg")
+                    Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }

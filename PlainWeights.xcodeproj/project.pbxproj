@@ -20,6 +20,7 @@
 		1FB1C5062E50DA530053C668 /* PlainWeights.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlainWeights.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FB1C5142E50DA540053C668 /* PlainWeightsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlainWeightsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FB1C5312E50DA540053C668 /* All_Code.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = All_Code.swift; sourceTree = "<group>"; };
+		4AEA68D3CAAD43CBA0E4F488 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -57,6 +58,7 @@
 			isa = PBXGroup;
 			children = (
 				1FB1C5312E50DA540053C668 /* All_Code.swift */,
+				4AEA68D3CAAD43CBA0E4F488 /* CLAUDE.md */,
 				1FB1C5082E50DA530053C668 /* PlainWeights */,
 				1FB1C5172E50DA540053C668 /* PlainWeightsTests */,
 				1FB1C5072E50DA530053C668 /* Products */,

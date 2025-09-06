@@ -25,6 +25,43 @@ PlainWeights is a high-performance gym workout tracking app built with SwiftUI a
 - Batch operations required for all multi-item updates
 - Profile with Instruments before and after EVERY feature
 
+### SwiftData Best Practices - CRITICAL
+
+**IMPORTANT: SwiftData is designed to be used directly in views. DO NOT overcomplicate with unnecessary abstraction layers.**
+
+#### SwiftData Architecture Principles (MUST FOLLOW)
+- **ALWAYS use SwiftData patterns directly** - `@Environment(\.modelContext)` and `@Query` in views
+- **NEVER add unnecessary ViewModel layers** - SwiftData provides reactive updates automatically
+- **NEVER try to "improve" SwiftData with MVVM** - It breaks the framework's elegant design
+- **DO use Services for business logic** - But call them directly from views, not through ViewModels
+
+#### Correct SwiftData Pattern
+```swift
+// ✅ CORRECT - Direct SwiftData usage
+struct ExerciseDetailView: View {
+    @Environment(\.modelContext) private var context
+    @Query private var sets: [ExerciseSet]
+    @State private var weightText = ""
+    
+    private func addSet() {
+        let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
+        context.insert(set)
+        try? context.save()
+    }
+}
+
+// ❌ WRONG - Unnecessary ViewModel layer
+@Observable class ExerciseDetailViewModel {
+    private let context: ModelContext  // This breaks SwiftData's design
+    // ViewModels add complexity without benefit
+}
+```
+
+#### When to Use Services vs Direct Code
+- **Use Services for:** Complex calculations, data aggregation, formatting utilities
+- **Use Direct Code for:** Simple CRUD operations, form state, UI state
+- **Never use ViewModels for:** Wrapping ModelContext or @Query results
+
 ### Data Model Architecture
 
 #### Core Entities
@@ -111,19 +148,25 @@ xcrun simctl list devices
 
 ## Architecture Guidelines
 
-### View Layer
+### View Layer (SwiftData-First Approach)
+- **USE SWIFTDATA DIRECTLY IN VIEWS** - No unnecessary ViewModels
+- Use `@Environment(\.modelContext)` for data operations
+- Use `@Query` with predicates for reactive data fetching
 - Use `NavigationStack` with value-based navigation
 - Implement `.task` modifier for async data loading
-- Use `@State` and `@Binding` properly to minimize re-renders
+- Use `@State` for UI state, not data state (SwiftData handles that)
 - Leverage `ViewThatFits` for responsive layouts
 - Use `.sensoryFeedback` for haptic feedback
 
-### Data Layer
+### Data Layer (Pure SwiftData)
+- **Direct ModelContext usage** - Don't wrap in ViewModels
 - SwiftData models with proper relationships
+- `@Query` provides automatic reactivity - trust it
 - Implement custom `FetchDescriptor` for complex queries
 - Use `@Query` animations for smooth updates
 - Background `ModelContext` for intensive operations
 - Implement proper migration schemas
+- Let SwiftData handle synchronization - don't fight it
 
 ### Charts and Analytics
 - Pre-calculate and cache chart data points
@@ -132,34 +175,48 @@ xcrun simctl list devices
 - Background queue for statistical calculations
 - Consider using `TimelineView` for real-time updates
 
-### Performance Patterns
+### Performance Patterns (SwiftData-First)
 ```swift
-// Example patterns to follow:
-// 1. Use @Query with predicates
-@Query(filter: #Predicate<Exercise> { $0.category == "Chest" })
-private var chestExercises: [Exercise]
+// ✅ CORRECT: Direct SwiftData in Views
+struct ExerciseListView: View {
+    @Environment(\.modelContext) private var context
+    @Query(filter: #Predicate<Exercise> { $0.category == "Chest" })
+    private var chestExercises: [Exercise]
+    
+    // Simple operations directly in view
+    private func deleteExercise(_ exercise: Exercise) {
+        context.delete(exercise)
+        try? context.save()
+    }
+}
 
-// 2. Batch operations
+// ✅ CORRECT: Services for complex logic only
+enum VolumeAnalytics {
+    static func calculateVolume(for sets: [ExerciseSet]) -> Double {
+        // Complex calculation logic
+    }
+}
+
+// ❌ WRONG: Wrapping SwiftData in ViewModels
+@Observable class ExerciseViewModel {
+    private let context: ModelContext  // Don't do this!
+    @Query var exercises: [Exercise]   // This won't work properly
+}
+
+// Batch operations (still valid)
 modelContext.transaction {
     // Multiple operations
 }
 
-// 3. Background processing
+// Background processing (still valid)
 Task.detached(priority: .background) {
     // Heavy calculations
-}
-
-// 4. Cached computed properties
-@Observable
-final class MetricsCache {
-    private var cache: [String: Any] = [:]
-    // Implement cache invalidation
 }
 ```
 
 ## Clean Architecture Structure (UPDATED SEPTEMBER 2025)
 
-**IMPORTANT: The codebase has been refactored to use clean architecture with proper separation of concerns. All new code must follow these patterns.**
+**IMPORTANT: Use Services for business logic, but NEVER wrap SwiftData in ViewModels. Views should use @Environment(\.modelContext) directly.**
 
 ### 📁 **Current Folder Structure:**
 ```
@@ -725,6 +782,48 @@ ForEach(Array(sets.enumerated()), id: \.element) { (index, set) in
     // Identity issues with SwiftUI updates
 }
 ```
+
+## iOS 18 SwiftUI Regressions & Fixes
+
+### Critical iOS 18 List Button Issue
+**This is a documented iOS 18 regression that affects all SwiftUI apps.**
+
+#### The Problem
+- Buttons inside List/ForEach views don't respond to quick taps
+- Only long presses work reliably
+- Parent view gestures can completely block button actions
+- This wastes hours of debugging time if you don't know about it
+
+#### Required Fix Pattern
+```swift
+// ✅ CORRECT - iOS 18 Compatible Button in List
+Button(action: doSomething) {
+    Image(systemName: "plus.circle.fill")
+        .font(.title2)
+        .foregroundStyle(.tint)
+}
+.buttonStyle(.plain)  // CRITICAL: Use .plain, NOT .borderless
+.contentShape(Rectangle())  // CRITICAL: Improves hit-testing
+
+// ❌ WRONG - Won't work reliably in iOS 18
+Button(action: doSomething) {
+    Image(systemName: "plus.circle.fill")
+}
+.buttonStyle(.borderless)  // Unreliable in Lists
+// Missing contentShape
+```
+
+#### Additional Requirements
+- **Remove conflicting gestures:** Any parent `.onTapGesture` will block button taps
+- **Test with quick taps:** Build succeeding doesn't mean buttons work
+- **Check console logs:** If logs don't appear, it's a UI issue, not logic
+
+#### Debugging Checklist for Non-Responsive Buttons
+1. ✅ Is the button using `.buttonStyle(.plain)`?
+2. ✅ Does it have `.contentShape(Rectangle())`?
+3. ✅ Are there any parent `.onTapGesture` modifiers to remove?
+4. ✅ Do console logs appear when tapping? (If not, it's hit-testing)
+5. ✅ Are you testing with quick taps, not just long presses?
 
 ## Development Approach
 - **INCREMENTAL DELIVERY**: Break down implementation into small, testable chunks

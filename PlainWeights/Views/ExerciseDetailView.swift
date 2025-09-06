@@ -108,9 +108,6 @@ struct ExerciseDetailView: View {
                 }
             }
         }
-        .onTapGesture {
-            focusedField = nil
-        }
     }
 
     // MARK: - Business Logic Methods
@@ -280,7 +277,8 @@ private struct QuickAddView: View {
                     .font(.title2)
                     .foregroundStyle(.tint)
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
             .disabled(!canAddSet)
         }
         .listRowSeparator(.hidden)
@@ -325,7 +323,8 @@ private struct HistorySectionView: View {
                                         .font(.title3)
                                         .foregroundStyle(.tint)
                                 }
-                                .buttonStyle(.borderless)
+                                .buttonStyle(.plain)
+                                .contentShape(Rectangle())
                             }
                         }
                     }

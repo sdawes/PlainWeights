@@ -9,8 +9,7 @@ import Foundation
 import SwiftData
 
 /// Service for calculating volume-related metrics for exercises
-@Observable
-final class VolumeAnalytics {
+enum VolumeAnalytics {
     
     // MARK: - Volume Calculations
     

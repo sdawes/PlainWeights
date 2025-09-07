@@ -9,8 +9,7 @@ import Foundation
 import SwiftData
 
 /// Service for grouping and organizing exercise data
-@Observable
-final class ExerciseDataGrouper {
+enum ExerciseDataGrouper {
     
     // MARK: - Day Grouping
     
@@ -85,7 +84,9 @@ final class ExerciseDataGrouper {
     static func createDayGroups(from sets: [ExerciseSet]) -> [DayGroup] {
         let dayGroups = groupSetsByDay(sets)
         return dayGroups.map { date, daySets in
-            DayGroup(date: date, sets: daySets)
+            // Defensive sorting: ensure within-group ordering regardless of input
+            let sortedSets = daySets.sorted { $0.timestamp > $1.timestamp }
+            return DayGroup(date: date, sets: sortedSets)
         }
     }
 }

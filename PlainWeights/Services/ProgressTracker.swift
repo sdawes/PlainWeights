@@ -9,8 +9,7 @@ import Foundation
 import SwiftUI
 
 /// Service for tracking progress and determining UI presentation colors/states
-@Observable
-final class ProgressTracker {
+enum ProgressTracker {
     
     // MARK: - Color Logic
     

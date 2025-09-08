@@ -203,7 +203,7 @@ private struct VolumeMetricsView: View {
     let progressState: ProgressTracker.ProgressState
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             // Last completed section
             if let lastInfo = progressState.lastCompletedDayInfo {
                 // Last completed header
@@ -238,7 +238,7 @@ private struct VolumeMetricsView: View {
                 // Today's volume and percentage row
                 HStack {
                     Text("\(Formatters.formatVolume(progressState.todayVolume)) kg")
-                        .font(.title2)
+                        .font(.headline)
                         .bold()
                         .monospacedDigit()
                     

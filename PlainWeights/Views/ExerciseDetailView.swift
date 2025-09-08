@@ -50,17 +50,6 @@ struct ExerciseDetailView: View {
                 .listRowSeparator(.hidden)
                 .padding(.vertical, 8)
             
-            // Max weight from last completed day
-            if let progressState = createProgressState(),
-               let lastInfo = progressState.lastCompletedDayInfo {
-                Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .listRowSeparator(.hidden)
-                    .padding(.vertical, 4)
-            }
-            
             // Volume tracking metrics row
             if let progressState = createProgressState() {
                 VolumeMetricsView(progressState: progressState)
@@ -261,14 +250,6 @@ private struct VolumeMetricsView: View {
                 .frame(height: 4)
                 .clipShape(Capsule())
             }
-            
-            // Delta chip (comparison with last session)
-            Text(progressState.deltaText)
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.secondary.opacity(0.2))
-                .clipShape(Capsule())
         }
         .listRowSeparator(.hidden)
         .padding(.vertical, 10)

@@ -52,7 +52,7 @@ struct ExerciseDetailView: View {
             
             // Volume tracking metrics row
             if let progressState = createProgressState() {
-                VolumeMetricsView(progressState: progressState)
+                VolumeMetricsView(progressState: progressState, sets: sets)
             }
             
             // Quick-add row
@@ -201,32 +201,26 @@ struct ExerciseDetailView: View {
 
 private struct VolumeMetricsView: View {
     let progressState: ProgressTracker.ProgressState
+    let sets: [ExerciseSet]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Last completed section
-            if let lastInfo = progressState.lastCompletedDayInfo {
-                VStack(alignment: .leading, spacing: 6) {
-                    // Last completed header
-                    Text("Last completed")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-                    
-                    // Weight/reps and total volume row
-                    HStack {
-                        Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
-                            .font(.headline)
-                            .monospacedDigit()
-                        
-                        Spacer()
-                        
-                        Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
-                            .font(.headline)
-                            .bold()
-                            .monospacedDigit()
-                    }
+            // Progressive overload section
+            let progressionResult = ProgressiveOverloadAnalytics.calculateProgressionTargets(from: sets)
+            
+            switch progressionResult {
+            case .valid(let targets):
+                ProgressionGuidanceView(targets: targets, showWarning: false)
+                
+            case .unreliableData(let warning, let targets):
+                if let targets = targets {
+                    ProgressionGuidanceView(targets: targets, showWarning: true)
+                } else {
+                    FallbackLastCompletedView(progressState: progressState)
                 }
+                
+            case .insufficientData:
+                FallbackLastCompletedView(progressState: progressState)
             }
             
             // Lifted today section
@@ -388,6 +382,108 @@ private struct HistorySectionView: View {
                     Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Progression Guidance View
+
+private struct ProgressionGuidanceView: View {
+    let targets: ProgressionTargets
+    let showWarning: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Last session header
+            HStack {
+                Text("Last session")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                
+                if showWarning {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            }
+            
+            // Last session breakdown
+            Text(targets.lastSession.description)
+                .font(.headline)
+                .monospacedDigit()
+            
+            // Progression targets
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Target progression:")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack {
+                        Text("Reps:")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(targets.repProgression.description)
+                            .font(.subheadline)
+                            .monospacedDigit()
+                        
+                        if targets.recommendedPath == .reps {
+                            Image(systemName: "star.fill")
+                                .font(.caption)
+                                .foregroundStyle(.yellow)
+                        }
+                    }
+                    
+                    HStack {
+                        Text("Weight:")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(targets.weightProgression.description)
+                            .font(.subheadline)
+                            .monospacedDigit()
+                        
+                        if targets.recommendedPath == .weight {
+                            Image(systemName: "star.fill")
+                                .font(.caption)
+                                .foregroundStyle(.yellow)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Fallback Last Completed View
+
+private struct FallbackLastCompletedView: View {
+    let progressState: ProgressTracker.ProgressState
+    
+    var body: some View {
+        if let lastInfo = progressState.lastCompletedDayInfo {
+            VStack(alignment: .leading, spacing: 6) {
+                // Last completed header
+                Text("Last completed")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                
+                // Weight/reps and total volume row
+                HStack {
+                    Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
+                        .font(.headline)
+                        .monospacedDigit()
+                    
+                    Spacer()
+                    
+                    Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
+                        .font(.headline)
+                        .bold()
+                        .monospacedDigit()
                 }
             }
         }

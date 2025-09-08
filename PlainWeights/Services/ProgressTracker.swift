@@ -30,7 +30,7 @@ enum ProgressTracker {
     /// Complete progress state for a workout session
     struct ProgressState {
         let todayVolume: Double
-        let lastCompletedDayInfo: (date: Date, volume: Double)?
+        let lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double)?
         let progressRatioUnclamped: Double
         let progressBarRatio: Double
         let percentOfLast: Int

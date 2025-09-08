@@ -54,7 +54,7 @@ enum Formatters {
     /// Format delta text with percentage and comparison date
     static func formatDeltaText(
         todayVolume: Double, 
-        lastCompletedDayInfo: (date: Date, volume: Double)?
+        lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double)?
     ) -> String {
         guard let lastInfo = lastCompletedDayInfo else {
             return "Baseline day"

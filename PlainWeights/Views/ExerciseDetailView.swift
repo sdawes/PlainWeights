@@ -206,24 +206,26 @@ private struct VolumeMetricsView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Last completed section
             if let lastInfo = progressState.lastCompletedDayInfo {
-                // Last completed header
-                Text("Last completed")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                
-                // Weight/reps and total volume row
-                HStack {
-                    Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
-                        .font(.headline)
-                        .monospacedDigit()
+                VStack(alignment: .leading, spacing: 6) {
+                    // Last completed header
+                    Text("Last completed")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
                     
-                    Spacer()
-                    
-                    Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
-                        .font(.headline)
-                        .bold()
-                        .monospacedDigit()
+                    // Weight/reps and total volume row
+                    HStack {
+                        Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
+                            .font(.headline)
+                            .monospacedDigit()
+                        
+                        Spacer()
+                        
+                        Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
+                            .font(.headline)
+                            .bold()
+                            .monospacedDigit()
+                    }
                 }
             }
             
@@ -244,7 +246,7 @@ private struct VolumeMetricsView: View {
                     
                     Spacer()
                     
-                    if progressState.showProgressBar {
+                    if progressState.lastCompletedDayInfo != nil {
                         Text("\(progressState.percentOfLast)% of last")
                             .font(.headline)
                             .monospacedDigit()
@@ -252,22 +254,30 @@ private struct VolumeMetricsView: View {
                             .accessibilityLabel("You have reached \(progressState.percentOfLast) percent of your last daily total")
                     }
                 }
+            }
+            
+            // Progress bar with enhanced spacing (always visible)
+            VStack(spacing: 0) {
+                Spacer()
+                    .frame(height: 12)
                 
-                // Progress bar (if applicable)
-                if progressState.showProgressBar {
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            Rectangle()
-                                .fill(Color.secondary.opacity(0.2))
-                            Rectangle()
-                                .fill(progressState.barFillColor)
-                                .frame(width: geometry.size.width * progressState.progressBarRatio)
-                                .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
-                        }
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Always show background track
+                        Rectangle()
+                            .fill(Color.secondary.opacity(0.2))
+                        // Show progress fill (0% when no last completed data)
+                        Rectangle()
+                            .fill(progressState.lastCompletedDayInfo != nil ? progressState.barFillColor : Color.clear)
+                            .frame(width: geometry.size.width * (progressState.lastCompletedDayInfo != nil ? progressState.progressBarRatio : 0))
+                            .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
                     }
-                    .frame(height: 4)
-                    .clipShape(Capsule())
                 }
+                .frame(height: 4)
+                .clipShape(Capsule())
+                
+                Spacer()
+                    .frame(height: 12)
             }
         }
         .padding(16)

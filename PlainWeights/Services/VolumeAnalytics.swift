@@ -27,7 +27,7 @@ enum VolumeAnalytics {
     }
     
     /// Get information about the last completed day (before today)
-    static func lastCompletedDayInfo(from sets: [ExerciseSet]) -> (date: Date, volume: Double, maxWeight: Double)? {
+    static func lastCompletedDayInfo(from sets: [ExerciseSet]) -> (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int)? {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         
@@ -46,7 +46,15 @@ enum VolumeAnalytics {
         
         let volume = lastDaySets.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
         let maxWeight = lastDaySets.map { $0.weight }.max() ?? 0
-        return (lastDay, volume, maxWeight)
+        
+        // Find reps corresponding to max weight (most recent if multiple)
+        let maxWeightSet = lastDaySets
+            .filter { $0.weight == maxWeight }
+            .sorted { $0.timestamp > $1.timestamp }
+            .first
+        let maxWeightReps = maxWeightSet?.reps ?? 0
+        
+        return (lastDay, volume, maxWeight, maxWeightReps)
     }
     
     /// Calculate volume for a specific set of exercise sets

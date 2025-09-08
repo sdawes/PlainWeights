@@ -214,8 +214,23 @@ private struct VolumeMetricsView: View {
     let progressState: ProgressTracker.ProgressState
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Today's volume
+        VStack(alignment: .leading, spacing: 8) {
+            // Last lifted (heaviest weight + reps from last completed day)
+            if let lastInfo = progressState.lastCompletedDayInfo {
+                Text("Last lifted: \(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+            
+            // Last total volume
+            if let lastInfo = progressState.lastCompletedDayInfo {
+                Text("Last total: \(Formatters.formatVolume(lastInfo.volume)) kg")
+                    .font(.title2)
+                    .bold()
+                    .monospacedDigit()
+            }
+            
+            // Today's volume with progress percentage
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("Today: \(Formatters.formatVolume(progressState.todayVolume)) kg")
                     .font(.title2)
@@ -230,14 +245,6 @@ private struct VolumeMetricsView: View {
                         .accessibilityLabel("You have reached \(progressState.percentOfLast) percent of your last daily total")
                 }
             }
-            
-            // Delta chip
-            Text(progressState.deltaText)
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.secondary.opacity(0.2))
-                .clipShape(Capsule())
             
             // Progress bar (if applicable)
             if progressState.showProgressBar {
@@ -254,6 +261,14 @@ private struct VolumeMetricsView: View {
                 .frame(height: 4)
                 .clipShape(Capsule())
             }
+            
+            // Delta chip (comparison with last session)
+            Text(progressState.deltaText)
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.secondary.opacity(0.2))
+                .clipShape(Capsule())
         }
         .listRowSeparator(.hidden)
         .padding(.vertical, 10)

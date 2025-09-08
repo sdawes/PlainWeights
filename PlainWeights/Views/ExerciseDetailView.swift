@@ -203,56 +203,80 @@ private struct VolumeMetricsView: View {
     let progressState: ProgressTracker.ProgressState
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Last lifted (heaviest weight + reps from last completed day)
+        VStack(alignment: .leading, spacing: 12) {
+            // Last completed section
             if let lastInfo = progressState.lastCompletedDayInfo {
-                Text("Last lifted: \(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
-                    .font(.headline)
+                // Last completed header
+                Text("Last completed")
+                    .font(.caption)
                     .foregroundStyle(.secondary)
-            }
-            
-            // Last total volume
-            if let lastInfo = progressState.lastCompletedDayInfo {
-                Text("Last total: \(Formatters.formatVolume(lastInfo.volume)) kg")
-                    .font(.title2)
-                    .bold()
-                    .monospacedDigit()
-            }
-            
-            // Today's volume with progress percentage
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text("Today: \(Formatters.formatVolume(progressState.todayVolume)) kg")
-                    .font(.title2)
-                    .bold()
-                    .monospacedDigit()
-
-                if progressState.showProgressBar {
-                    Text("· \(progressState.percentOfLast)% of last")
+                    .textCase(.uppercase)
+                
+                // Weight/reps and total volume row
+                HStack {
+                    Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
                         .font(.headline)
                         .monospacedDigit()
-                        .foregroundStyle(progressState.barFillColor)
-                        .accessibilityLabel("You have reached \(progressState.percentOfLast) percent of your last daily total")
+                    
+                    Spacer()
+                    
+                    Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
+                        .font(.headline)
+                        .bold()
+                        .monospacedDigit()
                 }
             }
             
-            // Progress bar (if applicable)
-            if progressState.showProgressBar {
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(Color.secondary.opacity(0.2))
-                        Rectangle()
-                            .fill(progressState.barFillColor)
-                            .frame(width: geometry.size.width * progressState.progressBarRatio)
-                            .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
+            // Lifted today section
+            VStack(alignment: .leading, spacing: 6) {
+                // Lifted today header
+                Text("Lifted today")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                
+                // Today's volume and percentage row
+                HStack {
+                    Text("\(Formatters.formatVolume(progressState.todayVolume)) kg")
+                        .font(.title2)
+                        .bold()
+                        .monospacedDigit()
+                    
+                    Spacer()
+                    
+                    if progressState.showProgressBar {
+                        Text("\(progressState.percentOfLast)% of last")
+                            .font(.headline)
+                            .monospacedDigit()
+                            .foregroundStyle(progressState.barFillColor)
+                            .accessibilityLabel("You have reached \(progressState.percentOfLast) percent of your last daily total")
                     }
                 }
-                .frame(height: 4)
-                .clipShape(Capsule())
+                
+                // Progress bar (if applicable)
+                if progressState.showProgressBar {
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Rectangle()
+                                .fill(Color.secondary.opacity(0.2))
+                            Rectangle()
+                                .fill(progressState.barFillColor)
+                                .frame(width: geometry.size.width * progressState.progressBarRatio)
+                                .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
+                        }
+                    }
+                    .frame(height: 4)
+                    .clipShape(Capsule())
+                }
             }
         }
+        .padding(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+        )
         .listRowSeparator(.hidden)
-        .padding(.vertical, 10)
+        .padding(.vertical, 8)
     }
 }
 

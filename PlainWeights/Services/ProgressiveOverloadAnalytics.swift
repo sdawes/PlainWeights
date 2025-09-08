@@ -137,7 +137,9 @@ enum ProgressionResult {
     
     var targets: ProgressionTargets? {
         switch self {
-        case .valid(let targets), .unreliableData(_, let targets):
+        case .valid(let targets):
+            return targets
+        case .unreliableData(_, let targets):
             return targets
         case .insufficientData:
             return nil

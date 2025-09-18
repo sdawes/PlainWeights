@@ -10,6 +10,7 @@ import SwiftData
 
 struct ExerciseDetailView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
     let exercise: Exercise
     @Query private var sets: [ExerciseSet]
     
@@ -17,7 +18,8 @@ struct ExerciseDetailView: View {
     @State private var weightText = ""
     @State private var repsText = ""
     @State private var exerciseName: String = ""
-    
+    @State private var showingDeleteAlert = false
+
     @FocusState private var nameFocused: Bool
     @FocusState private var focusedField: Field?
     
@@ -91,22 +93,37 @@ struct ExerciseDetailView: View {
         .scrollContentBackground(.hidden)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if nameFocused { 
-                    Button("Done") { 
+                if nameFocused {
+                    Button("Done") {
                         nameFocused = false
                         updateExerciseName()
-                    } 
+                    }
+                } else {
+                    Button {
+                        showingDeleteAlert = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
                 }
             }
 
             ToolbarItem(placement: .keyboard) {
-                HStack { 
+                HStack {
                     Spacer()
-                    Button("Done") { 
-                        focusedField = nil 
-                    } 
+                    Button("Done") {
+                        focusedField = nil
+                    }
                 }
             }
+        }
+        .alert("Delete Exercise", isPresented: $showingDeleteAlert) {
+            Button("Delete", role: .destructive) {
+                deleteExercise()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This will permanently delete \"\(exercise.name)\" and all its sets. This action cannot be undone.")
         }
     }
 
@@ -194,6 +211,17 @@ struct ExerciseDetailView: View {
     
     private func isMostRecentSet(_ set: ExerciseSet, in sets: [ExerciseSet]) -> Bool {
         set.persistentModelID == sets.first?.persistentModelID
+    }
+
+    /// Delete the exercise and all its associated sets (cascade delete)
+    private func deleteExercise() {
+        context.delete(exercise)
+        do {
+            try context.save()
+            dismiss()
+        } catch {
+            print("Failed to delete exercise: \(error)")
+        }
     }
 }
 

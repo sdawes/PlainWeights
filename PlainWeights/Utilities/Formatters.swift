@@ -9,39 +9,56 @@ import Foundation
 
 /// Shared formatting utilities for the app
 enum Formatters {
-    
-    // MARK: - Volume Formatting
-    
-    /// Format volume with grouping separators (e.g., "1,250")
-    static func formatVolume(_ volume: Double) -> String {
+
+    // MARK: - Cached Formatters
+
+    /// Cached volume formatter for performance
+    private static let volumeFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.maximumFractionDigits = 0
         formatter.groupingSeparator = ","
-        return formatter.string(from: NSNumber(value: volume)) ?? "0"
-    }
-    
-    /// Format weight value, showing decimals only when needed (e.g., "100" or "100.5")
-    static func formatWeight(_ value: Double) -> String {
-        value.truncatingRemainder(dividingBy: 1) == 0 ? 
-            String(format: "%.0f", value) : 
-            String(format: "%.1f", value)
-    }
-    
-    // MARK: - Date Formatting
-    
-    /// Format date for delta display (e.g., "Thu 14 Aug")
-    static func formatDeltaDate(_ date: Date) -> String {
+        return formatter
+    }()
+
+    /// Cached date formatter for delta display
+    private static let deltaDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "E d MMM"  // e.g., "Thu 14 Aug"
-        return formatter.string(from: date)
-    }
-    
-    /// Format date for day headers (e.g., "Thursday, 14 August 2025")
-    static func formatDayHeader(_ date: Date) -> String {
+        return formatter
+    }()
+
+    /// Cached date formatter for day headers
+    private static let dayHeaderFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE, d MMMM yyyy"  // e.g., "Thursday, 14 August 2025"
-        return formatter.string(from: date)
+        return formatter
+    }()
+
+    // MARK: - Volume Formatting
+
+    /// Format volume with grouping separators (e.g., "1,250")
+    static func formatVolume(_ volume: Double) -> String {
+        volumeFormatter.string(from: NSNumber(value: volume)) ?? "0"
+    }
+
+    /// Format weight value, showing decimals only when needed (e.g., "100" or "100.5")
+    static func formatWeight(_ value: Double) -> String {
+        value.truncatingRemainder(dividingBy: 1) == 0 ?
+            String(format: "%.0f", value) :
+            String(format: "%.1f", value)
+    }
+
+    // MARK: - Date Formatting
+
+    /// Format date for delta display (e.g., "Thu 14 Aug")
+    static func formatDeltaDate(_ date: Date) -> String {
+        deltaDateFormatter.string(from: date)
+    }
+
+    /// Format date for day headers (e.g., "Thursday, 14 August 2025")
+    static func formatDayHeader(_ date: Date) -> String {
+        dayHeaderFormatter.string(from: date)
     }
     
     /// Format date for abbreviated day headers (e.g., "Thu 14 Aug")

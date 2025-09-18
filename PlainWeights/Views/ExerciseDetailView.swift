@@ -207,7 +207,10 @@ private struct VolumeMetricsView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Last session breakdown
             if let weightGroups = SessionBreakdown.getLastSessionBreakdown(from: sets) {
-                LastSessionView(weightGroups: weightGroups)
+                LastSessionView(
+                    weightGroups: weightGroups,
+                    totalVolume: progressState.lastCompletedDayInfo?.volume
+                )
             } else {
                 // Fallback when no session data available
                 Text("Baseline day")
@@ -384,7 +387,8 @@ private struct HistorySectionView: View {
 
 private struct LastSessionView: View {
     let weightGroups: [WeightGroup]
-    
+    let totalVolume: Double?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             // Last session header
@@ -392,12 +396,20 @@ private struct LastSessionView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
-            
+
             // Weight group breakdown (one line per weight)
             ForEach(weightGroups.indices, id: \.self) { index in
                 Text(weightGroups[index].description)
                     .font(.headline)
                     .monospacedDigit()
+            }
+
+            // Total volume for last session
+            if let totalVolume = totalVolume {
+                Text("Total: \(Formatters.formatVolume(totalVolume)) kg")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
             }
         }
     }

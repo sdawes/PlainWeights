@@ -137,13 +137,8 @@ class TestDataGenerator {
     static func generateTestDataSet4(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
         logger.info("Generating Test Data Set 4 (Live gym data)...")
-        
-        do {
-            clearAllData(modelContext: modelContext)
-            generateLiveData(modelContext: modelContext)
-        } catch {
-            logger.error("Failed to generate Live Data: \(error.localizedDescription)")
-        }
+        clearAllData(modelContext: modelContext)
+        generateLiveData(modelContext: modelContext)
     }
     
     static func clearAllData(modelContext: ModelContext) {
@@ -414,7 +409,7 @@ class TestDataGenerator {
             let setsCount = Int.random(in: 60...100)
             let baseWeight = getBaseWeight(for: exercise.category, index: index)
             
-            for setIndex in 0..<setsCount {
+            for _ in 0..<setsCount {
                 let variation = Double.random(in: 0.8...1.2)
                 let weight = baseWeight * variation
                 let reps = Int.random(in: 6...15)
@@ -596,8 +591,6 @@ class TestDataGenerator {
     }
     
     private static func generateLiveWorkoutSessions(exercises: [Exercise], baseDate: Date, modelContext: ModelContext) {
-        let calendar = Calendar.current
-        
         // Aug 17, 2025 - Back-focused session
         generateLiveWorkout1(exercises: exercises, baseDate: baseDate, modelContext: modelContext)
         
@@ -625,8 +618,6 @@ class TestDataGenerator {
     
     // Aug 17, 2025 - Back-focused session
     private static func generateLiveWorkout1(exercises: [Exercise], baseDate: Date, modelContext: ModelContext) {
-        let calendar = Calendar.current
-        
         // Deadlifts (trap bar) - exercises[0]
         generateLiveSet(exercise: exercises[0], date: dateFrom(baseDate, hour: 15, minute: 13, seconds: 14), weight: 40.0, reps: 10, modelContext: modelContext)
         generateLiveSet(exercise: exercises[0], date: dateFrom(baseDate, hour: 15, minute: 13, seconds: 14), weight: 40.0, reps: 10, modelContext: modelContext)
@@ -948,7 +939,7 @@ class TestDataGenerator {
     
     private static func dateFrom(_ baseDate: Date, hour: Int, minute: Int, seconds: Int) -> Date {
         let calendar = Calendar.current
-        var date = calendar.date(bySettingHour: hour, minute: minute, second: seconds, of: baseDate) ?? baseDate
+        let date = calendar.date(bySettingHour: hour, minute: minute, second: seconds, of: baseDate) ?? baseDate
         return date
     }
     

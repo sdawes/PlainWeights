@@ -21,44 +21,86 @@ struct ExerciseListView: View {
 
 struct FilteredExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var exercises: [Exercise]
+    @Query private var sets: [ExerciseSet]
     @Binding var showingAddExercise: Bool
     let searchText: String
-    
+
     init(searchText: String, showingAddExercise: Binding<Bool>) {
         self.searchText = searchText
         self._showingAddExercise = showingAddExercise
-        
-        // Dynamic query based on search text
+
+        // Query recent sets (30 days) with search filtering in predicate
+        let calendar = Calendar.current
+        let startDate = calendar.date(byAdding: .day, value: -30, to: Date()) ?? Date.distantPast
+
         if searchText.isEmpty {
-            _exercises = Query(
-                sort: [SortDescriptor(\Exercise.lastUpdated, order: .reverse)]
+            _sets = Query(
+                filter: #Predicate<ExerciseSet> { $0.timestamp >= startDate },
+                sort: [SortDescriptor(\.timestamp, order: .reverse)]
             )
         } else {
-            _exercises = Query(
-                filter: #Predicate<Exercise> { exercise in
-                    exercise.name.localizedStandardContains(searchText) ||
-                    exercise.category.localizedStandardContains(searchText)
+            _sets = Query(
+                filter: #Predicate<ExerciseSet> { set in
+                    set.timestamp >= startDate &&
+                    (
+                        (set.exercise?.name.localizedStandardContains(searchText) ?? false) ||
+                        (set.exercise?.category.localizedStandardContains(searchText) ?? false)
+                    )
                 },
-                sort: [SortDescriptor(\Exercise.lastUpdated, order: .reverse)]
+                sort: [SortDescriptor(\.timestamp, order: .reverse)]
             )
         }
     }
 
+    // Compute workout journal groups using service
+    private var workoutDays: [ExerciseDataGrouper.WorkoutDay] {
+        ExerciseDataGrouper.createWorkoutJournal(from: sets)
+    }
+
     var body: some View {
         List {
-            ForEach(exercises) { exercise in
-                NavigationLink(value: exercise) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(exercise.name).font(.headline)
-                        Text(exercise.category).font(.subheadline).foregroundStyle(.secondary)
-                        Text(exercise.lastUpdated, format: .relative(presentation: .named))
-                            .font(.caption).foregroundStyle(.tertiary)
+            if sets.isEmpty {
+                Text(searchText.isEmpty ? "No recent workouts" : "No matching exercises found")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(workoutDays, id: \.date) { day in
+                    Section {
+                        ForEach(day.exercises) { exercise in
+                            NavigationLink(value: exercise.exercise) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(exercise.exercise.name)
+                                        .font(.headline)
+                                    Text(exercise.exercise.category)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                    HStack {
+                                        Text("\(exercise.setCount) sets")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                        Text("·")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                        Text("\(Formatters.formatVolume(exercise.volume)) kg")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                    } header: {
+                        HStack {
+                            Text(Formatters.formatWorkoutDayLabel(day.date))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text("\(day.exerciseCount) exercises · \(Formatters.formatVolume(day.totalVolume)) kg")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
                     }
-                    .padding(.vertical, 4)
                 }
             }
-            .onDelete(perform: deleteExercises)
         }
         .navigationTitle("Exercises")
         .toolbar {
@@ -98,12 +140,6 @@ struct FilteredExerciseListView: View {
         .sheet(isPresented: $showingAddExercise) { AddExerciseView() }
         .navigationDestination(for: Exercise.self) { exercise in
             ExerciseDetailView(exercise: exercise)
-        }
-    }
-    
-    private func deleteExercises(at offsets: IndexSet) {
-        offsets.forEach { index in
-            modelContext.delete(exercises[index])
         }
     }
 }

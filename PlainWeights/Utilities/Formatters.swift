@@ -48,6 +48,20 @@ enum Formatters {
     static func formatAbbreviatedDayHeader(_ date: Date) -> String {
         date.formatted(Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated))
     }
+
+    /// Format date for workout journal with Today/Yesterday shortcuts
+    static func formatWorkoutDayLabel(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        if date == today {
+            return "Today"
+        } else if date == calendar.date(byAdding: .day, value: -1, to: today) {
+            return "Yesterday"
+        } else {
+            return formatAbbreviatedDayHeader(date)
+        }
+    }
     
     // MARK: - Progress Text Formatting
     

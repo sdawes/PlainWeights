@@ -79,7 +79,7 @@ enum ExerciseDataGrouper {
             set.persistentModelID == lastSetID
         }
     }
-    
+
     /// Create structured day groups with metadata
     static func createDayGroups(from sets: [ExerciseSet]) -> [DayGroup] {
         let dayGroups = groupSetsByDay(sets)
@@ -87,6 +87,79 @@ enum ExerciseDataGrouper {
             // Defensive sorting: ensure within-group ordering regardless of input
             let sortedSets = daySets.sorted { $0.timestamp > $1.timestamp }
             return DayGroup(date: date, sets: sortedSets)
+        }
+    }
+
+    // MARK: - Workout Journal Grouping
+
+    /// Represents a single exercise's work within a day for the workout journal
+    struct WorkoutExercise: Identifiable {
+        let id: PersistentIdentifier
+        let exercise: Exercise
+        let sets: [ExerciseSet]
+        let setCount: Int
+        let volume: Double
+
+        init?(from sets: [ExerciseSet]) {
+            guard let exercise = sets.first?.exercise else { return nil }
+
+            self.id = exercise.persistentModelID
+            self.exercise = exercise
+            self.sets = sets.sorted { $0.timestamp > $1.timestamp }
+            self.setCount = sets.count
+            self.volume = VolumeAnalytics.calculateVolume(for: sets)
+        }
+    }
+
+    /// Represents a workout day for the journal view
+    struct WorkoutDay {
+        let date: Date
+        let exercises: [WorkoutExercise]
+        let totalVolume: Double
+        let exerciseCount: Int
+        let totalSets: Int
+    }
+
+    /// Create workout journal groups from sets
+    /// Groups sets by day, then by exercise within each day
+    /// - Parameter sets: Exercise sets to group (should be pre-sorted newest first)
+    /// - Returns: Array of WorkoutDay objects, newest day first
+    static func createWorkoutJournal(from sets: [ExerciseSet]) -> [WorkoutDay] {
+        // First group by day
+        let dayGroups = createDayGroups(from: sets)
+
+        // Transform each day into a WorkoutDay
+        return dayGroups.map { dayGroup in
+            // Group this day's sets by exercise
+            let setsByExercise = Dictionary(grouping: dayGroup.sets) {
+                $0.exercise?.persistentModelID
+            }
+
+            // Create WorkoutExercise for each exercise
+            var exercises: [WorkoutExercise] = []
+            exercises.reserveCapacity(setsByExercise.count)
+
+            for (_, exerciseSets) in setsByExercise {
+                if let workoutExercise = WorkoutExercise(from: exerciseSets) {
+                    exercises.append(workoutExercise)
+                }
+            }
+
+            // Sort exercises: most recent set first, then alphabetically
+            exercises.sort { a, b in
+                let aTime = a.sets.first?.timestamp ?? .distantPast
+                let bTime = b.sets.first?.timestamp ?? .distantPast
+                if aTime != bTime { return aTime > bTime }
+                return a.exercise.name.localizedCaseInsensitiveCompare(b.exercise.name) == .orderedAscending
+            }
+
+            return WorkoutDay(
+                date: dayGroup.date,
+                exercises: exercises,
+                totalVolume: dayGroup.volume,
+                exerciseCount: exercises.count,
+                totalSets: dayGroup.sets.count
+            )
         }
     }
 }

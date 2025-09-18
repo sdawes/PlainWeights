@@ -233,69 +233,47 @@ private struct VolumeMetricsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Last session breakdown
-            if let weightGroups = SessionBreakdown.getLastSessionBreakdown(from: sets) {
-                LastSessionView(
-                    weightGroups: weightGroups,
-                    totalVolume: progressState.lastCompletedDayInfo?.volume
-                )
-            } else {
-                // Fallback when no session data available
-                Text("Baseline day")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            // Lifted today section
-            VStack(alignment: .leading, spacing: 6) {
-                // Lifted today header
-                Text("Lifted today")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                
-                // Today's volume and percentage row
-                HStack {
-                    Text("\(Formatters.formatVolume(progressState.todayVolume)) kg")
-                        .font(.headline)
-                        .bold()
-                        .monospacedDigit()
-                    
-                    Spacer()
-                    
-                    if progressState.lastCompletedDayInfo != nil {
-                        Text("\(progressState.percentOfLast)% of last")
-                            .font(.headline)
-                            .monospacedDigit()
-                            .foregroundStyle(progressState.barFillColor)
-                            .accessibilityLabel("You have reached \(progressState.percentOfLast) percent of your last daily total")
+            // Max weight from last session
+            if let maxWeightInfo = VolumeAnalytics.getMaxWeightFromLastDay(from: sets) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Last max weight")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+
+                    HStack {
+                        Text("\(Formatters.formatWeight(maxWeightInfo.weight)) kg")
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundStyle(.primary)
+
+                        Spacer()
+
+                        if !maxWeightInfo.allReps.isEmpty {
+                            let repsText = maxWeightInfo.allReps.map(String.init).joined(separator: ", ")
+                            Text("\(repsText) reps")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }
-            
-            // Progress bar with enhanced spacing (always visible)
-            VStack(spacing: 0) {
-                Spacer()
-                    .frame(height: 12)
-                
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Always show background track
-                        Rectangle()
-                            .fill(Color.secondary.opacity(0.2))
-                        // Show progress fill (0% when no last completed data)
-                        Rectangle()
-                            .fill(progressState.lastCompletedDayInfo != nil ? progressState.barFillColor : Color.clear)
-                            .frame(width: geometry.size.width * (progressState.lastCompletedDayInfo != nil ? progressState.progressBarRatio : 0))
-                            .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
-                    }
+
+            // Total volume from last session
+            if let totalVolume = progressState.lastCompletedDayInfo?.volume {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Last session total")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+
+                    Text("\(Formatters.formatVolume(totalVolume)) kg")
+                        .font(.headline.bold())
+                        .foregroundStyle(.primary)
                 }
-                .frame(height: 4)
-                .clipShape(Capsule())
-                
-                Spacer()
-                    .frame(height: 12)
             }
+
+            // Today's progress section
+            TodayProgressDisplay(progressState: progressState)
         }
         .padding(16)
         .overlay(
@@ -440,5 +418,47 @@ private struct LastSessionView: View {
                     .padding(.top, 4)
             }
         }
+    }
+}
+
+
+
+// MARK: - Today Progress Display
+
+private struct TodayProgressDisplay: View {
+    let progressState: ProgressTracker.ProgressState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            Text("Lifted today")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+
+            // Volume and percentage row
+            HStack {
+                Text("\(Formatters.formatVolume(progressState.todayVolume)) kg")
+                    .font(.headline.bold())
+                    .foregroundStyle(.primary)
+
+                Spacer()
+
+                if progressState.lastCompletedDayInfo != nil {
+                    Text("\(progressState.percentOfLast)% of last")
+                        .font(.headline)
+                        .foregroundStyle(progressState.barFillColor)
+                }
+            }
+
+            // Modern progress bar
+            if progressState.lastCompletedDayInfo != nil {
+                ProgressView(value: Double(progressState.progressBarRatio))
+                    .progressViewStyle(LinearProgressViewStyle(tint: progressState.barFillColor))
+                    .scaleEffect(x: 1, y: 1.5, anchor: .center)
+                    .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

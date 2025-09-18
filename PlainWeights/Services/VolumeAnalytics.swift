@@ -13,12 +13,12 @@ enum VolumeAnalytics {
     
     // MARK: - Volume Calculations
     
-    /// Calculate total volume for sets from today
+    /// Calculate total volume for sets from today (excludes warm-up sets)
     static func todayVolume(from sets: [ExerciseSet]) -> Double {
         let todaySets = todaySets(from: sets)
-        return todaySets.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
+        return todaySets.filter { !$0.isWarmUp }.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
     }
-    
+
     /// Get all sets from today
     static func todaySets(from sets: [ExerciseSet]) -> [ExerciseSet] {
         let calendar = Calendar.current
@@ -40,10 +40,14 @@ enum VolumeAnalytics {
         let pastDays = setsByDay.keys.filter { $0 < today }.sorted(by: >)
         
         guard let lastDay = pastDays.first,
-              let lastDaySets = setsByDay[lastDay] else {
+              let allLastDaySets = setsByDay[lastDay] else {
             return nil
         }
-        
+
+        // Filter out warm-up sets for calculations
+        let lastDaySets = allLastDaySets.filter { !$0.isWarmUp }
+        guard !lastDaySets.isEmpty else { return nil }
+
         let volume = lastDaySets.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
         let maxWeight = lastDaySets.map { $0.weight }.max() ?? 0
         
@@ -73,9 +77,13 @@ enum VolumeAnalytics {
         let pastDays = setsByDay.keys.filter { $0 < today }.sorted(by: >)
 
         guard let lastDay = pastDays.first,
-              let lastDaySets = setsByDay[lastDay] else {
+              let allLastDaySets = setsByDay[lastDay] else {
             return nil
         }
+
+        // Filter out warm-up sets for calculations
+        let lastDaySets = allLastDaySets.filter { !$0.isWarmUp }
+        guard !lastDaySets.isEmpty else { return nil }
 
         // Find max weight from last day
         let maxWeight = lastDaySets.map { $0.weight }.max() ?? 0
@@ -89,9 +97,9 @@ enum VolumeAnalytics {
         return (maxWeight, maxWeightReps)
     }
 
-    /// Calculate volume for a specific set of exercise sets
+    /// Calculate volume for a specific set of exercise sets (excludes warm-up sets)
     static func calculateVolume(for sets: [ExerciseSet]) -> Double {
-        sets.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
+        sets.filter { !$0.isWarmUp }.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
     }
     
     // MARK: - Progress Calculations

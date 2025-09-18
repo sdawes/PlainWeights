@@ -18,6 +18,7 @@ struct ExerciseDetailView: View {
     @State private var weightText = ""
     @State private var repsText = ""
     @State private var exerciseName: String = ""
+    @State private var isWarmUpSet = false
     @State private var showingDeleteAlert = false
 
     @FocusState private var nameFocused: Bool
@@ -61,6 +62,7 @@ struct ExerciseDetailView: View {
             QuickAddView(
                 weightText: $weightText,
                 repsText: $repsText,
+                isWarmUpSet: $isWarmUpSet,
                 focusedField: $focusedField,
                 canAddSet: canAddSet,
                 addSet: addSet
@@ -146,8 +148,8 @@ struct ExerciseDetailView: View {
             return 
         }
         
-        print("Adding set: \(weight)kg x \(reps) reps")
-        let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
+        print("Adding set: \(weight)kg x \(reps) reps \(isWarmUpSet ? "(warm-up)" : "")")
+        let set = ExerciseSet(weight: weight, reps: reps, isWarmUp: isWarmUpSet, exercise: exercise)
         context.insert(set)
         
         do {
@@ -203,6 +205,7 @@ struct ExerciseDetailView: View {
     private func clearForm() {
         weightText = ""
         repsText = ""
+        isWarmUpSet = false
     }
     
     private var canAddSet: Bool {
@@ -290,32 +293,42 @@ private struct VolumeMetricsView: View {
 private struct QuickAddView: View {
     @Binding var weightText: String
     @Binding var repsText: String
+    @Binding var isWarmUpSet: Bool
     @FocusState.Binding var focusedField: ExerciseDetailView.Field?
     let canAddSet: Bool
     let addSet: () -> Void
-    
+
     var body: some View {
-        HStack(spacing: 12) {
-            TextField("Weight", text: $weightText)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(.roundedBorder)
-                .focused($focusedField, equals: .weight)
-                .frame(maxWidth: .infinity)
-            
-            TextField("Reps", text: $repsText)
-                .keyboardType(.numberPad)
-                .textFieldStyle(.roundedBorder)
-                .focused($focusedField, equals: .reps)
-                .frame(maxWidth: .infinity)
-            
-            Button(action: addSet) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.tint)
+        VStack(spacing: 8) {
+            HStack(spacing: 12) {
+                TextField("Weight", text: $weightText)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focusedField, equals: .weight)
+                    .frame(maxWidth: .infinity)
+
+                TextField("Reps", text: $repsText)
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focusedField, equals: .reps)
+                    .frame(maxWidth: .infinity)
+
+                Button(action: addSet) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.tint)
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .disabled(!canAddSet)
             }
-            .buttonStyle(.plain)
-            .contentShape(Rectangle())
-            .disabled(!canAddSet)
+
+            // Warm-up toggle
+            HStack {
+                Toggle("Warm-up set", isOn: $isWarmUpSet)
+                    .font(.caption)
+                Spacer()
+            }
         }
         .listRowSeparator(.hidden)
         .padding(.vertical, 8)
@@ -336,11 +349,25 @@ private struct HistorySectionView: View {
             Section {
                 ForEach(dayGroup.sets, id: \.persistentModelID) { set in
                     HStack {
-                        Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
-                            .monospacedDigit()
-                        
+                        HStack(spacing: 6) {
+                            Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
+                                .monospacedDigit()
+                                .foregroundStyle(set.isWarmUp ? .secondary : .primary)
+
+                            // Warm-up indicator
+                            if set.isWarmUp {
+                                Text("W")
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                                    .frame(width: 16, height: 16)
+                                    .background(Color.orange)
+                                    .clipShape(Circle())
+                            }
+                        }
+
                         Spacer()
-                        
+
                         HStack(spacing: 8) {
                             Text(set.timestamp.formatted(
                                 Date.FormatStyle()

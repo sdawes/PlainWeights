@@ -211,9 +211,10 @@ struct ExerciseDetailView: View {
 
         do {
             try context.save()
-            print("Toggled warm-up status for set: \\(set.weight)kg x \\(set.reps) - now \\(set.isWarmUp ? "warm-up" : "working set")")
+            let status = set.isWarmUp ? "warm-up" : "working set"
+            print("Toggled warm-up status for set: \(set.weight)kg x \(set.reps) - now \(status)")
         } catch {
-            print("Error toggling warm-up status: \\(error)")
+            print("Error toggling warm-up status: \(error)")
         }
     }
 
@@ -374,24 +375,22 @@ private struct HistorySectionView: View {
                                 toggleWarmUpStatus(set)
                             } label: {
                                 Image(systemName: set.isWarmUp ? "flame.circle.fill" : "flame.circle")
-                                    .font(.title3)
+                                    .font(.callout)
                                     .foregroundStyle(set.isWarmUp ? .orange : .secondary)
                             }
                             .buttonStyle(.plain)
                             .contentShape(Rectangle())
 
-                            // Add repeat button only for most recent set overall
-                            if isMostRecentSet(set, sets) {
-                                Button {
-                                    repeatSet(set)
-                                } label: {
-                                    Image(systemName: "arrow.clockwise.circle.fill")
-                                        .font(.title3)
-                                        .foregroundStyle(.tint)
-                                }
-                                .buttonStyle(.plain)
-                                .contentShape(Rectangle())
+                            // Repeat button for any set
+                            Button {
+                                repeatSet(set)
+                            } label: {
+                                Image(systemName: "arrow.clockwise.circle")
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
                             }
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
                         }
                     }
                     .listRowSeparator(dayGroup.isFirst(set) ? .hidden : .visible, edges: .top)

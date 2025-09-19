@@ -244,9 +244,9 @@ class TestDataGenerator {
                               modelContext: modelContext)
         
         generateWorkoutSession(date: dateFrom(startDate, daysOffset: 10, hour: 18, minute: 30),
-                              exercises: [exercises[0], exercises[1], exercises[2], exercises[12], exercises[13], exercises[17], exercises[18]],
-                              weights: [82.5, 37.5, 22, 52.5, 12, 0, 32],
-                              reps: [[8,8,8,8], [10,10,10,9], [12,12,12], [8,8,7,7], [12,12,12], [9,8,8], [12,12,12]],
+                              exercises: [exercises[0], exercises[1], exercises[2], exercises[3], exercises[12], exercises[13], exercises[17], exercises[18]],
+                              weights: [82.5, 37.5, 22, 0, 52.5, 12, 2.5, 32],
+                              reps: [[8,8,8,8], [10,10,10,9], [12,12,12], [15,12,10], [8,8,7,7], [12,12,12], [8,7,6], [12,12,12]],
                               modelContext: modelContext)
         
         generateWorkoutSession(date: dateFrom(startDate, daysOffset: 12, hour: 7, minute: 0),
@@ -281,9 +281,9 @@ class TestDataGenerator {
                               modelContext: modelContext)
         
         generateWorkoutSession(date: dateFrom(startDate, daysOffset: 20, hour: 10, minute: 0),
-                              exercises: [exercises[0], exercises[1], exercises[2], exercises[12], exercises[13], exercises[17], exercises[18]],
-                              weights: [85, 40, 24, 55, 14, 0, 34],
-                              reps: [[8,8,8,8], [10,10,10,10], [12,12,12], [8,8,8,7], [12,12,12], [10,9,9], [12,12,12]],
+                              exercises: [exercises[0], exercises[1], exercises[2], exercises[3], exercises[12], exercises[13], exercises[17], exercises[18]],
+                              weights: [85, 40, 24, 2.5, 55, 14, 5, 34],
+                              reps: [[8,8,8,8], [10,10,10,10], [12,12,12], [12,10,8], [8,8,8,7], [12,12,12], [6,6,5], [12,12,12]],
                               modelContext: modelContext)
         
         // Week 4
@@ -469,13 +469,15 @@ class TestDataGenerator {
         let calendar = Calendar.current
         let startDate = calendar.date(byAdding: .weekOfYear, value: -2, to: Date()) ?? Date()
         
-        // Create 5 basic exercises
+        // Create 7 basic exercises (including bodyweight)
         let exerciseData: [(String, String)] = [
             ("Bench Press", "Chest"),
             ("Squat", "Legs"),
             ("Deadlift", "Back"),
             ("Overhead Press", "Shoulders"),
-            ("Pull-ups", "Back")
+            ("Pull-ups", "Back"),
+            ("Push-ups", "Chest"),
+            ("Tricep Dips", "Arms")
         ]
         
         var exercises: [Exercise] = []
@@ -487,37 +489,37 @@ class TestDataGenerator {
         
         // Week 1 - Monday
         generateWorkoutSession(date: dateFrom(startDate, daysOffset: 0, hour: 8, minute: 0),
-                              exercises: [exercises[0], exercises[3]],
-                              weights: [60, 40],
-                              reps: [[10,10,10], [10,10,10]],
+                              exercises: [exercises[0], exercises[3], exercises[5]],
+                              weights: [60, 40, 0],
+                              reps: [[10,10,10], [10,10,10], [20,15,12]],
                               modelContext: modelContext)
         
         // Week 1 - Wednesday
         generateWorkoutSession(date: dateFrom(startDate, daysOffset: 2, hour: 8, minute: 0),
-                              exercises: [exercises[1], exercises[2]],
-                              weights: [80, 100],
-                              reps: [[8,8,8], [5,5,5]],
+                              exercises: [exercises[1], exercises[2], exercises[6]],
+                              weights: [80, 100, 0],
+                              reps: [[8,8,8], [5,5,5], [12,10,8]],
                               modelContext: modelContext)
         
         // Week 1 - Friday
         generateWorkoutSession(date: dateFrom(startDate, daysOffset: 4, hour: 8, minute: 0),
                               exercises: [exercises[4], exercises[0]],
                               weights: [0, 65],
-                              reps: [[6,5,5], [8,8,8]],
+                              reps: [[8,6,5], [8,8,8]],
                               modelContext: modelContext)
         
         // Week 2 - Monday
         generateWorkoutSession(date: dateFrom(startDate, daysOffset: 7, hour: 8, minute: 0),
-                              exercises: [exercises[1], exercises[3]],
-                              weights: [85, 42.5],
-                              reps: [[8,8,8], [10,10,10]],
+                              exercises: [exercises[1], exercises[3], exercises[5]],
+                              weights: [85, 42.5, 2.5],
+                              reps: [[8,8,8], [10,10,10], [15,12,10]],
                               modelContext: modelContext)
         
         // Week 2 - Wednesday
         generateWorkoutSession(date: dateFrom(startDate, daysOffset: 9, hour: 8, minute: 0),
-                              exercises: [exercises[2], exercises[4]],
-                              weights: [105, 0],
-                              reps: [[5,5,5], [7,6,5]],
+                              exercises: [exercises[2], exercises[4], exercises[6]],
+                              weights: [105, 2.5, 5],
+                              reps: [[5,5,5], [7,6,5], [10,8,6]],
                               modelContext: modelContext)
         
         // Week 2 - Friday
@@ -881,8 +883,9 @@ class TestDataGenerator {
         generateLiveSet(exercise: exercises[14], date: dateFrom(workoutDate, hour: 16, minute: 44, seconds: 0), weight: 15.0, reps: 11, modelContext: modelContext)
         generateLiveSet(exercise: exercises[14], date: dateFrom(workoutDate, hour: 16, minute: 46, seconds: 0), weight: 15.0, reps: 10, modelContext: modelContext)
         
-        // Tricep dips - exercises[15]
-        generateLiveSet(exercise: exercises[15], date: dateFrom(workoutDate, hour: 16, minute: 48, seconds: 0), weight: 5.0, reps: 8, modelContext: modelContext)
+        // Tricep dips - exercises[15] (bodyweight to weighted progression)
+        generateLiveSet(exercise: exercises[15], date: dateFrom(workoutDate, hour: 16, minute: 46, seconds: 0), weight: 0.0, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[15], date: dateFrom(workoutDate, hour: 16, minute: 48, seconds: 0), weight: 0.0, reps: 10, modelContext: modelContext)
         generateLiveSet(exercise: exercises[15], date: dateFrom(workoutDate, hour: 16, minute: 50, seconds: 0), weight: 5.0, reps: 8, modelContext: modelContext)
         generateLiveSet(exercise: exercises[15], date: dateFrom(workoutDate, hour: 16, minute: 53, seconds: 0), weight: 5.0, reps: 7, modelContext: modelContext)
         generateLiveSet(exercise: exercises[15], date: dateFrom(workoutDate, hour: 16, minute: 56, seconds: 0), weight: 5.0, reps: 6, modelContext: modelContext)
@@ -898,8 +901,10 @@ class TestDataGenerator {
     private static func generateLiveWorkout8(exercises: [Exercise], baseDate: Date, modelContext: ModelContext) {
         let workoutDate = Calendar.current.date(byAdding: .day, value: 11, to: baseDate) ?? baseDate
         
-        // Pull ups (proper) - exercises[26]
-        generateLiveSet(exercise: exercises[26], date: dateFrom(workoutDate, hour: 14, minute: 50, seconds: 0), weight: 1.0, reps: 3, modelContext: modelContext)
+        // Pull ups (proper) - exercises[26] (bodyweight)
+        generateLiveSet(exercise: exercises[26], date: dateFrom(workoutDate, hour: 14, minute: 50, seconds: 0), weight: 0.0, reps: 5, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[26], date: dateFrom(workoutDate, hour: 14, minute: 52, seconds: 0), weight: 0.0, reps: 4, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[26], date: dateFrom(workoutDate, hour: 14, minute: 54, seconds: 0), weight: 0.0, reps: 3, modelContext: modelContext)
         generateLiveSet(exercise: exercises[26], date: dateFrom(workoutDate, hour: 14, minute: 52, seconds: 0), weight: 1.0, reps: 4, modelContext: modelContext)
         generateLiveSet(exercise: exercises[26], date: dateFrom(workoutDate, hour: 14, minute: 54, seconds: 0), weight: 1.0, reps: 3, modelContext: modelContext)
         generateLiveSet(exercise: exercises[26], date: dateFrom(workoutDate, hour: 14, minute: 55, seconds: 0), weight: 1.0, reps: 4, modelContext: modelContext)
@@ -930,6 +935,12 @@ class TestDataGenerator {
         generateLiveSet(exercise: exercises[30], date: dateFrom(workoutDate, hour: 15, minute: 39, seconds: 0), weight: 10.0, reps: 15, modelContext: modelContext)
         generateLiveSet(exercise: exercises[30], date: dateFrom(workoutDate, hour: 15, minute: 41, seconds: 0), weight: 10.0, reps: 12, modelContext: modelContext)
         generateLiveSet(exercise: exercises[30], date: dateFrom(workoutDate, hour: 15, minute: 44, seconds: 0), weight: 10.0, reps: 11, modelContext: modelContext)
+
+        // Press ups - exercises[25] (bodyweight progression)
+        generateLiveSet(exercise: exercises[25], date: dateFrom(workoutDate, hour: 15, minute: 46, seconds: 0), weight: 0.0, reps: 20, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[25], date: dateFrom(workoutDate, hour: 15, minute: 48, seconds: 0), weight: 0.0, reps: 18, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[25], date: dateFrom(workoutDate, hour: 15, minute: 50, seconds: 0), weight: 2.5, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[25], date: dateFrom(workoutDate, hour: 15, minute: 52, seconds: 0), weight: 2.5, reps: 10, modelContext: modelContext)
     }
     
     private static func generateLiveSet(exercise: Exercise, date: Date, weight: Double, reps: Int, modelContext: ModelContext) {

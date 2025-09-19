@@ -10,13 +10,20 @@ import SwiftData
 
 /// Service for calculating volume-related metrics for exercises
 enum VolumeAnalytics {
-    
+
     // MARK: - Volume Calculations
+
+    /// Get effective load for volume calculations (treats 0kg as 1kg to maintain unit consistency)
+    /// - Parameter weight: The weight value from the exercise set
+    /// - Returns: Effective load in kg (1.0 for bodyweight, actual weight otherwise)
+    private static func effectiveLoad(for weight: Double) -> Double {
+        return weight == 0 ? 1.0 : weight
+    }
     
     /// Calculate total volume for sets from today (excludes warm-up sets)
     static func todayVolume(from sets: [ExerciseSet]) -> Double {
         let todaySets = todaySets(from: sets)
-        return todaySets.filter { !$0.isWarmUp }.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
+        return todaySets.filter { !$0.isWarmUp }.reduce(0) { $0 + effectiveLoad(for: $1.weight) * Double($1.reps) }
     }
 
     /// Get all sets from today
@@ -48,7 +55,7 @@ enum VolumeAnalytics {
         let lastDaySets = allLastDaySets.filter { !$0.isWarmUp }
         guard !lastDaySets.isEmpty else { return nil }
 
-        let volume = lastDaySets.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
+        let volume = lastDaySets.reduce(0) { $0 + effectiveLoad(for: $1.weight) * Double($1.reps) }
         let maxWeight = lastDaySets.map { $0.weight }.max() ?? 0
         
         // Find reps corresponding to max weight (most recent if multiple)
@@ -133,9 +140,48 @@ enum VolumeAnalytics {
         return (maxWeight, maxReps)
     }
 
+    /// Get max weight, best reps at max weight, and total set count from last completed day
+    /// - Parameter sets: Exercise sets to analyze
+    /// - Returns: Tuple with max weight, highest rep count at that weight, and total sets, or nil if no last day
+    static func getMaxWeightAndSessionStats(from sets: [ExerciseSet]) -> (weight: Double, maxReps: Int, totalSets: Int)? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        // Group sets by day
+        let setsByDay = Dictionary(grouping: sets) { set in
+            calendar.startOfDay(for: set.timestamp)
+        }
+
+        // Find the most recent day before today with sets
+        let pastDays = setsByDay.keys.filter { $0 < today }.sorted(by: >)
+
+        guard let lastDay = pastDays.first,
+              let allLastDaySets = setsByDay[lastDay] else {
+            return nil
+        }
+
+        // Filter out warm-up sets for calculations
+        let lastDaySets = allLastDaySets.filter { !$0.isWarmUp }
+        guard !lastDaySets.isEmpty else { return nil }
+
+        // Find max weight from last day
+        let maxWeight = lastDaySets.map { $0.weight }.max() ?? 0
+
+        // Get the highest rep count achieved at max weight
+        let maxReps = lastDaySets
+            .filter { $0.weight == maxWeight }
+            .map { $0.reps }
+            .max() ?? 0
+
+        // Count total working sets in that session
+        let totalSets = lastDaySets.count
+
+        return (maxWeight, maxReps, totalSets)
+    }
+
     /// Calculate volume for a specific set of exercise sets (excludes warm-up sets)
     static func calculateVolume(for sets: [ExerciseSet]) -> Double {
-        sets.filter { !$0.isWarmUp }.reduce(0) { $0 + ($1.weight * Double($1.reps)) }
+        sets.filter { !$0.isWarmUp }.reduce(0) { $0 + effectiveLoad(for: $1.weight) * Double($1.reps) }
     }
     
     // MARK: - Progress Calculations

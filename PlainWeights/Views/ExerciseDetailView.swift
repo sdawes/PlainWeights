@@ -141,7 +141,7 @@ struct ExerciseDetailView: View {
     private func addSet() {
         guard let weight = Double(weightText),
               let reps = Int(repsText),
-              weight > 0,
+              weight >= 0,
               reps > 0 else { 
             print("AddSet failed: Invalid input - weight: \(weightText), reps: \(repsText)")
             return 
@@ -248,7 +248,7 @@ private struct VolumeMetricsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Row 1: Last session metrics combined
-            if let maxPerformance = VolumeAnalytics.getMaxRepsAtMaxWeight(from: sets),
+            if let maxStats = VolumeAnalytics.getMaxWeightAndSessionStats(from: sets),
                let totalVolume = progressState.lastCompletedDayInfo?.volume {
                 HStack(alignment: .top) {
                     // Left: Max weight with reps underneath
@@ -258,11 +258,11 @@ private struct VolumeMetricsView: View {
                             .foregroundStyle(.secondary)
                             .textCase(.uppercase)
 
-                        Text("\(Formatters.formatWeight(maxPerformance.weight)) kg")
+                        Text("\(Formatters.formatWeight(maxStats.weight)) kg")
                             .font(.system(size: 32, weight: .bold))
                             .foregroundStyle(.primary)
 
-                        Text("\(maxPerformance.maxReps) reps")
+                        Text("\(maxStats.maxReps) reps • \(maxStats.totalSets) sets")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

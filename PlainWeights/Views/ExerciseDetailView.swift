@@ -204,6 +204,7 @@ struct ExerciseDetailView: View {
     private func clearForm() {
         weightText = ""
         repsText = ""
+        focusedField = nil
     }
 
     private func toggleWarmUpStatus(_ set: ExerciseSet) {

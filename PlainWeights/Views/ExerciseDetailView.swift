@@ -247,46 +247,43 @@ private struct VolumeMetricsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Max weight from last session
-            if let maxWeightInfo = VolumeAnalytics.getMaxWeightFromLastDay(from: sets) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Last max weight")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
+            // Row 1: Last session metrics combined
+            if let maxPerformance = VolumeAnalytics.getMaxRepsAtMaxWeight(from: sets),
+               let totalVolume = progressState.lastCompletedDayInfo?.volume {
+                HStack(alignment: .top) {
+                    // Left: Max weight with reps underneath
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Last max weight")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
 
-                    HStack {
-                        Text("\(Formatters.formatWeight(maxWeightInfo.weight)) kg")
+                        Text("\(Formatters.formatWeight(maxPerformance.weight)) kg")
                             .font(.system(size: 32, weight: .bold))
                             .foregroundStyle(.primary)
 
-                        Spacer()
+                        Text("\(maxPerformance.maxReps) reps")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
 
-                        if !maxWeightInfo.allReps.isEmpty {
-                            let repsText = maxWeightInfo.allReps.map(String.init).joined(separator: ", ")
-                            Text("\(repsText) reps")
-                                .font(.headline)
-                                .foregroundStyle(.secondary)
-                        }
+                    Spacer()
+
+                    // Right: Total volume
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("Last session total")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
+
+                        Text("\(Formatters.formatVolume(totalVolume)) kg")
+                            .font(.headline.bold())
+                            .foregroundStyle(.primary)
                     }
                 }
             }
 
-            // Total volume from last session
-            if let totalVolume = progressState.lastCompletedDayInfo?.volume {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Last session total")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-
-                    Text("\(Formatters.formatVolume(totalVolume)) kg")
-                        .font(.headline.bold())
-                        .foregroundStyle(.primary)
-                }
-            }
-
-            // Today's progress section
+            // Row 2: Today's progress section
             TodayProgressDisplay(progressState: progressState)
         }
         .padding(16)
@@ -376,8 +373,8 @@ private struct HistorySectionView: View {
                                 toggleWarmUpStatus(set)
                             } label: {
                                 Image(systemName: set.isWarmUp ? "flame.circle.fill" : "flame.circle")
-                                    .font(.callout)
-                                    .foregroundStyle(set.isWarmUp ? .orange : .secondary)
+                                    .font(.caption)
+                                    .foregroundStyle(set.isWarmUp ? .red : .secondary)
                             }
                             .buttonStyle(.plain)
                             .contentShape(Rectangle())
@@ -386,9 +383,9 @@ private struct HistorySectionView: View {
                             Button {
                                 repeatSet(set)
                             } label: {
-                                Image(systemName: "arrow.clockwise.circle")
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
+                                Image(systemName: "arrow.clockwise.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.blue)
                             }
                             .buttonStyle(.plain)
                             .contentShape(Rectangle())

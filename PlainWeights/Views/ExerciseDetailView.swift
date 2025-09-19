@@ -18,7 +18,6 @@ struct ExerciseDetailView: View {
     @State private var weightText = ""
     @State private var repsText = ""
     @State private var exerciseName: String = ""
-    @State private var isWarmUpSet = false
     @State private var showingDeleteAlert = false
 
     @FocusState private var nameFocused: Bool
@@ -62,7 +61,6 @@ struct ExerciseDetailView: View {
             QuickAddView(
                 weightText: $weightText,
                 repsText: $repsText,
-                isWarmUpSet: $isWarmUpSet,
                 focusedField: $focusedField,
                 canAddSet: canAddSet,
                 addSet: addSet
@@ -87,7 +85,8 @@ struct ExerciseDetailView: View {
                     dayGroups: createDayGroups(),
                     isMostRecentSet: isMostRecentSet,
                     repeatSet: repeatSet,
-                    deleteSet: deleteSet
+                    deleteSet: deleteSet,
+                    toggleWarmUpStatus: toggleWarmUpStatus
                 )
             }
         }
@@ -148,8 +147,8 @@ struct ExerciseDetailView: View {
             return 
         }
         
-        print("Adding set: \(weight)kg x \(reps) reps \(isWarmUpSet ? "(warm-up)" : "")")
-        let set = ExerciseSet(weight: weight, reps: reps, isWarmUp: isWarmUpSet, exercise: exercise)
+        print("Adding set: \(weight)kg x \(reps) reps")
+        let set = ExerciseSet(weight: weight, reps: reps, isWarmUp: false, exercise: exercise)
         context.insert(set)
         
         do {
@@ -205,9 +204,19 @@ struct ExerciseDetailView: View {
     private func clearForm() {
         weightText = ""
         repsText = ""
-        isWarmUpSet = false
     }
-    
+
+    private func toggleWarmUpStatus(_ set: ExerciseSet) {
+        set.isWarmUp.toggle()
+
+        do {
+            try context.save()
+            print("Toggled warm-up status for set: \\(set.weight)kg x \\(set.reps) - now \\(set.isWarmUp ? "warm-up" : "working set")")
+        } catch {
+            print("Error toggling warm-up status: \\(error)")
+        }
+    }
+
     private var canAddSet: Bool {
         !weightText.isEmpty && !repsText.isEmpty
     }
@@ -293,7 +302,6 @@ private struct VolumeMetricsView: View {
 private struct QuickAddView: View {
     @Binding var weightText: String
     @Binding var repsText: String
-    @Binding var isWarmUpSet: Bool
     @FocusState.Binding var focusedField: ExerciseDetailView.Field?
     let canAddSet: Bool
     let addSet: () -> Void
@@ -322,13 +330,6 @@ private struct QuickAddView: View {
                 .contentShape(Rectangle())
                 .disabled(!canAddSet)
             }
-
-            // Warm-up toggle
-            HStack {
-                Toggle("Warm-up set", isOn: $isWarmUpSet)
-                    .font(.caption)
-                Spacer()
-            }
         }
         .listRowSeparator(.hidden)
         .padding(.vertical, 8)
@@ -343,6 +344,7 @@ private struct HistorySectionView: View {
     let isMostRecentSet: (ExerciseSet, [ExerciseSet]) -> Bool
     let repeatSet: (ExerciseSet) -> Void
     let deleteSet: (ExerciseSet) -> Void
+    let toggleWarmUpStatus: (ExerciseSet) -> Void
     
     var body: some View {
         ForEach(dayGroups, id: \.date) { dayGroup in
@@ -354,16 +356,6 @@ private struct HistorySectionView: View {
                                 .monospacedDigit()
                                 .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
-                            // Warm-up indicator
-                            if set.isWarmUp {
-                                Text("W")
-                                    .font(.caption2)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(.white)
-                                    .frame(width: 16, height: 16)
-                                    .background(Color.orange)
-                                    .clipShape(Circle())
-                            }
                         }
 
                         Spacer()
@@ -376,7 +368,18 @@ private struct HistorySectionView: View {
                             ))
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                            
+
+                            // Warm-up toggle button
+                            Button {
+                                toggleWarmUpStatus(set)
+                            } label: {
+                                Image(systemName: set.isWarmUp ? "flame.circle.fill" : "flame.circle")
+                                    .font(.title3)
+                                    .foregroundStyle(set.isWarmUp ? .orange : .secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
+
                             // Add repeat button only for most recent set overall
                             if isMostRecentSet(set, sets) {
                                 Button {

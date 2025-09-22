@@ -57,14 +57,6 @@ struct ExerciseDetailView: View {
                 ExerciseSummaryView(progressState: progressState, sets: sets)
             }
 
-            // Add set section title
-            Text("ADD SET")
-                .font(.footnote)
-                .textCase(.uppercase)
-                .foregroundStyle(.secondary)
-                .listRowSeparator(.hidden)
-                .padding(.vertical, 4)
-
             // Quick-add row
             QuickAddView(
                 weightText: $weightText,
@@ -257,32 +249,57 @@ private struct QuickAddView: View {
     let addSet: () -> Void
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             HStack(spacing: 12) {
-                TextField("Weight", text: $weightText)
-                    .keyboardType(.decimalPad)
-                    .textFieldStyle(.roundedBorder)
-                    .focused($focusedField, equals: .weight)
-                    .frame(maxWidth: .infinity)
-
-                TextField("Reps", text: $repsText)
-                    .keyboardType(.numberPad)
-                    .textFieldStyle(.roundedBorder)
-                    .focused($focusedField, equals: .reps)
-                    .frame(maxWidth: .infinity)
-
-                Button(action: addSet) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(.tint)
+                // Weight input with label
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Weight (kg)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    TextField("0", text: $weightText)
+                        .keyboardType(.decimalPad)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .weight)
                 }
-                .buttonStyle(.plain)
-                .contentShape(Rectangle())
-                .disabled(!canAddSet)
+                .frame(maxWidth: .infinity)
+
+                // Reps input with label
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Reps")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    TextField("0", text: $repsText)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .reps)
+                }
+                .frame(maxWidth: .infinity)
             }
+
+            // Enhanced Add button
+            Button(action: addSet) {
+                HStack(spacing: 6) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 18))
+                    Text("Add Set")
+                        .font(.system(size: 16, weight: .semibold))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(canAddSet ? Color.accentColor : Color.gray.opacity(0.3))
+                .foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
+            .disabled(!canAddSet)
+            .opacity(canAddSet ? 1.0 : 0.6)
         }
+        .padding(16)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .listRowSeparator(.hidden)
-        .padding(.vertical, 8)
+        .listRowBackground(Color.clear)
+        .padding(.vertical, 4)
     }
 }
 

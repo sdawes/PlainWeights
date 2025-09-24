@@ -82,6 +82,7 @@ struct ExerciseSummaryView: View {
                             .scaleEffect(x: 1, y: 1.5, anchor: .center)
                             .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
                     }
+
                 }
             } else {
                 // Show today's progress even if no last session data
@@ -133,6 +134,7 @@ private struct TodayProgressComponent: View {
                     .scaleEffect(x: 1, y: 1.5, anchor: .center)
                     .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
             }
+
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -20,6 +20,7 @@ struct ExerciseDetailView: View {
     @State private var exerciseName: String = ""
     @State private var noteText: String = ""
     @State private var showingDeleteAlert = false
+    @State private var showingAddSet = false
 
     @FocusState private var nameFocused: Bool
     @FocusState private var focusedField: Field?
@@ -67,16 +68,27 @@ struct ExerciseDetailView: View {
                 ExerciseSummaryView(progressState: progressState, sets: sets)
             }
 
-            // Quick-add row
-            QuickAddView(
-                weightText: $weightText,
-                repsText: $repsText,
-                focusedField: $focusedField,
-                canAddSet: canAddSet,
-                addSet: addSet
-            )
-            .id("quickAddSection")
-            
+            // Add Set button - positioned below summary, above historic sets
+            HStack {
+                Spacer()
+                Button(action: { showingAddSet = true }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.caption)
+                        Text("Add Set")
+                            .font(.caption.bold())
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.blue)
+                    .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            .listRowSeparator(.hidden)
+            .padding(.vertical, 4)
+
             // History label row
             Text("HISTORIC SETS")
                 .font(.footnote)
@@ -104,34 +116,6 @@ struct ExerciseDetailView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .scrollDismissesKeyboard(.interactively)
-        .safeAreaInset(edge: .bottom) {
-            if keyboardHeight > 0 {
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(height: max(0, keyboardHeight - 100)) // Adjust for toolbar
-            }
-        }
-        .onChange(of: focusedField) { _, newValue in
-            if newValue != nil {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        scrollProxy.scrollTo("quickAddSection", anchor: .center)
-                    }
-                }
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
-            if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    keyboardHeight = keyboardFrame.height
-                }
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-            withAnimation(.easeInOut(duration: 0.25)) {
-                keyboardHeight = 0
-            }
-        }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -150,22 +134,6 @@ struct ExerciseDetailView: View {
                 }
             }
 
-            ToolbarItem(placement: .keyboard) {
-                HStack {
-                    Button("Cancel") {
-                        focusedField = nil
-                    }
-                    .foregroundStyle(.secondary)
-
-                    Spacer()
-
-                    Button("Add Set") {
-                        addSet()
-                    }
-                    .font(.body.bold())
-                    .disabled(!canAddSet)
-                }
-            }
         }
         .alert("Delete Exercise", isPresented: $showingDeleteAlert) {
             Button("Delete", role: .destructive) {
@@ -174,6 +142,9 @@ struct ExerciseDetailView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("This will permanently delete \"\(exercise.name)\" and all its sets. This action cannot be undone.")
+        }
+        .sheet(isPresented: $showingAddSet) {
+            AddSetView(exercise: exercise)
         }
     }
 

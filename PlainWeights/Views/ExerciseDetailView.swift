@@ -18,10 +18,12 @@ struct ExerciseDetailView: View {
     @State private var weightText = ""
     @State private var repsText = ""
     @State private var exerciseName: String = ""
+    @State private var noteText: String = ""
     @State private var showingDeleteAlert = false
 
     @FocusState private var nameFocused: Bool
     @FocusState private var focusedField: Field?
+    @State private var keyboardHeight: CGFloat = 0
     
     enum Field {
         case weight, reps
@@ -35,23 +37,31 @@ struct ExerciseDetailView: View {
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
         _exerciseName = State(initialValue: exercise.name)
+        _noteText = State(initialValue: exercise.note ?? "")
     }
 
     var body: some View {
-        List {
+        ScrollViewReader { scrollProxy in
+            List {
             // Title row
             TextField("Title", text: $exerciseName)
                 .font(.largeTitle.bold())
                 .textFieldStyle(.plain)
                 .focused($nameFocused)
                 .submitLabel(.done)
-                .onSubmit { 
+                .onSubmit {
                     nameFocused = false
                     updateExerciseName()
                 }
                 .listRowSeparator(.hidden)
                 .padding(.vertical, 8)
-            
+
+            // Notes section
+            NotesSection(
+                noteText: $noteText,
+                updateNote: updateNote
+            )
+
             // Exercise summary metrics row
             if let progressState = createProgressState() {
                 ExerciseSummaryView(progressState: progressState, sets: sets)
@@ -65,6 +75,7 @@ struct ExerciseDetailView: View {
                 canAddSet: canAddSet,
                 addSet: addSet
             )
+            .id("quickAddSection")
             
             // History label row
             Text("HISTORIC SETS")
@@ -92,6 +103,36 @@ struct ExerciseDetailView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom) {
+            if keyboardHeight > 0 {
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(height: max(0, keyboardHeight - 100)) // Adjust for toolbar
+            }
+        }
+        .onChange(of: focusedField) { _, newValue in
+            if newValue != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        scrollProxy.scrollTo("quickAddSection", anchor: .center)
+                    }
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
+            if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    keyboardHeight = keyboardFrame.height
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            withAnimation(.easeInOut(duration: 0.25)) {
+                keyboardHeight = 0
+            }
+        }
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if nameFocused {
@@ -111,10 +152,18 @@ struct ExerciseDetailView: View {
 
             ToolbarItem(placement: .keyboard) {
                 HStack {
-                    Spacer()
-                    Button("Done") {
+                    Button("Cancel") {
                         focusedField = nil
                     }
+                    .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button("Add Set") {
+                        addSet()
+                    }
+                    .font(.body.bold())
+                    .disabled(!canAddSet)
                 }
             }
         }
@@ -139,20 +188,22 @@ struct ExerciseDetailView: View {
     }
     
     private func addSet() {
-        guard let weight = Double(weightText),
-              let reps = Int(repsText),
-              weight >= 0,
-              reps > 0 else { 
+        guard let (weight, reps) = ExerciseSetService.validateInput(
+            weightText: weightText,
+            repsText: repsText
+        ) else {
             print("AddSet failed: Invalid input - weight: \(weightText), reps: \(repsText)")
-            return 
+            return
         }
-        
+
         print("Adding set: \(weight)kg x \(reps) reps")
-        let set = ExerciseSet(weight: weight, reps: reps, isWarmUp: false, exercise: exercise)
-        context.insert(set)
-        
         do {
-            try context.save()
+            try ExerciseSetService.addSet(
+                weight: weight,
+                reps: reps,
+                to: exercise,
+                context: context
+            )
             print("Set saved successfully")
             clearForm()
         } catch {
@@ -162,15 +213,8 @@ struct ExerciseDetailView: View {
     
     private func repeatSet(_ set: ExerciseSet) {
         print("Repeating set: \(set.weight)kg x \(set.reps) reps")
-        let newSet = ExerciseSet(
-            weight: set.weight,
-            reps: set.reps,
-            exercise: exercise
-        )
-        context.insert(newSet)
-        
         do {
-            try context.save()
+            try ExerciseSetService.repeatSet(set, for: exercise, context: context)
             print("Repeated set saved successfully")
         } catch {
             print("Error repeating set: \(error)")
@@ -178,10 +222,8 @@ struct ExerciseDetailView: View {
     }
     
     private func deleteSet(_ set: ExerciseSet) {
-        context.delete(set)
-        
         do {
-            try context.save()
+            try ExerciseSetService.deleteSet(set, context: context)
         } catch {
             print("Error deleting set: \(error)")
         }
@@ -208,10 +250,8 @@ struct ExerciseDetailView: View {
     }
 
     private func toggleWarmUpStatus(_ set: ExerciseSet) {
-        set.isWarmUp.toggle()
-
         do {
-            try context.save()
+            try ExerciseSetService.toggleWarmUpStatus(set, context: context)
             let status = set.isWarmUp ? "warm-up" : "working set"
             print("Toggled warm-up status for set: \(set.weight)kg x \(set.reps) - now \(status)")
         } catch {
@@ -220,7 +260,7 @@ struct ExerciseDetailView: View {
     }
 
     private var canAddSet: Bool {
-        !weightText.isEmpty && !repsText.isEmpty
+        ExerciseSetService.validateInput(weightText: weightText, repsText: repsText) != nil
     }
     
     private func isMostRecentSet(_ set: ExerciseSet, in sets: [ExerciseSet]) -> Bool {
@@ -237,6 +277,56 @@ struct ExerciseDetailView: View {
             print("Failed to delete exercise: \(error)")
         }
     }
+
+    private func updateNote() {
+        let trimmed = noteText.trimmingCharacters(in: .whitespacesAndNewlines)
+        exercise.note = trimmed.isEmpty ? nil : trimmed
+        exercise.bumpUpdated()
+
+        do {
+            try context.save()
+        } catch {
+            print("Error updating note: \(error)")
+        }
+    }
+}
+
+// MARK: - Notes Section
+
+private struct NotesSection: View {
+    @Binding var noteText: String
+    let updateNote: () -> Void
+    @FocusState private var noteFocused: Bool
+
+    var body: some View {
+        TextEditor(text: $noteText)
+            .font(.footnote)
+            .foregroundStyle(Color(.darkGray))
+            .scrollContentBackground(.hidden)
+            .padding(8)
+            .background(Color(.systemGray6))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .frame(minHeight: 50, maxHeight: 100)
+            .focused($noteFocused)
+            .overlay(alignment: .topLeading) {
+                if noteText.isEmpty && !noteFocused {
+                    Text("Add notes about form, target muscles, etc...")
+                        .font(.footnote)
+                        .foregroundStyle(.tertiary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 12)
+                        .allowsHitTesting(false)
+                }
+            }
+            .onChange(of: noteFocused) { _, isFocused in
+                if !isFocused {
+                    updateNote()
+                }
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .padding(.vertical, 2)
+    }
 }
 
 // MARK: - Quick Add View
@@ -249,57 +339,48 @@ private struct QuickAddView: View {
     let addSet: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                // Weight input with label
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Weight (kg)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    TextField("0", text: $weightText)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: .weight)
-                }
-                .frame(maxWidth: .infinity)
-
-                // Reps input with label
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Reps")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    TextField("0", text: $repsText)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: .reps)
-                }
-                .frame(maxWidth: .infinity)
+        HStack(spacing: 10) {
+            // Weight input - compact
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Weight (kg)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                TextField("0", text: $weightText)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focusedField, equals: .weight)
             }
+            .frame(maxWidth: .infinity)
 
-            // Enhanced Add button
+            // Reps input - compact
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Reps")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                TextField("0", text: $repsText)
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focusedField, equals: .reps)
+            }
+            .frame(maxWidth: .infinity)
+
+            // Compact plus button
             Button(action: addSet) {
-                HStack(spacing: 6) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 18))
-                    Text("Add Set")
-                        .font(.system(size: 16, weight: .semibold))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(canAddSet ? Color.accentColor : Color.gray.opacity(0.3))
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                Image(systemName: "plus.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(canAddSet ? Color.accentColor : Color.gray.opacity(0.4))
             }
             .buttonStyle(.plain)
             .disabled(!canAddSet)
-            .opacity(canAddSet ? 1.0 : 0.6)
+            .contentShape(Circle())
+            .padding(.top, 12) // Align with text fields
         }
-        .padding(16)
+        .padding(12)
         .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 }
 

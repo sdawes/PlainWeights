@@ -542,54 +542,61 @@ class TestDataGenerator {
         let calendar = Calendar.current
         let startDate = calendar.date(from: DateComponents(year: 2025, month: 8, day: 17, hour: 14, minute: 0)) ?? Date()
         
-        // Create exercises with exact names and categories from live data
+        // Create exercises with exact names and categories from live data (Updated September 2025)
         let exerciseData: [(String, String)] = [
-            ("Deadlifts (trap bar)", "Back"),
-            ("Duel cable lat pulldown", "Back"),
-            ("Cable lat pulldown", "Back"),
-            ("T bar row", "Back"),
-            ("Reverse cable fly", "Back"),
-            ("Dumbbell seated curls", "Biceps"),
-            ("Cable face pulls", "Back"),
-            ("Cable rope bicep curls", "Bicep"),
             ("Leg press machine", "Legs"),
-            ("Sled push", "Legs"),
-            ("Plate loaded incline chest press", "Chest"),
-            ("Chest press machine", "Chest"),
-            ("Shoulder press (dumbbells)", "Shoulders"),
-            ("Lateral raises (cross cables)", "Shoulder"),
-            ("Lateral raises (single cable)", "Shoulder"),
-            ("Tricep dips", "Triceps"),
-            ("Tricep push downs (bar)", "Triceps"),
-            ("Squat", "Legs"),
-            ("Front rack squat", "Legs"),
-            ("Split squat (barbell)", "Legs"),
-            ("Leg raises", "Legs"),
-            ("Calf raises (rear machine)", "Legs"),
-            ("Calf raises (standing)", "Legs"),
-            ("Hyper extension 45", "Back"),
-            ("Ring pull ups (45 ground)", "Back"),
-            ("Press ups", "Chest"),
-            ("Pull ups (proper)", "Back"),
-            ("Tricep pulls (rope)", "Triceps"),
             ("Incline dumbbell chest press", "Chest"),
+            ("Lateral raises (single cable)", "Shoulder"),
+            ("Duel cable lat pulldown", "Back"),
             ("Cable chest flys", "Chest"),
-            ("Dumbbell hammer curls", "Bicep")
+            ("Cable face pulls", "Back"),
+            ("Incline chest press (machine)", "Chest"),
+            ("Ring pull ups (45 ground)", "Back"),
+            ("Cable rope bicep curls", "Bicep"),
+            ("Sled push", "Legs"),
+            ("Lateral raises (cross cables)", "Shoulder"),
+            ("Split squat (barbell)", "Legs"),
+            ("Dumbbell seated curls", "Biceps"),
+            ("Calf raises (rear machine)", "Legs"),
+            ("Tricep push downs (bar)", "Triceps"),
+            ("Press ups", "Chest"),
+            ("Tricep dips", "Triceps"),
+            ("Shoulder press (dumbbells)", "Shoulders"),
+            ("Pull ups (proper)", "Back"),
+            ("Reverse cable fly", "Back"),
+            ("Hyper extension 45", "Back"),
+            ("Calf raises (standing)", "Legs"),
+            ("Tricep pulls (rope)", "Triceps"),
+            ("Cable lat pulldown", "Back"),
+            ("Dumbbell hammer curls", "Bicep"),
+            ("Leg raises", "Legs"),
+            ("Front rack squat", "Legs"),
+            ("T bar row", "Back"),
+            ("Deadlifts (trap bar)", "Back"),
+            ("Chest press machine", "Chest"),
+            ("Squat", "Legs"),
+            ("Chest press", "Chest"),
+            ("Shoulder press (machine)", "Shoulder")
         ]
-        
+
         var exercises: [Exercise] = []
-        for (name, category) in exerciseData {
-            let exercise = Exercise(name: name, category: category, createdDate: startDate)
+        for i in 0..<exerciseData.count {
+            let (name, category) = exerciseData[i]
+            // Set creation date: Sep 22 for last two exercises, Aug 17 for all others
+            let createdDate = (i >= 31) ?
+                Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 22, hour: 14, minute: 12)) ?? startDate :
+                startDate
+            let exercise = Exercise(name: name, category: category, createdDate: createdDate)
             modelContext.insert(exercise)
             exercises.append(exercise)
         }
-        
+
         // Generate the actual workout sessions from live data
         generateLiveWorkoutSessions(exercises: exercises, baseDate: startDate, modelContext: modelContext)
         
         try? modelContext.save()
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
-        logger.info("Live Data generated: 31 exercises, 168 sets from real gym sessions (Aug 17-28)")
+        logger.info("Live Data generated: 33 exercises, 197 sets from real gym sessions (Aug 17 - Sep 22, 2025)")
     }
     
     private static func generateLiveWorkoutSessions(exercises: [Exercise], baseDate: Date, modelContext: ModelContext) {
@@ -616,6 +623,9 @@ class TestDataGenerator {
         
         // Aug 28, 2025 - Back and biceps session
         generateLiveWorkout8(exercises: exercises, baseDate: baseDate, modelContext: modelContext)
+
+        // Sep 22, 2025 - Chest, shoulders, and triceps session
+        generateLiveWorkout9(exercises: exercises, baseDate: baseDate, modelContext: modelContext)
     }
     
     // Aug 17, 2025 - Back-focused session
@@ -942,7 +952,49 @@ class TestDataGenerator {
         generateLiveSet(exercise: exercises[25], date: dateFrom(workoutDate, hour: 15, minute: 50, seconds: 0), weight: 2.5, reps: 12, modelContext: modelContext)
         generateLiveSet(exercise: exercises[25], date: dateFrom(workoutDate, hour: 15, minute: 52, seconds: 0), weight: 2.5, reps: 10, modelContext: modelContext)
     }
-    
+
+    // Sep 22, 2025 - Chest, shoulders, and triceps session
+    private static func generateLiveWorkout9(exercises: [Exercise], baseDate: Date, modelContext: ModelContext) {
+        let workoutDate = Calendar.current.date(byAdding: .day, value: 36, to: baseDate) ?? baseDate
+
+        // Chest press - exercises[31] (new exercise added Sep 22)
+        generateLiveSet(exercise: exercises[31], date: dateFrom(workoutDate, hour: 15, minute: 12, seconds: 0), weight: 20.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[31], date: dateFrom(workoutDate, hour: 15, minute: 13, seconds: 0), weight: 40.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[31], date: dateFrom(workoutDate, hour: 15, minute: 16, seconds: 0), weight: 50.0, reps: 8, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[31], date: dateFrom(workoutDate, hour: 15, minute: 17, seconds: 0), weight: 50.0, reps: 8, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[31], date: dateFrom(workoutDate, hour: 15, minute: 21, seconds: 0), weight: 50.0, reps: 9, modelContext: modelContext)
+
+        // Incline chest press (machine) - exercises[6]
+        generateLiveSet(exercise: exercises[6], date: dateFrom(workoutDate, hour: 15, minute: 23, seconds: 0), weight: 10.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[6], date: dateFrom(workoutDate, hour: 15, minute: 25, seconds: 0), weight: 30.0, reps: 8, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[6], date: dateFrom(workoutDate, hour: 15, minute: 27, seconds: 0), weight: 30.0, reps: 7, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[6], date: dateFrom(workoutDate, hour: 15, minute: 30, seconds: 0), weight: 30.0, reps: 9, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[6], date: dateFrom(workoutDate, hour: 15, minute: 33, seconds: 0), weight: 30.0, reps: 7, modelContext: modelContext)
+
+        // Lateral raises (single cable) - exercises[2]
+        generateLiveSet(exercise: exercises[2], date: dateFrom(workoutDate, hour: 15, minute: 37, seconds: 0), weight: 15.0, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[2], date: dateFrom(workoutDate, hour: 15, minute: 40, seconds: 0), weight: 17.5, reps: 9, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[2], date: dateFrom(workoutDate, hour: 15, minute: 42, seconds: 0), weight: 17.5, reps: 9, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[2], date: dateFrom(workoutDate, hour: 15, minute: 44, seconds: 0), weight: 17.5, reps: 10, modelContext: modelContext)
+
+        // Shoulder press (machine) - exercises[32] (new exercise added Sep 22)
+        generateLiveSet(exercise: exercises[32], date: dateFrom(workoutDate, hour: 15, minute: 47, seconds: 0), weight: 26.5, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[32], date: dateFrom(workoutDate, hour: 15, minute: 48, seconds: 0), weight: 32.0, reps: 7, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[32], date: dateFrom(workoutDate, hour: 15, minute: 50, seconds: 0), weight: 32.0, reps: 8, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[32], date: dateFrom(workoutDate, hour: 15, minute: 52, seconds: 0), weight: 32.0, reps: 8, modelContext: modelContext)
+
+        // Tricep dips - exercises[16]
+        generateLiveSet(exercise: exercises[16], date: dateFrom(workoutDate, hour: 15, minute: 55, seconds: 0), weight: 0.0, reps: 6, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[16], date: dateFrom(workoutDate, hour: 15, minute: 56, seconds: 0), weight: 5.0, reps: 6, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[16], date: dateFrom(workoutDate, hour: 15, minute: 58, seconds: 0), weight: 5.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[16], date: dateFrom(workoutDate, hour: 16, minute: 0, seconds: 0), weight: 5.0, reps: 6, modelContext: modelContext)
+
+        // Tricep pulls (rope) - exercises[22]
+        generateLiveSet(exercise: exercises[22], date: dateFrom(workoutDate, hour: 16, minute: 3, seconds: 0), weight: 39.5, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[22], date: dateFrom(workoutDate, hour: 16, minute: 5, seconds: 0), weight: 39.5, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[22], date: dateFrom(workoutDate, hour: 16, minute: 6, seconds: 0), weight: 39.5, reps: 10, modelContext: modelContext)
+    }
+
     private static func generateLiveSet(exercise: Exercise, date: Date, weight: Double, reps: Int, modelContext: ModelContext) {
         let set = ExerciseSet(timestamp: date, weight: weight, reps: reps, exercise: exercise)
         modelContext.insert(set)

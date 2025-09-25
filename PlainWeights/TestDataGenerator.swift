@@ -573,15 +573,22 @@ class TestDataGenerator {
         let calendar = Calendar.current
         let startDate = calendar.date(from: DateComponents(year: 2025, month: 9, day: 24, hour: 17, minute: 0)) ?? Date()
 
-        // Create exercises from today's workout
+        // Exercise definitions from live data export
         let exerciseData: [(String, String)] = [
-            ("Pull Up (Strict)", "Back"),
-            ("T Bar Row", "Back"),
-            ("Deadlifts (Trapbar)", "Back"),
-            ("Reverse Cable Flys", "Back"),
             ("Seated Incline Dumbell Curls", "Bicep"),
+            ("Barbell squat", "Legs"),
+            ("Knees to toe", "Core"),
+            ("Barbell Lunges", "Legs"),
+            ("Hamstring Curls", "Legs"),
+            ("Sled Push", "Legs"),
+            ("T Bar Row", "Back"),
             ("Rope Bicep Curls", "Bicep"),
-            ("Rope Face Pulls", "Back")
+            ("Leg Raises", "Legs"),
+            ("Reverse Cable Flys", "Back"),
+            ("Pull Up (Strict)", "Back"),
+            ("Rope Face Pulls", "Back"),
+            ("Calf Raises", "Legs"),
+            ("Deadlifts (Trapbar)", "Back")
         ]
 
         var exercises: [Exercise] = []
@@ -591,79 +598,140 @@ class TestDataGenerator {
             exercises.append(exercise)
         }
 
-        // Generate today's workout session
-        generateTodayWorkout(exercises: exercises, baseDate: startDate, modelContext: modelContext)
+        // Create dates for all workout sessions
+        let sep22Date = calendar.date(from: DateComponents(year: 2025, month: 9, day: 22, hour: 18, minute: 0)) ?? Date()
+        let sep25Date = calendar.date(from: DateComponents(year: 2025, month: 9, day: 25, hour: 16, minute: 57, second: 5)) ?? Date()
+
+        // Generate all workout sessions
+        generateLiveWorkouts(exercises: exercises, sep22Date: sep22Date, sep24Date: startDate, sep25Date: sep25Date, modelContext: modelContext)
 
         try? modelContext.save()
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
-        logger.info("Live Data generated: 7 exercises, 26 sets from today's workout (\(dateFormatter.string(from: startDate)))")
+        logger.info("Live Data generated: 14 exercises, 69 sets from 3 workout sessions (Sep 22, 24, 25, 2025)")
     }
     
-    private static func generateTodayWorkout(exercises: [Exercise], baseDate: Date, modelContext: ModelContext) {
-        // Start at 17:00 (5:00 PM)
-        var currentTime = baseDate
+    private static func generateLiveWorkouts(exercises: [Exercise], sep22Date: Date, sep24Date: Date, sep25Date: Date, modelContext: ModelContext) {
 
-        // Pull Up (Strict) - 4 sets x 0kg x 5 reps
-        for i in 0..<4 {
-            generateLiveSet(exercise: exercises[0], date: currentTime, weight: 0.0, reps: 5, modelContext: modelContext)
-            currentTime = Calendar.current.date(byAdding: .minute, value: 2, to: currentTime) ?? currentTime
-        }
+        // SESSION 1: 2025-09-22 18:00:00 - Leg Day
+        // Barbell squat: 3 sets (exercises[1])
+        generateLiveSet(exercise: exercises[1], date: timestampFrom(sep22Date, time: "18:00:00"), weight: 50.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[1], date: timestampFrom(sep22Date, time: "18:03:00"), weight: 50.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[1], date: timestampFrom(sep22Date, time: "18:05:00"), weight: 50.0, reps: 10, modelContext: modelContext)
 
-        // Rest between exercises
-        currentTime = Calendar.current.date(byAdding: .minute, value: 1, to: currentTime) ?? currentTime
+        // Barbell Lunges: 3 sets (exercises[3])
+        generateLiveSet(exercise: exercises[3], date: timestampFrom(sep22Date, time: "18:06:00"), weight: 30.0, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[3], date: timestampFrom(sep22Date, time: "18:09:00"), weight: 30.0, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[3], date: timestampFrom(sep22Date, time: "18:12:00"), weight: 30.0, reps: 12, modelContext: modelContext)
 
-        // T Bar Row - 4 sets x 25kg x 10 reps
-        for i in 0..<4 {
-            generateLiveSet(exercise: exercises[1], date: currentTime, weight: 25.0, reps: 10, modelContext: modelContext)
-            currentTime = Calendar.current.date(byAdding: .minute, value: 2, to: currentTime) ?? currentTime
-        }
+        // Sled Push: 3 sets (exercises[5])
+        generateLiveSet(exercise: exercises[5], date: timestampFrom(sep22Date, time: "18:15:00"), weight: 50.0, reps: 20, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[5], date: timestampFrom(sep22Date, time: "18:17:00"), weight: 50.0, reps: 20, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[5], date: timestampFrom(sep22Date, time: "18:20:00"), weight: 50.0, reps: 20, modelContext: modelContext)
 
-        // Rest between exercises
-        currentTime = Calendar.current.date(byAdding: .minute, value: 1, to: currentTime) ?? currentTime
+        // Hamstring Curls: 3 sets (exercises[4])
+        generateLiveSet(exercise: exercises[4], date: timestampFrom(sep22Date, time: "18:24:00"), weight: 34.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[4], date: timestampFrom(sep22Date, time: "18:26:00"), weight: 34.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[4], date: timestampFrom(sep22Date, time: "18:30:00"), weight: 34.0, reps: 10, modelContext: modelContext)
 
-        // Deadlifts (Trapbar) - 4 sets x 60kg x 10 reps
-        for i in 0..<4 {
-            generateLiveSet(exercise: exercises[2], date: currentTime, weight: 60.0, reps: 10, modelContext: modelContext)
-            currentTime = Calendar.current.date(byAdding: .minute, value: 3, to: currentTime) ?? currentTime
-        }
+        // Leg Raises: 3 sets (exercises[8])
+        generateLiveSet(exercise: exercises[8], date: timestampFrom(sep22Date, time: "18:32:00"), weight: 39.5, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[8], date: timestampFrom(sep22Date, time: "18:35:00"), weight: 39.5, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[8], date: timestampFrom(sep22Date, time: "18:38:00"), weight: 39.5, reps: 10, modelContext: modelContext)
 
-        // Rest between exercises
-        currentTime = Calendar.current.date(byAdding: .minute, value: 1, to: currentTime) ?? currentTime
+        // Calf Raises: 3 sets (exercises[12])
+        generateLiveSet(exercise: exercises[12], date: timestampFrom(sep22Date, time: "18:40:00"), weight: 40.0, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[12], date: timestampFrom(sep22Date, time: "18:43:00"), weight: 40.0, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[12], date: timestampFrom(sep22Date, time: "18:45:00"), weight: 40.0, reps: 12, modelContext: modelContext)
 
-        // Reverse Cable Flys - 3 sets x 15kg x 12 reps
-        for i in 0..<3 {
-            generateLiveSet(exercise: exercises[3], date: currentTime, weight: 15.0, reps: 12, modelContext: modelContext)
-            currentTime = Calendar.current.date(byAdding: .minute, value: 2, to: currentTime) ?? currentTime
-        }
+        // SESSION 2: 2025-09-24 17:00:00 - Back/Bicep Day
+        // Pull Up (Strict): 2 sets (exercises[10])
+        generateLiveSet(exercise: exercises[10], date: timestampFrom(sep24Date, time: "17:00:00"), weight: 0.0, reps: 5, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[10], date: timestampFrom(sep24Date, time: "17:02:00"), weight: 0.0, reps: 5, modelContext: modelContext)
 
-        // Rest between exercises
-        currentTime = Calendar.current.date(byAdding: .minute, value: 1, to: currentTime) ?? currentTime
+        // T Bar Row: 4 sets (exercises[6])
+        generateLiveSet(exercise: exercises[6], date: timestampFrom(sep24Date, time: "17:03:30"), weight: 25.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[6], date: timestampFrom(sep24Date, time: "17:07:00"), weight: 25.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[6], date: timestampFrom(sep24Date, time: "17:09:00"), weight: 25.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[6], date: timestampFrom(sep24Date, time: "17:11:00"), weight: 25.0, reps: 10, modelContext: modelContext)
 
-        // Seated Incline Dumbell Curls - 4 sets x 10kg x 10 reps
-        for i in 0..<4 {
-            generateLiveSet(exercise: exercises[4], date: currentTime, weight: 10.0, reps: 10, modelContext: modelContext)
-            currentTime = Calendar.current.date(byAdding: .minute, value: 2, to: currentTime) ?? currentTime
-        }
+        // Seated Incline Dumbell Curls: 4 sets (exercises[0])
+        generateLiveSet(exercise: exercises[0], date: timestampFrom(sep24Date, time: "17:14:00"), weight: 10.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[0], date: timestampFrom(sep24Date, time: "17:16:00"), weight: 10.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[0], date: timestampFrom(sep24Date, time: "17:18:00"), weight: 10.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[0], date: timestampFrom(sep24Date, time: "17:20:00"), weight: 10.0, reps: 10, modelContext: modelContext)
 
-        // Rest between exercises
-        currentTime = Calendar.current.date(byAdding: .minute, value: 1, to: currentTime) ?? currentTime
+        // Deadlifts (Trapbar): 4 sets (exercises[13])
+        generateLiveSet(exercise: exercises[13], date: timestampFrom(sep24Date, time: "17:22:30"), weight: 60.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[13], date: timestampFrom(sep24Date, time: "17:25:00"), weight: 60.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[13], date: timestampFrom(sep24Date, time: "17:27:30"), weight: 60.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[13], date: timestampFrom(sep24Date, time: "17:30:00"), weight: 60.0, reps: 10, modelContext: modelContext)
 
-        // Rope Bicep Curls - 4 sets x 39.5kg x 12 reps
-        for i in 0..<4 {
-            generateLiveSet(exercise: exercises[5], date: currentTime, weight: 39.5, reps: 12, modelContext: modelContext)
-            currentTime = Calendar.current.date(byAdding: .minute, value: 2, to: currentTime) ?? currentTime
-        }
+        // Rope Face Pulls: 3 sets (exercises[11])
+        generateLiveSet(exercise: exercises[11], date: timestampFrom(sep24Date, time: "17:32:30"), weight: 45.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[11], date: timestampFrom(sep24Date, time: "17:34:30"), weight: 45.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[11], date: timestampFrom(sep24Date, time: "17:36:30"), weight: 45.0, reps: 10, modelContext: modelContext)
 
-        // Rest between exercises
-        currentTime = Calendar.current.date(byAdding: .minute, value: 1, to: currentTime) ?? currentTime
+        // Rope Bicep Curls: 4 sets (exercises[7])
+        generateLiveSet(exercise: exercises[7], date: timestampFrom(sep24Date, time: "17:39:00"), weight: 39.5, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[7], date: timestampFrom(sep24Date, time: "17:41:30"), weight: 39.5, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[7], date: timestampFrom(sep24Date, time: "17:44:00"), weight: 39.5, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[7], date: timestampFrom(sep24Date, time: "17:46:30"), weight: 39.5, reps: 12, modelContext: modelContext)
 
-        // Rope Face Pulls - 3 sets x 45kg x 10 reps
-        for i in 0..<3 {
-            generateLiveSet(exercise: exercises[6], date: currentTime, weight: 45.0, reps: 10, modelContext: modelContext)
-            currentTime = Calendar.current.date(byAdding: .minute, value: 2, to: currentTime) ?? currentTime
-        }
+        // Reverse Cable Flys: 3 sets (exercises[9])
+        generateLiveSet(exercise: exercises[9], date: timestampFrom(sep24Date, time: "17:49:00"), weight: 15.0, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[9], date: timestampFrom(sep24Date, time: "17:51:30"), weight: 15.0, reps: 12, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[9], date: timestampFrom(sep24Date, time: "17:54:00"), weight: 15.0, reps: 12, modelContext: modelContext)
+
+        // Pull Up (Strict): 2 more sets later (exercises[10])
+        generateLiveSet(exercise: exercises[10], date: timestampFrom(sep24Date, time: "20:45:30"), weight: 0.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[10], date: timestampFrom(sep24Date, time: "20:46:30"), weight: 0.0, reps: 10, modelContext: modelContext)
+
+        // Knees to toe: 3 sets (exercises[2])
+        generateLiveSet(exercise: exercises[2], date: timestampFrom(sep24Date, time: "20:47:30"), weight: 0.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[2], date: timestampFrom(sep24Date, time: "20:48:30"), weight: 0.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[2], date: timestampFrom(sep24Date, time: "20:49:30"), weight: 0.0, reps: 10, modelContext: modelContext)
+
+        // SESSION 3: 2025-09-25 16:57:05 - Mixed Leg Day
+        // Leg Raises: 4 sets (exercises[8])
+        generateLiveSet(exercise: exercises[8], date: timestampFrom(sep25Date, time: "16:57:05"), weight: 48.5, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[8], date: timestampFrom(sep25Date, time: "16:58:02"), weight: 48.5, reps: 13, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[8], date: timestampFrom(sep25Date, time: "17:00:09"), weight: 54.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[8], date: timestampFrom(sep25Date, time: "17:01:32"), weight: 54.0, reps: 10, modelContext: modelContext)
+
+        // Hamstring Curls: 1 warm-up set (exercises[4])
+        generateLiveSetWithWarmUp(exercise: exercises[4], date: timestampFrom(sep25Date, time: "17:04:30"), weight: 32.0, reps: 14, isWarmUp: true, modelContext: modelContext)
+
+        // Calf Raises: 2 sets (exercises[12])
+        generateLiveSet(exercise: exercises[12], date: timestampFrom(sep25Date, time: "17:07:26"), weight: 40.0, reps: 15, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[12], date: timestampFrom(sep25Date, time: "17:08:47"), weight: 40.0, reps: 15, modelContext: modelContext)
+
+        // Barbell squat: 5 sets (exercises[1])
+        generateLiveSetWithWarmUp(exercise: exercises[1], date: timestampFrom(sep25Date, time: "17:13:04"), weight: 20.0, reps: 15, isWarmUp: true, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[1], date: timestampFrom(sep25Date, time: "17:15:31"), weight: 40.0, reps: 8, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[1], date: timestampFrom(sep25Date, time: "17:19:39"), weight: 50.0, reps: 8, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[1], date: timestampFrom(sep25Date, time: "17:19:44"), weight: 50.0, reps: 8, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[1], date: timestampFrom(sep25Date, time: "17:21:54"), weight: 50.0, reps: 8, modelContext: modelContext)
+
+        // Barbell Lunges: 3 sets (exercises[3])
+        generateLiveSet(exercise: exercises[3], date: timestampFrom(sep25Date, time: "17:25:36"), weight: 30.0, reps: 9, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[3], date: timestampFrom(sep25Date, time: "17:28:06"), weight: 30.0, reps: 9, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[3], date: timestampFrom(sep25Date, time: "17:32:50"), weight: 30.0, reps: 9, modelContext: modelContext)
+
+        // Sled Push: 2 sets (exercises[5])
+        generateLiveSet(exercise: exercises[5], date: timestampFrom(sep25Date, time: "17:33:03"), weight: 50.0, reps: 1, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[5], date: timestampFrom(sep25Date, time: "17:34:33"), weight: 50.0, reps: 1, modelContext: modelContext)
+
+        // Hamstring Curls: 3 more sets (exercises[4])
+        generateLiveSet(exercise: exercises[4], date: timestampFrom(sep25Date, time: "17:41:22"), weight: 37.5, reps: 11, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[4], date: timestampFrom(sep25Date, time: "17:42:28"), weight: 37.5, reps: 14, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[4], date: timestampFrom(sep25Date, time: "17:46:16"), weight: 37.5, reps: 12, modelContext: modelContext)
+
+        // Knees to toe: 3 sets (exercises[2])
+        generateLiveSet(exercise: exercises[2], date: timestampFrom(sep25Date, time: "17:48:31"), weight: 0.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[2], date: timestampFrom(sep25Date, time: "17:49:56"), weight: 0.0, reps: 10, modelContext: modelContext)
+        generateLiveSet(exercise: exercises[2], date: timestampFrom(sep25Date, time: "17:52:08"), weight: 0.0, reps: 9, modelContext: modelContext)
     }
 
     private static func generateLiveSet(exercise: Exercise, date: Date, weight: Double, reps: Int, modelContext: ModelContext) {
@@ -671,10 +739,22 @@ class TestDataGenerator {
         modelContext.insert(set)
     }
 
-    private static func dateFrom(_ baseDate: Date, hour: Int, minute: Int, seconds: Int) -> Date {
+    private static func generateLiveSetWithWarmUp(exercise: Exercise, date: Date, weight: Double, reps: Int, isWarmUp: Bool, modelContext: ModelContext) {
+        let set = ExerciseSet(timestamp: date, weight: weight, reps: reps, isWarmUp: isWarmUp, exercise: exercise)
+        modelContext.insert(set)
+    }
+
+    private static func timestampFrom(_ sep24Date: Date, time: String) -> Date {
+        let components = time.split(separator: ":")
+        guard components.count == 3,
+              let hour = Int(components[0]),
+              let minute = Int(components[1]),
+              let second = Int(components[2]) else {
+            return sep24Date
+        }
+
         let calendar = Calendar.current
-        let date = calendar.date(bySettingHour: hour, minute: minute, second: seconds, of: baseDate) ?? baseDate
-        return date
+        return calendar.date(bySettingHour: hour, minute: minute, second: second, of: sep24Date) ?? sep24Date
     }
 
     // Helper function for old test data sets (1, 2, and 3)
@@ -696,9 +776,9 @@ class TestDataGenerator {
     }
 
     // Legacy dateFrom with daysOffset for old test data sets
-    private static func dateFrom(_ baseDate: Date, daysOffset: Int, hour: Int, minute: Int) -> Date {
+    private static func dateFrom(_ sep24Date: Date, daysOffset: Int, hour: Int, minute: Int) -> Date {
         let calendar = Calendar.current
-        let date = calendar.date(byAdding: .day, value: daysOffset, to: baseDate) ?? baseDate
+        let date = calendar.date(byAdding: .day, value: daysOffset, to: sep24Date) ?? sep24Date
         return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: date) ?? date
     }
 }

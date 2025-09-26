@@ -56,11 +56,18 @@ class TestDataGenerator {
 
         // Print exercise definitions
         logger.info("// COPY FROM HERE FOR generateLiveData() ================================")
+        logger.info("// EXPORT DATE: \(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .medium))")
         logger.info("")
-        logger.info("// Exercise definitions")
-        logger.info("let exerciseData: [(String, String)] = [")
+        logger.info("// Exercise definitions with notes")
+        logger.info("let exerciseData: [(name: String, category: String, note: String?)] = [")
         for exercise in exercises {
-            logger.info("    (\"\(exercise.name)\", \"\(exercise.category)\"),")
+            if let note = exercise.note, !note.isEmpty {
+                // Escape quotes in note text
+                let escapedNote = note.replacingOccurrences(of: "\"", with: "\\\"")
+                logger.info("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: \"\(escapedNote)\"),")
+            } else {
+                logger.info("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: nil),")
+            }
         }
         logger.info("]")
         logger.info("")
@@ -126,10 +133,10 @@ class TestDataGenerator {
                     if let first = group.first {
                         logger.info("// \(first.exercise.name): \(group.count) sets")
                         for item in group {
-                            let timeOnly = DateFormatter()
-                            timeOnly.dateFormat = "HH:mm:ss"
+                            let fullDateTime = DateFormatter()
+                            fullDateTime.dateFormat = "yyyy-MM-dd HH:mm:ss"
                             let warmupFlag = item.set.isWarmUp ? " (warm-up)" : ""
-                            logger.info("//   \(timeOnly.string(from: item.set.timestamp)) - \(item.set.weight)kg x \(item.set.reps) reps\(warmupFlag)")
+                            logger.info("//   \(fullDateTime.string(from: item.set.timestamp)) - \(item.set.weight)kg x \(item.set.reps) reps\(warmupFlag)")
                         }
                     }
                 }

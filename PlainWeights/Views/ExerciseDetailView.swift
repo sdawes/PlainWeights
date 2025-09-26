@@ -96,6 +96,7 @@ struct ExerciseDetailView: View {
                     .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
+                .contentShape(Rectangle())
             }
             .listRowSeparator(.hidden)
             .padding(.vertical, 4)
@@ -125,9 +126,6 @@ struct ExerciseDetailView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .scrollDismissesKeyboard(.immediately)
-        .onTapGesture {
-            KeyboardUtility.dismissKeyboard()
-        }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

@@ -23,80 +23,76 @@ struct AddSetView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    Text("Add new set to \(exercise.name)")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                        .padding(.vertical, 4)
-                } header: {
-                    Text("")
-                }
+            VStack(spacing: 24) {
+                // Input fields container - matching ExerciseSummaryView style
+                VStack(spacing: 16) {
+                    // Weight input box
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Weight (kg)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
 
-                Section {
-                    VStack(spacing: 16) {
-                        // Weight input box
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Weight (kg)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-
-                            TextField("Enter weight", text: $weightText)
-                                .keyboardType(.decimalPad)
-                                .focused($focusedField, equals: .weight)
-                                .submitLabel(.next)
-                                .onSubmit {
-                                    focusedField = .reps
-                                }
-                                .padding(12)
-                                .background(Color(.systemGray6))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(focusedField == .weight ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .weight ? 2 : 1)
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-
-                        // Reps input box
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Reps")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-
-                            TextField("Enter reps", text: $repsText)
-                                .keyboardType(.numberPad)
-                                .focused($focusedField, equals: .reps)
-                                .submitLabel(.done)
-                                .onSubmit {
-                                    focusedField = nil
-                                }
-                                .padding(12)
-                                .background(Color(.systemGray6))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(focusedField == .reps ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .reps ? 2 : 1)
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
+                        TextField("Enter weight", text: $weightText)
+                            .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .weight)
+                            .submitLabel(.next)
+                            .onSubmit {
+                                focusedField = .reps
+                            }
+                            .padding(12)
+                            .background(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(focusedField == .weight ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .weight ? 2 : 1)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                    .padding(.vertical, 8)
-                } header: {
-                    Text("Set Details")
-                }
 
-                Section {
-                    Button(action: addSet) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                            Text("Add Set")
-                                .fontWeight(.semibold)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .foregroundStyle(canAddSet ? Color.blue : Color.gray)
+                    // Reps input box
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Reps")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        TextField("Enter reps", text: $repsText)
+                            .keyboardType(.numberPad)
+                            .focused($focusedField, equals: .reps)
+                            .submitLabel(.done)
+                            .onSubmit {
+                                focusedField = nil
+                            }
+                            .padding(12)
+                            .background(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(focusedField == .reps ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .reps ? 2 : 1)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                    .disabled(!canAddSet)
                 }
+                .padding(16)
+                .background(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                )
+
+                // Add Set button
+                Button(action: addSet) {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Add Set")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .foregroundStyle(canAddSet ? Color.blue : Color.gray)
+                    .padding(.vertical, 12)
+                }
+                .disabled(!canAddSet)
+
+                Spacer()
             }
+            .padding(16)
             .navigationTitle("Add Set")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

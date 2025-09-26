@@ -66,7 +66,10 @@ struct ExerciseDetailView: View {
                     .onSubmit {
                         updateNote()
                     }
-                    .onChange(of: noteText) { _, _ in
+                    .onChange(of: noteText) { _, newValue in
+                        if newValue.count > 40 {
+                            noteText = String(newValue.prefix(40))
+                        }
                         updateNote()
                     }
             }
@@ -125,7 +128,10 @@ struct ExerciseDetailView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
-        .scrollDismissesKeyboard(.interactively)
+        .scrollDismissesKeyboard(.immediately)
+        .onTapGesture {
+            KeyboardUtility.dismissKeyboard()
+        }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

@@ -25,6 +25,10 @@ struct ExerciseDetailView: View {
     @FocusState private var nameFocused: Bool
     @FocusState private var focusedField: Field?
     @State private var keyboardHeight: CGFloat = 0
+
+    // Memoized expensive calculations - updated only when sets change
+    @State private var progressState: ProgressTracker.ProgressState?
+    @State private var dayGroups: [ExerciseDataGrouper.DayGroup] = []
     
     enum Field {
         case weight, reps
@@ -77,7 +81,9 @@ struct ExerciseDetailView: View {
             .padding(.vertical, 8)
 
             // Exercise summary metrics row - always shown
-            ExerciseSummaryView(progressState: createProgressState(), sets: sets)
+            if let progressState = progressState {
+                ExerciseSummaryView(progressState: progressState, sets: sets)
+            }
 
             // Add Set button - positioned below summary, above historic sets
             HStack {
@@ -117,7 +123,7 @@ struct ExerciseDetailView: View {
             } else {
                 HistorySectionView(
                     sets: sets,
-                    dayGroups: createDayGroups(),
+                    dayGroups: dayGroups,
                     isMostRecentSet: isMostRecentSet,
                     deleteSet: deleteSet
                 )
@@ -156,16 +162,20 @@ struct ExerciseDetailView: View {
         .sheet(isPresented: $showingAddSet) {
             AddSetView(exercise: exercise)
         }
+        .onAppear {
+            updateCachedData()
+        }
+        .onChange(of: sets) { _, newSets in
+            updateCachedData()
+        }
     }
 
     // MARK: - Business Logic Methods
-    
-    private func createProgressState() -> ProgressTracker.ProgressState {
-        ProgressTracker.createProgressState(from: sets)
-    }
-    
-    private func createDayGroups() -> [ExerciseDataGrouper.DayGroup] {
-        ExerciseDataGrouper.createDayGroups(from: sets)
+
+    /// Update cached expensive calculations when sets change
+    private func updateCachedData() {
+        progressState = ProgressTracker.createProgressState(from: sets)
+        dayGroups = ExerciseDataGrouper.createDayGroups(from: sets)
     }
     
     private func addSet() {
@@ -340,7 +350,7 @@ private struct HistorySectionView: View {
             Section {
                 ForEach(dayGroup.sets, id: \.persistentModelID) { set in
                     HStack(alignment: .bottom) {
-                        Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
+                        Text(ExerciseSetFormatters.formatSet(set))
                             .monospacedDigit()
                             .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
@@ -353,11 +363,7 @@ private struct HistorySectionView: View {
                                 .textCase(.uppercase)
                         }
 
-                        Text(set.timestamp.formatted(
-                            Date.FormatStyle()
-                                .hour().minute()
-                                .locale(Locale(identifier: "en_GB_POSIX"))
-                        ))
+                        Text(Formatters.formatTimeHM(set.timestamp))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     }

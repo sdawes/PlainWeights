@@ -12,10 +12,13 @@ struct ExerciseSummaryView: View {
     let progressState: ProgressTracker.ProgressState
     let sets: [ExerciseSet]
 
+    // Cache expensive calculation in computed property
+    private var sessionMetrics: ExerciseSessionMetricsData {
+        ExerciseSessionMetrics.getSessionMetricsWithDefaults(from: sets)
+    }
+
     var body: some View {
         VStack(spacing: 16) {
-            // Get session metrics (always available, with zero defaults for new exercises)
-            let sessionMetrics = ExerciseSessionMetrics.getSessionMetricsWithDefaults(from: sets)
 
             // Last session metrics section - always shown
             HStack(alignment: .top) {
@@ -26,11 +29,18 @@ struct ExerciseSummaryView: View {
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
-                    Text("\(Formatters.formatWeight(sessionMetrics.lastSessionMaxWeight)) kg")
+                    Text(ExerciseSetFormatters.formatLastMaxWeight(
+                        weight: sessionMetrics.lastSessionMaxWeight,
+                        reps: sessionMetrics.lastSessionMaxWeightReps
+                    ))
                         .font(.system(size: 32, weight: .bold))
                         .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
 
-                    Text("\(sessionMetrics.lastSessionMaxWeightReps) reps • \(sessionMetrics.lastSessionTotalSets) sets")
+                    Text(ExerciseSetFormatters.formatMaxWeightDetails(
+                        weight: sessionMetrics.lastSessionMaxWeight,
+                        reps: sessionMetrics.lastSessionMaxWeightReps,
+                        sets: sessionMetrics.lastSessionTotalSets
+                    ))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -53,32 +63,48 @@ struct ExerciseSummaryView: View {
 
                 // Today's progress section (integrated)
                 VStack(alignment: .leading, spacing: 12) {
-                    // Header
-                    Text("Lifted today")
+                    // Adaptive header based on exercise type
+                    Text(progressState.progressLabel)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     // Volume and percentage row
                     HStack {
-                        Text("\(Formatters.formatVolume(progressState.todayVolume)) kg")
+                        Text("\(Formatters.formatVolume(progressState.todayVolume)) \(progressState.unit)")
                             .font(.headline.bold())
                             .foregroundStyle(.primary)
 
                         Spacer()
 
-                        if sessionMetrics.hasHistoricalData {
+                        if progressState.canCompareToLast || sessionMetrics.todaysVolume > 0 {
                             Text("\(progressState.percentOfLast)% of last")
                                 .font(.headline)
                                 .foregroundStyle(progressState.barFillColor)
+                        } else if sessionMetrics.hasHistoricalData && !progressState.canCompareToLast {
+                            Text(progressState.deltaText)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
 
-                    // Progress bar - always shown but greyed out for new exercises
-                    ProgressView(value: sessionMetrics.hasHistoricalData ? Double(progressState.progressBarRatio) : 0.0)
-                        .progressViewStyle(LinearProgressViewStyle(tint: sessionMetrics.hasHistoricalData ? progressState.barFillColor : .secondary))
-                        .scaleEffect(x: 1, y: 1.5, anchor: .center)
-                        .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
+                    // Progress bar - always shown when requested
+                    if progressState.showProgressBar {
+                        if progressState.canCompareToLast {
+                            // Normal progress bar with comparison
+                            ProgressView(value: Double(progressState.progressBarRatio))
+                                .progressViewStyle(LinearProgressViewStyle(tint: progressState.barFillColor))
+                                .scaleEffect(x: 1, y: 1.5, anchor: .center)
+                                .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
+                        } else {
+                            // Progress bar for new exercises or type changes - show as 100% if today has volume
+                            let newExerciseProgress = sessionMetrics.todaysVolume > 0 ? 1.0 : 0.0
+                            ProgressView(value: newExerciseProgress)
+                                .progressViewStyle(LinearProgressViewStyle(tint: sessionMetrics.todaysVolume > 0 ? .green : .secondary.opacity(0.3)))
+                                .scaleEffect(x: 1, y: 1.5, anchor: .center)
+                                .animation(.easeInOut(duration: 0.3), value: newExerciseProgress)
+                        }
+                    }
 
                 }
         }
@@ -113,7 +139,7 @@ private struct TodayProgressComponent: View {
 
                 Spacer()
 
-                if progressState.lastCompletedDayInfo != nil {
+                if progressState.canCompareToLast || progressState.todayVolume > 0 {
                     Text("\(progressState.percentOfLast)% of last")
                         .font(.headline)
                         .foregroundStyle(progressState.barFillColor)

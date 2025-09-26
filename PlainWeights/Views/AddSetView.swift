@@ -32,7 +32,7 @@ struct AddSetView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        TextField("Enter weight", text: $weightText)
+                        TextField("Enter weight (optional)", text: $weightText)
                             .keyboardType(.decimalPad)
                             .focused($focusedField, equals: .weight)
                             .submitLabel(.next)
@@ -54,7 +54,7 @@ struct AddSetView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        TextField("Enter reps", text: $repsText)
+                        TextField("Enter reps (optional)", text: $repsText)
                             .keyboardType(.numberPad)
                             .focused($focusedField, equals: .reps)
                             .submitLabel(.done)

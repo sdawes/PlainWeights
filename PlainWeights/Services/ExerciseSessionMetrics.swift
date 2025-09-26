@@ -46,6 +46,28 @@ enum ExerciseSessionMetrics {
         return lastSessionInfo.volume
     }
 
+    /// Get session metrics for today's session
+    static func getTodaySessionMetrics(from sets: [ExerciseSet]) -> SessionMetrics? {
+        let todaySets = getTodaysSets(from: sets)
+        guard !todaySets.isEmpty else { return nil }
+
+        return ExerciseVolumeCalculator.getSessionMetrics(for: todaySets, date: Date())
+    }
+
+    /// Get session metrics for the last completed session
+    static func getLastSessionMetrics(from sets: [ExerciseSet]) -> SessionMetrics? {
+        guard let lastSessionInfo = getLastCompletedSessionInfo(from: sets) else {
+            return nil
+        }
+
+        let calendar = Calendar.current
+        let lastSessionSets = sets.filter { set in
+            calendar.startOfDay(for: set.timestamp) == calendar.startOfDay(for: lastSessionInfo.date) && !set.isWarmUp
+        }
+
+        return ExerciseVolumeCalculator.getSessionMetrics(for: lastSessionSets, date: lastSessionInfo.date)
+    }
+
     /// Get the date of the last completed session
     static func getLastSessionDate(from sets: [ExerciseSet]) -> Date? {
         return getLastCompletedSessionInfo(from: sets)?.date
@@ -56,9 +78,7 @@ enum ExerciseSessionMetrics {
     /// Calculate total volume lifted today (updates live as sets are added)
     static func getTodaysVolume(from sets: [ExerciseSet]) -> Double {
         let todaySets = getTodaysSets(from: sets)
-        return todaySets.filter { !$0.isWarmUp }.reduce(0) { total, set in
-            total + effectiveLoad(for: set.weight) * Double(set.reps)
-        }
+        return ExerciseVolumeCalculator.calculateVolume(for: todaySets)
     }
 
     /// Get all sets performed today
@@ -76,14 +96,21 @@ enum ExerciseSessionMetrics {
     }
 
     /// Create complete session metrics with zero defaults for new exercises
-    static func getSessionMetricsWithDefaults(from sets: [ExerciseSet]) -> SessionMetrics {
-        return SessionMetrics(
-            lastSessionMaxWeight: getLastSessionMaxWeight(from: sets),
-            lastSessionMaxWeightReps: getLastSessionMaxWeightReps(from: sets),
-            lastSessionTotalSets: getLastSessionTotalSets(from: sets),
-            lastSessionTotalVolume: getLastSessionTotalVolume(from: sets),
-            todaysVolume: getTodaysVolume(from: sets),
-            hasHistoricalData: hasHistoricalSessionData(from: sets)
+    /// Optimized to compute all metrics in minimal passes over the data
+    static func getSessionMetricsWithDefaults(from sets: [ExerciseSet]) -> ExerciseSessionMetricsData {
+        // Get last session info once (single shared call)
+        let lastDayInfo = ExerciseDataHelper.getLastCompletedDayInfo(from: sets)
+
+        // Calculate today's volume once
+        let todaysVolume = getTodaysVolume(from: sets)
+
+        return ExerciseSessionMetricsData(
+            lastSessionMaxWeight: lastDayInfo?.maxWeight ?? 0.0,
+            lastSessionMaxWeightReps: lastDayInfo?.maxWeightReps ?? 0,
+            lastSessionTotalSets: lastDayInfo?.totalSets ?? 0,
+            lastSessionTotalVolume: lastDayInfo?.volume ?? 0.0,
+            todaysVolume: todaysVolume,
+            hasHistoricalData: lastDayInfo != nil
         )
     }
 
@@ -91,37 +118,17 @@ enum ExerciseSessionMetrics {
 
     /// Get comprehensive info about the last completed session (before today)
     private static func getLastCompletedSessionInfo(from sets: [ExerciseSet]) -> (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int, totalSets: Int)? {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-
-        // Get sets from before today, excluding warm-ups
-        let historicalSets = sets.filter { set in
-            calendar.startOfDay(for: set.timestamp) < today && !set.isWarmUp
-        }
-
-        guard !historicalSets.isEmpty else { return nil }
-
-        // Group by day and get the most recent day
-        let groupedByDay = Dictionary(grouping: historicalSets) { set in
-            calendar.startOfDay(for: set.timestamp)
-        }
-
-        guard let lastDate = groupedByDay.keys.max(),
-              let lastDaySets = groupedByDay[lastDate] else {
+        guard let lastDayInfo = ExerciseDataHelper.getLastCompletedDayInfo(from: sets) else {
             return nil
         }
 
-        // Calculate metrics for that day
-        let volume = lastDaySets.reduce(0) { total, set in
-            total + effectiveLoad(for: set.weight) * Double(set.reps)
-        }
-
-        let maxWeight = lastDaySets.map { $0.weight }.max() ?? 0.0
-        let maxWeightSets = lastDaySets.filter { $0.weight == maxWeight }
-        let maxWeightReps = maxWeightSets.map { $0.reps }.max() ?? 0
-        let totalSets = lastDaySets.count
-
-        return (date: lastDate, volume: volume, maxWeight: maxWeight, maxWeightReps: maxWeightReps, totalSets: totalSets)
+        return (
+            date: lastDayInfo.date,
+            volume: lastDayInfo.volume,
+            maxWeight: lastDayInfo.maxWeight,
+            maxWeightReps: lastDayInfo.maxWeightReps,
+            totalSets: lastDayInfo.totalSets
+        )
     }
 
     /// Get effective load for volume calculations (treats 0kg as 1kg for bodyweight exercises)
@@ -133,7 +140,7 @@ enum ExerciseSessionMetrics {
 // MARK: - Session Metrics Data Structure
 
 /// Complete session metrics for the Exercise Summary component
-struct SessionMetrics {
+struct ExerciseSessionMetricsData {
     let lastSessionMaxWeight: Double
     let lastSessionMaxWeightReps: Int
     let lastSessionTotalSets: Int

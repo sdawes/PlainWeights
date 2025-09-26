@@ -39,59 +39,105 @@ enum ProgressTracker {
         let barFillColor: Color
         let gainsColor: Color
         let deltaText: String
-        
-        init(from sets: [ExerciseSet]) {
-            // Calculate core metrics using ExerciseSessionMetrics
-            self.todayVolume = ExerciseSessionMetrics.getTodaysVolume(from: sets)
+        let progressLabel: String
+        let unit: String
+        let canCompareToLast: Bool
 
-            // Build lastCompletedDayInfo from session metrics
-            if ExerciseSessionMetrics.hasHistoricalSessionData(from: sets),
-               let date = ExerciseSessionMetrics.getLastSessionDate(from: sets) {
+        init(from sets: [ExerciseSet]) {
+            // Get today's and last session metrics
+            let todayMetrics = ExerciseSessionMetrics.getTodaySessionMetrics(from: sets)
+            let lastMetrics = ExerciseSessionMetrics.getLastSessionMetrics(from: sets)
+
+            self.todayVolume = todayMetrics?.value ?? 0
+
+            // Set display labels based on today's exercise type
+            if let todayMetrics = todayMetrics {
+                self.progressLabel = ExerciseVolumeCalculator.getProgressLabel(for: todayMetrics.type)
+                self.unit = ExerciseVolumeCalculator.getUnit(for: todayMetrics.type)
+            } else {
+                self.progressLabel = "Lifted today"
+                self.unit = "kg"
+            }
+
+            // Build lastCompletedDayInfo for backward compatibility
+            if let lastMetrics = lastMetrics {
                 self.lastCompletedDayInfo = (
-                    date: date,
-                    volume: ExerciseSessionMetrics.getLastSessionTotalVolume(from: sets),
-                    maxWeight: ExerciseSessionMetrics.getLastSessionMaxWeight(from: sets),
-                    maxWeightReps: ExerciseSessionMetrics.getLastSessionMaxWeightReps(from: sets)
+                    date: lastMetrics.date,
+                    volume: lastMetrics.value,
+                    maxWeight: lastMetrics.maxWeight,
+                    maxWeightReps: lastMetrics.maxWeightReps
                 )
             } else {
                 self.lastCompletedDayInfo = nil
             }
-            
-            let lastVolume = lastCompletedDayInfo?.volume
-            
-            self.progressRatioUnclamped = VolumeAnalytics.progressRatioUnclamped(
-                todayVolume: todayVolume, 
-                lastCompletedVolume: lastVolume
+
+            // Calculate progress with type comparison
+            let progressResult = ExerciseVolumeCalculator.calculateProgress(
+                today: todayMetrics ?? SessionMetrics(type: .weightBased, value: 0, maxWeight: 0, maxWeightReps: 0, totalSets: 0, date: Date()),
+                last: lastMetrics
             )
-            
-            self.progressBarRatio = VolumeAnalytics.progressBarRatio(
-                todayVolume: todayVolume, 
-                lastCompletedVolume: lastVolume
-            )
-            
-            self.percentOfLast = VolumeAnalytics.percentOfLast(
-                todayVolume: todayVolume, 
-                lastCompletedVolume: lastVolume
-            )
-            
-            self.gainsPercent = VolumeAnalytics.gainsPercent(
-                todayVolume: todayVolume, 
-                lastCompletedVolume: lastVolume
-            )
-            
-            self.showProgressBar = VolumeAnalytics.shouldShowProgressBar(
-                lastCompletedVolume: lastVolume
-            )
-            
+
+            self.canCompareToLast = progressResult.canCompare
+
+            if progressResult.canCompare {
+                self.percentOfLast = progressResult.percentage
+                self.showProgressBar = true
+
+                let lastVolume = lastCompletedDayInfo?.volume
+
+                self.progressRatioUnclamped = VolumeAnalytics.progressRatioUnclamped(
+                    todayVolume: todayVolume,
+                    lastCompletedVolume: lastVolume
+                )
+
+                self.progressBarRatio = VolumeAnalytics.progressBarRatio(
+                    todayVolume: todayVolume,
+                    lastCompletedVolume: lastVolume
+                )
+
+                self.gainsPercent = VolumeAnalytics.gainsPercent(
+                    todayVolume: todayVolume,
+                    lastCompletedVolume: lastVolume
+                )
+
+                self.deltaText = Formatters.formatDeltaText(
+                    todayVolume: todayVolume,
+                    lastCompletedDayInfo: lastCompletedDayInfo
+                )
+            } else {
+                // Can't compare - different exercise types or no history
+                // Calculate percentage for new exercises using 0-baseline math
+                self.percentOfLast = VolumeAnalytics.percentOfLast(
+                    todayVolume: todayVolume,
+                    lastCompletedVolume: lastCompletedDayInfo?.volume
+                )
+                self.showProgressBar = true  // Always show progress bar
+
+                // Use our updated analytics for consistent calculations
+                let lastVolume = lastCompletedDayInfo?.volume
+                self.progressRatioUnclamped = VolumeAnalytics.progressRatioUnclamped(
+                    todayVolume: todayVolume,
+                    lastCompletedVolume: lastVolume
+                )
+                self.progressBarRatio = VolumeAnalytics.progressBarRatio(
+                    todayVolume: todayVolume,
+                    lastCompletedVolume: lastVolume
+                )
+                self.gainsPercent = VolumeAnalytics.gainsPercent(
+                    todayVolume: todayVolume,
+                    lastCompletedVolume: lastVolume
+                )
+
+                if lastMetrics != nil && !progressResult.canCompare {
+                    self.deltaText = "Exercise type changed"
+                } else {
+                    self.deltaText = ""
+                }
+            }
+
             // Determine colors
             self.barFillColor = ProgressTracker.barFillColor(percentOfLast: percentOfLast)
             self.gainsColor = ProgressTracker.gainsColor(gainsPercent: gainsPercent)
-            
-            // Format delta text
-            self.deltaText = Formatters.formatDeltaText(
-                todayVolume: todayVolume, 
-                lastCompletedDayInfo: lastCompletedDayInfo
-            )
         }
     }
     

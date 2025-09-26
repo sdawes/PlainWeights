@@ -30,7 +30,12 @@ enum ExerciseSetService {
         context: ModelContext
     ) throws {
         // Validation happens in validateInput, but double-check here
-        guard weight >= 0, reps > 0 else {
+        guard weight >= 0, reps >= 0 else {
+            throw ExerciseSetError.invalidInput
+        }
+
+        // At least one must be greater than 0 (same logic as validateInput)
+        guard weight > 0 || reps > 0 else {
             throw ExerciseSetError.invalidInput
         }
 
@@ -100,17 +105,24 @@ enum ExerciseSetService {
 
     /// Validate text input for weight and reps
     /// - Parameters:
-    ///   - weightText: String input for weight
-    ///   - repsText: String input for reps
-    /// - Returns: Tuple of valid weight and reps, or nil if invalid
+    ///   - weightText: String input for weight (empty treated as 0)
+    ///   - repsText: String input for reps (empty treated as 0)
+    /// - Returns: Tuple of valid weight and reps, or nil if both are 0
     static func validateInput(
         weightText: String,
         repsText: String
     ) -> (weight: Double, reps: Int)? {
-        guard let weight = Double(weightText),
-              let reps = Int(repsText),
-              weight >= 0,
-              reps > 0 else {
+        // Treat empty fields as 0
+        let weight = Double(weightText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+        let reps = Int(repsText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+
+        // Both weight and reps must be non-negative
+        guard weight >= 0, reps >= 0 else {
+            return nil
+        }
+
+        // At least one must be greater than 0
+        guard weight > 0 || reps > 0 else {
             return nil
         }
 

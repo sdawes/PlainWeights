@@ -35,6 +35,14 @@ enum Formatters {
         return formatter
     }()
 
+    /// Cached time formatter for set timestamps (HH:mm format)
+    private static let timeHMFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"  // 24-hour format
+        formatter.locale = Locale(identifier: "en_GB_POSIX")  // Consistent formatting
+        return formatter
+    }()
+
     // MARK: - Volume Formatting
 
     /// Format volume with grouping separators (e.g., "1,250")
@@ -64,6 +72,11 @@ enum Formatters {
     /// Format date for abbreviated day headers (e.g., "Thu 14 Aug")
     static func formatAbbreviatedDayHeader(_ date: Date) -> String {
         date.formatted(Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated))
+    }
+
+    /// Format time for set timestamps (e.g., "14:30")
+    static func formatTimeHM(_ date: Date) -> String {
+        timeHMFormatter.string(from: date)
     }
 
     /// Format date for workout journal with Today/Yesterday shortcuts

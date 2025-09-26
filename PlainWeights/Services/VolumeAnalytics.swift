@@ -35,37 +35,11 @@ enum VolumeAnalytics {
     
     /// Get information about the last completed day (before today)
     static func lastCompletedDayInfo(from sets: [ExerciseSet]) -> (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int)? {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        
-        // Group sets by day
-        let setsByDay = Dictionary(grouping: sets) { set in
-            calendar.startOfDay(for: set.timestamp)
-        }
-        
-        // Find the most recent day before today with sets
-        let pastDays = setsByDay.keys.filter { $0 < today }.sorted(by: >)
-        
-        guard let lastDay = pastDays.first,
-              let allLastDaySets = setsByDay[lastDay] else {
+        guard let lastDayInfo = ExerciseDataHelper.getLastCompletedDayInfo(from: sets) else {
             return nil
         }
 
-        // Filter out warm-up sets for calculations
-        let lastDaySets = allLastDaySets.filter { !$0.isWarmUp }
-        guard !lastDaySets.isEmpty else { return nil }
-
-        let volume = lastDaySets.reduce(0) { $0 + effectiveLoad(for: $1.weight) * Double($1.reps) }
-        let maxWeight = lastDaySets.map { $0.weight }.max() ?? 0
-        
-        // Find reps corresponding to max weight (most recent if multiple)
-        let maxWeightSet = lastDaySets
-            .filter { $0.weight == maxWeight }
-            .sorted { $0.timestamp > $1.timestamp }
-            .first
-        let maxWeightReps = maxWeightSet?.reps ?? 0
-        
-        return (lastDay, volume, maxWeight, maxWeightReps)
+        return (lastDayInfo.date, lastDayInfo.volume, lastDayInfo.maxWeight, lastDayInfo.maxWeightReps)
     }
 
     /// Get max weight and all corresponding reps from last completed day
@@ -188,7 +162,10 @@ enum VolumeAnalytics {
     
     /// Calculate unclamped progress ratio (can exceed 1.0)
     static func progressRatioUnclamped(todayVolume: Double, lastCompletedVolume: Double?) -> Double {
-        guard let lastVolume = lastCompletedVolume, lastVolume > 0 else { return 0 }
+        let lastVolume = lastCompletedVolume ?? 0
+        if lastVolume == 0 {
+            return todayVolume > 0 ? 1.0 : 0.0  // 100% if any progress from 0
+        }
         return todayVolume / lastVolume
     }
     
@@ -206,16 +183,18 @@ enum VolumeAnalytics {
     
     /// Calculate gains percentage compared to last completed day
     static func gainsPercent(todayVolume: Double, lastCompletedVolume: Double?) -> Int {
-        guard let lastVolume = lastCompletedVolume, lastVolume > 0 else { return 0 }
+        let lastVolume = lastCompletedVolume ?? 0
+        if lastVolume == 0 {
+            return todayVolume > 0 ? 100 : 0  // 100% gain from nothing
+        }
         let gain = (todayVolume - lastVolume) / lastVolume * 100
         return Int(round(gain))
     }
     
     // MARK: - Helper Functions
     
-    /// Check if progress bar should be shown
+    /// Check if progress bar should be shown - always true for consistency
     static func shouldShowProgressBar(lastCompletedVolume: Double?) -> Bool {
-        guard let lastVolume = lastCompletedVolume else { return false }
-        return lastVolume > 0
+        return true
     }
 }

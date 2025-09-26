@@ -118,9 +118,7 @@ struct ExerciseDetailView: View {
                     sets: sets,
                     dayGroups: createDayGroups(),
                     isMostRecentSet: isMostRecentSet,
-                    repeatSet: repeatSet,
-                    deleteSet: deleteSet,
-                    toggleWarmUpStatus: toggleWarmUpStatus
+                    deleteSet: deleteSet
                 )
             }
         }
@@ -337,55 +335,33 @@ private struct HistorySectionView: View {
     let sets: [ExerciseSet]
     let dayGroups: [ExerciseDataGrouper.DayGroup]
     let isMostRecentSet: (ExerciseSet, [ExerciseSet]) -> Bool
-    let repeatSet: (ExerciseSet) -> Void
     let deleteSet: (ExerciseSet) -> Void
-    let toggleWarmUpStatus: (ExerciseSet) -> Void
     
     var body: some View {
         ForEach(dayGroups, id: \.date) { dayGroup in
             Section {
                 ForEach(dayGroup.sets, id: \.persistentModelID) { set in
-                    HStack {
-                        HStack(spacing: 6) {
-                            Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
-                                .monospacedDigit()
-                                .foregroundStyle(set.isWarmUp ? .secondary : .primary)
-
-                        }
+                    HStack(alignment: .bottom) {
+                        Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
+                            .monospacedDigit()
+                            .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
                         Spacer()
 
-                        HStack(spacing: 8) {
-                            Text(set.timestamp.formatted(
-                                Date.FormatStyle()
-                                    .hour().minute()
-                                    .locale(Locale(identifier: "en_GB_POSIX"))
-                            ))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                            // Warm-up toggle button
-                            Button {
-                                toggleWarmUpStatus(set)
-                            } label: {
-                                Image(systemName: set.isWarmUp ? "flame.circle.fill" : "flame.circle")
-                                    .font(.caption)
-                                    .foregroundStyle(set.isWarmUp ? .red : .secondary)
-                            }
-                            .buttonStyle(.plain)
-                            .contentShape(Rectangle())
-
-                            // Repeat button for any set
-                            Button {
-                                repeatSet(set)
-                            } label: {
-                                Image(systemName: "arrow.clockwise.circle.fill")
-                                    .font(.caption)
-                                    .foregroundStyle(.blue)
-                            }
-                            .buttonStyle(.plain)
-                            .contentShape(Rectangle())
+                        if set.isWarmUp {
+                            Text("WARM UP")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(.red.opacity(0.7))
+                                .textCase(.uppercase)
                         }
+
+                        Text(set.timestamp.formatted(
+                            Date.FormatStyle()
+                                .hour().minute()
+                                .locale(Locale(identifier: "en_GB_POSIX"))
+                        ))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
                     .listRowSeparator(dayGroup.isFirst(set) ? .hidden : .visible, edges: .top)
                     .listRowSeparator(dayGroup.isLast(set) ? .hidden : .visible, edges: .bottom)

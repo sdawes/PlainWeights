@@ -41,9 +41,21 @@ enum ProgressTracker {
         let deltaText: String
         
         init(from sets: [ExerciseSet]) {
-            // Calculate core metrics using VolumeAnalytics
-            self.todayVolume = VolumeAnalytics.todayVolume(from: sets)
-            self.lastCompletedDayInfo = VolumeAnalytics.lastCompletedDayInfo(from: sets)
+            // Calculate core metrics using ExerciseSessionMetrics
+            self.todayVolume = ExerciseSessionMetrics.getTodaysVolume(from: sets)
+
+            // Build lastCompletedDayInfo from session metrics
+            if ExerciseSessionMetrics.hasHistoricalSessionData(from: sets),
+               let date = ExerciseSessionMetrics.getLastSessionDate(from: sets) {
+                self.lastCompletedDayInfo = (
+                    date: date,
+                    volume: ExerciseSessionMetrics.getLastSessionTotalVolume(from: sets),
+                    maxWeight: ExerciseSessionMetrics.getLastSessionMaxWeight(from: sets),
+                    maxWeightReps: ExerciseSessionMetrics.getLastSessionMaxWeightReps(from: sets)
+                )
+            } else {
+                self.lastCompletedDayInfo = nil
+            }
             
             let lastVolume = lastCompletedDayInfo?.volume
             

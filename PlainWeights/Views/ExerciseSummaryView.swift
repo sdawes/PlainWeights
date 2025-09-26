@@ -14,42 +14,41 @@ struct ExerciseSummaryView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Combined metrics in single bordered component
-            if let maxStats = VolumeAnalytics.getMaxWeightAndSessionStats(from: sets),
-               let totalVolume = progressState.lastCompletedDayInfo?.volume {
+            // Get session metrics (always available, with zero defaults for new exercises)
+            let sessionMetrics = ExerciseSessionMetrics.getSessionMetricsWithDefaults(from: sets)
 
-                // Last session metrics section
-                HStack(alignment: .top) {
-                    // Left: Max weight with reps underneath
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Last max weight")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
+            // Last session metrics section - always shown
+            HStack(alignment: .top) {
+                // Left: Max weight with reps underneath
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Last max weight")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
 
-                        Text("\(Formatters.formatWeight(maxStats.weight)) kg")
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundStyle(.primary)
+                    Text("\(Formatters.formatWeight(sessionMetrics.lastSessionMaxWeight)) kg")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
 
-                        Text("\(maxStats.maxReps) reps • \(maxStats.totalSets) sets")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    // Right: Total volume
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("Last session total")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-
-                        Text("\(Formatters.formatVolume(totalVolume)) kg")
-                            .font(.headline.bold())
-                            .foregroundStyle(.primary)
-                    }
+                    Text("\(sessionMetrics.lastSessionMaxWeightReps) reps • \(sessionMetrics.lastSessionTotalSets) sets")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+
+                Spacer()
+
+                // Right: Total volume
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("Last session total")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+
+                    Text("\(Formatters.formatVolume(sessionMetrics.lastSessionTotalVolume)) kg")
+                        .font(.headline.bold())
+                        .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
+                }
+            }
                 .padding(.bottom, 16)
 
                 // Today's progress section (integrated)
@@ -68,26 +67,20 @@ struct ExerciseSummaryView: View {
 
                         Spacer()
 
-                        if progressState.lastCompletedDayInfo != nil {
+                        if sessionMetrics.hasHistoricalData {
                             Text("\(progressState.percentOfLast)% of last")
                                 .font(.headline)
                                 .foregroundStyle(progressState.barFillColor)
                         }
                     }
 
-                    // Modern progress bar
-                    if progressState.lastCompletedDayInfo != nil {
-                        ProgressView(value: Double(progressState.progressBarRatio))
-                            .progressViewStyle(LinearProgressViewStyle(tint: progressState.barFillColor))
-                            .scaleEffect(x: 1, y: 1.5, anchor: .center)
-                            .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
-                    }
+                    // Progress bar - always shown but greyed out for new exercises
+                    ProgressView(value: sessionMetrics.hasHistoricalData ? Double(progressState.progressBarRatio) : 0.0)
+                        .progressViewStyle(LinearProgressViewStyle(tint: sessionMetrics.hasHistoricalData ? progressState.barFillColor : .secondary))
+                        .scaleEffect(x: 1, y: 1.5, anchor: .center)
+                        .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
 
                 }
-            } else {
-                // Show today's progress even if no last session data
-                TodayProgressComponent(progressState: progressState)
-            }
         }
         .padding(16)
         .overlay(

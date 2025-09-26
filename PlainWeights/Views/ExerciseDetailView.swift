@@ -76,10 +76,8 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .padding(.vertical, 8)
 
-            // Exercise summary metrics row
-            if let progressState = createProgressState() {
-                ExerciseSummaryView(progressState: progressState, sets: sets)
-            }
+            // Exercise summary metrics row - always shown
+            ExerciseSummaryView(progressState: createProgressState(), sets: sets)
 
             // Add Set button - positioned below summary, above historic sets
             HStack {
@@ -166,7 +164,7 @@ struct ExerciseDetailView: View {
 
     // MARK: - Business Logic Methods
     
-    private func createProgressState() -> ProgressTracker.ProgressState? {
+    private func createProgressState() -> ProgressTracker.ProgressState {
         ProgressTracker.createProgressState(from: sets)
     }
     

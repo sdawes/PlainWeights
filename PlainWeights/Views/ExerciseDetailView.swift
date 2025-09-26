@@ -44,24 +44,34 @@ struct ExerciseDetailView: View {
     var body: some View {
         ScrollViewReader { scrollProxy in
             List {
-            // Title row
-            TextField("Title", text: $exerciseName)
-                .font(.largeTitle.bold())
-                .textFieldStyle(.plain)
-                .focused($nameFocused)
-                .submitLabel(.done)
-                .onSubmit {
-                    nameFocused = false
-                    updateExerciseName()
-                }
-                .listRowSeparator(.hidden)
-                .padding(.vertical, 8)
+            // Title and notes row
+            VStack(alignment: .leading, spacing: 2) {
+                // Title
+                TextField("Title", text: $exerciseName)
+                    .font(.largeTitle.bold())
+                    .textFieldStyle(.plain)
+                    .focused($nameFocused)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        nameFocused = false
+                        updateExerciseName()
+                    }
 
-            // Notes section
-            NotesSection(
-                noteText: $noteText,
-                updateNote: updateNote
-            )
+                // Notes as subtitle
+                TextField("Add notes about form, target muscles, etc...", text: $noteText)
+                    .font(.caption.italic())
+                    .foregroundStyle(.tertiary)
+                    .textFieldStyle(.plain)
+                    .lineLimit(1)
+                    .onSubmit {
+                        updateNote()
+                    }
+                    .onChange(of: noteText) { _, _ in
+                        updateNote()
+                    }
+            }
+            .listRowSeparator(.hidden)
+            .padding(.vertical, 8)
 
             // Exercise summary metrics row
             if let progressState = createProgressState() {
@@ -259,44 +269,6 @@ struct ExerciseDetailView: View {
         } catch {
             print("Error updating note: \(error)")
         }
-    }
-}
-
-// MARK: - Notes Section
-
-private struct NotesSection: View {
-    @Binding var noteText: String
-    let updateNote: () -> Void
-    @FocusState private var noteFocused: Bool
-
-    var body: some View {
-        TextEditor(text: $noteText)
-            .font(.footnote)
-            .foregroundStyle(Color(.darkGray))
-            .scrollContentBackground(.hidden)
-            .padding(8)
-            .background(Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .frame(minHeight: 50, maxHeight: 100)
-            .focused($noteFocused)
-            .overlay(alignment: .topLeading) {
-                if noteText.isEmpty && !noteFocused {
-                    Text("Add notes about form, target muscles, etc...")
-                        .font(.footnote)
-                        .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 12)
-                        .allowsHitTesting(false)
-                }
-            }
-            .onChange(of: noteFocused) { _, isFocused in
-                if !isFocused {
-                    updateNote()
-                }
-            }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            .padding(.vertical, 2)
     }
 }
 

@@ -8,6 +8,24 @@
 import SwiftUI
 import SwiftData
 
+/// Configuration for AddSetView presentation with reliable parameter delivery
+struct AddSetConfig: Identifiable {
+    let id = UUID()
+    let exercise: Exercise
+    let initialWeight: Double?
+    let initialReps: Int?
+
+    /// Create config for empty "Add Set" presentation
+    static func empty(exercise: Exercise) -> AddSetConfig {
+        AddSetConfig(exercise: exercise, initialWeight: nil, initialReps: nil)
+    }
+
+    /// Create config for "Add Previous Set" with pre-populated values
+    static func previous(exercise: Exercise, weight: Double?, reps: Int?) -> AddSetConfig {
+        AddSetConfig(exercise: exercise, initialWeight: weight, initialReps: reps)
+    }
+}
+
 struct ExerciseDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
@@ -20,7 +38,7 @@ struct ExerciseDetailView: View {
     @State private var exerciseName: String = ""
     @State private var noteText: String = ""
     @State private var showingDeleteAlert = false
-    @State private var showingAddSet = false
+    @State private var addSetConfig: AddSetConfig?
 
     @FocusState private var nameFocused: Bool
     @FocusState private var notesFocused: Bool
@@ -88,10 +106,35 @@ struct ExerciseDetailView: View {
                 ExerciseSummaryView(progressState: progressState, sets: sets)
             }
 
-            // Add Set button - positioned below summary, above historic sets
-            HStack {
+            // Add buttons - positioned adjacent with clear hierarchy
+            HStack(spacing: 8) {
                 Spacer()
-                Button(action: { showingAddSet = true }) {
+
+                // Secondary: Add Previous Set (subdued styling)
+                Button(action: {
+                    addSetConfig = .previous(
+                        exercise: exercise,
+                        weight: lastWorkingSetValues.weight,
+                        reps: lastWorkingSetValues.reps
+                    )
+                }) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.caption2)
+                        Text("Add Previous Set")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.secondary.opacity(0.1))
+                    .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+
+                // Primary: Add Set (prominent styling)
+                Button(action: { addSetConfig = .empty(exercise: exercise) }) {
                     HStack(spacing: 4) {
                         Image(systemName: "plus.circle.fill")
                             .font(.caption)
@@ -164,8 +207,12 @@ struct ExerciseDetailView: View {
         } message: {
             Text("This will permanently delete \"\(exercise.name)\" and all its sets. This action cannot be undone.")
         }
-        .sheet(isPresented: $showingAddSet) {
-            AddSetView(exercise: exercise)
+        .sheet(item: $addSetConfig) { config in
+            AddSetView(
+                exercise: config.exercise,
+                initialWeight: config.initialWeight,
+                initialReps: config.initialReps
+            )
         }
         .onAppear {
             updateCachedData()
@@ -244,6 +291,17 @@ struct ExerciseDetailView: View {
         repsText = ""
         focusedField = nil
     }
+
+    /// Get the weight and reps values from the last working (non-warm-up) set
+    private var lastWorkingSetValues: (weight: Double?, reps: Int?) {
+        guard let lastWorkingSet = sets.first(where: { !$0.isWarmUp }) else {
+            return (nil, nil)
+        }
+
+        // Return actual values including zeros for pre-population
+        return (lastWorkingSet.weight, lastWorkingSet.reps)
+    }
+
 
     private func toggleWarmUpStatus(_ set: ExerciseSet) {
         do {
@@ -428,4 +486,3 @@ private struct LastSessionView: View {
         }
     }
 }
-

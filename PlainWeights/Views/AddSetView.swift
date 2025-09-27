@@ -21,6 +21,16 @@ struct AddSetView: View {
         case weight, reps
     }
 
+    init(exercise: Exercise, initialWeight: Double? = nil, initialReps: Int? = nil) {
+        self.exercise = exercise
+        if let initialWeight = initialWeight, initialWeight >= 0 {
+            _weightText = State(initialValue: Formatters.formatWeight(initialWeight))
+        }
+        if let initialReps = initialReps, initialReps >= 0 {
+            _repsText = State(initialValue: String(initialReps))
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
@@ -77,18 +87,26 @@ struct AddSetView: View {
                         .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                 )
 
-                // Add Set button
-                Button(action: addSet) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                        Text("Add Set")
-                            .fontWeight(.semibold)
+                // Add Set button - matching ExerciseDetailView design
+                HStack {
+                    Spacer()
+                    Button(action: addSet) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.caption)
+                            Text("Add Set")
+                                .font(.caption.bold())
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(canAddSet ? Color.blue : Color.gray)
+                        .clipShape(Capsule())
                     }
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(canAddSet ? Color.blue : Color.gray)
-                    .padding(.vertical, 12)
+                    .buttonStyle(.plain)
+                    .contentShape(Rectangle())
+                    .disabled(!canAddSet)
                 }
-                .disabled(!canAddSet)
 
                 Spacer()
             }

@@ -12,6 +12,18 @@ import SwiftData
 /// Service for calculating session-to-session exercise metrics
 enum ExerciseSessionMetrics {
 
+    // MARK: - Today's Most Recent Set
+
+    /// Get today's most recent (newest) working set
+    static func getTodaysMostRecentSet(from sets: [ExerciseSet]) -> ExerciseSet? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        return sets
+            .filter { calendar.startOfDay(for: $0.timestamp) == today && !$0.isWarmUp }
+            .first  // Sets are already sorted by timestamp descending
+    }
+
     // MARK: - Last Completed Session Metrics
 
     /// Calculate the maximum weight lifted in the last completed session (not today)

@@ -25,8 +25,74 @@ enum ProgressTracker {
         return .secondary
     }
     
+    // MARK: - Personal Record Indicators
+
+    enum PRDirection {
+        case up, down, same
+
+        var iconName: String {
+            switch self {
+            case .up: return "arrow.up.circle.fill"
+            case .down: return "arrow.down.circle.fill"
+            case .same: return "arrow.left.arrow.right.circle.fill"
+            }
+        }
+
+        var color: Color {
+            switch self {
+            case .up: return .green
+            case .down: return Color(red: 0.7, green: 0.1, blue: 0.1) // Same as delete button
+            case .same: return .blue
+            }
+        }
+    }
+
+    struct PersonalRecordIndicators {
+        let weightImprovement: Double
+        let repsImprovement: Int
+        let weightDirection: PRDirection
+        let repsDirection: PRDirection
+        let hasWeightPR: Bool
+        let hasRepsPR: Bool
+
+        static func compare(todaysNewestWeight: Double, todaysNewestReps: Int,
+                          lastSessionMaxWeight: Double, lastSessionMaxReps: Int) -> PersonalRecordIndicators {
+
+            let weightDiff = todaysNewestWeight - lastSessionMaxWeight
+            let repsDiff = todaysNewestReps - lastSessionMaxReps
+
+            let weightDirection: PRDirection
+            let repsDirection: PRDirection
+
+            if weightDiff > 0 {
+                weightDirection = .up
+            } else if weightDiff < 0 {
+                weightDirection = .down
+            } else {
+                weightDirection = .same
+            }
+
+            if repsDiff > 0 {
+                repsDirection = .up
+            } else if repsDiff < 0 {
+                repsDirection = .down
+            } else {
+                repsDirection = .same
+            }
+
+            return PersonalRecordIndicators(
+                weightImprovement: weightDiff,
+                repsImprovement: repsDiff,
+                weightDirection: weightDirection,
+                repsDirection: repsDirection,
+                hasWeightPR: weightDirection == .up,
+                hasRepsPR: repsDirection == .up
+            )
+        }
+    }
+
     // MARK: - Progress State
-    
+
     /// Complete progress state for a workout session
     struct ProgressState {
         let todayVolume: Double
@@ -43,6 +109,7 @@ enum ProgressTracker {
         let progressLabel: String
         let unit: String
         let canCompareToLast: Bool
+        let personalRecords: PersonalRecordIndicators?
 
         init(from sets: [ExerciseSet]) {
             // Get today's and last session metrics
@@ -152,6 +219,19 @@ enum ProgressTracker {
                 } else {
                     self.deltaText = ""
                 }
+            }
+
+            // Calculate personal records by comparing today's newest set with last session's max
+            if let lastMetrics = lastMetrics,
+               let newestSet = ExerciseSessionMetrics.getTodaysMostRecentSet(from: sets) {
+                self.personalRecords = PersonalRecordIndicators.compare(
+                    todaysNewestWeight: newestSet.weight,
+                    todaysNewestReps: newestSet.reps,
+                    lastSessionMaxWeight: lastMetrics.maxWeight,
+                    lastSessionMaxReps: lastMetrics.maxWeightReps
+                )
+            } else {
+                self.personalRecords = nil
             }
 
             // Determine colors

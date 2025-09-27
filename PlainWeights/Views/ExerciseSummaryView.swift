@@ -8,6 +8,38 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Personal Record Indicator Component
+
+struct PersonalRecordIndicator: View {
+    let improvement: Double
+    let direction: ProgressTracker.PRDirection
+    let unit: String
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: direction.iconName)
+                .font(.caption2)
+                .foregroundStyle(direction.color)
+            Text("\(improvement > 0 ? "+" : improvement < 0 ? "-" : "")\(formatImprovement())\(unit)")
+                .font(.caption2.bold())
+                .foregroundStyle(direction.color)
+        }
+    }
+
+    private func formatImprovement() -> String {
+        // Handle zero case for same performance
+        if improvement == 0 {
+            return "0"
+        }
+
+        if unit == "kg" {
+            return Formatters.formatWeight(abs(improvement))
+        } else {
+            return String(Int(abs(improvement)))
+        }
+    }
+}
+
 struct ExerciseSummaryView: View {
     let progressState: ProgressTracker.ProgressState
     let sets: [ExerciseSet]
@@ -74,6 +106,25 @@ struct ExerciseSummaryView: View {
                         Text("\(Formatters.formatVolume(progressState.todayVolume)) \(progressState.unit)")
                             .font(.headline.bold())
                             .foregroundStyle(.primary)
+
+                        // Personal record indicators
+                        if let personalRecords = progressState.personalRecords {
+                            HStack(spacing: 4) {
+                                // Weight improvement indicator
+                                PersonalRecordIndicator(
+                                    improvement: personalRecords.weightImprovement,
+                                    direction: personalRecords.weightDirection,
+                                    unit: "kg"
+                                )
+
+                                // Reps improvement indicator
+                                PersonalRecordIndicator(
+                                    improvement: Double(personalRecords.repsImprovement),
+                                    direction: personalRecords.repsDirection,
+                                    unit: " reps"
+                                )
+                            }
+                        }
 
                         Spacer()
 

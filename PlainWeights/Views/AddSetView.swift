@@ -15,6 +15,7 @@ struct AddSetView: View {
 
     @State private var weightText = ""
     @State private var repsText = ""
+    @State private var isWarmUpSet = false
     @FocusState private var focusedField: Field?
 
     enum Field {
@@ -87,6 +88,18 @@ struct AddSetView: View {
                         .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                 )
 
+                // Warm-up toggle
+                HStack {
+                    Text("Warm-up set")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Toggle("", isOn: $isWarmUpSet)
+                        .labelsHidden()
+                        .tint(isWarmUpSet ? .red : .blue)
+                }
+                .padding(.horizontal, 16)
+
                 // Add Set button - matching ExerciseDetailView design
                 HStack {
                     Spacer()
@@ -141,6 +154,7 @@ struct AddSetView: View {
             try ExerciseSetService.addSet(
                 weight: weight,
                 reps: reps,
+                isWarmUp: isWarmUpSet,
                 to: exercise,
                 context: context
             )

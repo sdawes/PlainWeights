@@ -54,7 +54,7 @@ struct ExerciseSummaryView: View {
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
-                    Text("\(Formatters.formatVolume(sessionMetrics.lastSessionTotalVolume)) kg")
+                    Text("\(Formatters.formatVolume(sessionMetrics.lastSessionTotalWeightVolume)) kg")
                         .font(.headline.bold())
                         .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
                 }
@@ -133,7 +133,7 @@ private struct TodayProgressComponent: View {
 
             // Volume and percentage row
             HStack {
-                Text("\(Formatters.formatVolume(progressState.todayVolume)) kg")
+                Text("\(Formatters.formatVolume(progressState.todayWeightVolume)) kg")
                     .font(.headline.bold())
                     .foregroundStyle(.primary)
 

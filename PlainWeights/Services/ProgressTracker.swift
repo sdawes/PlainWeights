@@ -30,6 +30,7 @@ enum ProgressTracker {
     /// Complete progress state for a workout session
     struct ProgressState {
         let todayVolume: Double
+        let todayWeightVolume: Double  // Weight-only volume for display
         let lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int)?
         let progressRatioUnclamped: Double
         let progressBarRatio: Double
@@ -49,6 +50,10 @@ enum ProgressTracker {
             let lastMetrics = ExerciseSessionMetrics.getLastSessionMetrics(from: sets)
 
             self.todayVolume = todayMetrics?.value ?? 0
+
+            // Calculate weight-only volume for display (shows 0 kg for reps-only exercises)
+            let todaysSets = ExerciseSessionMetrics.getTodaysSets(from: sets)
+            self.todayWeightVolume = ExerciseVolumeCalculator.calculateWeightVolume(for: todaysSets)
 
             // Set display labels based on today's exercise type
             if let todayMetrics = todayMetrics {
@@ -129,7 +134,21 @@ enum ProgressTracker {
                 )
 
                 if lastMetrics != nil && !progressResult.canCompare {
-                    self.deltaText = "Exercise type changed"
+                    // Only show "type changed" if it's a real type change, not data inconsistency
+                    // For new exercises or consistent reps-only, show nothing
+                    if let todayMetrics = todayMetrics, let lastMetrics = lastMetrics {
+                        // Check if this is a legitimate type change vs data inconsistency
+                        let todayHasWeight = todayMetrics.value > 0 && todayMetrics.type == .weightBased
+                        let lastHadWeight = lastMetrics.value > 0 && lastMetrics.type == .weightBased
+
+                        if todayHasWeight != lastHadWeight {
+                            self.deltaText = "Exercise type changed"
+                        } else {
+                            self.deltaText = ""
+                        }
+                    } else {
+                        self.deltaText = ""
+                    }
                 } else {
                     self.deltaText = ""
                 }

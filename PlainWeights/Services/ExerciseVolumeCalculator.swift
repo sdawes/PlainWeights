@@ -66,6 +66,31 @@ enum ExerciseVolumeCalculator {
         return volume
     }
 
+    /// Calculate weight-only volume for display purposes (excludes reps-only exercises)
+    /// Used for "Lifted today" display to show 0 kg for bodyweight exercises
+    static func calculateWeightVolume(for sets: [ExerciseSet]) -> Double {
+        var volume = 0.0
+
+        // Single pass to calculate only weight-based volume
+        for set in sets {
+            guard !set.isWarmUp else { continue }
+
+            // Only count exercises that involve actual weight
+            if set.weight > 0 {
+                if set.reps > 0 {
+                    // Standard exercise: weight × reps
+                    volume += set.weight * Double(set.reps)
+                } else {
+                    // Weight-only exercise: just weight
+                    volume += set.weight
+                }
+            }
+            // Skip reps-only exercises (weight = 0) for display consistency
+        }
+
+        return volume
+    }
+
     // MARK: - Session Analysis
 
     /// Get session metrics for a specific set of sets (today or last session)

@@ -79,6 +79,49 @@ enum Formatters {
         timeHMFormatter.string(from: date)
     }
 
+    /// Format exercise last done date with smart relative display
+    /// - Parameter date: The date the exercise was last performed
+    /// - Returns: Smart formatted string like "yesterday", "3 days ago", "last week", etc.
+    static func formatExerciseLastDone(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let now = Date()
+
+        // Get start of day for both dates to compare calendar days
+        let startOfToday = calendar.startOfDay(for: now)
+        let startOfExerciseDay = calendar.startOfDay(for: date)
+
+        // Calculate difference in days
+        let daysDifference = calendar.dateComponents([.day], from: startOfExerciseDay, to: startOfToday).day ?? 0
+
+        // Handle different cases based on calendar days
+        if daysDifference == 0 {
+            return "today"
+        } else if daysDifference == 1 {
+            return "yesterday"
+        } else if daysDifference >= 2 && daysDifference <= 6 {
+            return "\(daysDifference) days ago"
+        } else if daysDifference >= 7 && daysDifference <= 13 {
+            return "last week"
+        } else if daysDifference >= 14 && daysDifference <= 27 {
+            let weeks = daysDifference / 7
+            return "\(weeks) weeks ago"
+        } else if daysDifference >= 28 && daysDifference <= 59 {
+            return "last month"
+        } else if daysDifference >= 60 && daysDifference <= 364 {
+            let months = daysDifference / 30
+            if months == 1 {
+                return "last month"
+            } else {
+                return "\(months) months ago"
+            }
+        } else if daysDifference >= 365 && daysDifference < 730 {
+            return "last year"
+        } else {
+            let years = daysDifference / 365
+            return "\(years) years ago"
+        }
+    }
+
     /// Format date for workout journal with Today/Yesterday shortcuts
     static func formatWorkoutDayLabel(_ date: Date) -> String {
         let calendar = Calendar.current

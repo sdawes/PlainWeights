@@ -59,7 +59,7 @@ struct FilteredExerciseListView: View {
                             Text(exercise.category)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
-                            Text(exercise.lastUpdated, format: .relative(presentation: .named))
+                            Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                         }

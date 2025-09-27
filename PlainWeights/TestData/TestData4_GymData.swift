@@ -5,7 +5,7 @@
 //  Created by Claude on 25/09/2025.
 //
 //  Test Data Set 4: Real Gym Data
-//  21 exercises, 5 workout sessions (Sep 22, 24, 25, 26, 2025)
+//  24 exercises, 4 workout sessions (Sep 22, 24, 25, 26, 2025)
 
 #if DEBUG
 import Foundation
@@ -18,7 +18,7 @@ class TestData4_GymData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData4_GymData")
-        logger.info("Generating Test Data Set 4 (Real gym data - 21 exercises, 4 sessions)...")
+        logger.info("Generating Test Data Set 4 (Real gym data - 24 exercises, 4 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -52,8 +52,11 @@ class TestData4_GymData {
             (name: "Seated dumbbell Arnold press", category: "Shoulders", note: nil),
             (name: "Upright cable row", category: "Shoulders", note: nil),
             (name: "Butterfly sit up", category: "Core", note: nil),
-            (name: "Test exercise ", category: "Test", note: nil),
-            (name: "Test 2", category: "Test", note: "Check these notes export and re upload"),
+            (name: "Chest Press", category: "Chest", note: nil),
+            (name: "Incline Dumbbell Chest Press", category: "Chest", note: nil),
+            (name: "Chest Cable Flys", category: "Chest", note: nil),
+            (name: "Tricep Dips", category: "Triceps", note: nil),
+            (name: "Tricep Rope Pulls", category: "Triceps", note: nil),
         ]
 
         // Create exercises
@@ -76,9 +79,6 @@ class TestData4_GymData {
         // SESSION 4: 2025-09-26 16:16:57 (Shoulders & Core)
         generateSession4(exercises: exercises, modelContext: modelContext)
 
-        // SESSION 5: 2025-09-26 20:05:15 (Test)
-        generateSession5(exercises: exercises, modelContext: modelContext)
-
         // Save all data
         do {
             try modelContext.save()
@@ -87,10 +87,56 @@ class TestData4_GymData {
         }
     }
 
-    // MARK: - Session 1: 2025-09-22 18:00:00 (Leg Day)
+    // MARK: - Session 1: 2025-09-22 17:00:00 - 18:35:00 (Chest, Triceps, then Legs)
 
     private static func generateSession1(exercises: [String: Exercise], modelContext: ModelContext) {
         let baseDate = Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 22, hour: 18, minute: 0, second: 0))!
+
+        // CHEST & TRICEPS WORKOUT (17:00 - 17:40)
+
+        // Chest Press: 4 sets @ 17:00, 17:03, 17:05, 17:05
+        addSet(exercise: exercises["Chest Press"]!, weight: 50.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-60*60), context: modelContext)  // 17:00
+        addSet(exercise: exercises["Chest Press"]!, weight: 50.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-57*60), context: modelContext)  // 17:03
+        addSet(exercise: exercises["Chest Press"]!, weight: 50.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-55*60), context: modelContext)  // 17:05
+        addSet(exercise: exercises["Chest Press"]!, weight: 50.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-55*60), context: modelContext)  // 17:05 (4th set)
+
+        // Incline Dumbbell Chest Press: 3 sets @ 17:10, 17:13, 17:15
+        addSet(exercise: exercises["Incline Dumbbell Chest Press"]!, weight: 20.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-50*60), context: modelContext)  // 17:10
+        addSet(exercise: exercises["Incline Dumbbell Chest Press"]!, weight: 20.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-47*60), context: modelContext)  // 17:13
+        addSet(exercise: exercises["Incline Dumbbell Chest Press"]!, weight: 20.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-45*60), context: modelContext)  // 17:15
+
+        // Chest Cable Flys: 3 sets @ 17:17, 17:20, 17:23
+        addSet(exercise: exercises["Chest Cable Flys"]!, weight: 17.5, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-43*60), context: modelContext)  // 17:17
+        addSet(exercise: exercises["Chest Cable Flys"]!, weight: 17.5, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-40*60), context: modelContext)  // 17:20
+        addSet(exercise: exercises["Chest Cable Flys"]!, weight: 17.5, reps: 10,
+               timestamp: baseDate.addingTimeInterval(-37*60), context: modelContext)  // 17:23
+
+        // Tricep Dips: 3 sets @ 17:25, 17:30, 17:33
+        addSet(exercise: exercises["Tricep Dips"]!, weight: 5.0, reps: 8,
+               timestamp: baseDate.addingTimeInterval(-35*60), context: modelContext)  // 17:25
+        addSet(exercise: exercises["Tricep Dips"]!, weight: 5.0, reps: 8,
+               timestamp: baseDate.addingTimeInterval(-30*60), context: modelContext)  // 17:30
+        addSet(exercise: exercises["Tricep Dips"]!, weight: 5.0, reps: 8,
+               timestamp: baseDate.addingTimeInterval(-27*60), context: modelContext)  // 17:33
+
+        // Tricep Rope Pulls: 3 sets @ 17:35, 17:37, 17:40
+        addSet(exercise: exercises["Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
+               timestamp: baseDate.addingTimeInterval(-25*60), context: modelContext)  // 17:35
+        addSet(exercise: exercises["Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
+               timestamp: baseDate.addingTimeInterval(-23*60), context: modelContext)  // 17:37
+        addSet(exercise: exercises["Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
+               timestamp: baseDate.addingTimeInterval(-20*60), context: modelContext)  // 17:40
+
+        // LEG DAY WORKOUT (18:00 - 18:35) - Original exercises
 
         // Barbell squat: 3 sets
         addSet(exercise: exercises["Barbell squat"]!, weight: 50.0, reps: 10,
@@ -344,29 +390,6 @@ class TestData4_GymData {
                timestamp: baseDate.addingTimeInterval(40*60 + 36), context: modelContext)
         addSet(exercise: exercises["Butterfly sit up"]!, weight: 0.0, reps: 15,
                timestamp: baseDate.addingTimeInterval(42*60 + 30), context: modelContext)
-    }
-
-    // MARK: - Session 5: 2025-09-26 20:05:15 (Test)
-
-    private static func generateSession5(exercises: [String: Exercise], modelContext: ModelContext) {
-        let baseDate = Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 26, hour: 20, minute: 5, second: 15))!
-
-        // Test exercise : 3 sets
-        addSet(exercise: exercises["Test exercise "]!, weight: 15.0, reps: 15,
-               timestamp: baseDate, context: modelContext)
-        addSet(exercise: exercises["Test exercise "]!, weight: 30.0, reps: 20,
-               timestamp: baseDate.addingTimeInterval(5), context: modelContext)
-        addSet(exercise: exercises["Test exercise "]!, weight: 25.0, reps: 25,
-               timestamp: baseDate.addingTimeInterval(10), context: modelContext)
-
-        // Test 2: 3 sets (starting at 20:13:17)
-        let test2Time = Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 26, hour: 20, minute: 13, second: 17))!
-        addSet(exercise: exercises["Test 2"]!, weight: 30.0, reps: 30,
-               timestamp: test2Time, context: modelContext)
-        addSet(exercise: exercises["Test 2"]!, weight: 40.0, reps: 40,
-               timestamp: test2Time.addingTimeInterval(5), context: modelContext)
-        addSet(exercise: exercises["Test 2"]!, weight: 50.0, reps: 50,
-               timestamp: test2Time.addingTimeInterval(11), context: modelContext)
     }
 
     // MARK: - Helper Methods

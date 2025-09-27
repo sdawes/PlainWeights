@@ -23,6 +23,7 @@ struct ExerciseDetailView: View {
     @State private var showingAddSet = false
 
     @FocusState private var nameFocused: Bool
+    @FocusState private var notesFocused: Bool
     @FocusState private var focusedField: Field?
     @State private var keyboardHeight: CGFloat = 0
 
@@ -67,14 +68,16 @@ struct ExerciseDetailView: View {
                     .foregroundStyle(.tertiary)
                     .textFieldStyle(.plain)
                     .lineLimit(1)
+                    .focused($notesFocused)
+                    .submitLabel(.done)
                     .onSubmit {
+                        notesFocused = false
                         updateNote()
                     }
                     .onChange(of: noteText) { _, newValue in
                         if newValue.count > 40 {
                             noteText = String(newValue.prefix(40))
                         }
-                        updateNote()
                     }
             }
             .listRowSeparator(.hidden)
@@ -139,6 +142,11 @@ struct ExerciseDetailView: View {
                     Button("Done") {
                         nameFocused = false
                         updateExerciseName()
+                    }
+                } else if notesFocused {
+                    Button("Done") {
+                        notesFocused = false
+                        updateNote()
                     }
                 } else {
                     Button {

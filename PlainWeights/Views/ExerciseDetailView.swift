@@ -149,11 +149,8 @@ struct ExerciseDetailView: View {
                         updateNote()
                     }
                 } else {
-                    Button {
+                    IconComponents.deleteIcon {
                         showingDeleteAlert = true
-                    } label: {
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
                     }
                 }
             }

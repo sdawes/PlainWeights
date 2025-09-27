@@ -47,9 +47,16 @@ struct FilteredExerciseListView: View {
 
     var body: some View {
         List {
+            // WorkoutMetrics card
+            WorkoutMetrics()
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowBackground(Color.clear)
+
+            // Exercises
             if exercises.isEmpty {
                 Text(searchText.isEmpty ? "No exercises yet" : "No matching exercises found")
                     .foregroundStyle(.secondary)
+                    .listRowSeparator(.hidden)
             } else {
                 ForEach(exercises) { exercise in
                     NavigationLink(value: exercise) {
@@ -75,6 +82,9 @@ struct FilteredExerciseListView: View {
                 }
             }
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.immediately)
         .navigationTitle("Exercises")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

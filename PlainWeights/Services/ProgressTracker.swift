@@ -34,7 +34,7 @@ enum ProgressTracker {
             switch self {
             case .up: return "arrow.up.circle.fill"
             case .down: return "arrow.down.circle.fill"
-            case .same: return "arrow.left.arrow.right.circle.fill"
+            case .same: return "arrow.left.circle.fill"
             }
         }
 

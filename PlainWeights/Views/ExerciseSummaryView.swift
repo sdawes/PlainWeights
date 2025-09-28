@@ -56,7 +56,7 @@ struct ExerciseSummaryView: View {
             HStack(alignment: .top) {
                 // Left: Max weight with reps underneath
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Last max weight")
+                    Text("Last lifted")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
@@ -65,7 +65,7 @@ struct ExerciseSummaryView: View {
                         weight: sessionMetrics.lastSessionMaxWeight,
                         reps: sessionMetrics.lastSessionMaxWeightReps
                     ))
-                        .font(.system(size: 32, weight: .bold))
+                        .font(.system(size: 36, weight: .bold))
                         .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
 
                     Text(ExerciseSetFormatters.formatMaxWeightDetails(
@@ -78,36 +78,29 @@ struct ExerciseSummaryView: View {
                 }
 
                 Spacer()
-
-                // Right: Total volume
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Last session total")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-
-                    Text("\(Formatters.formatVolume(sessionMetrics.lastSessionTotalWeightVolume)) kg")
-                        .font(.headline.bold())
-                        .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
-                }
             }
                 .padding(.bottom, 16)
 
-                // Today's progress section (integrated)
-                VStack(alignment: .leading, spacing: 12) {
-                    // Adaptive header based on exercise type
-                    Text(progressState.progressLabel)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-
-                    // Volume and percentage row
+                // Today's progress section with dual headers
+                VStack(alignment: .leading, spacing: 8) {
+                    // Dual headers row
                     HStack {
-                        Text("\(Formatters.formatVolume(progressState.todayVolume)) \(progressState.unit)")
-                            .font(.headline.bold())
-                            .foregroundStyle(.primary)
+                        Text(progressState.progressLabel)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
 
-                        // Personal record indicators
+                        Spacer()
+
+                        Text("Today's progress")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
+                    }
+
+                    // Values row: Personal record indicators and volume comparison
+                    HStack {
+                        // Personal record indicators on the left
                         if let personalRecords = progressState.personalRecords {
                             HStack(spacing: 4) {
                                 // Weight improvement indicator
@@ -128,35 +121,18 @@ struct ExerciseSummaryView: View {
 
                         Spacer()
 
-                        if progressState.canCompareToLast || sessionMetrics.todaysVolume > 0 {
-                            Text("\(progressState.percentOfLast)% of last")
-                                .font(.headline)
-                                .foregroundStyle(progressState.barFillColor)
-                        } else if sessionMetrics.hasHistoricalData && !progressState.canCompareToLast {
-                            Text(progressState.deltaText)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        // Volume comparison as fraction on the right
+                        if let lastVolume = progressState.lastCompletedDayInfo?.volume {
+                            Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(lastVolume)) \(progressState.unit)")
+                                .font(.headline.bold())
+                                .foregroundStyle(progressState.todayVolume >= lastVolume ? .green : .primary)
+                        } else if sessionMetrics.todaysVolume > 0 {
+                            // For new exercises, just show current volume
+                            Text("\(Formatters.formatVolume(progressState.todayVolume)) \(progressState.unit)")
+                                .font(.headline.bold())
+                                .foregroundStyle(.primary)
                         }
                     }
-
-                    // Progress bar - always shown when requested
-                    if progressState.showProgressBar {
-                        if progressState.canCompareToLast {
-                            // Normal progress bar with comparison
-                            ProgressView(value: Double(progressState.progressBarRatio))
-                                .progressViewStyle(LinearProgressViewStyle(tint: progressState.barFillColor))
-                                .scaleEffect(x: 1, y: 1.5, anchor: .center)
-                                .animation(.easeInOut(duration: 0.3), value: progressState.progressBarRatio)
-                        } else {
-                            // Progress bar for new exercises or type changes - show as 100% if today has volume
-                            let newExerciseProgress = sessionMetrics.todaysVolume > 0 ? 1.0 : 0.0
-                            ProgressView(value: newExerciseProgress)
-                                .progressViewStyle(LinearProgressViewStyle(tint: sessionMetrics.todaysVolume > 0 ? .green : .secondary.opacity(0.3)))
-                                .scaleEffect(x: 1, y: 1.5, anchor: .center)
-                                .animation(.easeInOut(duration: 0.3), value: newExerciseProgress)
-                        }
-                    }
-
                 }
         }
         .padding(16)

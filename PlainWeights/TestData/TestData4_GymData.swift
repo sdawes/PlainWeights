@@ -5,7 +5,7 @@
 //  Created by Claude on 25/09/2025.
 //
 //  Test Data Set 4: Real Gym Data
-//  24 exercises, 4 workout sessions (Sep 22, 24, 25, 26, 2025)
+//  26 exercises, 5 workout sessions (Sep 22, 24, 25, 26, 27, 2025)
 
 #if DEBUG
 import Foundation
@@ -18,7 +18,7 @@ class TestData4_GymData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData4_GymData")
-        logger.info("Generating Test Data Set 4 (Real gym data - 24 exercises, 4 sessions)...")
+        logger.info("Generating Test Data Set 4 (Real gym data - 26 exercises, 5 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -56,7 +56,8 @@ class TestData4_GymData {
             (name: "Incline Dumbbell Chest Press", category: "Chest", note: nil),
             (name: "Chest Cable Flys", category: "Chest", note: nil),
             (name: "Tricep Dips", category: "Triceps", note: nil),
-            (name: "Tricep Rope Pulls", category: "Triceps", note: nil),
+            (name: "Overhead Tricep Rope Pulls", category: "Triceps", note: nil),
+            (name: "Dumbbell flys", category: "Chest ", note: nil),
         ]
 
         // Create exercises
@@ -78,6 +79,9 @@ class TestData4_GymData {
 
         // SESSION 4: 2025-09-26 16:16:57 (Shoulders & Core)
         generateSession4(exercises: exercises, modelContext: modelContext)
+
+        // SESSION 5: 2025-09-27 16:41:23 (Chest & Triceps)
+        generateSession5(exercises: exercises, modelContext: modelContext)
 
         // Save all data
         do {
@@ -128,12 +132,12 @@ class TestData4_GymData {
         addSet(exercise: exercises["Tricep Dips"]!, weight: 5.0, reps: 8,
                timestamp: baseDate.addingTimeInterval(-27*60), context: modelContext)  // 17:33
 
-        // Tricep Rope Pulls: 3 sets @ 17:35, 17:37, 17:40
-        addSet(exercise: exercises["Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
+        // Overhead Tricep Rope Pulls: 3 sets @ 17:35, 17:37, 17:40
+        addSet(exercise: exercises["Overhead Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
                timestamp: baseDate.addingTimeInterval(-25*60), context: modelContext)  // 17:35
-        addSet(exercise: exercises["Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
+        addSet(exercise: exercises["Overhead Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
                timestamp: baseDate.addingTimeInterval(-23*60), context: modelContext)  // 17:37
-        addSet(exercise: exercises["Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
+        addSet(exercise: exercises["Overhead Tricep Rope Pulls"]!, weight: 39.5, reps: 12,
                timestamp: baseDate.addingTimeInterval(-20*60), context: modelContext)  // 17:40
 
         // LEG DAY WORKOUT (18:00 - 18:35) - Original exercises
@@ -390,6 +394,66 @@ class TestData4_GymData {
                timestamp: baseDate.addingTimeInterval(40*60 + 36), context: modelContext)
         addSet(exercise: exercises["Butterfly sit up"]!, weight: 0.0, reps: 15,
                timestamp: baseDate.addingTimeInterval(42*60 + 30), context: modelContext)
+    }
+
+    // MARK: - Session 5: 2025-09-27 16:41:23 (Chest & Triceps)
+
+    private static func generateSession5(exercises: [String: Exercise], modelContext: ModelContext) {
+        let baseDate = Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 27, hour: 16, minute: 41, second: 23))!
+
+        // Chest Press: 6 sets (2 warm-up, 4 working)
+        addWarmUpSet(exercise: exercises["Chest Press"]!, weight: 20.0, reps: 10,
+                     timestamp: baseDate, context: modelContext)
+        addWarmUpSet(exercise: exercises["Chest Press"]!, weight: 40.0, reps: 8,
+                     timestamp: baseDate.addingTimeInterval(13), context: modelContext)
+        addSet(exercise: exercises["Chest Press"]!, weight: 55.0, reps: 5,
+               timestamp: baseDate.addingTimeInterval(3*60 + 9), context: modelContext)
+        addSet(exercise: exercises["Chest Press"]!, weight: 55.0, reps: 6,
+               timestamp: baseDate.addingTimeInterval(5*60 + 30), context: modelContext)
+        addSet(exercise: exercises["Chest Press"]!, weight: 55.0, reps: 8,
+               timestamp: baseDate.addingTimeInterval(8*60 + 18), context: modelContext)
+        addSet(exercise: exercises["Chest Press"]!, weight: 55.0, reps: 7,
+               timestamp: baseDate.addingTimeInterval(11*60 + 22), context: modelContext)
+
+        // Incline Dumbbell Chest Press: 4 sets (1 warm-up, 3 working)
+        addWarmUpSet(exercise: exercises["Incline Dumbbell Chest Press"]!, weight: 17.5, reps: 8,
+                     timestamp: baseDate.addingTimeInterval(13*60 + 49), context: modelContext)
+        addSet(exercise: exercises["Incline Dumbbell Chest Press"]!, weight: 20.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(15*60 + 24), context: modelContext)
+        addSet(exercise: exercises["Incline Dumbbell Chest Press"]!, weight: 20.0, reps: 11,
+               timestamp: baseDate.addingTimeInterval(18*60 + 49), context: modelContext)
+        addSet(exercise: exercises["Incline Dumbbell Chest Press"]!, weight: 20.0, reps: 11,
+               timestamp: baseDate.addingTimeInterval(22*60 + 8), context: modelContext)
+
+        // Dumbbell flys: 3 sets
+        addSet(exercise: exercises["Dumbbell flys"]!, weight: 12.5, reps: 7,
+               timestamp: baseDate.addingTimeInterval(24*60 + 4), context: modelContext)
+        addSet(exercise: exercises["Dumbbell flys"]!, weight: 12.5, reps: 14,
+               timestamp: baseDate.addingTimeInterval(27*60 + 36), context: modelContext)
+        addSet(exercise: exercises["Dumbbell flys"]!, weight: 12.5, reps: 10,
+               timestamp: baseDate.addingTimeInterval(31*60 + 34), context: modelContext)
+
+        // Tricep Dips: 4 sets (1 warm-up, 3 working)
+        addWarmUpSet(exercise: exercises["Tricep Dips"]!, weight: 0.0, reps: 8,
+                     timestamp: baseDate.addingTimeInterval(33*60 + 47), context: modelContext)
+        addSet(exercise: exercises["Tricep Dips"]!, weight: 5.0, reps: 7,
+               timestamp: baseDate.addingTimeInterval(35*60 + 38), context: modelContext)
+        addSet(exercise: exercises["Tricep Dips"]!, weight: 5.0, reps: 7,
+               timestamp: baseDate.addingTimeInterval(38*60), context: modelContext)
+        addSet(exercise: exercises["Tricep Dips"]!, weight: 5.0, reps: 7,
+               timestamp: baseDate.addingTimeInterval(40*60 + 36), context: modelContext)
+
+        // Overhead Tricep Rope Pulls: 5 sets (1 warm-up, 4 working)
+        addWarmUpSet(exercise: exercises["Overhead Tricep Rope Pulls"]!, weight: 28.5, reps: 10,
+                     timestamp: baseDate.addingTimeInterval(43*60 + 34), context: modelContext)
+        addSet(exercise: exercises["Overhead Tricep Rope Pulls"]!, weight: 34.0, reps: 12,
+               timestamp: baseDate.addingTimeInterval(45*60 + 48), context: modelContext)
+        addSet(exercise: exercises["Overhead Tricep Rope Pulls"]!, weight: 42.0, reps: 8,
+               timestamp: baseDate.addingTimeInterval(48*60 + 15), context: modelContext)
+        addSet(exercise: exercises["Overhead Tricep Rope Pulls"]!, weight: 42.0, reps: 6,
+               timestamp: baseDate.addingTimeInterval(50*60 + 8), context: modelContext)
+        addSet(exercise: exercises["Overhead Tricep Rope Pulls"]!, weight: 42.0, reps: 8,
+               timestamp: baseDate.addingTimeInterval(52*60 + 40), context: modelContext)
     }
 
     // MARK: - Helper Methods

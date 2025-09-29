@@ -50,96 +50,142 @@ struct ExerciseSummaryView: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 8) {
+            // Card 1: Max Last Lifted (Full Width)
+            MaxLastLiftedCard(
+                sessionMetrics: sessionMetrics,
+                lastCompletedInfo: progressState.lastCompletedDayInfo
+            )
 
-            // Last session metrics section - always shown
-            HStack(alignment: .top) {
-                // Left: Max weight with details on right
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Max last lifted")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
+            // Card 2 & 3: Set Comparison and Today's Volume (Side by Side)
+            HStack(spacing: 8) {
+                SetComparisonCard(
+                    progressLabel: progressState.progressLabel,
+                    personalRecords: progressState.personalRecords
+                )
 
-                    HStack(alignment: .lastTextBaseline, spacing: 4) {
-                        Text(ExerciseSetFormatters.formatLastMaxWeight(
-                            weight: sessionMetrics.lastSessionMaxWeight,
-                            reps: sessionMetrics.lastSessionMaxWeightReps
-                        ))
-                            .font(.system(size: 36, weight: .bold))
-                            .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
-
-                        Text("(\(ExerciseSetFormatters.formatMaxWeightDetails(weight: sessionMetrics.lastSessionMaxWeight, reps: sessionMetrics.lastSessionMaxWeightReps, sets: sessionMetrics.lastSessionTotalSets)))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if let lastCompletedInfo = progressState.lastCompletedDayInfo {
-                        Text(Formatters.formatAbbreviatedDayHeader(lastCompletedInfo.date))
-                            .font(.caption2.italic())
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Spacer()
+                TodaysVolumeCard(
+                    todayVolume: progressState.todayVolume,
+                    lastVolume: progressState.lastCompletedDayInfo?.volume ?? 0,
+                    unit: progressState.unit
+                )
             }
-                .padding(.bottom, 16)
-
-                // Today's progress section with dual headers
-                VStack(alignment: .leading, spacing: 8) {
-                    // Dual headers row
-                    HStack {
-                        Text(progressState.progressLabel)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-
-                        Spacer()
-
-                        Text("Today's volume")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-                    }
-
-                    // Values row: Personal record indicators and volume comparison
-                    HStack {
-                        // Personal record indicators on the left
-                        if let personalRecords = progressState.personalRecords {
-                            HStack(spacing: 4) {
-                                // Weight improvement indicator
-                                PersonalRecordIndicator(
-                                    improvement: personalRecords.weightImprovement,
-                                    direction: personalRecords.weightDirection,
-                                    unit: "kg"
-                                )
-
-                                // Reps improvement indicator
-                                PersonalRecordIndicator(
-                                    improvement: Double(personalRecords.repsImprovement),
-                                    direction: personalRecords.repsDirection,
-                                    unit: " reps"
-                                )
-                            }
-                        }
-
-                        Spacer()
-
-                        // Volume comparison as fraction - always show comparison (use 0 for new exercises)
-                        let lastVolume = progressState.lastCompletedDayInfo?.volume ?? 0
-                        Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(lastVolume)) \(progressState.unit)")
-                            .font(.headline.bold())
-                            .foregroundStyle(progressState.todayVolume >= lastVolume ? .green : .primary)
-                    }
-                }
         }
+        .listRowSeparator(.hidden)
+        .padding(.vertical, 8)
+    }
+}
+
+// MARK: - Card Components
+
+private struct MaxLastLiftedCard: View {
+    let sessionMetrics: ExerciseSessionMetricsData
+    let lastCompletedInfo: (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Max last lifted")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+
+            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                Text(ExerciseSetFormatters.formatLastMaxWeight(
+                    weight: sessionMetrics.lastSessionMaxWeight,
+                    reps: sessionMetrics.lastSessionMaxWeightReps
+                ))
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
+
+                Text("(\(ExerciseSetFormatters.formatMaxWeightDetails(weight: sessionMetrics.lastSessionMaxWeight, reps: sessionMetrics.lastSessionMaxWeightReps, sets: sessionMetrics.lastSessionTotalSets)))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            if let lastCompletedInfo = lastCompletedInfo {
+                Text(Formatters.formatAbbreviatedDayHeader(lastCompletedInfo.date))
+                    .font(.caption2.italic())
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(height: 70)
         .padding(16)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
         )
-        .listRowSeparator(.hidden)
-        .padding(.vertical, 8)
+    }
+}
+
+private struct SetComparisonCard: View {
+    let progressLabel: String
+    let personalRecords: ProgressTracker.PersonalRecordIndicators?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(progressLabel)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+
+            if let personalRecords = personalRecords {
+                HStack(spacing: 4) {
+                    // Weight improvement indicator
+                    PersonalRecordIndicator(
+                        improvement: personalRecords.weightImprovement,
+                        direction: personalRecords.weightDirection,
+                        unit: "kg"
+                    )
+
+                    // Reps improvement indicator
+                    PersonalRecordIndicator(
+                        improvement: Double(personalRecords.repsImprovement),
+                        direction: personalRecords.repsDirection,
+                        unit: " reps"
+                    )
+                }
+            }
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(height: 70)
+        .padding(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+        )
+    }
+}
+
+private struct TodaysVolumeCard: View {
+    let todayVolume: Double
+    let lastVolume: Double
+    let unit: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Today's volume")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+
+            Text("\(Formatters.formatVolume(todayVolume))/\(Formatters.formatVolume(lastVolume)) \(unit)")
+                .font(.headline.bold())
+                .foregroundStyle(todayVolume >= lastVolume ? .green : .primary)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(height: 70)
+        .padding(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+        )
     }
 }
 

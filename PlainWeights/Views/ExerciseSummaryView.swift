@@ -54,27 +54,31 @@ struct ExerciseSummaryView: View {
 
             // Last session metrics section - always shown
             HStack(alignment: .top) {
-                // Left: Max weight with reps underneath
+                // Left: Max weight with details on right
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Last lifted")
+                    Text("Max last lifted")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
-                    Text(ExerciseSetFormatters.formatLastMaxWeight(
-                        weight: sessionMetrics.lastSessionMaxWeight,
-                        reps: sessionMetrics.lastSessionMaxWeightReps
-                    ))
-                        .font(.system(size: 36, weight: .bold))
-                        .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
+                    HStack(alignment: .lastTextBaseline, spacing: 4) {
+                        Text(ExerciseSetFormatters.formatLastMaxWeight(
+                            weight: sessionMetrics.lastSessionMaxWeight,
+                            reps: sessionMetrics.lastSessionMaxWeightReps
+                        ))
+                            .font(.system(size: 36, weight: .bold))
+                            .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
 
-                    Text(ExerciseSetFormatters.formatMaxWeightDetails(
-                        weight: sessionMetrics.lastSessionMaxWeight,
-                        reps: sessionMetrics.lastSessionMaxWeightReps,
-                        sets: sessionMetrics.lastSessionTotalSets
-                    ))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        Text("(\(ExerciseSetFormatters.formatMaxWeightDetails(weight: sessionMetrics.lastSessionMaxWeight, reps: sessionMetrics.lastSessionMaxWeightReps, sets: sessionMetrics.lastSessionTotalSets)))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let lastCompletedInfo = progressState.lastCompletedDayInfo {
+                        Text(Formatters.formatAbbreviatedDayHeader(lastCompletedInfo.date))
+                            .font(.caption2.italic())
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 Spacer()
@@ -92,7 +96,7 @@ struct ExerciseSummaryView: View {
 
                         Spacer()
 
-                        Text("Today's progress")
+                        Text("Today's volume")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .textCase(.uppercase)
@@ -121,17 +125,11 @@ struct ExerciseSummaryView: View {
 
                         Spacer()
 
-                        // Volume comparison as fraction on the right
-                        if let lastVolume = progressState.lastCompletedDayInfo?.volume {
-                            Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(lastVolume)) \(progressState.unit)")
-                                .font(.headline.bold())
-                                .foregroundStyle(progressState.todayVolume >= lastVolume ? .green : .primary)
-                        } else if sessionMetrics.todaysVolume > 0 {
-                            // For new exercises, just show current volume
-                            Text("\(Formatters.formatVolume(progressState.todayVolume)) \(progressState.unit)")
-                                .font(.headline.bold())
-                                .foregroundStyle(.primary)
-                        }
+                        // Volume comparison as fraction - always show comparison (use 0 for new exercises)
+                        let lastVolume = progressState.lastCompletedDayInfo?.volume ?? 0
+                        Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(lastVolume)) \(progressState.unit)")
+                            .font(.headline.bold())
+                            .foregroundStyle(progressState.todayVolume >= lastVolume ? .green : .primary)
                     }
                 }
         }

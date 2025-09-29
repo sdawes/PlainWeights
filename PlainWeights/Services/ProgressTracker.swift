@@ -122,12 +122,11 @@ enum ProgressTracker {
             let todaysSets = ExerciseSessionMetrics.getTodaysSets(from: sets)
             self.todayWeightVolume = ExerciseVolumeCalculator.calculateWeightVolume(for: todaysSets)
 
-            // Set display labels based on today's exercise type
+            // Set display labels - always show comparison label (matches header above)
+            self.progressLabel = "Set vs max last"
             if let todayMetrics = todayMetrics {
-                self.progressLabel = ExerciseVolumeCalculator.getProgressLabel(for: todayMetrics.type)
                 self.unit = ExerciseVolumeCalculator.getUnit(for: todayMetrics.type)
             } else {
-                self.progressLabel = "Lifted today"
                 self.unit = "kg"
             }
 
@@ -222,13 +221,16 @@ enum ProgressTracker {
             }
 
             // Calculate personal records by comparing today's newest set with last session's max
-            if let lastMetrics = lastMetrics,
-               let newestSet = ExerciseSessionMetrics.getTodaysMostRecentSet(from: sets) {
+            // If no history exists, compare against 0/0 baseline to show absolute improvement
+            if let newestSet = ExerciseSessionMetrics.getTodaysMostRecentSet(from: sets) {
+                let lastMaxWeight = lastMetrics?.maxWeight ?? 0.0
+                let lastMaxReps = lastMetrics?.maxWeightReps ?? 0
+
                 self.personalRecords = PersonalRecordIndicators.compare(
                     todaysNewestWeight: newestSet.weight,
                     todaysNewestReps: newestSet.reps,
-                    lastSessionMaxWeight: lastMetrics.maxWeight,
-                    lastSessionMaxReps: lastMetrics.maxWeightReps
+                    lastSessionMaxWeight: lastMaxWeight,
+                    lastSessionMaxReps: lastMaxReps
                 )
             } else {
                 self.personalRecords = nil

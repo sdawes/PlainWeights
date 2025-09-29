@@ -47,7 +47,8 @@ struct ExerciseDetailView: View {
 
     // Memoized expensive calculations - updated only when sets change
     @State private var progressState: ProgressTracker.ProgressState?
-    @State private var dayGroups: [ExerciseDataGrouper.DayGroup] = []
+    @State private var todaySets: [ExerciseSet] = []
+    @State private var historicDayGroups: [ExerciseDataGrouper.DayGroup] = []
     
     enum Field {
         case weight, reps
@@ -153,26 +154,45 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .padding(.vertical, 4)
 
-            // History label row
-            Text("HISTORIC SETS")
-                .font(.footnote)
-                .textCase(.uppercase)
-                .foregroundStyle(.secondary)
-                .listRowSeparator(.hidden)
-                .padding(.vertical, 4)
-            
-            // Grouped history rows
+            // Today's sets section (only shown if today has sets)
+            if !todaySets.isEmpty {
+                Text("TODAY'S SETS")
+                    .font(.footnote)
+                    .textCase(.uppercase)
+                    .foregroundStyle(.secondary)
+                    .listRowSeparator(.hidden)
+                    .padding(.vertical, 4)
+
+                TodaySetsSectionView(
+                    todaySets: todaySets,
+                    isMostRecentSet: isMostRecentSet,
+                    deleteSet: deleteSet
+                )
+            }
+
+            // Historic sets section
+            if !historicDayGroups.isEmpty {
+                Text("HISTORIC SETS")
+                    .font(.footnote)
+                    .textCase(.uppercase)
+                    .foregroundStyle(.secondary)
+                    .listRowSeparator(.hidden)
+                    .padding(.vertical, 4)
+                    .padding(.top, todaySets.isEmpty ? 0 : 16)
+
+                HistorySectionView(
+                    sets: sets,
+                    dayGroups: historicDayGroups,
+                    isMostRecentSet: isMostRecentSet,
+                    deleteSet: deleteSet
+                )
+            }
+
+            // Empty state (only when no sets at all)
             if sets.isEmpty {
                 Text("No sets yet")
                     .foregroundStyle(.secondary)
                     .listRowSeparator(.hidden)
-            } else {
-                HistorySectionView(
-                    sets: sets,
-                    dayGroups: dayGroups,
-                    isMostRecentSet: isMostRecentSet,
-                    deleteSet: deleteSet
-                )
             }
         }
         .listStyle(.plain)
@@ -227,43 +247,11 @@ struct ExerciseDetailView: View {
     /// Update cached expensive calculations when sets change
     private func updateCachedData() {
         progressState = ProgressTracker.createProgressState(from: sets)
-        dayGroups = ExerciseDataGrouper.createDayGroups(from: sets)
+        let (todaysData, historicData) = ExerciseDataGrouper.separateTodayFromHistoric(sets: sets)
+        todaySets = todaysData
+        historicDayGroups = historicData
     }
-    
-    private func addSet() {
-        guard let (weight, reps) = ExerciseSetService.validateInput(
-            weightText: weightText,
-            repsText: repsText
-        ) else {
-            print("AddSet failed: Invalid input - weight: \(weightText), reps: \(repsText)")
-            return
-        }
 
-        print("Adding set: \(weight)kg x \(reps) reps")
-        do {
-            try ExerciseSetService.addSet(
-                weight: weight,
-                reps: reps,
-                to: exercise,
-                context: context
-            )
-            print("Set saved successfully")
-            clearForm()
-        } catch {
-            print("Error saving set: \(error)")
-        }
-    }
-    
-    private func repeatSet(_ set: ExerciseSet) {
-        print("Repeating set: \(set.weight)kg x \(set.reps) reps")
-        do {
-            try ExerciseSetService.repeatSet(set, for: exercise, context: context)
-            print("Repeated set saved successfully")
-        } catch {
-            print("Error repeating set: \(error)")
-        }
-    }
-    
     private func deleteSet(_ set: ExerciseSet) {
         do {
             try ExerciseSetService.deleteSet(set, context: context)
@@ -275,21 +263,15 @@ struct ExerciseDetailView: View {
     private func updateExerciseName() {
         let trimmed = exerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, trimmed != exercise.name else { return }
-        
+
         exercise.name = trimmed
         exercise.bumpUpdated()
-        
+
         do {
             try context.save()
         } catch {
             print("Error updating exercise name: \(error)")
         }
-    }
-    
-    private func clearForm() {
-        weightText = ""
-        repsText = ""
-        focusedField = nil
     }
 
     /// Get the weight and reps values from the last working (non-warm-up) set
@@ -302,21 +284,6 @@ struct ExerciseDetailView: View {
         return (lastWorkingSet.weight, lastWorkingSet.reps)
     }
 
-
-    private func toggleWarmUpStatus(_ set: ExerciseSet) {
-        do {
-            try ExerciseSetService.toggleWarmUpStatus(set, context: context)
-            let status = set.isWarmUp ? "warm-up" : "working set"
-            print("Toggled warm-up status for set: \(set.weight)kg x \(set.reps) - now \(status)")
-        } catch {
-            print("Error toggling warm-up status: \(error)")
-        }
-    }
-
-    private var canAddSet: Bool {
-        ExerciseSetService.validateInput(weightText: weightText, repsText: repsText) != nil
-    }
-    
     private func isMostRecentSet(_ set: ExerciseSet, in sets: [ExerciseSet]) -> Bool {
         set.persistentModelID == sets.first?.persistentModelID
     }
@@ -342,61 +309,6 @@ struct ExerciseDetailView: View {
         } catch {
             print("Error updating note: \(error)")
         }
-    }
-}
-
-// MARK: - Quick Add View
-
-private struct QuickAddView: View {
-    @Binding var weightText: String
-    @Binding var repsText: String
-    @FocusState.Binding var focusedField: ExerciseDetailView.Field?
-    let canAddSet: Bool
-    let addSet: () -> Void
-
-    var body: some View {
-        HStack(spacing: 10) {
-            // Weight input - compact
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Weight (kg)")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                TextField("0", text: $weightText)
-                    .keyboardType(.decimalPad)
-                    .textFieldStyle(.roundedBorder)
-                    .focused($focusedField, equals: .weight)
-            }
-            .frame(maxWidth: .infinity)
-
-            // Reps input - compact
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Reps")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                TextField("0", text: $repsText)
-                    .keyboardType(.numberPad)
-                    .textFieldStyle(.roundedBorder)
-                    .focused($focusedField, equals: .reps)
-            }
-            .frame(maxWidth: .infinity)
-
-            // Compact plus button
-            Button(action: addSet) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(canAddSet ? Color.accentColor : Color.gray.opacity(0.4))
-            }
-            .buttonStyle(.plain)
-            .disabled(!canAddSet)
-            .contentShape(Circle())
-            .padding(.top, 12) // Align with text fields
-        }
-        .padding(12)
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .listRowSeparator(.hidden)
-        .listRowBackground(Color.clear)
-        .padding(.vertical, 2)
     }
 }
 
@@ -450,38 +362,6 @@ private struct HistorySectionView: View {
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
-            }
-        }
-    }
-}
-
-// MARK: - Last Session View
-
-private struct LastSessionView: View {
-    let weightGroups: [WeightGroup]
-    let totalVolume: Double?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Last session header
-            Text("Last session")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-
-            // Weight group breakdown (one line per weight)
-            ForEach(weightGroups.indices, id: \.self) { index in
-                Text(weightGroups[index].description)
-                    .font(.headline)
-                    .monospacedDigit()
-            }
-
-            // Total volume for last session
-            if let totalVolume = totalVolume {
-                Text("Total: \(Formatters.formatVolume(totalVolume)) kg")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
             }
         }
     }

@@ -3,10 +3,10 @@
 //  PlainWeights
 //
 //  Created by Claude on 25/09/2025.
-//  Last Updated: 29 Sep 2025 at 20:38:00
+//  Last Updated: 1 Oct 2025 at 11:27:52
 //
 //  Test Data Set 4: Real Gym Data
-//  28 exercises, 6 workout sessions (Sep 22, 24, 25, 26, 27, 29, 2025)
+//  28 exercises, 8 workout sessions (Sep 22, 24, 25, 26, 27, 29, 30, 2025 & Oct 1, 2025)
 
 #if DEBUG
 import Foundation
@@ -19,7 +19,7 @@ class TestData4_GymData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData4_GymData")
-        logger.info("Generating Test Data Set 4 (Real gym data - 28 exercises, 6 sessions)...")
+        logger.info("Generating Test Data Set 4 (Real gym data - 28 exercises, 8 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -37,11 +37,11 @@ class TestData4_GymData {
             (name: "Barbell squat", category: "Legs", note: nil),
             (name: "Knees to toe", category: "Core", note: nil),
             (name: "Barbell Lunges", category: "Legs", note: nil),
-            (name: "Hamstring Curls", category: "Legs", note: nil),
+            (name: "Hamstring Curls", category: "Legs", note: "5 is 37.5 and 6 is 43kg"),
             (name: "Sled Push", category: "Legs", note: nil),
             (name: "T Bar Row", category: "Back", note: nil),
             (name: "Rope Bicep Curls", category: "Bicep", note: "7 is 39.5kg, 8 is 45kg"),
-            (name: "Leg Raises", category: "Legs", note: nil),
+            (name: "Leg Raises", category: "Legs", note: "5 is 37.5, 7 is 48.5, 8 is 54"),
             (name: "Reverse Cable Flys", category: "Back", note: nil),
             (name: "Pull Ups", category: "Back", note: nil),
             (name: "Rope Face Pulls", category: "Back", note: nil),
@@ -88,6 +88,12 @@ class TestData4_GymData {
 
         // SESSION 6: 2025-09-29 16:56:48 (Back & Biceps)
         generateSession6(exercises: exercises, modelContext: modelContext)
+
+        // SESSION 7: 2025-09-29 20:51:28 (Back - Single Exercise)
+        generateSession7(exercises: exercises, modelContext: modelContext)
+
+        // SESSION 8: 2025-09-30 16:48:49 (Legs)
+        generateSession8(exercises: exercises, modelContext: modelContext)
 
         // Save all data
         do {
@@ -514,6 +520,72 @@ class TestData4_GymData {
                timestamp: baseDate.addingTimeInterval(46*60 + 16), context: modelContext)
         addSet(exercise: exercises["Rope Bicep Curls"]!, weight: 45.0, reps: 9,
                timestamp: baseDate.addingTimeInterval(48*60 + 24), context: modelContext)
+    }
+
+    // MARK: - Session 7: 2025-09-29 20:51:28 (Back - Single Exercise)
+
+    private static func generateSession7(exercises: [String: Exercise], modelContext: ModelContext) {
+        let baseDate = Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 29, hour: 20, minute: 51, second: 28))!
+
+        // Reverse dumbbell flys: 1 set
+        addSet(exercise: exercises["Reverse dumbbell flys"]!, weight: 10.0, reps: 15,
+               timestamp: baseDate, context: modelContext)
+    }
+
+    // MARK: - Session 8: 2025-09-30 16:48:49 (Legs)
+
+    private static func generateSession8(exercises: [String: Exercise], modelContext: ModelContext) {
+        let baseDate = Calendar.current.date(from: DateComponents(year: 2025, month: 9, day: 30, hour: 16, minute: 48, second: 49))!
+
+        // Barbell squat: 5 sets (1 warm-up + 4 working)
+        addWarmUpSet(exercise: exercises["Barbell squat"]!, weight: 20.0, reps: 15,
+                     timestamp: baseDate, context: modelContext)
+        addSet(exercise: exercises["Barbell squat"]!, weight: 50.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(2*60 + 35), context: modelContext)
+        addSet(exercise: exercises["Barbell squat"]!, weight: 50.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(5*60 + 15), context: modelContext)
+        addSet(exercise: exercises["Barbell squat"]!, weight: 50.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(7*60 + 24), context: modelContext)
+        addSet(exercise: exercises["Barbell squat"]!, weight: 50.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(9*60 + 36), context: modelContext)
+
+        // Barbell Lunges: 3 sets
+        addSet(exercise: exercises["Barbell Lunges"]!, weight: 30.0, reps: 12,
+               timestamp: baseDate.addingTimeInterval(11*60 + 41), context: modelContext)
+        addSet(exercise: exercises["Barbell Lunges"]!, weight: 30.0, reps: 12,
+               timestamp: baseDate.addingTimeInterval(15*60 + 21), context: modelContext)
+        addSet(exercise: exercises["Barbell Lunges"]!, weight: 30.0, reps: 12,
+               timestamp: baseDate.addingTimeInterval(18*60 + 41), context: modelContext)
+
+        // Hamstring Curls: 5 sets (1 warm-up + 4 working)
+        addWarmUpSet(exercise: exercises["Hamstring Curls"]!, weight: 32.0, reps: 14,
+                     timestamp: baseDate.addingTimeInterval(22*60 + 20), context: modelContext)
+        addSet(exercise: exercises["Hamstring Curls"]!, weight: 37.5, reps: 14,
+               timestamp: baseDate.addingTimeInterval(23*60 + 39), context: modelContext)
+        addSet(exercise: exercises["Hamstring Curls"]!, weight: 37.5, reps: 16,
+               timestamp: baseDate.addingTimeInterval(25*60 + 11), context: modelContext)
+        addSet(exercise: exercises["Hamstring Curls"]!, weight: 43.0, reps: 13,
+               timestamp: baseDate.addingTimeInterval(26*60 + 42), context: modelContext)
+        addSet(exercise: exercises["Hamstring Curls"]!, weight: 43.0, reps: 13,
+               timestamp: baseDate.addingTimeInterval(28*60 + 34), context: modelContext)
+
+        // Leg Raises: 4 sets
+        addSet(exercise: exercises["Leg Raises"]!, weight: 37.5, reps: 11,
+               timestamp: baseDate.addingTimeInterval(30*60 + 16), context: modelContext)
+        addSet(exercise: exercises["Leg Raises"]!, weight: 48.5, reps: 10,
+               timestamp: baseDate.addingTimeInterval(31*60 + 13), context: modelContext)
+        addSet(exercise: exercises["Leg Raises"]!, weight: 54.0, reps: 8,
+               timestamp: baseDate.addingTimeInterval(32*60 + 44), context: modelContext)
+        addSet(exercise: exercises["Leg Raises"]!, weight: 54.0, reps: 10,
+               timestamp: baseDate.addingTimeInterval(34*60 + 26), context: modelContext)
+
+        // Calf Raises: 3 sets
+        addSet(exercise: exercises["Calf Raises"]!, weight: 45.0, reps: 15,
+               timestamp: baseDate.addingTimeInterval(36*60 + 16), context: modelContext)
+        addSet(exercise: exercises["Calf Raises"]!, weight: 45.0, reps: 15,
+               timestamp: baseDate.addingTimeInterval(37*60 + 57), context: modelContext)
+        addSet(exercise: exercises["Calf Raises"]!, weight: 45.0, reps: 15,
+               timestamp: baseDate.addingTimeInterval(39*60 + 27), context: modelContext)
     }
 
     // MARK: - Helper Methods

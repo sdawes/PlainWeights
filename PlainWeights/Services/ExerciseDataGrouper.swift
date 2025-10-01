@@ -90,6 +90,24 @@ enum ExerciseDataGrouper {
         }
     }
 
+    /// Separate today's sets from historic sets for better UX during active workouts
+    static func separateTodayFromHistoric(sets: [ExerciseSet]) -> (todaySets: [ExerciseSet], historicGroups: [DayGroup]) {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        // Split sets into today vs historic
+        let todaySets = sets.filter { calendar.startOfDay(for: $0.timestamp) == today }
+        let historicSets = sets.filter { calendar.startOfDay(for: $0.timestamp) != today }
+
+        // Sort today's sets by timestamp (most recent first)
+        let sortedTodaySets = todaySets.sorted { $0.timestamp > $1.timestamp }
+
+        // Create day groups for historic sets
+        let historicGroups = createDayGroups(from: historicSets)
+
+        return (todaySets: sortedTodaySets, historicGroups: historicGroups)
+    }
+
     // MARK: - Workout Journal Grouping
 
     /// Represents a single exercise's work within a day for the workout journal

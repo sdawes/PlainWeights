@@ -14,8 +14,11 @@ struct ExerciseListView: View {
     @State private var searchText = ""
 
     var body: some View {
-        FilteredExerciseListView(searchText: searchText, showingAddExercise: $showingAddExercise)
-            .searchable(text: $searchText, prompt: "Search by name or category")
+        FilteredExerciseListView(
+            searchText: searchText,
+            showingAddExercise: $showingAddExercise
+        )
+        .searchable(text: $searchText, prompt: "Search by name or category")
     }
 }
 
@@ -115,7 +118,8 @@ struct FilteredExerciseListView: View {
                     }
                 } label: {
                     Image(systemName: "ladybug.fill")
-                        .foregroundColor(.orange)
+                        .font(.callout)
+                        .foregroundColor(.black)
                 }
             }
             #endif

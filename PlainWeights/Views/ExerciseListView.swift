@@ -18,6 +18,7 @@ struct ExerciseListView: View {
             searchText: searchText,
             showingAddExercise: $showingAddExercise
         )
+        // Note: iOS 26+ automatically applies Liquid Glass styling to .searchable()
         .searchable(text: $searchText, prompt: "Search by name or category")
     }
 }
@@ -49,44 +50,63 @@ struct FilteredExerciseListView: View {
     }
 
     var body: some View {
-        List {
-            // WorkoutMetrics card
-            WorkoutMetrics()
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                .listRowBackground(Color.clear)
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                // WorkoutMetrics card
+                WorkoutMetrics()
+                    .padding(.horizontal, 16)
 
-            // Exercises
-            if exercises.isEmpty {
-                Text(searchText.isEmpty ? "No exercises yet" : "No matching exercises found")
-                    .foregroundStyle(.secondary)
-                    .listRowSeparator(.hidden)
-            } else {
-                ForEach(exercises) { exercise in
-                    NavigationLink(value: exercise) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(exercise.name)
-                                .font(.headline)
-                            Text(exercise.category)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                        }
-                        .padding(.vertical, 4)
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            deleteExercise(exercise)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+                // Exercises card
+                VStack(spacing: 0) {
+                    if exercises.isEmpty {
+                        Text(searchText.isEmpty ? "No exercises yet" : "No matching exercises found")
+                            .foregroundStyle(.secondary)
+                            .padding()
+                    } else {
+                        ForEach(exercises.indices, id: \.self) { index in
+                            let exercise = exercises[index]
+
+                            NavigationLink(value: exercise) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(exercise.name)
+                                        .font(.headline)
+                                        .foregroundStyle(.primary)
+                                    Text(exercise.category)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                    Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
+                                        .font(.caption)
+                                        .foregroundStyle(.tertiary)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 16)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteExercise(exercise)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+
+                            if index < exercises.count - 1 {
+                                Divider()
+                                    .padding(.leading, 16)
+                            }
                         }
                     }
                 }
+                .background(Color(.systemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .padding(.horizontal, 16)
             }
+            .padding(.vertical, 16)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
+        .background(Color(.systemGroupedBackground))
         .scrollDismissesKeyboard(.immediately)
         .navigationTitle("Exercises")
         .toolbar {

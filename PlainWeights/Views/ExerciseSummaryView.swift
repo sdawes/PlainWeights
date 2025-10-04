@@ -146,23 +146,24 @@ struct ExerciseSummaryView: View {
             }
         }
         .padding(16)
-        .background(
+        .background {
             ZStack {
-                // Metallic blue gradient (iOS style)
+                // Ultra-thin material blur for glassmorphism
+                Color.clear
+                    .background(.ultraThinMaterial)
+
+                // Light blue to white gradient for transparent glass appearance
                 LinearGradient(
                     gradient: Gradient(colors: [
-                        Color(red: 0.4, green: 0.6, blue: 0.9),  // Lighter blue
-                        Color(red: 0.2, green: 0.4, blue: 0.7)   // Deeper blue
+                        Color.blue.opacity(0.4),
+                        Color.white.opacity(0.2)
                     ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-
-                // Subtle overlay for depth
-                Color.white.opacity(0.1)
-                    .blendMode(.overlay)
+                .blendMode(.overlay)
             }
-        )
+        }
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
         .listRowSeparator(.hidden)

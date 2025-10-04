@@ -66,8 +66,7 @@ struct ExerciseDetailView: View {
     }
 
     var body: some View {
-        ScrollViewReader { scrollProxy in
-            List {
+        List {
             // Title and notes row
             VStack(alignment: .leading, spacing: 2) {
                 // Title
@@ -134,7 +133,7 @@ struct ExerciseDetailView: View {
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
 
-                // Primary: Add Set (prominent styling)
+                // Primary: Add Set (prominent styling with Liquid Glass)
                 Button(action: { addSetConfig = .empty(exercise: exercise) }) {
                     HStack(spacing: 4) {
                         Image(systemName: "plus.circle.fill")
@@ -145,11 +144,20 @@ struct ExerciseDetailView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.blue)
-                    .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
+                .background {
+                    if #available(iOS 26, *) {
+                        // iOS 26+ Liquid Glass for floating button
+                        Color.clear
+                            .glassEffect(.regular.tint(.blue.opacity(0.8)).interactive())
+                    } else {
+                        // iOS 17-25 fallback
+                        Capsule()
+                            .fill(Color.blue)
+                    }
+                }
             }
             .listRowSeparator(.hidden)
             .padding(.vertical, 4)
@@ -197,8 +205,8 @@ struct ExerciseDetailView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .background(Color(.systemGroupedBackground))
         .scrollDismissesKeyboard(.immediately)
-        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if nameFocused {

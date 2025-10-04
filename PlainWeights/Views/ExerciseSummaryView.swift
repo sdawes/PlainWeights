@@ -56,7 +56,7 @@ struct ExerciseSummaryView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Max last lifted")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.8))
                         .textCase(.uppercase)
                 }
 
@@ -66,13 +66,13 @@ struct ExerciseSummaryView: View {
                     if let lastCompletedInfo = progressState.lastCompletedDayInfo {
                         Text(Formatters.formatAbbreviatedDayHeader(lastCompletedInfo.date))
                             .font(.caption2.italic())
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.white.opacity(0.7))
                     }
 
                     if sessionMetrics.lastSessionTotalSets > 0 {
                         Text("\(sessionMetrics.lastSessionTotalSets) sets")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.white.opacity(0.7))
                     }
                 }
             }
@@ -84,12 +84,12 @@ struct ExerciseSummaryView: View {
                     reps: sessionMetrics.lastSessionMaxWeightReps
                 ))
                     .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
+                    .foregroundStyle(sessionMetrics.hasHistoricalData ? .white : .white.opacity(0.5))
 
                 if sessionMetrics.lastSessionMaxWeightReps > 0 {
                     Text("\(sessionMetrics.lastSessionMaxWeightReps) reps")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.7))
                 }
             }
 
@@ -99,7 +99,7 @@ struct ExerciseSummaryView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Today")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.8))
                         .textCase(.uppercase)
 
                     if let personalRecords = progressState.personalRecords {
@@ -118,7 +118,7 @@ struct ExerciseSummaryView: View {
                     } else {
                         Text("No data")
                             .font(.caption)
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(.white.opacity(0.5))
                     }
                 }
 
@@ -128,13 +128,13 @@ struct ExerciseSummaryView: View {
                 VStack(alignment: .trailing, spacing: 6) {
                     Text("Volume")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.8))
                         .textCase(.uppercase)
 
                     HStack(spacing: 4) {
                         Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(progressState.lastCompletedDayInfo?.volume ?? 0)) \(progressState.unit)")
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(progressState.todayVolume >= (progressState.lastCompletedDayInfo?.volume ?? 0) ? .green : .primary)
+                            .foregroundStyle(progressState.todayVolume >= (progressState.lastCompletedDayInfo?.volume ?? 0) ? .green : .white)
 
                         if progressState.todayVolume > (progressState.lastCompletedDayInfo?.volume ?? 0) {
                             Image(systemName: "arrow.up.circle.fill")
@@ -146,24 +146,7 @@ struct ExerciseSummaryView: View {
             }
         }
         .padding(16)
-        .background {
-            ZStack {
-                // Ultra-thin material blur for glassmorphism
-                Color.clear
-                    .background(.ultraThinMaterial)
-
-                // Light blue to white gradient for transparent glass appearance
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.blue.opacity(0.4),
-                        Color.white.opacity(0.2)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .blendMode(.overlay)
-            }
-        }
+        .background(Color(red: 0.15, green: 0.2, blue: 0.28))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

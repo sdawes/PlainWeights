@@ -15,7 +15,7 @@ struct WorkoutMetrics: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Workout Summary")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.8))
                         .textCase(.uppercase)
                 }
 
@@ -24,7 +24,7 @@ struct WorkoutMetrics: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("This Month")
                         .font(.caption2.italic())
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.7))
                 }
             }
 
@@ -34,10 +34,10 @@ struct WorkoutMetrics: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("28")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.white)
                     Text("exercises")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.7))
                 }
 
                 Spacer()
@@ -46,10 +46,10 @@ struct WorkoutMetrics: View {
                 VStack(alignment: .center, spacing: 4) {
                     Text("15")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.white)
                     Text("workout days")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.7))
                 }
 
                 Spacer()
@@ -58,10 +58,10 @@ struct WorkoutMetrics: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("342")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.white)
                     Text("total sets")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.7))
                 }
             }
 
@@ -69,32 +69,15 @@ struct WorkoutMetrics: View {
             HStack {
                 Text("12,450 kg")
                     .font(.headline.weight(.semibold))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
                 Text("total volume lifted")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.7))
                 Spacer()
             }
         }
         .padding(16)
-        .background {
-            ZStack {
-                // Ultra-thin material blur for glassmorphism
-                Color.clear
-                    .background(.ultraThinMaterial)
-
-                // Light blue to white gradient for transparent glass appearance
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.blue.opacity(0.4),
-                        Color.white.opacity(0.2)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .blendMode(.overlay)
-            }
-        }
+        .background(Color(red: 0.15, green: 0.2, blue: 0.28))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .listRowSeparator(.hidden)
         .padding(.vertical, 8)

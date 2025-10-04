@@ -117,7 +117,7 @@ struct ExerciseDetailView: View {
                 HStack(spacing: 8) {
                     Spacer()
 
-                    // Secondary: Add Previous Set (subdued styling)
+                    // Add Previous Set (icon only with Liquid Glass)
                     Button(action: {
                         addSetConfig = .previous(
                             exercise: exercise,
@@ -125,38 +125,37 @@ struct ExerciseDetailView: View {
                             reps: lastWorkingSetValues.reps
                         )
                     }) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "arrow.uturn.backward")
-                                .font(.caption2)
-                            Text("Add Previous Set")
-                                .font(.caption)
-                        }
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(Color.secondary.opacity(0.1))
-                        .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Rectangle())
-
-                    // Primary: Add Set (prominent styling with Liquid Glass)
-                    Button(action: { addSetConfig = .empty(exercise: exercise) }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.caption)
-                            Text("Add Set")
-                                .font(.caption.bold())
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.body)
+                            .foregroundStyle(.white)
+                            .padding(8)
                     }
                     .buttonStyle(.plain)
                     .contentShape(Rectangle())
                     .background {
                         if #available(iOS 26, *) {
-                            // iOS 26+ Liquid Glass for floating button
+                            // iOS 26+ Liquid Glass
+                            Color.clear
+                                .glassEffect(.regular.tint(.blue.opacity(0.8)).interactive())
+                        } else {
+                            // iOS 17-25 fallback
+                            Capsule()
+                                .fill(Color.blue)
+                        }
+                    }
+
+                    // Add Set (icon only with Liquid Glass)
+                    Button(action: { addSetConfig = .empty(exercise: exercise) }) {
+                        Image(systemName: "plus")
+                            .font(.body)
+                            .foregroundStyle(.white)
+                            .padding(8)
+                    }
+                    .buttonStyle(.plain)
+                    .contentShape(Rectangle())
+                    .background {
+                        if #available(iOS 26, *) {
+                            // iOS 26+ Liquid Glass
                             Color.clear
                                 .glassEffect(.regular.tint(.blue.opacity(0.8)).interactive())
                         } else {
@@ -265,7 +264,7 @@ struct ExerciseDetailView: View {
             }
         }
         .listStyle(.insetGrouped) // card-like grouped sections with system styling
-        .listSectionSpacing(16)
+        .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
         .background(Color(.systemGroupedBackground))
         .scrollDismissesKeyboard(.immediately)

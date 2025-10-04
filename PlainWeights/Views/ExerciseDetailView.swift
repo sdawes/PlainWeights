@@ -103,7 +103,7 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets())
-            .padding(.bottom, 12)
+            .padding(.bottom, 20)
 
             // Exercise summary metrics "card"
             if let progressState = progressState {

@@ -165,9 +165,6 @@ struct ExerciseSummaryView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
-        .listRowSeparator(.hidden)
-        .padding(.vertical, 8)
     }
 }
 

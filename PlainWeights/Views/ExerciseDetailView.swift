@@ -67,143 +67,205 @@ struct ExerciseDetailView: View {
 
     var body: some View {
         List {
-            // Title and notes row
-            VStack(alignment: .leading, spacing: 2) {
-                // Title
-                TextField("Title", text: $exerciseName)
-                    .font(.largeTitle.bold())
-                    .textFieldStyle(.plain)
-                    .focused($nameFocused)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        nameFocused = false
-                        updateExerciseName()
-                    }
+            // Title and notes row (no card background)
+            Section {
+                VStack(alignment: .leading, spacing: 2) {
+                    // Title
+                    TextField("Title", text: $exerciseName)
+                        .font(.largeTitle.bold())
+                        .textFieldStyle(.plain)
+                        .focused($nameFocused)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            nameFocused = false
+                            updateExerciseName()
+                        }
 
-                // Notes as subtitle
-                TextField("Add notes about form, target muscles, etc...", text: $noteText)
-                    .font(.caption.italic())
-                    .foregroundStyle(.tertiary)
-                    .textFieldStyle(.plain)
-                    .lineLimit(1)
-                    .focused($notesFocused)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        notesFocused = false
-                        updateNote()
+                    // Notes as subtitle
+                    TextField("Add notes about form, target muscles, etc...", text: $noteText)
+                        .font(.caption.italic())
+                        .foregroundStyle(.tertiary)
+                        .textFieldStyle(.plain)
+                        .lineLimit(1)
+                        .focused($notesFocused)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            notesFocused = false
+                            updateNote()
+                        }
+                        .onChange(of: noteText) { _, newValue in
+                            if newValue.count > 40 {
+                                noteText = String(newValue.prefix(40))
+                            }
+                        }
+                }
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+
+            // Exercise summary metrics "card"
+            if let progressState = progressState {
+                Section {
+                    ExerciseSummaryView(progressState: progressState, sets: sets)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear) // keep the card's own background
+                }
+            }
+
+            // Add buttons section (single row)
+            Section {
+                HStack(spacing: 8) {
+                    Spacer()
+
+                    // Secondary: Add Previous Set (subdued styling)
+                    Button(action: {
+                        addSetConfig = .previous(
+                            exercise: exercise,
+                            weight: lastWorkingSetValues.weight,
+                            reps: lastWorkingSetValues.reps
+                        )
+                    }) {
+                        HStack(spacing: 3) {
+                            Image(systemName: "arrow.uturn.backward")
+                                .font(.caption2)
+                            Text("Add Previous Set")
+                                .font(.caption)
+                        }
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(Color.secondary.opacity(0.1))
+                        .clipShape(Capsule())
                     }
-                    .onChange(of: noteText) { _, newValue in
-                        if newValue.count > 40 {
-                            noteText = String(newValue.prefix(40))
+                    .buttonStyle(.plain)
+                    .contentShape(Rectangle())
+
+                    // Primary: Add Set (prominent styling with Liquid Glass)
+                    Button(action: { addSetConfig = .empty(exercise: exercise) }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.caption)
+                            Text("Add Set")
+                                .font(.caption.bold())
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                    }
+                    .buttonStyle(.plain)
+                    .contentShape(Rectangle())
+                    .background {
+                        if #available(iOS 26, *) {
+                            // iOS 26+ Liquid Glass for floating button
+                            Color.clear
+                                .glassEffect(.regular.tint(.blue.opacity(0.8)).interactive())
+                        } else {
+                            // iOS 17-25 fallback
+                            Capsule()
+                                .fill(Color.blue)
                         }
                     }
-            }
-            .listRowSeparator(.hidden)
-            .padding(.vertical, 8)
-
-            // Exercise summary metrics row - always shown
-            if let progressState = progressState {
-                ExerciseSummaryView(progressState: progressState, sets: sets)
-            }
-
-            // Add buttons - positioned adjacent with clear hierarchy
-            HStack(spacing: 8) {
-                Spacer()
-
-                // Secondary: Add Previous Set (subdued styling)
-                Button(action: {
-                    addSetConfig = .previous(
-                        exercise: exercise,
-                        weight: lastWorkingSetValues.weight,
-                        reps: lastWorkingSetValues.reps
-                    )
-                }) {
-                    HStack(spacing: 3) {
-                        Image(systemName: "arrow.uturn.backward")
-                            .font(.caption2)
-                        Text("Add Previous Set")
-                            .font(.caption)
-                    }
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(Color.secondary.opacity(0.1))
-                    .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-                .contentShape(Rectangle())
-
-                // Primary: Add Set (prominent styling with Liquid Glass)
-                Button(action: { addSetConfig = .empty(exercise: exercise) }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.caption)
-                        Text("Add Set")
-                            .font(.caption.bold())
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                }
-                .buttonStyle(.plain)
-                .contentShape(Rectangle())
-                .background {
-                    if #available(iOS 26, *) {
-                        // iOS 26+ Liquid Glass for floating button
-                        Color.clear
-                            .glassEffect(.regular.tint(.blue.opacity(0.8)).interactive())
-                    } else {
-                        // iOS 17-25 fallback
-                        Capsule()
-                            .fill(Color.blue)
-                    }
                 }
             }
             .listRowSeparator(.hidden)
-            .padding(.vertical, 4)
+            .listRowBackground(Color.clear)
 
-            // Today's sets section (only shown if today has sets)
+            // Today's sets "card"
             if !todaySets.isEmpty {
-                Text("TODAY'S SETS")
-                    .font(.footnote)
-                    .textCase(.uppercase)
-                    .foregroundStyle(.secondary)
-                    .listRowSeparator(.hidden)
-                    .padding(.vertical, 4)
+                Section {
+                    ForEach(todaySets, id: \.persistentModelID) { set in
+                        HStack(alignment: .bottom) {
+                            Text(ExerciseSetFormatters.formatSet(set))
+                                .monospacedDigit()
+                                .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
-                TodaySetsSectionView(
-                    todaySets: todaySets,
-                    isMostRecentSet: isMostRecentSet,
-                    deleteSet: deleteSet
-                )
+                            Spacer()
+
+                            if set.isWarmUp {
+                                Text("WARM UP")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundStyle(.red.opacity(0.7))
+                                    .textCase(.uppercase)
+                            }
+
+                            Text(Formatters.formatTimeHM(set.timestamp))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                deleteSet(set)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
+                } header: {
+                    Text("TODAY'S SETS")
+                        .font(.footnote)
+                        .textCase(.uppercase)
+                        .foregroundStyle(.secondary)
+                }
             }
 
-            // Historic sets section
+            // Historic sets: one "card" per day group
             if !historicDayGroups.isEmpty {
-                Text("HISTORIC SETS")
-                    .font(.footnote)
-                    .textCase(.uppercase)
-                    .foregroundStyle(.secondary)
-                    .listRowSeparator(.hidden)
-                    .padding(.vertical, 4)
-                    .padding(.top, todaySets.isEmpty ? 0 : 16)
+                ForEach(historicDayGroups, id: \.date) { dayGroup in
+                    Section {
+                        ForEach(dayGroup.sets, id: \.persistentModelID) { set in
+                            HStack(alignment: .bottom) {
+                                Text(ExerciseSetFormatters.formatSet(set))
+                                    .monospacedDigit()
+                                    .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
-                HistorySectionView(
-                    sets: sets,
-                    dayGroups: historicDayGroups,
-                    isMostRecentSet: isMostRecentSet,
-                    deleteSet: deleteSet
-                )
+                                Spacer()
+
+                                if set.isWarmUp {
+                                    Text("WARM UP")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundStyle(.red.opacity(0.7))
+                                        .textCase(.uppercase)
+                                }
+
+                                Text(Formatters.formatTimeHM(set.timestamp))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteSet(set)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                        }
+                    } header: {
+                        HStack {
+                            Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            Spacer()
+
+                            Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
             }
 
             // Empty state (only when no sets at all)
             if sets.isEmpty {
-                Text("No sets yet")
-                    .foregroundStyle(.secondary)
-                    .listRowSeparator(.hidden)
+                Section {
+                    Text("No sets yet")
+                        .foregroundStyle(.secondary)
+                }
+                .listRowSeparator(.hidden)
             }
         }
-        .listStyle(.plain)
+        .listStyle(.insetGrouped) // card-like grouped sections with system styling
+        .listSectionSpacing(16)
         .scrollContentBackground(.hidden)
         .background(Color(.systemGroupedBackground))
         .scrollDismissesKeyboard(.immediately)
@@ -245,7 +307,7 @@ struct ExerciseDetailView: View {
         .onAppear {
             updateCachedData()
         }
-        .onChange(of: sets) { _, newSets in
+        .onChange(of: sets) { _, _ in
             updateCachedData()
         }
     }
@@ -316,61 +378,6 @@ struct ExerciseDetailView: View {
             try context.save()
         } catch {
             print("Error updating note: \(error)")
-        }
-    }
-}
-
-// MARK: - History Section View
-
-private struct HistorySectionView: View {
-    let sets: [ExerciseSet]
-    let dayGroups: [ExerciseDataGrouper.DayGroup]
-    let isMostRecentSet: (ExerciseSet, [ExerciseSet]) -> Bool
-    let deleteSet: (ExerciseSet) -> Void
-    
-    var body: some View {
-        ForEach(dayGroups, id: \.date) { dayGroup in
-            Section {
-                ForEach(dayGroup.sets, id: \.persistentModelID) { set in
-                    HStack(alignment: .bottom) {
-                        Text(ExerciseSetFormatters.formatSet(set))
-                            .monospacedDigit()
-                            .foregroundStyle(set.isWarmUp ? .secondary : .primary)
-
-                        Spacer()
-
-                        if set.isWarmUp {
-                            Text("WARM UP")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(.red.opacity(0.7))
-                                .textCase(.uppercase)
-                        }
-
-                        Text(Formatters.formatTimeHM(set.timestamp))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    }
-                    .listRowSeparator(dayGroup.isFirst(set) ? .hidden : .visible, edges: .top)
-                    .listRowSeparator(dayGroup.isLast(set) ? .hidden : .visible, edges: .bottom)
-                    .swipeActions {
-                        Button("Delete", role: .destructive) {
-                            deleteSet(set)
-                        }
-                    }
-                }
-            } header: {
-                HStack {
-                    Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    
-                    Spacer()
-                    
-                    Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-            }
         }
     }
 }

@@ -99,6 +99,7 @@ struct ExerciseDetailView: View {
                             }
                         }
                 }
+                .padding(.horizontal, 8)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -108,75 +109,18 @@ struct ExerciseDetailView: View {
             // Exercise summary metrics "card"
             if let progressState = progressState {
                 Section {
-                    ExerciseSummaryView(progressState: progressState, sets: sets)
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear) // keep the card's own background
-                        .listRowInsets(EdgeInsets())
+                    ExerciseSummaryView(
+                        progressState: progressState,
+                        sets: sets,
+                        exercise: exercise,
+                        addSetConfig: $addSetConfig,
+                        lastWorkingSetValues: lastWorkingSetValues
+                    )
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear) // keep the card's own background
+                    .listRowInsets(EdgeInsets())
                 }
             }
-
-            // Add buttons section (single row)
-            Section {
-                HStack(spacing: 12) {
-                    Spacer()
-
-                    // Add Previous Set (icon-only circular button with Liquid Glass)
-                    Button(action: {
-                        addSetConfig = .previous(
-                            exercise: exercise,
-                            weight: lastWorkingSetValues.weight,
-                            reps: lastWorkingSetValues.reps
-                        )
-                    }) {
-                        Image(systemName: "arrow.uturn.backward")
-                            .font(.body)
-                            .foregroundStyle(.white)
-                    }
-                    .buttonStyle(.plain)
-                    .frame(width: 36, height: 36)          // square frame for perfect circle
-                    .contentShape(Circle())                // circular hit target
-                    .background {
-                        if #available(iOS 26, *) {
-                            // iOS 26+ Liquid Glass in a circular shape
-                            Color.clear
-                                .glassEffect(
-                                    .regular.tint(.blue.opacity(0.8)).interactive(),
-                                    in: Circle()
-                                )
-                        } else {
-                            // iOS 17–25 fallback
-                            Circle()
-                                .fill(Color.blue)
-                        }
-                    }
-
-                    // Add Set (icon-only circular button with Liquid Glass)
-                    Button(action: { addSetConfig = .empty(exercise: exercise) }) {
-                        Image(systemName: "plus")
-                            .font(.body)
-                            .foregroundStyle(.white)
-                    }
-                    .buttonStyle(.plain)
-                    .frame(width: 36, height: 36)          // square frame for perfect circle
-                    .contentShape(Circle())                // circular hit target
-                    .background {
-                        if #available(iOS 26, *) {
-                            // iOS 26+ Liquid Glass in a circular shape
-                            Color.clear
-                                .glassEffect(
-                                    .regular.tint(.blue.opacity(0.8)).interactive(),
-                                    in: Circle()
-                                )
-                        } else {
-                            // iOS 17–25 fallback
-                            Circle()
-                                .fill(Color.blue)
-                        }
-                    }
-                }
-            }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
 
             // Today's sets "card"
             if !todaySets.isEmpty {

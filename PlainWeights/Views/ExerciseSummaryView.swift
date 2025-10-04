@@ -43,6 +43,9 @@ struct PersonalRecordIndicator: View {
 struct ExerciseSummaryView: View {
     let progressState: ProgressTracker.ProgressState
     let sets: [ExerciseSet]
+    let exercise: Exercise
+    @Binding var addSetConfig: AddSetConfig?
+    let lastWorkingSetValues: (weight: Double?, reps: Int?)
 
     // Cache expensive calculation in computed property
     private var sessionMetrics: ExerciseSessionMetricsData {
@@ -144,6 +147,44 @@ struct ExerciseSummaryView: View {
                     }
                 }
             }
+
+            // Add Set Buttons
+            HStack(spacing: 8) {
+                Spacer()
+
+                // Add Previous Set button
+                Button(action: {
+                    addSetConfig = .previous(
+                        exercise: exercise,
+                        weight: lastWorkingSetValues.weight,
+                        reps: lastWorkingSetValues.reps
+                    )
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.uturn.backward.circle.fill")
+                            .foregroundStyle(.gray)
+                        Text("Add Previous")
+                            .foregroundStyle(.black)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                // Add Set button
+                Button(action: {
+                    addSetConfig = .empty(exercise: exercise)
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(.blue)
+                        Text("Add Set")
+                            .foregroundStyle(.black)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+            .padding(.top, 16)
         }
         .padding(16)
         .background(Color(.systemBackground))

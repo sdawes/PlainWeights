@@ -56,7 +56,7 @@ struct ExerciseSummaryView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Max last lifted")
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.secondary)
                         .textCase(.uppercase)
                 }
 
@@ -66,13 +66,13 @@ struct ExerciseSummaryView: View {
                     if let lastCompletedInfo = progressState.lastCompletedDayInfo {
                         Text(Formatters.formatAbbreviatedDayHeader(lastCompletedInfo.date))
                             .font(.caption2.italic())
-                            .foregroundStyle(.white.opacity(0.7))
+                            .foregroundStyle(.secondary)
                     }
 
                     if sessionMetrics.lastSessionTotalSets > 0 {
                         Text("\(sessionMetrics.lastSessionTotalSets) sets")
                             .font(.caption)
-                            .foregroundStyle(.white.opacity(0.7))
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -84,12 +84,12 @@ struct ExerciseSummaryView: View {
                     reps: sessionMetrics.lastSessionMaxWeightReps
                 ))
                     .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(sessionMetrics.hasHistoricalData ? .white : .white.opacity(0.5))
+                    .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
 
                 if sessionMetrics.lastSessionMaxWeightReps > 0 {
                     Text("\(sessionMetrics.lastSessionMaxWeightReps) reps")
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -99,7 +99,7 @@ struct ExerciseSummaryView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Today")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     if let personalRecords = progressState.personalRecords {
@@ -118,7 +118,7 @@ struct ExerciseSummaryView: View {
                     } else {
                         Text("No data")
                             .font(.caption)
-                            .foregroundStyle(.white.opacity(0.5))
+                            .foregroundStyle(.tertiary)
                     }
                 }
 
@@ -128,13 +128,13 @@ struct ExerciseSummaryView: View {
                 VStack(alignment: .trailing, spacing: 6) {
                     Text("Volume")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     HStack(spacing: 4) {
                         Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(progressState.lastCompletedDayInfo?.volume ?? 0)) \(progressState.unit)")
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(progressState.todayVolume >= (progressState.lastCompletedDayInfo?.volume ?? 0) ? .green : .white)
+                            .foregroundStyle(progressState.todayVolume >= (progressState.lastCompletedDayInfo?.volume ?? 0) ? .green : .primary)
 
                         if progressState.todayVolume > (progressState.lastCompletedDayInfo?.volume ?? 0) {
                             Image(systemName: "arrow.up.circle.fill")
@@ -146,7 +146,7 @@ struct ExerciseSummaryView: View {
             }
         }
         .padding(16)
-        .background(Color(red: 0.15, green: 0.2, blue: 0.28))
+        .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

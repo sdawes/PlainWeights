@@ -102,6 +102,8 @@ struct ExerciseDetailView: View {
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+            .padding(.bottom, 12)
 
             // Exercise summary metrics "card"
             if let progressState = progressState {
@@ -109,15 +111,16 @@ struct ExerciseDetailView: View {
                     ExerciseSummaryView(progressState: progressState, sets: sets)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear) // keep the card's own background
+                        .listRowInsets(EdgeInsets())
                 }
             }
 
             // Add buttons section (single row)
             Section {
-                HStack(spacing: 8) {
+                HStack(spacing: 12) {
                     Spacer()
 
-                    // Add Previous Set (icon only with Liquid Glass)
+                    // Add Previous Set (icon-only circular button with Liquid Glass)
                     Button(action: {
                         addSetConfig = .previous(
                             exercise: exercise,
@@ -128,39 +131,45 @@ struct ExerciseDetailView: View {
                         Image(systemName: "arrow.uturn.backward")
                             .font(.body)
                             .foregroundStyle(.white)
-                            .padding(8)
                     }
                     .buttonStyle(.plain)
-                    .contentShape(Rectangle())
+                    .frame(width: 36, height: 36)          // square frame for perfect circle
+                    .contentShape(Circle())                // circular hit target
                     .background {
                         if #available(iOS 26, *) {
-                            // iOS 26+ Liquid Glass
+                            // iOS 26+ Liquid Glass in a circular shape
                             Color.clear
-                                .glassEffect(.regular.tint(.blue.opacity(0.8)).interactive())
+                                .glassEffect(
+                                    .regular.tint(.blue.opacity(0.8)).interactive(),
+                                    in: Circle()
+                                )
                         } else {
-                            // iOS 17-25 fallback
-                            Capsule()
+                            // iOS 17–25 fallback
+                            Circle()
                                 .fill(Color.blue)
                         }
                     }
 
-                    // Add Set (icon only with Liquid Glass)
+                    // Add Set (icon-only circular button with Liquid Glass)
                     Button(action: { addSetConfig = .empty(exercise: exercise) }) {
                         Image(systemName: "plus")
                             .font(.body)
                             .foregroundStyle(.white)
-                            .padding(8)
                     }
                     .buttonStyle(.plain)
-                    .contentShape(Rectangle())
+                    .frame(width: 36, height: 36)          // square frame for perfect circle
+                    .contentShape(Circle())                // circular hit target
                     .background {
                         if #available(iOS 26, *) {
-                            // iOS 26+ Liquid Glass
+                            // iOS 26+ Liquid Glass in a circular shape
                             Color.clear
-                                .glassEffect(.regular.tint(.blue.opacity(0.8)).interactive())
+                                .glassEffect(
+                                    .regular.tint(.blue.opacity(0.8)).interactive(),
+                                    in: Circle()
+                                )
                         } else {
-                            // iOS 17-25 fallback
-                            Capsule()
+                            // iOS 17–25 fallback
+                            Circle()
                                 .fill(Color.blue)
                         }
                     }

@@ -52,71 +52,91 @@ struct ExerciseSummaryView: View {
         ExerciseSessionMetrics.getSessionMetricsWithDefaults(from: sets)
     }
 
+    // Detect exercise type for adaptive UI
+    private var exerciseType: ExerciseMetricsType {
+        ExerciseMetricsType.determine(from: sets)
+    }
+
+    // Rep-based metrics for reps-only exercises
+    private var todayTotalReps: Int {
+        RepsAnalytics.getTodayTotalReps(from: sets)
+    }
+
+    private var lastSessionTotalReps: Int {
+        RepsAnalytics.getLastSessionTotalReps(from: sets)
+    }
+
+    private var maxRepsLastSession: Int {
+        RepsAnalytics.getMaxRepsFromLastSession(from: sets)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Header: Title and date with sets underneath
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Max last lifted")
+            // SECTION 1: Last Lifted (full width) - Adaptive based on exercise type
+            VStack(alignment: .leading, spacing: 4) {
+                // Title with date inline - changes based on exercise type
+                HStack(spacing: 4) {
+                    Text(exerciseType == .repsOnly ? "MAX REPS LAST DONE" : "MAX LAST LIFTED")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
-                }
 
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 2) {
                     if let lastCompletedInfo = progressState.lastCompletedDayInfo {
-                        Text(Formatters.formatAbbreviatedDayHeader(lastCompletedInfo.date))
+                        Text("(\(Formatters.formatAbbreviatedDayHeader(lastCompletedInfo.date)))")
                             .font(.caption2.italic())
                             .foregroundStyle(.secondary)
                     }
+                }
 
-                    if sessionMetrics.lastSessionTotalSets > 0 {
-                        Text("\(sessionMetrics.lastSessionTotalSets) sets")
+                // Hero number - weight for weight-based, reps for reps-only
+                if exerciseType == .repsOnly {
+                    // Reps-only: Show max reps as hero number
+                    Text("\(maxRepsLastSession)")
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundStyle(maxRepsLastSession > 0 ? .primary : .secondary)
+                } else {
+                    // Weight-only or Combined: Show weight as hero number
+                    Text(ExerciseSetFormatters.formatLastMaxWeight(weight: sessionMetrics.lastSessionMaxWeight, reps: sessionMetrics.lastSessionMaxWeightReps))
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
+
+                    // Show reps subtitle only for combined exercises
+                    if exerciseType == .combined && sessionMetrics.lastSessionMaxWeightReps > 0 {
+                        Text("\(sessionMetrics.lastSessionMaxWeightReps) reps")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
             }
 
-            // Hero number section: weight on left with reps underneath
-            VStack(alignment: .leading, spacing: 4) {
-                Text(ExerciseSetFormatters.formatLastMaxWeight(
-                    weight: sessionMetrics.lastSessionMaxWeight,
-                    reps: sessionMetrics.lastSessionMaxWeightReps
-                ))
-                    .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(sessionMetrics.hasHistoricalData ? .primary : .secondary)
-
-                if sessionMetrics.lastSessionMaxWeightReps > 0 {
-                    Text("\(sessionMetrics.lastSessionMaxWeightReps) reps")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            // Grid section: Today comparison + Volume
+            // SECTION 2 & 3: Today's Progression (split horizontally)
             HStack(alignment: .top, spacing: 16) {
-                // Left column: Today metrics
+                // SECTION 2: Today's Progression (top left) - Adaptive indicators
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Today")
+                    Text("TODAY'S PROGRESSION")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     if let personalRecords = progressState.personalRecords {
                         HStack(spacing: 8) {
-                            PersonalRecordIndicator(
-                                improvement: personalRecords.weightImprovement,
-                                direction: personalRecords.weightDirection,
-                                unit: "kg"
-                            )
-                            PersonalRecordIndicator(
-                                improvement: Double(personalRecords.repsImprovement),
-                                direction: personalRecords.repsDirection,
-                                unit: " reps"
-                            )
+                            // Show weight indicator for weight-only and combined exercises
+                            if exerciseType == .weightOnly || exerciseType == .combined {
+                                PersonalRecordIndicator(
+                                    improvement: personalRecords.weightImprovement,
+                                    direction: personalRecords.weightDirection,
+                                    unit: "kg"
+                                )
+                            }
+
+                            // Show reps indicator for reps-only and combined exercises
+                            if exerciseType == .repsOnly || exerciseType == .combined {
+                                PersonalRecordIndicator(
+                                    improvement: Double(personalRecords.repsImprovement),
+                                    direction: personalRecords.repsDirection,
+                                    unit: " reps"
+                                )
+                            }
                         }
                     } else {
                         Text("No data")
@@ -127,28 +147,43 @@ struct ExerciseSummaryView: View {
 
                 Spacer()
 
-                // Right column: Volume metrics
+                // SECTION 3: Volume/Reps (top right) - Adaptive based on exercise type
                 VStack(alignment: .trailing, spacing: 6) {
-                    Text("Volume")
+                    // Title changes: VOLUME for weight-based, TOTAL REPS for reps-only
+                    Text(exerciseType == .repsOnly ? "TOTAL REPS" : "VOLUME")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     HStack(spacing: 4) {
-                        Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(progressState.lastCompletedDayInfo?.volume ?? 0)) \(progressState.unit)")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(progressState.todayVolume >= (progressState.lastCompletedDayInfo?.volume ?? 0) ? .green : .primary)
+                        if exerciseType == .repsOnly {
+                            // Reps-only: Show cumulative reps comparison
+                            Text("\(todayTotalReps)/\(lastSessionTotalReps) reps")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(todayTotalReps >= lastSessionTotalReps ? .green : .primary)
 
-                        if progressState.todayVolume > (progressState.lastCompletedDayInfo?.volume ?? 0) {
-                            Image(systemName: "arrow.up.circle.fill")
-                                .font(.caption)
-                                .foregroundStyle(.green)
+                            if todayTotalReps > lastSessionTotalReps {
+                                Image(systemName: "arrow.up.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            }
+                        } else {
+                            // Weight-only or Combined: Show weight volume
+                            Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(progressState.lastCompletedDayInfo?.volume ?? 0)) \(progressState.unit)")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(progressState.todayVolume >= (progressState.lastCompletedDayInfo?.volume ?? 0) ? .green : .primary)
+
+                            if progressState.todayVolume > (progressState.lastCompletedDayInfo?.volume ?? 0) {
+                                Image(systemName: "arrow.up.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            }
                         }
                     }
                 }
             }
 
-            // Add Set Buttons
+            // SECTION 4: Action buttons (bottom full width)
             HStack(spacing: 8) {
                 Spacer()
 

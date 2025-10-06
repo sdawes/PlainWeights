@@ -54,9 +54,11 @@ enum ProgressTracker {
         let repsDirection: PRDirection
         let hasWeightPR: Bool
         let hasRepsPR: Bool
+        let exerciseType: ExerciseMetricsType
 
         static func compare(todaysNewestWeight: Double, todaysNewestReps: Int,
-                          lastSessionMaxWeight: Double, lastSessionMaxReps: Int) -> PersonalRecordIndicators {
+                          lastSessionMaxWeight: Double, lastSessionMaxReps: Int,
+                          exerciseType: ExerciseMetricsType) -> PersonalRecordIndicators {
 
             let weightDiff = todaysNewestWeight - lastSessionMaxWeight
             let repsDiff = todaysNewestReps - lastSessionMaxReps
@@ -86,7 +88,8 @@ enum ProgressTracker {
                 weightDirection: weightDirection,
                 repsDirection: repsDirection,
                 hasWeightPR: weightDirection == .up,
-                hasRepsPR: repsDirection == .up
+                hasRepsPR: repsDirection == .up,
+                exerciseType: exerciseType
             )
         }
     }
@@ -144,7 +147,7 @@ enum ProgressTracker {
 
             // Calculate progress with type comparison
             let progressResult = ExerciseVolumeCalculator.calculateProgress(
-                today: todayMetrics ?? SessionMetrics(type: .weightBased, value: 0, maxWeight: 0, maxWeightReps: 0, totalSets: 0, date: Date()),
+                today: todayMetrics ?? SessionMetrics(type: .combined, value: 0, maxWeight: 0, maxWeightReps: 0, totalSets: 0, date: Date()),
                 last: lastMetrics
             )
 
@@ -204,8 +207,8 @@ enum ProgressTracker {
                     // For new exercises or consistent reps-only, show nothing
                     if let todayMetrics = todayMetrics, let lastMetrics = lastMetrics {
                         // Check if this is a legitimate type change vs data inconsistency
-                        let todayHasWeight = todayMetrics.value > 0 && todayMetrics.type == .weightBased
-                        let lastHadWeight = lastMetrics.value > 0 && lastMetrics.type == .weightBased
+                        let todayHasWeight = todayMetrics.value > 0 && (todayMetrics.type == .weightOnly || todayMetrics.type == .combined)
+                        let lastHadWeight = lastMetrics.value > 0 && (lastMetrics.type == .weightOnly || lastMetrics.type == .combined)
 
                         if todayHasWeight != lastHadWeight {
                             self.deltaText = "Exercise type changed"
@@ -226,11 +229,15 @@ enum ProgressTracker {
                 let lastMaxWeight = lastMetrics?.maxWeight ?? 0.0
                 let lastMaxReps = lastMetrics?.maxWeightReps ?? 0
 
+                // Detect exercise type for adaptive indicators
+                let exerciseType = ExerciseMetricsType.determine(from: sets)
+
                 self.personalRecords = PersonalRecordIndicators.compare(
                     todaysNewestWeight: newestSet.weight,
                     todaysNewestReps: newestSet.reps,
                     lastSessionMaxWeight: lastMaxWeight,
-                    lastSessionMaxReps: lastMaxReps
+                    lastSessionMaxReps: lastMaxReps,
+                    exerciseType: exerciseType
                 )
             } else {
                 self.personalRecords = nil

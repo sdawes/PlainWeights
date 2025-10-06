@@ -10,18 +10,33 @@ import Foundation
 import os.log
 
 enum ExerciseMetricsType {
-    case weightBased  // Has weight > 0 (standard or weight-only exercises)
-    case repsOnly     // All weights are 0 (bodyweight exercises)
+    case weightOnly   // Has weight > 0, but reps are irrelevant/not tracked (e.g., sled push)
+    case combined     // Has both weight > 0 AND reps > 0 (standard weightlifting)
+    case repsOnly     // All weights are 0, only reps matter (bodyweight exercises)
 
     /// Determine the metrics type for a set of exercise sets
+    /// Analyzes working sets (excludes warm-ups) to detect exercise pattern
     static func determine(from sets: [ExerciseSet]) -> ExerciseMetricsType {
-        // Single pass to check for any weight > 0
-        for set in sets {
-            if set.weight > 0 {
-                return .weightBased
-            }
+        // Only consider working sets for type detection
+        let workingSets = sets.filter { !$0.isWarmUp }
+
+        // If no working sets, default to combined
+        guard !workingSets.isEmpty else { return .combined }
+
+        // Check if sets have meaningful weight or reps
+        let hasWeight = workingSets.contains { $0.weight > 0 }
+        let hasReps = workingSets.contains { $0.reps > 0 }
+
+        // Determine type based on what data exists
+        if hasWeight && hasReps {
+            return .combined  // User recorded both weight and reps
+        } else if hasWeight && !hasReps {
+            return .weightOnly  // Only weight matters (e.g., sled push)
+        } else if hasReps && !hasWeight {
+            return .repsOnly  // Only reps matter (e.g., bodyweight pull-ups)
+        } else {
+            return .combined  // Fallback to combined for safety
         }
-        return .repsOnly
     }
 }
 
@@ -135,7 +150,8 @@ enum ExerciseVolumeCalculator {
             }
         }
 
-        let metricsType: ExerciseMetricsType = hasWeight ? .weightBased : .repsOnly
+        // Determine type based on actual data pattern (delegate to determine method)
+        let metricsType = ExerciseMetricsType.determine(from: sets)
 
         let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
         if timeElapsed > 0.016 { // More than one frame (60fps)
@@ -188,7 +204,7 @@ enum ExerciseVolumeCalculator {
     /// Get appropriate total label for the metrics type
     static func getTotalLabel(for type: ExerciseMetricsType) -> String {
         switch type {
-        case .weightBased:
+        case .weightOnly, .combined:
             return "Last session total"
         case .repsOnly:
             return "Last session total"

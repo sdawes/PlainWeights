@@ -24,7 +24,18 @@ enum ProgressTracker {
         if gainsPercent < 0 { return .red }
         return .secondary
     }
-    
+
+    /// Determine direction and color for volume/reps comparison
+    /// - Parameters:
+    ///   - today: Today's volume or rep count
+    ///   - last: Last session's volume or rep count
+    /// - Returns: PRDirection indicating performance (up/same/down)
+    static func volumeComparisonDirection(today: Double, last: Double) -> PRDirection {
+        if today > last { return .up }
+        if today < last { return .down }
+        return .same
+    }
+
     // MARK: - Personal Record Indicators
 
     enum PRDirection {

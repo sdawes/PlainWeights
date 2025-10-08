@@ -70,8 +70,51 @@ struct ExerciseSummaryView: View {
         RepsAnalytics.getMaxRepsFromLastSession(from: sets)
     }
 
+    // Direction indicators for volume/reps comparison
+    private var volumeDirection: ProgressTracker.PRDirection {
+        ProgressTracker.volumeComparisonDirection(
+            today: progressState.todayVolume,
+            last: progressState.lastCompletedDayInfo?.volume ?? 0
+        )
+    }
+
+    private var repsDirection: ProgressTracker.PRDirection {
+        ProgressTracker.volumeComparisonDirection(
+            today: Double(todayTotalReps),
+            last: Double(lastSessionTotalReps)
+        )
+    }
+
+    // Calculate volume difference (positive = over, negative = left)
+    private var volumeDifference: (amount: Double, label: String)? {
+        guard progressState.todayVolume > 0 else { return nil }
+
+        let lastVolume = progressState.lastCompletedDayInfo?.volume ?? 0
+        let diff = progressState.todayVolume - lastVolume
+
+        if diff > 0 {
+            return (diff, "over")
+        } else if diff < 0 {
+            return (abs(diff), "left")
+        }
+        return nil // Equal, no message
+    }
+
+    // Calculate reps difference (positive = over, negative = left)
+    private var repsDifference: (amount: Int, label: String)? {
+        guard todayTotalReps > 0 else { return nil }
+
+        let diff = todayTotalReps - lastSessionTotalReps
+        if diff > 0 {
+            return (diff, "over")
+        } else if diff < 0 {
+            return (abs(diff), "left")
+        }
+        return nil // Equal, no message
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 16) {
             // SECTION 1: Last Lifted (full width) - Adaptive based on exercise type
             VStack(alignment: .leading, spacing: 4) {
                 // Title with date inline - changes based on exercise type
@@ -104,7 +147,7 @@ struct ExerciseSummaryView: View {
                     if exerciseType == .combined && sessionMetrics.lastSessionMaxWeightReps > 0 {
                         Text("\(sessionMetrics.lastSessionMaxWeightReps) reps")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.primary)
                     }
                 }
             }
@@ -113,7 +156,7 @@ struct ExerciseSummaryView: View {
             HStack(alignment: .top, spacing: 16) {
                 // SECTION 2: Today's Progression (top left) - Adaptive indicators
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("TODAY'S PROGRESSION")
+                    Text("PROGRESSION")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
@@ -139,7 +182,7 @@ struct ExerciseSummaryView: View {
                             }
                         }
                     } else {
-                        Text("No data")
+                        Text("Add a set to see progression metrics")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
                     }
@@ -155,28 +198,48 @@ struct ExerciseSummaryView: View {
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
-                    HStack(spacing: 4) {
-                        if exerciseType == .repsOnly {
-                            // Reps-only: Show cumulative reps comparison
-                            Text("\(todayTotalReps)/\(lastSessionTotalReps) reps")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(todayTotalReps >= lastSessionTotalReps ? .green : .primary)
+                    VStack(alignment: .trailing, spacing: 2) {
+                        HStack(spacing: 4) {
+                            if exerciseType == .repsOnly {
+                                // Reps-only: Show cumulative reps comparison in black
+                                Text("\(todayTotalReps)/\(lastSessionTotalReps) reps")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
 
-                            if todayTotalReps > lastSessionTotalReps {
-                                Image(systemName: "arrow.up.circle.fill")
+                                // Show arrow only when sets have been entered
+                                if todayTotalReps > 0 {
+                                    Image(systemName: repsDirection.iconName)
+                                        .font(.caption)
+                                        .foregroundStyle(repsDirection.color)
+                                }
+                            } else {
+                                // Weight-only or Combined: Show weight volume in black
+                                Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(progressState.lastCompletedDayInfo?.volume ?? 0)) \(progressState.unit)")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+
+                                // Show arrow only when sets have been entered
+                                if progressState.todayVolume > 0 {
+                                    Image(systemName: volumeDirection.iconName)
+                                        .font(.caption)
+                                        .foregroundStyle(volumeDirection.color)
+                                }
+                            }
+                        }
+
+                        // Show difference (left/over) with directional color
+                        if exerciseType == .repsOnly {
+                            if let diff = repsDifference {
+                                let repsText = diff.amount == 1 ? "rep" : "reps"
+                                Text("\(diff.amount) \(repsText) \(diff.label)")
                                     .font(.caption)
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(repsDirection.color)
                             }
                         } else {
-                            // Weight-only or Combined: Show weight volume
-                            Text("\(Formatters.formatVolume(progressState.todayVolume))/\(Formatters.formatVolume(progressState.lastCompletedDayInfo?.volume ?? 0)) \(progressState.unit)")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(progressState.todayVolume >= (progressState.lastCompletedDayInfo?.volume ?? 0) ? .green : .primary)
-
-                            if progressState.todayVolume > (progressState.lastCompletedDayInfo?.volume ?? 0) {
-                                Image(systemName: "arrow.up.circle.fill")
+                            if let diff = volumeDifference {
+                                Text("\(Formatters.formatVolume(diff.amount)) \(progressState.unit) \(diff.label)")
                                     .font(.caption)
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(volumeDirection.color)
                             }
                         }
                     }

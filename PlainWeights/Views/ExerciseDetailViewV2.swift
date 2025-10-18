@@ -74,6 +74,30 @@ struct ExerciseDetailViewV2: View {
         ProgressTracker.createProgressState(from: sets)
     }
 
+    // Volume direction indicator (reused from View 1)
+    private var volumeDirection: ProgressTracker.PRDirection {
+        guard let state = progressState else { return .same }
+        return ProgressTracker.volumeComparisonDirection(
+            today: state.todayVolume,
+            last: state.lastCompletedDayInfo?.volume ?? 0
+        )
+    }
+
+    // Volume difference calculation (reused from View 1)
+    private var volumeDifference: (amount: Double, label: String)? {
+        guard let state = progressState, state.todayVolume > 0 else { return nil }
+
+        let lastVolume = state.lastCompletedDayInfo?.volume ?? 0
+        let diff = state.todayVolume - lastVolume
+
+        if diff > 0 {
+            return (diff, "more")
+        } else if diff < 0 {
+            return (abs(diff), "left")
+        }
+        return nil // Equal, no message
+    }
+
     init(exercise: Exercise) {
         self.exercise = exercise
         let id = exercise.persistentModelID
@@ -111,15 +135,15 @@ struct ExerciseDetailViewV2: View {
                         label: "Volume",
                         value: formatVolume(),
                         unit: "kg",
-                        changeAmount: nil,
-                        changeDirection: nil
+                        changeAmount: formatVolumeChange(),
+                        changeDirection: volumeDirection
                     )
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
             }
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .navigationTitle(exercise.name)
         .navigationBarTitleDisplayMode(.large)
     }
@@ -158,6 +182,23 @@ struct ExerciseDetailViewV2: View {
         guard let pr = progressState?.personalRecords else {
             return nil
         }
-        return "\(abs(pr.repsImprovement))"
+        let amount = abs(pr.repsImprovement)
+        let repsText = amount == 1 ? "rep" : "reps"
+        return "\(amount) \(repsText)"
+    }
+
+    private func formatVolumeChange() -> String? {
+        guard let diff = volumeDifference else {
+            // When equal (no difference), show "0 kg"
+            guard let state = progressState, state.todayVolume > 0 else {
+                return nil
+            }
+            let lastVolume = state.lastCompletedDayInfo?.volume ?? 0
+            if state.todayVolume == lastVolume {
+                return "0 kg"
+            }
+            return nil
+        }
+        return "\(Formatters.formatVolume(diff.amount)) kg"
     }
 }

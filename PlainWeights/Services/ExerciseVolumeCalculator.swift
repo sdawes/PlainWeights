@@ -128,10 +128,8 @@ enum ExerciseVolumeCalculator {
             } else if set.weight > 0 && set.reps == 0 {
                 // Weight-only exercise: just weight
                 volume += set.weight
-            } else if set.weight == 0 && set.reps > 0 {
-                // Reps-only exercise: just reps
-                volume += Double(set.reps)
             }
+            // Bodyweight exercises (weight == 0) contribute 0 to weight volume
         }
 
         // Determine type based on actual data pattern (delegate to determine method)

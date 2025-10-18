@@ -95,17 +95,17 @@ enum RepsAnalytics {
 
     // MARK: - Reps Volume Comparison
 
-    /// Calculate reps volume difference for display (positive = over, negative = left)
+    /// Calculate reps volume difference for display (positive = more, negative = left)
     /// - Parameters:
     ///   - todayTotal: Total reps from today's session
     ///   - lastSessionTotal: Total reps from last session
-    /// - Returns: Tuple with amount and label ("over" or "left"), or nil if equal or no data
+    /// - Returns: Tuple with amount and label ("more" or "left"), or nil if equal or no data
     static func calculateRepsVolumeDifference(todayTotal: Int, lastSessionTotal: Int) -> (amount: Int, label: String)? {
         guard todayTotal > 0 else { return nil }
 
         let diff = todayTotal - lastSessionTotal
         if diff > 0 {
-            return (diff, "over")
+            return (diff, "more")
         } else if diff < 0 {
             return (abs(diff), "left")
         }

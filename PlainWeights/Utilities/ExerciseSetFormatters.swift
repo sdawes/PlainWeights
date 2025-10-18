@@ -11,21 +11,10 @@ enum ExerciseSetFormatters {
 
     // MARK: - Set Display Formatting
 
-    /// Format a single exercise set, hiding zeros appropriately
+    /// Format a single exercise set - always shows "XX kg x YY reps" format
     static func formatSet(_ set: ExerciseSet) -> String {
-        if set.weight == 0 && set.reps > 0 {
-            // Bodyweight exercises: "10 reps"
-            return "\(set.reps) reps"
-        } else if set.weight > 0 && set.reps == 0 {
-            // Weight-only exercises: "50 kg"
-            return "\(Formatters.formatWeight(set.weight)) kg"
-        } else if set.weight > 0 && set.reps > 0 {
-            // Standard exercises: "50 kg × 10 reps"
-            return "\(Formatters.formatWeight(set.weight)) kg × \(set.reps)"
-        } else {
-            // Fallback for invalid data
-            return "Invalid set"
-        }
+        // Always show full format: "XX kg x YY reps" (even when 0)
+        return "\(Formatters.formatWeight(set.weight)) kg × \(set.reps) reps"
     }
 
     /// Format last max weight display - always shows weight in kg

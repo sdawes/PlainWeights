@@ -45,15 +45,15 @@ enum ProgressTracker {
             switch self {
             case .up: return "arrow.up.circle.fill"
             case .down: return "arrow.down.circle.fill"
-            case .same: return "arrow.left.circle.fill"
+            case .same: return "minus.circle.fill"
             }
         }
 
         var color: Color {
             switch self {
-            case .up: return .green
-            case .down: return Color(red: 0.7, green: 0.1, blue: 0.1) // Same as delete button
-            case .same: return .blue
+            case .up: return .green          // Green for improvements
+            case .down: return .secondary    // Grey for decreases
+            case .same: return .orange       // Amber for no change
             }
         }
     }

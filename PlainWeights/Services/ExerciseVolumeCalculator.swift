@@ -56,7 +56,8 @@ enum ExerciseVolumeCalculator {
 
     // MARK: - Volume Calculations
 
-    /// Calculate total volume for a set of exercise sets based on their type
+    /// Calculate total volume for a set of exercise sets
+    /// Volume = weight × reps (only counted when both are present)
     /// Optimized single-pass algorithm
     static func calculateVolume(for sets: [ExerciseSet]) -> Double {
         var volume = 0.0
@@ -65,42 +66,31 @@ enum ExerciseVolumeCalculator {
         for set in sets {
             guard !set.isWarmUp else { continue }
 
-            // Calculate volume based on set values
+            // Only calculate volume when both weight and reps are present
             if set.weight > 0 && set.reps > 0 {
-                // Standard exercise: weight × reps
                 volume += set.weight * Double(set.reps)
-            } else if set.weight > 0 && set.reps == 0 {
-                // Weight-only exercise: just weight
-                volume += set.weight
-            } else if set.weight == 0 && set.reps > 0 {
-                // Reps-only exercise: just reps
-                volume += Double(set.reps)
             }
+            // If either weight or reps is 0, volume contribution is 0
         }
 
         return volume
     }
 
-    /// Calculate weight-only volume for display purposes (excludes reps-only exercises)
-    /// Used for "Lifted today" display to show 0 kg for bodyweight exercises
+    /// Calculate weight-only volume for display purposes
+    /// Volume = weight × reps (only counted when both are present)
+    /// Used for "Lifted today" display
     static func calculateWeightVolume(for sets: [ExerciseSet]) -> Double {
         var volume = 0.0
 
-        // Single pass to calculate only weight-based volume
+        // Single pass to calculate weight-based volume
         for set in sets {
             guard !set.isWarmUp else { continue }
 
-            // Only count exercises that involve actual weight
-            if set.weight > 0 {
-                if set.reps > 0 {
-                    // Standard exercise: weight × reps
-                    volume += set.weight * Double(set.reps)
-                } else {
-                    // Weight-only exercise: just weight
-                    volume += set.weight
-                }
+            // Only calculate volume when both weight and reps are present
+            if set.weight > 0 && set.reps > 0 {
+                volume += set.weight * Double(set.reps)
             }
-            // Skip reps-only exercises (weight = 0) for display consistency
+            // If either weight or reps is 0, volume contribution is 0
         }
 
         return volume
@@ -112,7 +102,6 @@ enum ExerciseVolumeCalculator {
     /// Optimized single-pass algorithm to avoid multiple array iterations
     static func getSessionMetrics(for sets: [ExerciseSet], date: Date) -> SessionMetrics {
         let startTime = CFAbsoluteTimeGetCurrent()
-        var hasWeight = false
         var volume = 0.0
         var maxWeight = 0.0
         var maxWeightReps = 0
@@ -123,11 +112,6 @@ enum ExerciseVolumeCalculator {
             guard !set.isWarmUp else { continue }
 
             totalSets += 1
-
-            // Track if this session has any weights
-            if set.weight > 0 {
-                hasWeight = true
-            }
 
             // Update max weight and reps
             if set.weight > maxWeight {

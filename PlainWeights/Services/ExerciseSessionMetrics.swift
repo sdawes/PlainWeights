@@ -120,12 +120,16 @@ enum ExerciseSessionMetrics {
         let lastSessionWeightVolume = lastDayInfo != nil ?
             ExerciseVolumeCalculator.calculateWeightVolume(for: lastDayInfo!.sets) : 0.0
 
+        // Calculate total reps volume for last session
+        let lastSessionRepsVolume = RepsAnalytics.getLastSessionTotalRepsVolume(from: sets)
+
         return ExerciseSessionMetricsData(
             lastSessionMaxWeight: lastDayInfo?.maxWeight ?? 0.0,
             lastSessionMaxWeightReps: lastDayInfo?.maxWeightReps ?? 0,
             lastSessionTotalSets: lastDayInfo?.totalSets ?? 0,
             lastSessionTotalVolume: lastDayInfo?.volume ?? 0.0,
             lastSessionTotalWeightVolume: lastSessionWeightVolume,
+            lastSessionTotalRepsVolume: lastSessionRepsVolume,
             todaysVolume: todaysVolume,
             hasHistoricalData: lastDayInfo != nil
         )
@@ -163,6 +167,7 @@ struct ExerciseSessionMetricsData {
     let lastSessionTotalSets: Int
     let lastSessionTotalVolume: Double
     let lastSessionTotalWeightVolume: Double  // Weight-only volume for display
+    let lastSessionTotalRepsVolume: Int       // Total reps volume from last session
     let todaysVolume: Double
     let hasHistoricalData: Bool
 }

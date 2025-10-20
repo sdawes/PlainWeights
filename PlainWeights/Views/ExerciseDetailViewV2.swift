@@ -55,9 +55,8 @@ struct MetricCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.systemBackground))
+        .background(Color.ptw_lightGrey)
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
     }
 }
 
@@ -68,6 +67,11 @@ struct ExerciseDetailViewV2: View {
     @Environment(\.dismiss) private var dismiss
     let exercise: Exercise
     @Query private var sets: [ExerciseSet]
+    @State private var addSetConfig: AddSetConfig?
+
+    // Cached data for performance
+    @State private var todaySets: [ExerciseSet] = []
+    @State private var historicDayGroups: [ExerciseDataGrouper.DayGroup] = []
 
     // Cached progress state
     private var progressState: ProgressTracker.ProgressState? {
@@ -108,44 +112,223 @@ struct ExerciseDetailViewV2: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Three metric cards
-                HStack(spacing: 12) {
-                    // Card 1: Weight
-                    MetricCard(
-                        label: "Weight",
-                        value: formatWeight(),
-                        unit: "kg",
-                        changeAmount: formatWeightChange(),
-                        changeDirection: progressState?.personalRecords?.weightDirection
-                    )
+        List {
+            // Metrics container section
+            Section {
+                // White container with metric cards and buttons
+                VStack(alignment: .leading, spacing: 16) {
+                    // Three metric cards
+                    HStack(spacing: 12) {
+                        // Card 1: Weight
+                        MetricCard(
+                            label: "Weight",
+                            value: formatWeight(),
+                            unit: "kg",
+                            changeAmount: formatWeightChange(),
+                            changeDirection: progressState?.personalRecords?.weightDirection
+                        )
 
-                    // Card 2: Reps
-                    MetricCard(
-                        label: "Reps",
-                        value: formatReps(),
-                        unit: "",
-                        changeAmount: formatRepsChange(),
-                        changeDirection: progressState?.personalRecords?.repsDirection
-                    )
+                        // Card 2: Reps
+                        MetricCard(
+                            label: "Reps",
+                            value: formatReps(),
+                            unit: "",
+                            changeAmount: formatRepsChange(),
+                            changeDirection: progressState?.personalRecords?.repsDirection
+                        )
 
-                    // Card 3: Volume
-                    MetricCard(
-                        label: "Volume",
-                        value: formatVolume(),
-                        unit: "kg",
-                        changeAmount: formatVolumeChange(),
-                        changeDirection: volumeDirection
-                    )
+                        // Card 3: Volume
+                        MetricCard(
+                            label: "Volume",
+                            value: formatVolume(),
+                            unit: "kg",
+                            changeAmount: formatVolumeChange(),
+                            changeDirection: volumeDirection
+                        )
+                    }
+
+                    // Progress bar
+                    VStack(alignment: .leading, spacing: 8) {
+                        // Thin progress bar
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                // Background track (grey)
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.secondary.opacity(0.2))
+                                    .frame(height: 4)
+
+                                // Fill (blue/green based on progress)
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(progressState?.barFillColor ?? .blue)
+                                    .frame(width: geometry.size.width * progressBarRatio, height: 4)
+                            }
+                        }
+                        .frame(height: 4)
+
+                        // Label: "Today X/Y kg"
+                        Text("Today \(formatTodayVolume())/\(formatLastVolume()) kg")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    // Action buttons
+                    HStack(spacing: 8) {
+                        Spacer()
+
+                        // Add Previous Set button
+                        Button(action: {
+                            addSetConfig = .previous(
+                                exercise: exercise,
+                                weight: lastWorkingSetValues.weight,
+                                reps: lastWorkingSetValues.reps
+                            )
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.uturn.backward.circle.fill")
+                                    .foregroundStyle(.gray)
+                                Text("Add Previous")
+                                    .foregroundStyle(.black)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+
+                        // Add Set button
+                        Button(action: {
+                            addSetConfig = .empty(exercise: exercise)
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundStyle(.blue)
+                                Text("Add Set")
+                                    .foregroundStyle(.black)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
+                .padding(16)
+                .background(Color(.systemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
+
+            // Today's sets section
+            if !todaySets.isEmpty {
+                Section {
+                    ForEach(todaySets, id: \.persistentModelID) { set in
+                        HStack(alignment: .bottom) {
+                            Text(ExerciseSetFormatters.formatSet(set))
+                                .monospacedDigit()
+                                .foregroundStyle(set.isWarmUp ? .secondary : .primary)
+
+                            Spacer()
+
+                            if set.isWarmUp {
+                                Text("WARM UP")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundStyle(.red.opacity(0.7))
+                                    .textCase(.uppercase)
+                            }
+
+                            Text(Formatters.formatTimeHM(set.timestamp))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                deleteSet(set)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
+                } header: {
+                    Text("TODAY'S SETS")
+                        .font(.footnote)
+                        .textCase(.uppercase)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            // Historic sets: one section per day group
+            if !historicDayGroups.isEmpty {
+                ForEach(historicDayGroups, id: \.date) { dayGroup in
+                    Section {
+                        ForEach(dayGroup.sets, id: \.persistentModelID) { set in
+                            HStack(alignment: .bottom) {
+                                Text(ExerciseSetFormatters.formatSet(set))
+                                    .monospacedDigit()
+                                    .foregroundStyle(set.isWarmUp ? .secondary : .primary)
+
+                                Spacer()
+
+                                if set.isWarmUp {
+                                    Text("WARM UP")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundStyle(.red.opacity(0.7))
+                                        .textCase(.uppercase)
+                                }
+
+                                Text(Formatters.formatTimeHM(set.timestamp))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteSet(set)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                        }
+                    } header: {
+                        HStack {
+                            Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            Spacer()
+
+                            Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+            }
+
+            // Empty state (only when no sets at all)
+            if sets.isEmpty {
+                Section {
+                    Text("No sets yet")
+                        .foregroundStyle(.secondary)
+                }
+                .listRowSeparator(.hidden)
             }
         }
-        .background(Color(.secondarySystemGroupedBackground))
+        .listStyle(.insetGrouped)
+        .listSectionSpacing(6)
+        .scrollContentBackground(.hidden)
+        .background(Color.ptw_lightGrey)
         .navigationTitle(exercise.name)
         .navigationBarTitleDisplayMode(.large)
+        .sheet(item: $addSetConfig) { config in
+            AddSetView(
+                exercise: config.exercise,
+                initialWeight: config.initialWeight,
+                initialReps: config.initialReps
+            )
+        }
+        .onAppear {
+            updateCachedData()
+        }
+        .onChange(of: sets) { _, _ in
+            updateCachedData()
+        }
     }
 
     // MARK: - Formatting Helpers
@@ -200,5 +383,49 @@ struct ExerciseDetailViewV2: View {
             return nil
         }
         return "\(Formatters.formatVolume(diff.amount)) kg"
+    }
+
+    /// Get the weight and reps values from the last working (non-warm-up) set
+    private var lastWorkingSetValues: (weight: Double?, reps: Int?) {
+        guard let lastWorkingSet = sets.first(where: { !$0.isWarmUp }) else {
+            return (nil, nil)
+        }
+        return (lastWorkingSet.weight, lastWorkingSet.reps)
+    }
+
+    // MARK: - Progress Bar Helpers
+
+    private var progressBarRatio: CGFloat {
+        guard let state = progressState else { return 0 }
+        return CGFloat(state.progressBarRatio)
+    }
+
+    private func formatTodayVolume() -> String {
+        guard let state = progressState else { return "0" }
+        return Formatters.formatVolume(state.todayVolume)
+    }
+
+    private func formatLastVolume() -> String {
+        guard let lastVolume = progressState?.lastCompletedDayInfo?.volume else {
+            return "0"
+        }
+        return Formatters.formatVolume(lastVolume)
+    }
+
+    // MARK: - Data Management
+
+    /// Update cached expensive calculations when sets change
+    private func updateCachedData() {
+        let (todaysData, historicData) = ExerciseDataGrouper.separateTodayFromHistoric(sets: sets)
+        todaySets = todaysData
+        historicDayGroups = historicData
+    }
+
+    private func deleteSet(_ set: ExerciseSet) {
+        do {
+            try ExerciseSetService.deleteSet(set, context: context)
+        } catch {
+            print("Error deleting set: \(error)")
+        }
     }
 }

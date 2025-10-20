@@ -128,15 +128,26 @@ class TestDataGenerator {
                     exerciseGroups.append(currentExercise)
                 }
 
-                // Print each exercise group
+                // Print each exercise group as executable Swift code
                 for group in exerciseGroups {
                     if let first = group.first {
                         logger.info("// \(first.exercise.name): \(group.count) sets")
                         for item in group {
-                            let fullDateTime = DateFormatter()
-                            fullDateTime.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                            let warmupFlag = item.set.isWarmUp ? " (warm-up)" : ""
-                            logger.info("//   \(fullDateTime.string(from: item.set.timestamp)) - \(item.set.weight)kg x \(item.set.reps) reps\(warmupFlag)")
+                            // Extract date components for date() function
+                            let calendar = Calendar.current
+                            let y = calendar.component(.year, from: item.set.timestamp)
+                            let m = calendar.component(.month, from: item.set.timestamp)
+                            let d = calendar.component(.day, from: item.set.timestamp)
+                            let h = calendar.component(.hour, from: item.set.timestamp)
+                            let min = calendar.component(.minute, from: item.set.timestamp)
+                            let s = calendar.component(.second, from: item.set.timestamp)
+
+                            // Generate appropriate function call
+                            if item.set.isWarmUp {
+                                logger.info("        addWarmUpSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
+                            } else {
+                                logger.info("        addSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
+                            }
                         }
                     }
                 }

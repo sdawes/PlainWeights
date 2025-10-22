@@ -24,6 +24,8 @@ struct MetricCard: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
+            Spacer()
+
             // Main value
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value)
@@ -181,7 +183,7 @@ struct ExerciseDetailView: View {
                         MetricCard(
                             label: "Reps",
                             value: formatReps(),
-                            unit: "",
+                            unit: "reps",
                             changeAmount: formatRepsChange(),
                             changeDirection: progressState?.personalRecords?.repsDirection
                         )

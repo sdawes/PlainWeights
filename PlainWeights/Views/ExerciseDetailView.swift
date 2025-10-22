@@ -27,13 +27,20 @@ struct MetricCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             // Section 2: Value (35pt)
-            Text(value)
-                .font(.system(size: 32, weight: .bold))
-                .foregroundStyle(.primary)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
-                .frame(height: 35, alignment: .center)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(value)
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                if !unit.isEmpty {
+                    Text(unit)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(height: 35, alignment: .center)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             // Section 3: Progress indicator (35pt)
             if let changeAmount = changeAmount, let direction = changeDirection {
@@ -171,7 +178,7 @@ struct ExerciseDetailView: View {
                     HStack(spacing: 12) {
                         // Card 1: Weight
                         MetricCard(
-                            label: "Weight (kg)",
+                            label: "Weight",
                             value: formatWeight(),
                             unit: "kg",
                             changeAmount: formatWeightChange(),
@@ -189,7 +196,7 @@ struct ExerciseDetailView: View {
 
                         // Card 3: Volume
                         MetricCard(
-                            label: "Volume (kg)",
+                            label: "Volume",
                             value: formatVolume(),
                             unit: "kg",
                             changeAmount: formatVolumeChange(),

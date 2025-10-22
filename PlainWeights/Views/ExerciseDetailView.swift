@@ -18,13 +18,15 @@ struct MetricCard: View {
     let changeDirection: ProgressTracker.PRDirection?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Label
+        VStack(spacing: 0) {
+            // Section 1: Label (36pt)
             Text(label.uppercased())
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .frame(height: 36, alignment: .center)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Main value
+            // Section 2: Value (37pt)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value)
                     .font(.system(size: 24, weight: .bold))
@@ -35,8 +37,10 @@ struct MetricCard: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
+            .frame(height: 37, alignment: .center)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Change indicator
+            // Section 3: Progress indicator (37pt)
             if let changeAmount = changeAmount, let direction = changeDirection {
                 HStack(spacing: 4) {
                     Image(systemName: direction.iconName)
@@ -45,10 +49,17 @@ struct MetricCard: View {
                     Text(changeAmount)
                         .font(.caption)
                         .foregroundStyle(direction.color)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
                 }
+                .frame(height: 37, alignment: .center)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Spacer()
+                    .frame(height: 37)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity)
         .frame(height: 110)
         .padding(16)
         .background(Color(.systemGroupedBackground))

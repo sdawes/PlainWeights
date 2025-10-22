@@ -123,6 +123,24 @@ struct ExerciseDetailViewV2: View {
             Section {
                 // White container with metric cards and buttons
                 VStack(alignment: .leading, spacing: 16) {
+                    // Notes field
+                    TextField("Add notes about form, target muscles, etc...", text: $noteText)
+                        .font(.caption.italic())
+                        .foregroundStyle(.tertiary)
+                        .textFieldStyle(.plain)
+                        .lineLimit(1)
+                        .focused($notesFocused)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            notesFocused = false
+                            updateNote()
+                        }
+                        .onChange(of: noteText) { _, newValue in
+                            if newValue.count > 40 {
+                                noteText = String(newValue.prefix(40))
+                            }
+                        }
+
                     // Three metric cards
                     HStack(spacing: 12) {
                         // Card 1: Weight
@@ -200,24 +218,6 @@ struct ExerciseDetailViewV2: View {
                         .buttonStyle(.bordered)
                         .controlSize(.regular)
                     }
-
-                    // Notes field
-                    TextField("Add notes about form, target muscles, etc...", text: $noteText)
-                        .font(.caption.italic())
-                        .foregroundStyle(.tertiary)
-                        .textFieldStyle(.plain)
-                        .lineLimit(1)
-                        .focused($notesFocused)
-                        .submitLabel(.done)
-                        .onSubmit {
-                            notesFocused = false
-                            updateNote()
-                        }
-                        .onChange(of: noteText) { _, newValue in
-                            if newValue.count > 40 {
-                                noteText = String(newValue.prefix(40))
-                            }
-                        }
                 }
                 .padding(16)
                 .background(Color(.systemBackground))

@@ -163,7 +163,6 @@ struct FilteredExerciseListView: View {
         .scrollContentBackground(.hidden)
         .background(Color(.systemGroupedBackground))
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle("Plain Weights")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { showingAddExercise = true } label: { Image(systemName: "plus") }

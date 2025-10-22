@@ -29,27 +29,6 @@ struct FilteredExerciseListView: View {
     @Binding var showingAddExercise: Bool
     let searchText: String
 
-    // State for view version selection
-    @State private var selectedExercise: ExerciseNavigation?
-
-    enum ViewVersion {
-        case v1, v2
-    }
-
-    struct ExerciseNavigation: Identifiable, Hashable {
-        let id = UUID()
-        let exercise: Exercise
-        let version: ViewVersion
-
-        static func == (lhs: ExerciseNavigation, rhs: ExerciseNavigation) -> Bool {
-            lhs.id == rhs.id
-        }
-
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(id)
-        }
-    }
-
     init(searchText: String, showingAddExercise: Binding<Bool>) {
         self.searchText = searchText
         self._showingAddExercise = showingAddExercise
@@ -81,9 +60,6 @@ struct FilteredExerciseListView: View {
             } else {
                 Section {
                     ForEach(exercises, id: \.persistentModelID) { exercise in
-                        // ORIGINAL NAVIGATION LINK - COMMENTED OUT FOR V1/V2 TESTING
-                        // Will be restored later
-                        /*
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(exercise.name)
@@ -96,52 +72,6 @@ struct FilteredExerciseListView: View {
                                     .font(.caption)
                                     .foregroundStyle(.tertiary)
                             }
-                        }
-                        */
-
-                        // TEMPORARY: V1/V2 button navigation
-                        HStack(spacing: 12) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(exercise.name)
-                                    .font(.headline)
-                                    .foregroundStyle(.primary)
-                                Text(exercise.category)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
-                                    .font(.caption)
-                                    .foregroundStyle(.tertiary)
-                            }
-
-                            Spacer()
-
-                            // V1 Button (current design)
-                            Button(action: {
-                                selectedExercise = ExerciseNavigation(exercise: exercise, version: .v1)
-                            }) {
-                                Text("V1")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(Color.blue)
-                                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                            }
-                            .buttonStyle(.plain)
-
-                            // V2 Button (new design)
-                            Button(action: {
-                                selectedExercise = ExerciseNavigation(exercise: exercise, version: .v2)
-                            }) {
-                                Text("V2")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(Color.green)
-                                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                            }
-                            .buttonStyle(.plain)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
@@ -204,20 +134,8 @@ struct FilteredExerciseListView: View {
             #endif
         }
         .sheet(isPresented: $showingAddExercise) { AddExerciseView() }
-        // ORIGINAL NAVIGATION - COMMENTED OUT FOR V1/V2 TESTING
-        /*
         .navigationDestination(for: Exercise.self) { exercise in
-            ExerciseDetailView(exercise: exercise)
-        }
-        */
-        // TEMPORARY: Conditional navigation based on view version
-        .navigationDestination(item: $selectedExercise) { selection in
-            switch selection.version {
-            case .v1:
-                ExerciseDetailView(exercise: selection.exercise)
-            case .v2:
-                ExerciseDetailViewV2(exercise: selection.exercise)
-            }
+            ExerciseDetailViewV2(exercise: exercise)
         }
     }
 

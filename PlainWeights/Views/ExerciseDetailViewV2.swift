@@ -124,7 +124,7 @@ struct ExerciseDetailViewV2: View {
         List {
             // Title and notes section (no card background)
             Section {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 8) {
                     // Title
                     TextField("Title", text: $exerciseName)
                         .font(.largeTitle.bold())
@@ -159,7 +159,7 @@ struct ExerciseDetailViewV2: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets())
-            .padding(.bottom, 20)
+            .padding(.bottom, 8)
 
             // Metrics container section
             Section {

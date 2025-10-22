@@ -19,14 +19,14 @@ struct MetricCard: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Section 1: Label (36pt)
+            // Section 1: Label (30pt)
             Text(label.uppercased())
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .frame(height: 36, alignment: .center)
+                .frame(height: 30, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Section 2: Value (37pt)
+            // Section 2: Value (35pt)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value)
                     .font(.system(size: 24, weight: .bold))
@@ -37,10 +37,10 @@ struct MetricCard: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
-            .frame(height: 37, alignment: .center)
+            .frame(height: 35, alignment: .center)
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Section 3: Progress indicator (37pt)
+            // Section 3: Progress indicator (35pt)
             if let changeAmount = changeAmount, let direction = changeDirection {
                 HStack(spacing: 4) {
                     Image(systemName: direction.iconName)
@@ -52,15 +52,15 @@ struct MetricCard: View {
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
                 }
-                .frame(height: 37, alignment: .center)
+                .frame(height: 35, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 Spacer()
-                    .frame(height: 37)
+                    .frame(height: 35)
             }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 110)
+        .frame(height: 100)
         .padding(16)
         .background(Color(.systemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))

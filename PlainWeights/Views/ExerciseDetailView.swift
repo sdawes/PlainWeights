@@ -46,11 +46,6 @@ struct MetricCard: View {
                         .font(.caption)
                         .foregroundStyle(direction.color)
                 }
-            } else {
-                // Placeholder for alignment when no change
-                Text("—")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

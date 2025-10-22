@@ -51,7 +51,7 @@ enum ProgressTracker {
 
         var color: Color {
             switch self {
-            case .up: return Color(red: 0, green: 0.65, blue: 0)    // Darker green for improvements
+            case .up: return .green                                  // Green for improvements
             case .down: return Color(red: 0.7, green: 0.1, blue: 0.1)  // Darker red for decreases
             case .same: return .blue                                 // Blue for no change
             }

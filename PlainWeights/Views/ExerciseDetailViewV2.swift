@@ -69,8 +69,10 @@ struct ExerciseDetailViewV2: View {
     @Query private var sets: [ExerciseSet]
     @State private var addSetConfig: AddSetConfig?
 
-    // Notes state
+    // Form state
+    @State private var exerciseName: String = ""
     @State private var noteText: String = ""
+    @FocusState private var nameFocused: Bool
     @FocusState private var notesFocused: Bool
     @State private var showingDeleteAlert = false
 
@@ -114,16 +116,27 @@ struct ExerciseDetailViewV2: View {
             filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
+        _exerciseName = State(initialValue: exercise.name)
         _noteText = State(initialValue: exercise.note ?? "")
     }
 
     var body: some View {
         List {
-            // Metrics container section
+            // Title and notes section (no card background)
             Section {
-                // White container with metric cards and buttons
-                VStack(alignment: .leading, spacing: 16) {
-                    // Notes field
+                VStack(alignment: .leading, spacing: 2) {
+                    // Title
+                    TextField("Title", text: $exerciseName)
+                        .font(.largeTitle.bold())
+                        .textFieldStyle(.plain)
+                        .focused($nameFocused)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            nameFocused = false
+                            updateExerciseName()
+                        }
+
+                    // Notes as subtitle
                     TextField("Add notes about form, target muscles, etc...", text: $noteText)
                         .font(.caption.italic())
                         .foregroundStyle(.tertiary)
@@ -140,7 +153,18 @@ struct ExerciseDetailViewV2: View {
                                 noteText = String(newValue.prefix(40))
                             }
                         }
+                }
+                .padding(.horizontal, 8)
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets())
+            .padding(.bottom, 20)
 
+            // Metrics container section
+            Section {
+                // White container with metric cards and buttons
+                VStack(alignment: .leading, spacing: 16) {
                     // Three metric cards
                     HStack(spacing: 12) {
                         // Card 1: Weight
@@ -326,11 +350,14 @@ struct ExerciseDetailViewV2: View {
         .scrollContentBackground(.hidden)
         .background(Color.ptw_lightGrey)
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle(exercise.name)
-        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if notesFocused {
+                if nameFocused {
+                    Button("Done") {
+                        nameFocused = false
+                        updateExerciseName()
+                    }
+                } else if notesFocused {
                     Button("Done") {
                         notesFocused = false
                         updateNote()
@@ -460,6 +487,20 @@ struct ExerciseDetailViewV2: View {
             try ExerciseSetService.deleteSet(set, context: context)
         } catch {
             print("Error deleting set: \(error)")
+        }
+    }
+
+    private func updateExerciseName() {
+        let trimmed = exerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != exercise.name else { return }
+
+        exercise.name = trimmed
+        exercise.bumpUpdated()
+
+        do {
+            try context.save()
+        } catch {
+            print("Error updating exercise name: \(error)")
         }
     }
 

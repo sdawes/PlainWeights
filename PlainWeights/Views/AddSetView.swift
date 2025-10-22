@@ -133,6 +133,9 @@ struct AddSetView: View {
                     }
                 }
             }
+            .onAppear {
+                focusedField = .weight
+            }
         }
     }
 

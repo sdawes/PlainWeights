@@ -69,6 +69,11 @@ struct ExerciseDetailViewV2: View {
     @Query private var sets: [ExerciseSet]
     @State private var addSetConfig: AddSetConfig?
 
+    // Notes state
+    @State private var noteText: String = ""
+    @FocusState private var notesFocused: Bool
+    @State private var showingDeleteAlert = false
+
     // Cached data for performance
     @State private var todaySets: [ExerciseSet] = []
     @State private var historicDayGroups: [ExerciseDataGrouper.DayGroup] = []
@@ -109,6 +114,7 @@ struct ExerciseDetailViewV2: View {
             filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
+        _noteText = State(initialValue: exercise.note ?? "")
     }
 
     var body: some View {
@@ -171,11 +177,11 @@ struct ExerciseDetailViewV2: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    // Action buttons
+                    // Action button
                     HStack(spacing: 8) {
                         Spacer()
 
-                        // Add Previous Set button
+                        // Add Set button (with previous values pre-filled)
                         Button(action: {
                             addSetConfig = .previous(
                                 exercise: exercise,
@@ -183,30 +189,35 @@ struct ExerciseDetailViewV2: View {
                                 reps: lastWorkingSetValues.reps
                             )
                         }) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "arrow.uturn.backward.circle.fill")
-                                    .foregroundStyle(.gray)
-                                Text("Add Previous")
-                                    .foregroundStyle(.black)
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-
-                        // Add Set button
-                        Button(action: {
-                            addSetConfig = .empty(exercise: exercise)
-                        }) {
-                            HStack(spacing: 4) {
+                            HStack(spacing: 6) {
                                 Image(systemName: "plus.circle.fill")
+                                    .font(.body)
                                     .foregroundStyle(.blue)
                                 Text("Add Set")
                                     .foregroundStyle(.black)
                             }
                         }
                         .buttonStyle(.bordered)
-                        .controlSize(.small)
+                        .controlSize(.regular)
                     }
+
+                    // Notes field
+                    TextField("Add notes about form, target muscles, etc...", text: $noteText)
+                        .font(.caption.italic())
+                        .foregroundStyle(.tertiary)
+                        .textFieldStyle(.plain)
+                        .lineLimit(1)
+                        .focused($notesFocused)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            notesFocused = false
+                            updateNote()
+                        }
+                        .onChange(of: noteText) { _, newValue in
+                            if newValue.count > 40 {
+                                noteText = String(newValue.prefix(40))
+                            }
+                        }
                 }
                 .padding(16)
                 .background(Color(.systemBackground))
@@ -214,7 +225,7 @@ struct ExerciseDetailViewV2: View {
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
+            .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 0, trailing: 0))
 
             // Today's sets section
             if !todaySets.isEmpty {
@@ -314,8 +325,31 @@ struct ExerciseDetailViewV2: View {
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
         .background(Color.ptw_lightGrey)
+        .scrollDismissesKeyboard(.immediately)
         .navigationTitle(exercise.name)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if notesFocused {
+                    Button("Done") {
+                        notesFocused = false
+                        updateNote()
+                    }
+                } else {
+                    IconComponents.deleteIcon {
+                        showingDeleteAlert = true
+                    }
+                }
+            }
+        }
+        .alert("Delete Exercise", isPresented: $showingDeleteAlert) {
+            Button("Delete", role: .destructive) {
+                deleteExercise()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This will permanently delete \"\(exercise.name)\" and all its sets. This action cannot be undone.")
+        }
         .sheet(item: $addSetConfig) { config in
             AddSetView(
                 exercise: config.exercise,
@@ -426,6 +460,29 @@ struct ExerciseDetailViewV2: View {
             try ExerciseSetService.deleteSet(set, context: context)
         } catch {
             print("Error deleting set: \(error)")
+        }
+    }
+
+    private func updateNote() {
+        let trimmed = noteText.trimmingCharacters(in: .whitespacesAndNewlines)
+        exercise.note = trimmed.isEmpty ? nil : trimmed
+        exercise.bumpUpdated()
+
+        do {
+            try context.save()
+        } catch {
+            print("Error updating note: \(error)")
+        }
+    }
+
+    /// Delete the exercise and all its associated sets (cascade delete)
+    private func deleteExercise() {
+        context.delete(exercise)
+        do {
+            try context.save()
+            dismiss()
+        } catch {
+            print("Failed to delete exercise: \(error)")
         }
     }
 }

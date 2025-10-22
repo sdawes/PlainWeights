@@ -24,8 +24,6 @@ struct MetricCard: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Spacer()
-
             // Main value
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value)
@@ -55,7 +53,7 @@ struct MetricCard: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .frame(height: 110)
         .padding(16)
         .background(Color(.systemGroupedBackground))

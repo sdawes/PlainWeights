@@ -98,6 +98,7 @@ struct FilteredExerciseListView: View {
                 Image(systemName: "figure.strengthtraining.traditional")
                     .font(.title3)
                     .foregroundStyle(.black)
+                    .allowsHitTesting(false)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button { showingAddExercise = true } label: { Image(systemName: "plus") }

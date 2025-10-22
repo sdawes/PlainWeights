@@ -21,7 +21,7 @@ enum ProgressTracker {
     /// Determine color for gains display based on performance
     static func gainsColor(gainsPercent: Int) -> Color {
         if gainsPercent > 0 { return .green }
-        if gainsPercent < 0 { return .red }
+        if gainsPercent < 0 { return Color(red: 0.7, green: 0.1, blue: 0.1) }
         return .secondary
     }
 
@@ -52,7 +52,7 @@ enum ProgressTracker {
         var color: Color {
             switch self {
             case .up: return Color(red: 0, green: 0.65, blue: 0)    // Darker green for improvements
-            case .down: return .red                                  // Red for decreases
+            case .down: return Color(red: 0.7, green: 0.1, blue: 0.1)  // Darker red for decreases
             case .same: return .blue                                 // Blue for no change
             }
         }

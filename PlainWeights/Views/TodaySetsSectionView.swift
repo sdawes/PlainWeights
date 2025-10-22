@@ -26,7 +26,7 @@ struct TodaySetsSectionView: View {
                 if set.isWarmUp {
                     Text("WARM UP")
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(.red.opacity(0.7))
+                        .foregroundStyle(Color(red: 0.7, green: 0.1, blue: 0.1).opacity(0.7))
                         .textCase(.uppercase)
                 }
 

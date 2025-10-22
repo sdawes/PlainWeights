@@ -96,7 +96,7 @@ struct AddSetView: View {
                     Spacer()
                     Toggle("", isOn: $isWarmUpSet)
                         .labelsHidden()
-                        .tint(isWarmUpSet ? .red : .blue)
+                        .tint(isWarmUpSet ? Color(red: 0.7, green: 0.1, blue: 0.1) : .blue)
                 }
                 .padding(.horizontal, 16)
 

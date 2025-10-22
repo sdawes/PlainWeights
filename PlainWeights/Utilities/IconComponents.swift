@@ -10,12 +10,12 @@ import SwiftUI
 /// Reusable icon components with consistent styling
 enum IconComponents {
 
-    /// Delete icon - just trash symbol in red
+    /// Delete icon - just trash symbol in dark red
     static func deleteIcon(action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: "trash")
                 .font(.callout.bold())
-                .foregroundColor(.red)
+                .foregroundColor(Color(red: 0.7, green: 0.1, blue: 0.1))
         }
     }
 }

@@ -27,18 +27,13 @@ struct MetricCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             // Section 2: Value (35pt)
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(value)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.primary)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-                Text(unit)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.secondary)
-            }
-            .frame(height: 35, alignment: .center)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text(value)
+                .font(.system(size: 32, weight: .bold))
+                .foregroundStyle(.primary)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .frame(height: 35, alignment: .center)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             // Section 3: Progress indicator (35pt)
             if let changeAmount = changeAmount, let direction = changeDirection {
@@ -176,7 +171,7 @@ struct ExerciseDetailView: View {
                     HStack(spacing: 12) {
                         // Card 1: Weight
                         MetricCard(
-                            label: "Weight",
+                            label: "Weight (kg)",
                             value: formatWeight(),
                             unit: "kg",
                             changeAmount: formatWeightChange(),
@@ -187,14 +182,14 @@ struct ExerciseDetailView: View {
                         MetricCard(
                             label: "Reps",
                             value: formatReps(),
-                            unit: "reps",
+                            unit: "",
                             changeAmount: formatRepsChange(),
                             changeDirection: progressState?.personalRecords?.repsDirection
                         )
 
                         // Card 3: Volume
                         MetricCard(
-                            label: "Volume",
+                            label: "Volume (kg)",
                             value: formatVolume(),
                             unit: "kg",
                             changeAmount: formatVolumeChange(),

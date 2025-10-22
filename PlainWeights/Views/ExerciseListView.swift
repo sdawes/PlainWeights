@@ -164,6 +164,11 @@ struct FilteredExerciseListView: View {
         .background(Color(.systemGroupedBackground))
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Image(systemName: "figure.strengthtraining.traditional")
+                    .font(.title3)
+                    .foregroundStyle(.black)
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button { showingAddExercise = true } label: { Image(systemName: "plus") }
             }

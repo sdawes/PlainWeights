@@ -159,7 +159,7 @@ struct ExerciseDetailViewV2: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets())
-            .padding(.bottom, 8)
+            .padding(.bottom, 0)
 
             // Metrics container section
             Section {

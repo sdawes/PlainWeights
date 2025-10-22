@@ -136,7 +136,7 @@ struct FilteredExerciseListView: View {
         }
         .sheet(isPresented: $showingAddExercise) { AddExerciseView() }
         .navigationDestination(for: Exercise.self) { exercise in
-            ExerciseDetailViewV2(exercise: exercise)
+            ExerciseDetailView(exercise: exercise)
         }
     }
 

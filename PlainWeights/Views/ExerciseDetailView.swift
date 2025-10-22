@@ -60,9 +60,9 @@ struct MetricCard: View {
     }
 }
 
-// MARK: - ExerciseDetailViewV2
+// MARK: - ExerciseDetailView
 
-struct ExerciseDetailViewV2: View {
+struct ExerciseDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     let exercise: Exercise
@@ -348,7 +348,7 @@ struct ExerciseDetailViewV2: View {
         .listStyle(.insetGrouped)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
-        .background(Color.ptw_lightGrey)
+        .background(Color(.systemGroupedBackground))
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

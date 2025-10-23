@@ -85,6 +85,13 @@ struct ExerciseDetailView: View {
     @FocusState private var notesFocused: Bool
     @State private var showingDeleteAlert = false
 
+    // Metric mode selection
+    enum MetricMode: String, CaseIterable {
+        case last = "Last"
+        case best = "Best"
+    }
+    @State private var selectedMode: MetricMode = .last
+
     // Cached data for performance
     @State private var todaySets: [ExerciseSet] = []
     @State private var historicDayGroups: [ExerciseDataGrouper.DayGroup] = []
@@ -116,6 +123,26 @@ struct ExerciseDetailView: View {
             return (abs(diff), "left")
         }
         return nil // Equal, no message
+    }
+
+    // Best day metrics
+    private var bestDayMetrics: PersonalRecordService.BestDayMetrics? {
+        PersonalRecordService.calculateBestDayMetrics(from: sets)
+    }
+
+    private func formatBestWeight() -> String {
+        guard let best = bestDayMetrics else { return "0" }
+        return Formatters.formatWeight(best.maxWeight)
+    }
+
+    private func formatBestReps() -> String {
+        guard let best = bestDayMetrics else { return "0" }
+        return "\(best.repsAtMaxWeight)"
+    }
+
+    private func formatBestVolume() -> String {
+        guard let best = bestDayMetrics else { return "0" }
+        return Formatters.formatVolume(best.totalVolume)
     }
 
     init(exercise: Exercise) {
@@ -174,33 +201,41 @@ struct ExerciseDetailView: View {
             Section {
                 // White container with metric cards and buttons
                 VStack(alignment: .leading, spacing: 16) {
+                    // Picker: Last vs Best
+                    Picker("Metric Mode", selection: $selectedMode) {
+                        ForEach(MetricMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
                     // Three metric cards
                     HStack(spacing: 12) {
                         // Card 1: Weight
                         MetricCard(
                             label: "Weight",
-                            value: formatWeight(),
+                            value: selectedMode == .last ? formatWeight() : formatBestWeight(),
                             unit: "kg",
-                            changeAmount: formatWeightChange(),
-                            changeDirection: progressState?.personalRecords?.weightDirection
+                            changeAmount: selectedMode == .last ? formatWeightChange() : nil,
+                            changeDirection: selectedMode == .last ? progressState?.personalRecords?.weightDirection : nil
                         )
 
                         // Card 2: Reps
                         MetricCard(
                             label: "Reps",
-                            value: formatReps(),
+                            value: selectedMode == .last ? formatReps() : formatBestReps(),
                             unit: "",
-                            changeAmount: formatRepsChange(),
-                            changeDirection: progressState?.personalRecords?.repsDirection
+                            changeAmount: selectedMode == .last ? formatRepsChange() : nil,
+                            changeDirection: selectedMode == .last ? progressState?.personalRecords?.repsDirection : nil
                         )
 
                         // Card 3: Volume
                         MetricCard(
                             label: "Volume",
-                            value: formatVolume(),
+                            value: selectedMode == .last ? formatVolume() : formatBestVolume(),
                             unit: "kg",
-                            changeAmount: formatVolumeChange(),
-                            changeDirection: volumeDirection
+                            changeAmount: selectedMode == .last ? formatVolumeChange() : nil,
+                            changeDirection: selectedMode == .last ? volumeDirection : nil
                         )
                     }
 

@@ -10,7 +10,7 @@ import Foundation
 /// Service for calculating all-time personal records for exercises
 enum PersonalRecordService {
 
-    // MARK: - Data Structure
+    // MARK: - Data Structures
 
     /// Represents an all-time personal record for an exercise
     struct PersonalRecord {
@@ -18,6 +18,15 @@ enum PersonalRecordService {
         let reps: Int
         let date: Date
         let isBodyweight: Bool  // True if weight is 0 (bodyweight exercise)
+    }
+
+    /// Enhanced PR data including the full day's performance when PR was achieved
+    struct BestDayMetrics {
+        let maxWeight: Double        // Best weight ever lifted
+        let repsAtMaxWeight: Int     // Reps at that max weight
+        let totalVolume: Double      // Total volume for that entire day
+        let date: Date              // Date when this PR occurred
+        let isBodyweight: Bool
     }
 
     // MARK: - PR Calculation
@@ -76,5 +85,48 @@ enum PersonalRecordService {
                 isBodyweight: false
             )
         }
+    }
+
+    // MARK: - Best Day Metrics
+
+    /// Calculate best day metrics including the full day's performance when PR was achieved
+    ///
+    /// Logic:
+    /// - Finds the personal record (max weight + reps)
+    /// - Identifies the date when this PR occurred
+    /// - Calculates total volume for ALL sets on that day
+    /// - Returns complete metrics for that best day
+    ///
+    /// Performance: O(n) + O(n) = O(n) - two passes through sets array
+    ///
+    /// - Parameter sets: Array of exercise sets to analyze
+    /// - Returns: BestDayMetrics with max weight, reps, and total day volume, or nil if no working sets
+    static func calculateBestDayMetrics(from sets: [ExerciseSet]) -> BestDayMetrics? {
+        // First, get the personal record
+        guard let pr = calculateAllTimePR(from: sets) else {
+            return nil
+        }
+
+        // Get all sets from the same day as the PR
+        let calendar = Calendar.current
+        let prDayStart = calendar.startOfDay(for: pr.date)
+
+        let setsFromPRDay = sets.filter { set in
+            let setDayStart = calendar.startOfDay(for: set.timestamp)
+            return setDayStart == prDayStart && !set.isWarmUp
+        }
+
+        // Calculate total volume for that day
+        let totalVolume = setsFromPRDay.reduce(0.0) { sum, set in
+            sum + (set.weight * Double(set.reps))
+        }
+
+        return BestDayMetrics(
+            maxWeight: pr.weight,
+            repsAtMaxWeight: pr.reps,
+            totalVolume: totalVolume,
+            date: pr.date,
+            isBodyweight: pr.isBodyweight
+        )
     }
 }

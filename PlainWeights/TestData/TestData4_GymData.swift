@@ -3,10 +3,10 @@
 //  PlainWeights
 //
 //  Created by Claude on 25/09/2025.
-//  Last Updated: 16 Oct 2025 at 17:57:21
+//  Last Updated: 24 Oct 2025 at 15:23:58
 //
 //  Test Data Set 4: Real Gym Data
-//  40 exercises, 21 workout sessions (Sep 22 - Oct 15, 2025)
+//  45 exercises, 27 workout sessions (Sep 22 - Oct 23, 2025)
 
 #if DEBUG
 import Foundation
@@ -19,7 +19,7 @@ class TestData4_GymData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData4_GymData")
-        logger.info("Generating Test Data Set 4 (Real gym data - 40 exercises, 21 sessions)...")
+        logger.info("Generating Test Data Set 4 (Real gym data - 45 exercises, 27 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -31,7 +31,7 @@ class TestData4_GymData {
     // MARK: - Data Generation
 
     private static func generateGymData(modelContext: ModelContext) {
-        // EXPORT DATE: 16 Oct 2025 at 17:57:21
+        // EXPORT DATE: 24 Oct 2025 at 15:23:58
 
         // Exercise definitions with notes
         let exerciseData: [(name: String, category: String, note: String?)] = [
@@ -54,7 +54,7 @@ class TestData4_GymData {
             (name: "Seated dumbbell Arnold press", category: "Shoulders", note: nil),
             (name: "Upright cable row", category: "Shoulders", note: nil),
             (name: "Butterfly sit up", category: "Core", note: nil),
-            (name: "Chest Press", category: "Chest", note: nil),
+            (name: "Chest Press", category: "Chest", note: "What can I say about a chest press??"),
             (name: "Incline Dumbbell Chest Press", category: "Chest", note: "Include the raise as one"),
             (name: "Chest Cable Flys", category: "Chest", note: "3 is 17.5 and 4 is 23"),
             (name: "Tricep Dips", category: "Triceps", note: nil),
@@ -75,6 +75,11 @@ class TestData4_GymData {
             (name: "Lat pull down", category: "Back", note: nil),
             (name: "Chest press machine", category: "Chest", note: nil),
             (name: "Dumbbell hammer curls ", category: "Bicep", note: "Single arm raises each count as one rep."),
+            (name: "Dumbbell split squats", category: "Legs", note: "Number of reps done on one side logged"),
+            (name: "Standing dumbbell hammer curls", category: "Bicep", note: nil),
+            (name: "Test", category: "Test", note: "What is the maximum number of characters"),
+            (name: "Landmine Shoulder Press", category: "Shoulder ", note: nil),
+            (name: "Landmine Row", category: "Back", note: nil),
         ]
 
         // Create exercises

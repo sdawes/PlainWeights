@@ -17,11 +17,9 @@ class TestDataGenerator {
     // MARK: - Public Interface
     
     static func printCurrentData(modelContext: ModelContext) {
-        let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
-
-        logger.info("\n================================================================================")
-        logger.info("LIVE DATA EXPORT FOR TESTDATAGENERATOR")
-        logger.info("================================================================================")
+        print("\n================================================================================")
+        print("COMPLETE SWIFT FILE EXPORT - READY TO PASTE")
+        print("================================================================================")
 
         // Fetch all exercises
         let exerciseDescriptor = FetchDescriptor<Exercise>(
@@ -29,7 +27,7 @@ class TestDataGenerator {
         )
 
         guard let exercises = try? modelContext.fetch(exerciseDescriptor) else {
-            logger.error("Failed to fetch exercises")
+            print("Failed to fetch exercises")
             return
         }
 
@@ -44,38 +42,9 @@ class TestDataGenerator {
         // Sort all sets by timestamp
         allSets.sort { $0.set.timestamp < $1.set.timestamp }
 
-        logger.info("SUMMARY:")
-        logger.info("- Total Exercises: \(exercises.count)")
-        logger.info("- Total Sets: \(allSets.count)")
-        if let firstSet = allSets.first, let lastSet = allSets.last {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            logger.info("- Date Range: \(dateFormatter.string(from: firstSet.set.timestamp)) to \(dateFormatter.string(from: lastSet.set.timestamp))")
-        }
-        logger.info("")
-
-        // Print exercise definitions
-        logger.info("// COPY FROM HERE FOR generateLiveData() ================================")
-        logger.info("// EXPORT DATE: \(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .medium))")
-        logger.info("")
-        logger.info("// Exercise definitions with notes")
-        logger.info("let exerciseData: [(name: String, category: String, note: String?)] = [")
-        for exercise in exercises {
-            if let note = exercise.note, !note.isEmpty {
-                // Escape quotes in note text
-                let escapedNote = note.replacingOccurrences(of: "\"", with: "\\\"")
-                logger.info("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: \"\(escapedNote)\"),")
-            } else {
-                logger.info("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: nil),")
-            }
-        }
-        logger.info("]")
-        logger.info("")
-
-        // Group sets into workout sessions (sets within 3 hours of each other)
+        // Count sessions
         var workoutSessions: [[(exercise: Exercise, set: ExerciseSet)]] = []
         var currentSession: [(exercise: Exercise, set: ExerciseSet)] = []
-
         for (index, item) in allSets.enumerated() {
             if currentSession.isEmpty {
                 currentSession.append(item)
@@ -84,28 +53,125 @@ class TestDataGenerator {
                 if timeDiff < 10800 { // Within 3 hours
                     currentSession.append(item)
                 } else {
-                    // Start new session
                     workoutSessions.append(currentSession)
                     currentSession = [item]
                 }
             }
-
-            // Add last session
             if index == allSets.count - 1 && !currentSession.isEmpty {
                 workoutSessions.append(currentSession)
             }
         }
 
-        logger.info("// Workout Sessions (\(workoutSessions.count) total)")
-        logger.info("// Format: Exercise | Weight | Reps | Time")
-        logger.info("")
+        print("SUMMARY:")
+        print("- Total Exercises: \(exercises.count)")
+        print("- Total Sets: \(allSets.count)")
+        print("- Total Sessions: \(workoutSessions.count)")
+        if let firstSet = allSets.first, let lastSet = allSets.last {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd MMM yyyy"
+            print("- Date Range: \(dateFormatter.string(from: firstSet.set.timestamp)) - \(dateFormatter.string(from: lastSet.set.timestamp))")
+        }
+        print("")
+        print("// COPY FROM HERE ========================================================")
+        print("")
 
+        // Print complete Swift file
+        let today = DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .medium)
+        let startDate = allSets.first?.set.timestamp ?? Date()
+        let endDate = allSets.last?.set.timestamp ?? Date()
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.dateFormat = "dd MMM yyyy"
+        let dateRange = "\(dateFormatter.string(from: startDate)) - \(dateFormatter.string(from: endDate))"
+
+        print("//")
+        print("//  TestData4_GymData.swift")
+        print("//  PlainWeights")
+        print("//")
+        print("//  Created by Claude on 25/09/2025.")
+        print("//  Last Updated: \(today)")
+        print("//")
+        print("//  Test Data Set 4: Real Gym Data")
+        print("//  \(exercises.count) exercises, \(workoutSessions.count) workout sessions (\(dateRange))")
+        print("")
+        print("#if DEBUG")
+        print("import Foundation")
+        print("import SwiftData")
+        print("import os.log")
+        print("")
+        print("class TestData4_GymData {")
+        print("")
+        print("    // MARK: - Public Interface")
+        print("")
+        print("    static func generate(modelContext: ModelContext) {")
+        print("        let logger = Logger(subsystem: \"com.stephendawes.PlainWeights\", category: \"TestData4_GymData\")")
+        print("        logger.info(\"Generating Test Data Set 4 (Real gym data - \(exercises.count) exercises, \(workoutSessions.count) sessions)...\")")
+        print("")
+        print("        // Clear existing data")
+        print("        clearAllData(modelContext: modelContext)")
+        print("")
+        print("        generateGymData(modelContext: modelContext)")
+        print("        logger.info(\"Test Data Set 4 generation completed\")")
+        print("    }")
+        print("")
+        print("    // MARK: - Data Generation")
+        print("")
+        print("    private static func generateGymData(modelContext: ModelContext) {")
+        print("        // EXPORT DATE: \(today)")
+        print("")
+        print("        // Exercise definitions with notes")
+        print("        let exerciseData: [(name: String, category: String, note: String?)] = [")
+        for exercise in exercises {
+            if let note = exercise.note, !note.isEmpty {
+                // Escape quotes in note text
+                let escapedNote = note.replacingOccurrences(of: "\"", with: "\\\"")
+                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: \"\(escapedNote)\"),")
+            } else {
+                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: nil),")
+            }
+        }
+        print("        ]")
+        print("")
+        print("        // Create exercises")
+        print("        var exercises: [String: Exercise] = [:]")
+        print("        for data in exerciseData {")
+        print("            let exercise = Exercise(name: data.name, category: data.category, note: data.note)")
+        print("            exercises[data.name] = exercise")
+        print("            modelContext.insert(exercise)")
+        print("        }")
+        print("")
+        print("        // Helper function to create timestamps")
+        print("        func date(_ year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int, _ second: Int = 0) -> Date {")
+        print("            var components = DateComponents()")
+        print("            components.year = year")
+        print("            components.month = month")
+        print("            components.day = day")
+        print("            components.hour = hour")
+        print("            components.minute = minute")
+        print("            components.second = second")
+        print("            return Calendar.current.date(from: components)!")
+        print("        }")
+        print("")
+        print("        // Helper function to add a working set")
+        print("        func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date) {")
+        print("            guard let ex = exercises[exercise] else { return }")
+        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, exercise: ex)")
+        print("            modelContext.insert(set)")
+        print("        }")
+        print("")
+        print("        // Helper function to add a warm-up set")
+        print("        func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date) {")
+        print("            guard let ex = exercises[exercise] else { return }")
+        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, exercise: ex)")
+        print("            modelContext.insert(set)")
+        print("        }")
+        print("")
+
+        let sessionDateFormatter = DateFormatter()
+        sessionDateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
 
         for (sessionIndex, session) in workoutSessions.enumerated() {
             if let firstSet = session.first {
-                logger.info("// SESSION \(sessionIndex + 1): \(dateFormatter.string(from: firstSet.set.timestamp))")
+                print("        // SESSION \(sessionIndex + 1): \(sessionDateFormatter.string(from: firstSet.set.timestamp))")
 
                 // Group by consecutive exercises
                 var exerciseGroups: [[(exercise: Exercise, set: ExerciseSet)]] = []
@@ -128,12 +194,11 @@ class TestDataGenerator {
                     exerciseGroups.append(currentExercise)
                 }
 
-                // Print each exercise group as executable Swift code
+                // Print each exercise group
                 for group in exerciseGroups {
                     if let first = group.first {
-                        logger.info("// \(first.exercise.name): \(group.count) sets")
+                        print("        // \(first.exercise.name): \(group.count) sets")
                         for item in group {
-                            // Extract date components for date() function
                             let calendar = Calendar.current
                             let y = calendar.component(.year, from: item.set.timestamp)
                             let m = calendar.component(.month, from: item.set.timestamp)
@@ -142,26 +207,46 @@ class TestDataGenerator {
                             let min = calendar.component(.minute, from: item.set.timestamp)
                             let s = calendar.component(.second, from: item.set.timestamp)
 
-                            // Generate appropriate function call
                             if item.set.isWarmUp {
-                                logger.info("        addWarmUpSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
+                                print("        addWarmUpSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
                             } else {
-                                logger.info("        addSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
+                                print("        addSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
                             }
                         }
                     }
                 }
-                logger.info("")
+                print("")
             }
         }
 
-        logger.info("// COPY TO HERE ============================================")
-        logger.info("")
-        logger.info("// To use this data:")
-        logger.info("// 1. Copy everything between the COPY markers above")
-        logger.info("// 2. Share with Claude to update generateLiveData()")
-        logger.info("// 3. The data will be converted to proper Swift code")
-        logger.info("================================================================================")
+        print("        // Save all changes")
+        print("        do {")
+        print("            try modelContext.save()")
+        print("        } catch {")
+        print("            print(\"Error saving test data: \\(error)\")")
+        print("        }")
+        print("    }")
+        print("")
+        print("    // MARK: - Cleanup")
+        print("")
+        print("    private static func clearAllData(modelContext: ModelContext) {")
+        print("        do {")
+        print("            try modelContext.delete(model: Exercise.self)")
+        print("            try modelContext.delete(model: ExerciseSet.self)")
+        print("            try modelContext.save()")
+        print("        } catch {")
+        print("            print(\"Error clearing data: \\(error)\")")
+        print("        }")
+        print("    }")
+        print("}")
+        print("")
+        print("#endif")
+        print("")
+        print("// COPY TO HERE ==========================================================")
+        print("")
+        print("================================================================================")
+        print("EXPORT COMPLETE - Paste entire output above into TestData4_GymData.swift")
+        print("================================================================================")
     }
     
     static func generateTestDataSet1(modelContext: ModelContext) {

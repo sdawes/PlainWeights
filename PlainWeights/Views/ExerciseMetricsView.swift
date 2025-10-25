@@ -281,7 +281,7 @@ struct ExerciseMetricsView: View {
                 MetricCard(
                     label: "Reps",
                     value: selectedMode == .last ? formatReps() : formatBestReps(),
-                    unit: "",
+                    unit: "reps",
                     changeAmount: selectedMode == .last ? formatRepsChange() : formatBestRepsChange(),
                     changeDirection: selectedMode == .last ? progressState?.personalRecords?.repsDirection : bestModeIndicators?.repsDirection
                 )

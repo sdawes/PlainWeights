@@ -332,14 +332,16 @@ struct ExerciseMetricsView: View {
                         reps: lastWorkingSetValues.reps
                     )
                 }) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.tint)
+                            .font(.body)
+                            .foregroundStyle(.blue)
+                        Text("Add Set")
+                            .foregroundStyle(.black)
                     }
                 }
-                .buttonStyle(.plain)
-                .contentShape(Rectangle())
+                .buttonStyle(.bordered)
+                .controlSize(.regular)
             }
         }
     }

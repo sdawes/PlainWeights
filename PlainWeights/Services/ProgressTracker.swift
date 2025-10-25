@@ -20,7 +20,7 @@ enum ProgressTracker {
         } else if percentOfLast == 100 {
             return .blue  // Equal to target
         } else {
-            return .red  // Under target
+            return Color(red: 0.7, green: 0.1, blue: 0.1)  // Under target - matches app red
         }
     }
     

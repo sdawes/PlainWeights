@@ -38,7 +38,7 @@ struct MetricCard: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .minimumScaleFactor(0.5)
+            .minimumScaleFactor(0.3)
             .lineLimit(1)
             .frame(height: 35, alignment: .center)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -266,7 +266,7 @@ struct ExerciseMetricsView: View {
                     selectedMode = .last
                 }) {
                     Text("Last")
-                        .font(.headline)
+                        .font(.system(.headline, design: .monospaced))
                         .foregroundStyle(selectedMode == .last ? .primary : .secondary)
                 }
                 .buttonStyle(.plain)
@@ -275,7 +275,7 @@ struct ExerciseMetricsView: View {
                     selectedMode = .best
                 }) {
                     Text("Best")
-                        .font(.headline)
+                        .font(.system(.headline, design: .monospaced))
                         .foregroundStyle(selectedMode == .best ? .primary : .secondary)
                 }
                 .buttonStyle(.plain)

@@ -97,7 +97,7 @@ struct ExerciseDetailView: View {
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 24, trailing: 0))
+            .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
 
             // Today's sets section
             if !todaySets.isEmpty {

@@ -32,14 +32,14 @@ struct MetricCard: View {
                 Text(value)
                     .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(.primary)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
             }
+            .minimumScaleFactor(0.5)
+            .lineLimit(1)
             .frame(height: 35, alignment: .center)
             .frame(maxWidth: .infinity, alignment: .leading)
 

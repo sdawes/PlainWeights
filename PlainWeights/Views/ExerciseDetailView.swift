@@ -50,6 +50,8 @@ struct ExerciseDetailView: View {
                     // Title
                     TextField("Title", text: $exerciseName)
                         .font(AppFonts.exerciseTitle)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
                         .textFieldStyle(.plain)
                         .focused($nameFocused)
                         .submitLabel(.done)

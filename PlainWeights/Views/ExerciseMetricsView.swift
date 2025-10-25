@@ -331,7 +331,7 @@ struct ExerciseMetricsView: View {
 
                 // Label: "Today X/Y kg"
                 Text("Today \(formatTodayVolume())/\(formatLastVolume()) kg")
-                    .font(.caption)
+                    .font(AppFonts.progressLabel)
                     .foregroundStyle(.secondary)
             }
 
@@ -352,6 +352,7 @@ struct ExerciseMetricsView: View {
                             .font(.body)
                             .foregroundStyle(.blue)
                         Text("Add Set")
+                            .font(AppFonts.addSetButton)
                             .foregroundStyle(.black)
                     }
                 }

@@ -13,4 +13,10 @@ enum AppFonts {
 
     /// Caption font for exercise notes - SF Mono Regular
     static let exerciseNotes: Font = .system(.caption, design: .monospaced)
+
+    /// Caption font for progress bar label - SF Mono Regular
+    static let progressLabel: Font = .system(.caption, design: .monospaced)
+
+    /// Body font for Add Set button - SF Mono Regular
+    static let addSetButton: Font = .system(.body, design: .monospaced)
 }

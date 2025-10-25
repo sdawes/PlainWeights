@@ -124,6 +124,9 @@ enum ProgressTracker {
             todaySets: [ExerciseSet],
             bestMetrics: BestSessionCalculator.BestDayMetrics?
         ) -> BestModeIndicators? {
+            // Return nil when no sets added today (matches Last mode behavior)
+            guard !todaySets.isEmpty else { return nil }
+
             // Get today's best metrics
             let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: todaySets)
             let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: todaySets)

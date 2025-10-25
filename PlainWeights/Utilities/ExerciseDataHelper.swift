@@ -21,8 +21,20 @@ enum ExerciseDataHelper {
         let totalSets: Int
     }
 
+    /// Complete session metrics for the Exercise Summary component
+    struct SessionMetricsData {
+        let lastSessionMaxWeight: Double
+        let lastSessionMaxWeightReps: Int
+        let lastSessionTotalSets: Int
+        let lastSessionTotalVolume: Double
+        let lastSessionTotalWeightVolume: Double  // Weight-only volume for display
+        let lastSessionTotalRepsVolume: Int       // Total reps volume from last session
+        let todaysVolume: Double
+        let hasHistoricalData: Bool
+    }
+
     /// Get comprehensive info about the last completed session (before today)
-    /// Consolidates logic used by ExerciseSessionMetrics, VolumeAnalytics, and SessionBreakdown
+    /// Consolidates logic used by session calculators, VolumeAnalytics, and SessionBreakdown
     static func getLastCompletedDayInfo(from sets: [ExerciseSet]) -> LastCompletedDayInfo? {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
@@ -64,5 +76,33 @@ enum ExerciseDataHelper {
     /// Get just the sets from the last completed day (useful for further processing)
     static func getLastCompletedDaySets(from sets: [ExerciseSet]) -> [ExerciseSet]? {
         return getLastCompletedDayInfo(from: sets)?.sets
+    }
+
+    /// Create complete session metrics with zero defaults for new exercises
+    /// Optimized to compute all metrics in minimal passes over the data
+    static func getSessionMetricsWithDefaults(from sets: [ExerciseSet]) -> SessionMetricsData {
+        // Get last session info once (single shared call)
+        let lastDayInfo = getLastCompletedDayInfo(from: sets)
+
+        // Calculate today's volume using TodaySessionCalculator
+        let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
+
+        // Calculate weight-only volume for last session (shows 0 kg for bodyweight exercises)
+        let lastSessionWeightVolume = lastDayInfo != nil ?
+            ExerciseVolumeCalculator.calculateWeightVolume(for: lastDayInfo!.sets) : 0.0
+
+        // Calculate total reps volume for last session
+        let lastSessionRepsVolume = RepsAnalytics.getLastSessionTotalRepsVolume(from: sets)
+
+        return SessionMetricsData(
+            lastSessionMaxWeight: lastDayInfo?.maxWeight ?? 0.0,
+            lastSessionMaxWeightReps: lastDayInfo?.maxWeightReps ?? 0,
+            lastSessionTotalSets: lastDayInfo?.totalSets ?? 0,
+            lastSessionTotalVolume: lastDayInfo?.volume ?? 0.0,
+            lastSessionTotalWeightVolume: lastSessionWeightVolume,
+            lastSessionTotalRepsVolume: lastSessionRepsVolume,
+            todaysVolume: todaysVolume,
+            hasHistoricalData: lastDayInfo != nil
+        )
     }
 }

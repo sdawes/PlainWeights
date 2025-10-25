@@ -84,13 +84,13 @@ class TestDataGenerator {
         let dateRange = "\(dateFormatter.string(from: startDate)) - \(dateFormatter.string(from: endDate))"
 
         print("//")
-        print("//  TestData4_GymData.swift")
+        print("//  TestData.swift")
         print("//  PlainWeights")
         print("//")
         print("//  Created by Claude on 25/09/2025.")
         print("//  Last Updated: \(today)")
         print("//")
-        print("//  Test Data Set 4: Real Gym Data")
+        print("//  Real Gym Data")
         print("//  \(exercises.count) exercises, \(workoutSessions.count) workout sessions (\(dateRange))")
         print("")
         print("#if DEBUG")
@@ -98,13 +98,13 @@ class TestDataGenerator {
         print("import SwiftData")
         print("import os.log")
         print("")
-        print("class TestData4_GymData {")
+        print("class TestData {")
         print("")
         print("    // MARK: - Public Interface")
         print("")
         print("    static func generate(modelContext: ModelContext) {")
-        print("        let logger = Logger(subsystem: \"com.stephendawes.PlainWeights\", category: \"TestData4_GymData\")")
-        print("        logger.info(\"Generating Test Data Set 4 (Real gym data - \(exercises.count) exercises, \(workoutSessions.count) sessions)...\")")
+        print("        let logger = Logger(subsystem: \"com.stephendawes.PlainWeights\", category: \"TestData\")")
+        print("        logger.info(\"Generating test data (Real gym data - \(exercises.count) exercises, \(workoutSessions.count) sessions)...\")")
         print("")
         print("        // Clear existing data")
         print("        clearAllData(modelContext: modelContext)")
@@ -245,36 +245,15 @@ class TestDataGenerator {
         print("// COPY TO HERE ==========================================================")
         print("")
         print("================================================================================")
-        print("EXPORT COMPLETE - Paste entire output above into TestData4_GymData.swift")
+        print("EXPORT COMPLETE - Paste entire output above into TestData.swift")
         print("================================================================================")
     }
     
-    static func generateTestDataSet1(modelContext: ModelContext) {
+    static func generateTestData(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
-        logger.info("Generating Test Data Set 1 (1 month realistic workout data)...")
+        logger.info("Generating test data (Real gym data)...")
         clearAllData(modelContext: modelContext)
-        TestData1_OneMonth.generate(modelContext: modelContext)
-    }
-    
-    static func generateTestDataSet2(modelContext: ModelContext) {
-        let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
-        logger.info("Generating Test Data Set 2 (1 year performance test data)...")
-        clearAllData(modelContext: modelContext)
-        TestData3_OneYear.generate(modelContext: modelContext)
-    }
-    
-    static func generateTestDataSet3(modelContext: ModelContext) {
-        let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
-        logger.info("Generating Test Data Set 3 (2 weeks simple data)...")
-        clearAllData(modelContext: modelContext)
-        TestData2_TwoWeeks.generate(modelContext: modelContext)
-    }
-    
-    static func generateTestDataSet4(modelContext: ModelContext) {
-        let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
-        logger.info("Generating Test Data Set 4 (Live gym data)...")
-        clearAllData(modelContext: modelContext)
-        TestData4_GymData.generate(modelContext: modelContext)
+        TestData.generate(modelContext: modelContext)
     }
     
     static func clearAllData(modelContext: ModelContext) {

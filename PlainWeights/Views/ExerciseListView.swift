@@ -12,14 +12,21 @@ struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showingAddExercise = false
     @State private var searchText = ""
+    @State private var navigationPath = NavigationPath()
 
     var body: some View {
-        FilteredExerciseListView(
-            searchText: searchText,
-            showingAddExercise: $showingAddExercise
-        )
-        // Note: iOS 26+ automatically applies Liquid Glass styling to .searchable()
-        .searchable(text: $searchText, prompt: "Search by name or category")
+        NavigationStack(path: $navigationPath) {
+            FilteredExerciseListView(
+                searchText: searchText,
+                showingAddExercise: $showingAddExercise,
+                navigationPath: $navigationPath
+            )
+            // Note: iOS 26+ automatically applies Liquid Glass styling to .searchable()
+            .searchable(text: $searchText, prompt: "Search by name or category")
+            .navigationDestination(for: Exercise.self) { exercise in
+                ExerciseDetailView(exercise: exercise)
+            }
+        }
     }
 }
 
@@ -27,11 +34,13 @@ struct FilteredExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var exercises: [Exercise]
     @Binding var showingAddExercise: Bool
+    @Binding var navigationPath: NavigationPath
     let searchText: String
 
-    init(searchText: String, showingAddExercise: Binding<Bool>) {
+    init(searchText: String, showingAddExercise: Binding<Bool>, navigationPath: Binding<NavigationPath>) {
         self.searchText = searchText
         self._showingAddExercise = showingAddExercise
+        self._navigationPath = navigationPath
 
         // Query exercises directly with search filtering in predicate
         if searchText.isEmpty {
@@ -54,8 +63,10 @@ struct FilteredExerciseListView: View {
             // Exercises section
             if exercises.isEmpty {
                 Section {
-                    Text(searchText.isEmpty ? "No exercises yet" : "No matching exercises found")
-                        .foregroundStyle(.secondary)
+                    EmptyExercisesView(
+                        searchText: searchText,
+                        onAddExercise: { showingAddExercise = true }
+                    )
                 }
             } else {
                 Section {
@@ -109,34 +120,25 @@ struct FilteredExerciseListView: View {
                     Button("Print Data to Console") {
                         TestDataGenerator.printCurrentData(modelContext: modelContext)
                     }
-                    Divider()
-                    Button("Generate Set 1 (1 Month)") {
-                        TestDataGenerator.generateTestDataSet1(modelContext: modelContext)
+                    Button("Generate Test Data") {
+                        TestDataGenerator.generateTestData(modelContext: modelContext)
                     }
-                    Button("Generate Set 2 (1 Year)") {
-                        TestDataGenerator.generateTestDataSet2(modelContext: modelContext)
-                    }
-                    Button("Generate Set 3 (2 Weeks)") {
-                        TestDataGenerator.generateTestDataSet3(modelContext: modelContext)
-                    }
-                    Button("Generate Live Data (Real Workouts)") {
-                        TestDataGenerator.generateTestDataSet4(modelContext: modelContext)
-                    }
-                    Divider()
                     Button("Clear All Data", role: .destructive) {
                         TestDataGenerator.clearAllData(modelContext: modelContext)
                     }
                 } label: {
-                    Image(systemName: "ladybug.fill")
+                    Image(systemName: "hammer.fill")
                         .font(.callout)
                         .foregroundColor(.black)
                 }
             }
             #endif
         }
-        .sheet(isPresented: $showingAddExercise) { AddExerciseView() }
-        .navigationDestination(for: Exercise.self) { exercise in
-            ExerciseDetailView(exercise: exercise)
+        .sheet(isPresented: $showingAddExercise) {
+            AddExerciseView { newExercise in
+                // Navigate to the newly created exercise after sheet dismisses
+                navigationPath.append(newExercise)
+            }
         }
     }
 

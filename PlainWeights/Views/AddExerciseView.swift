@@ -15,6 +15,13 @@ struct AddExerciseView: View {
     @State private var name = ""
     @State private var category = ""
 
+    // Callback to notify parent when exercise is created
+    let onExerciseCreated: ((Exercise) -> Void)?
+
+    init(onExerciseCreated: ((Exercise) -> Void)? = nil) {
+        self.onExerciseCreated = onExerciseCreated
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -28,9 +35,13 @@ struct AddExerciseView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        modelContext.insert(Exercise(name: name, category: category))
+                        let newExercise = Exercise(name: name, category: category)
+                        modelContext.insert(newExercise)
                         try? modelContext.save()
                         dismiss()
+
+                        // Call callback with newly created exercise
+                        onExerciseCreated?(newExercise)
                     }
                     .disabled(name.isEmpty || category.isEmpty)
                 }

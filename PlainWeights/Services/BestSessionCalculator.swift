@@ -1,5 +1,5 @@
 //
-//  PersonalRecordService.swift
+//  BestSessionCalculator.swift
 //  PlainWeights
 //
 //  Created by Assistant on 2025-10-22.
@@ -7,8 +7,8 @@
 
 import Foundation
 
-/// Service for calculating all-time personal records for exercises
-enum PersonalRecordService {
+/// Service for calculating all-time best session metrics for exercises
+enum BestSessionCalculator {
 
     // MARK: - Data Structures
 
@@ -184,5 +184,22 @@ enum PersonalRecordService {
                 isBodyweight: false
             )
         }
+    }
+
+    // MARK: - Convenience Methods
+
+    /// Get the best max weight ever lifted (convenience wrapper)
+    static func getBestMaxWeight(from sets: [ExerciseSet]) -> Double {
+        return calculateBestDayMetrics(from: sets)?.maxWeight ?? 0.0
+    }
+
+    /// Get the best reps performed at max weight (convenience wrapper)
+    static func getBestMaxReps(from sets: [ExerciseSet]) -> Int {
+        return calculateBestDayMetrics(from: sets)?.repsAtMaxWeight ?? 0
+    }
+
+    /// Get the best total volume from a single day (convenience wrapper)
+    static func getBestVolume(from sets: [ExerciseSet]) -> Double {
+        return calculateBestDayMetrics(from: sets)?.totalVolume ?? 0.0
     }
 }

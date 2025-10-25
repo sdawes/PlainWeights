@@ -125,9 +125,24 @@ struct ExerciseDetailView: View {
         return nil // Equal, no message
     }
 
-    // Best day metrics
-    private var bestDayMetrics: PersonalRecordService.BestDayMetrics? {
-        PersonalRecordService.calculateBestDayMetrics(from: sets)
+    // Sets excluding today (for Best metrics - should only show PRs from previous days)
+    private var setsExcludingToday: [ExerciseSet] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return sets.filter { calendar.startOfDay(for: $0.timestamp) < today }
+    }
+
+    // Best day metrics (excludes today's sets - only shows all-time PRs from previous days)
+    private var bestDayMetrics: BestSessionCalculator.BestDayMetrics? {
+        BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
+    }
+
+    // Best mode indicators (today vs all-time best)
+    private var bestModeIndicators: ProgressTracker.BestModeIndicators? {
+        ProgressTracker.calculateBestModeIndicators(
+            todaySets: todaySets,
+            bestMetrics: bestDayMetrics
+        )
     }
 
     private func formatBestWeight() -> String {
@@ -143,6 +158,23 @@ struct ExerciseDetailView: View {
     private func formatBestVolume() -> String {
         guard let best = bestDayMetrics else { return "0" }
         return Formatters.formatVolume(best.totalVolume)
+    }
+
+    // Best mode change amount formatters
+    private func formatBestWeightChange() -> String? {
+        guard let indicators = bestModeIndicators else { return nil }
+        return "\(Formatters.formatWeight(abs(indicators.weightImprovement))) kg"
+    }
+
+    private func formatBestRepsChange() -> String? {
+        guard let indicators = bestModeIndicators else { return nil }
+        let amount = abs(indicators.repsImprovement)
+        return "\(amount) rep\(amount == 1 ? "" : "s")"
+    }
+
+    private func formatBestVolumeChange() -> String? {
+        guard let indicators = bestModeIndicators else { return nil }
+        return "\(Formatters.formatVolume(abs(indicators.volumeImprovement))) kg"
     }
 
     init(exercise: Exercise) {
@@ -216,8 +248,8 @@ struct ExerciseDetailView: View {
                             label: "Weight",
                             value: selectedMode == .last ? formatWeight() : formatBestWeight(),
                             unit: "kg",
-                            changeAmount: selectedMode == .last ? formatWeightChange() : nil,
-                            changeDirection: selectedMode == .last ? progressState?.personalRecords?.weightDirection : nil
+                            changeAmount: selectedMode == .last ? formatWeightChange() : formatBestWeightChange(),
+                            changeDirection: selectedMode == .last ? progressState?.personalRecords?.weightDirection : bestModeIndicators?.weightDirection
                         )
 
                         // Card 2: Reps
@@ -225,8 +257,8 @@ struct ExerciseDetailView: View {
                             label: "Reps",
                             value: selectedMode == .last ? formatReps() : formatBestReps(),
                             unit: "",
-                            changeAmount: selectedMode == .last ? formatRepsChange() : nil,
-                            changeDirection: selectedMode == .last ? progressState?.personalRecords?.repsDirection : nil
+                            changeAmount: selectedMode == .last ? formatRepsChange() : formatBestRepsChange(),
+                            changeDirection: selectedMode == .last ? progressState?.personalRecords?.repsDirection : bestModeIndicators?.repsDirection
                         )
 
                         // Card 3: Volume
@@ -234,8 +266,8 @@ struct ExerciseDetailView: View {
                             label: "Volume",
                             value: selectedMode == .last ? formatVolume() : formatBestVolume(),
                             unit: "kg",
-                            changeAmount: selectedMode == .last ? formatVolumeChange() : nil,
-                            changeDirection: selectedMode == .last ? volumeDirection : nil
+                            changeAmount: selectedMode == .last ? formatVolumeChange() : formatBestVolumeChange(),
+                            changeDirection: selectedMode == .last ? volumeDirection : bestModeIndicators?.volumeDirection
                         )
                     }
 
@@ -293,7 +325,7 @@ struct ExerciseDetailView: View {
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 0, trailing: 0))
+            .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 56, trailing: 0))
 
             // Today's sets section
             if !todaySets.isEmpty {

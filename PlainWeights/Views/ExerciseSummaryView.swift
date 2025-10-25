@@ -48,8 +48,8 @@ struct ExerciseSummaryView: View {
     let lastWorkingSetValues: (weight: Double?, reps: Int?)
 
     // Cache expensive calculation in computed property
-    private var sessionMetrics: ExerciseSessionMetricsData {
-        ExerciseSessionMetrics.getSessionMetricsWithDefaults(from: sets)
+    private var sessionMetrics: ExerciseDataHelper.SessionMetricsData {
+        ExerciseDataHelper.getSessionMetricsWithDefaults(from: sets)
     }
 
     // Rep-based metrics

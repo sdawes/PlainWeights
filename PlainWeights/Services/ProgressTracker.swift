@@ -36,7 +36,7 @@ enum ProgressTracker {
         return .same
     }
 
-    // MARK: - Personal Record Indicators
+    // MARK: - Progress Indicators
 
     enum PRDirection {
         case up, down, same
@@ -58,7 +58,9 @@ enum ProgressTracker {
         }
     }
 
-    struct PersonalRecordIndicators {
+    // MARK: - Last Mode Indicators (Today vs Last Session)
+
+    struct LastModeIndicators {
         let weightImprovement: Double
         let repsImprovement: Int
         let weightDirection: PRDirection
@@ -69,7 +71,7 @@ enum ProgressTracker {
 
         static func compare(todaysNewestWeight: Double, todaysNewestReps: Int,
                           lastSessionMaxWeight: Double, lastSessionMaxReps: Int,
-                          exerciseType: ExerciseMetricsType) -> PersonalRecordIndicators {
+                          exerciseType: ExerciseMetricsType) -> LastModeIndicators {
 
             let weightDiff = todaysNewestWeight - lastSessionMaxWeight
             let repsDiff = todaysNewestReps - lastSessionMaxReps
@@ -93,7 +95,7 @@ enum ProgressTracker {
                 repsDirection = .same
             }
 
-            return PersonalRecordIndicators(
+            return LastModeIndicators(
                 weightImprovement: weightDiff,
                 repsImprovement: repsDiff,
                 weightDirection: weightDirection,
@@ -101,6 +103,57 @@ enum ProgressTracker {
                 hasWeightPR: weightDirection == .up,
                 hasRepsPR: repsDirection == .up,
                 exerciseType: exerciseType
+            )
+        }
+    }
+
+    // MARK: - Best Mode Indicators (Today vs All-Time Best)
+
+    struct BestModeIndicators {
+        let weightImprovement: Double
+        let repsImprovement: Int
+        let volumeImprovement: Double
+        let weightDirection: PRDirection
+        let repsDirection: PRDirection
+        let volumeDirection: PRDirection
+        let hasNewWeightPR: Bool
+        let hasNewRepsPR: Bool
+        let hasNewVolumePR: Bool
+
+        static func calculate(
+            todaySets: [ExerciseSet],
+            bestMetrics: BestSessionCalculator.BestDayMetrics?
+        ) -> BestModeIndicators? {
+            // Get today's best metrics
+            let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: todaySets)
+            let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: todaySets)
+            let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: todaySets)
+
+            // Get all-time best (or 0 if none)
+            let bestWeight = bestMetrics?.maxWeight ?? 0.0
+            let bestReps = bestMetrics?.repsAtMaxWeight ?? 0
+            let bestVolume = bestMetrics?.totalVolume ?? 0.0
+
+            // Calculate differences
+            let weightDiff = todaysMaxWeight - bestWeight
+            let repsDiff = todaysMaxReps - bestReps
+            let volumeDiff = todaysVolume - bestVolume
+
+            // Determine directions
+            let weightDirection: PRDirection = weightDiff > 0 ? .up : (weightDiff < 0 ? .down : .same)
+            let repsDirection: PRDirection = repsDiff > 0 ? .up : (repsDiff < 0 ? .down : .same)
+            let volumeDirection: PRDirection = volumeDiff > 0 ? .up : (volumeDiff < 0 ? .down : .same)
+
+            return BestModeIndicators(
+                weightImprovement: weightDiff,
+                repsImprovement: repsDiff,
+                volumeImprovement: volumeDiff,
+                weightDirection: weightDirection,
+                repsDirection: repsDirection,
+                volumeDirection: volumeDirection,
+                hasNewWeightPR: weightDirection == .up,
+                hasNewRepsPR: repsDirection == .up,
+                hasNewVolumePR: volumeDirection == .up
             )
         }
     }
@@ -123,17 +176,17 @@ enum ProgressTracker {
         let progressLabel: String
         let unit: String
         let canCompareToLast: Bool
-        let personalRecords: PersonalRecordIndicators?
+        let personalRecords: LastModeIndicators?
 
         init(from sets: [ExerciseSet]) {
             // Get today's and last session metrics
-            let todayMetrics = ExerciseSessionMetrics.getTodaySessionMetrics(from: sets)
-            let lastMetrics = ExerciseSessionMetrics.getLastSessionMetrics(from: sets)
+            let todayMetrics = TodaySessionCalculator.getTodaySessionMetrics(from: sets)
+            let lastMetrics = LastSessionCalculator.getLastSessionMetrics(from: sets)
 
             self.todayVolume = todayMetrics?.value ?? 0
 
             // Calculate weight-only volume for display (shows 0 kg for reps-only exercises)
-            let todaysSets = ExerciseSessionMetrics.getTodaysSets(from: sets)
+            let todaysSets = TodaySessionCalculator.getTodaysSets(from: sets)
             self.todayWeightVolume = ExerciseVolumeCalculator.calculateWeightVolume(for: todaysSets)
 
             // Set display labels - always show comparison label (matches header above)
@@ -236,14 +289,14 @@ enum ProgressTracker {
 
             // Calculate personal records by comparing today's newest set with last session's max
             // If no history exists, compare against 0/0 baseline to show absolute improvement
-            if let newestSet = ExerciseSessionMetrics.getTodaysMostRecentSet(from: sets) {
+            if let newestSet = TodaySessionCalculator.getTodaysMostRecentSet(from: sets) {
                 let lastMaxWeight = lastMetrics?.maxWeight ?? 0.0
                 let lastMaxReps = lastMetrics?.maxWeightReps ?? 0
 
                 // Detect exercise type for adaptive indicators
                 let exerciseType = ExerciseMetricsType.determine(from: sets)
 
-                self.personalRecords = PersonalRecordIndicators.compare(
+                self.personalRecords = LastModeIndicators.compare(
                     todaysNewestWeight: newestSet.weight,
                     todaysNewestReps: newestSet.reps,
                     lastSessionMaxWeight: lastMaxWeight,
@@ -265,5 +318,13 @@ enum ProgressTracker {
     /// Create progress state for given exercise sets
     static func createProgressState(from sets: [ExerciseSet]) -> ProgressState {
         ProgressState(from: sets)
+    }
+
+    /// Calculate best mode indicators (convenience wrapper)
+    static func calculateBestModeIndicators(
+        todaySets: [ExerciseSet],
+        bestMetrics: BestSessionCalculator.BestDayMetrics?
+    ) -> BestModeIndicators? {
+        return BestModeIndicators.calculate(todaySets: todaySets, bestMetrics: bestMetrics)
     }
 }

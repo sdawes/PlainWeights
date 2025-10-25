@@ -49,7 +49,7 @@ struct ExerciseDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Title
                     TextField("Title", text: $exerciseName)
-                        .font(.largeTitle.bold())
+                        .font(AppFonts.exerciseTitle)
                         .textFieldStyle(.plain)
                         .focused($nameFocused)
                         .submitLabel(.done)
@@ -92,8 +92,6 @@ struct ExerciseDetailView: View {
                     addSetConfig: $addSetConfig
                 )
                 .padding(16)
-                .background(Color(.systemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -196,7 +194,7 @@ struct ExerciseDetailView: View {
         .listStyle(.insetGrouped)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
-        .background(Color(.systemGroupedBackground))
+        .background(.white)
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

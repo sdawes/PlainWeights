@@ -65,8 +65,10 @@ struct MetricCard: View {
         .frame(maxWidth: .infinity)
         .frame(height: 100)
         .padding(16)
-        .background(Color(.systemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(.black, lineWidth: 1)
+        )
     }
 }
 
@@ -258,13 +260,26 @@ struct ExerciseMetricsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Picker: Last vs Best
-            Picker("Metric Mode", selection: $selectedMode) {
-                ForEach(MetricMode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue).tag(mode)
+            // Mode selector: Last vs Best
+            HStack(spacing: 20) {
+                Button(action: {
+                    selectedMode = .last
+                }) {
+                    Text("Last")
+                        .font(.headline)
+                        .foregroundStyle(selectedMode == .last ? .primary : .secondary)
                 }
+                .buttonStyle(.plain)
+
+                Button(action: {
+                    selectedMode = .best
+                }) {
+                    Text("Best")
+                        .font(.headline)
+                        .foregroundStyle(selectedMode == .best ? .primary : .secondary)
+                }
+                .buttonStyle(.plain)
             }
-            .pickerStyle(.segmented)
 
             // Three metric cards
             HStack(spacing: 12) {
@@ -340,8 +355,7 @@ struct ExerciseMetricsView: View {
                             .foregroundStyle(.black)
                     }
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.regular)
+                .buttonStyle(.plain)
             }
         }
     }

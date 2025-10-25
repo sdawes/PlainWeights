@@ -94,6 +94,10 @@ struct ExerciseDetailView: View {
                     addSetConfig: $addSetConfig
                 )
                 .padding(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(.black, lineWidth: 1)
+                )
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)

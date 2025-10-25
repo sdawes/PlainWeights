@@ -46,7 +46,7 @@ struct ExerciseDetailView: View {
         List {
             // Title and notes section (no card background)
             Section {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
                     // Title
                     TextField("Title", text: $exerciseName)
                         .font(AppFonts.exerciseTitle)
@@ -65,7 +65,7 @@ struct ExerciseDetailView: View {
                         .font(AppFonts.exerciseNotes)
                         .foregroundStyle(.black)
                         .textFieldStyle(.plain)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .focused($notesFocused)
                         .submitLabel(.done)
                         .onSubmit {
@@ -79,6 +79,7 @@ struct ExerciseDetailView: View {
                         }
                 }
                 .padding(.horizontal, 8)
+                .padding(.vertical, 4)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -109,7 +110,7 @@ struct ExerciseDetailView: View {
                     ForEach(todaySets, id: \.persistentModelID) { set in
                         HStack(alignment: .bottom) {
                             Text(ExerciseSetFormatters.formatSet(set))
-                                .monospacedDigit()
+                                .font(AppFonts.setDetail)
                                 .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
                             Spacer()
@@ -122,7 +123,7 @@ struct ExerciseDetailView: View {
                             }
 
                             Text(Formatters.formatTimeHM(set.timestamp))
-                                .font(.caption)
+                                .font(AppFonts.timeLabel)
                                 .foregroundStyle(.secondary)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -135,7 +136,7 @@ struct ExerciseDetailView: View {
                     }
                 } header: {
                     Text("TODAY'S SETS")
-                        .font(.footnote)
+                        .font(AppFonts.sectionHeader)
                         .textCase(.uppercase)
                         .foregroundStyle(.secondary)
                 }
@@ -148,7 +149,7 @@ struct ExerciseDetailView: View {
                         ForEach(dayGroup.sets, id: \.persistentModelID) { set in
                             HStack(alignment: .bottom) {
                                 Text(ExerciseSetFormatters.formatSet(set))
-                                    .monospacedDigit()
+                                    .font(AppFonts.setDetail)
                                     .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
                                 Spacer()
@@ -161,7 +162,7 @@ struct ExerciseDetailView: View {
                                 }
 
                                 Text(Formatters.formatTimeHM(set.timestamp))
-                                    .font(.caption)
+                                    .font(AppFonts.timeLabel)
                                     .foregroundStyle(.secondary)
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -175,13 +176,13 @@ struct ExerciseDetailView: View {
                     } header: {
                         HStack {
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                .font(.caption)
+                                .font(AppFonts.dateHeader)
                                 .foregroundStyle(.secondary)
 
                             Spacer()
 
                             Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
-                                .font(.caption)
+                                .font(AppFonts.dateHeader)
                                 .foregroundStyle(.tertiary)
                         }
                     }

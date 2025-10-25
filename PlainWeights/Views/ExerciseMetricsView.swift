@@ -22,7 +22,7 @@ struct MetricCard: View {
         VStack(spacing: 0) {
             // Section 1: Label (30pt)
             Text(label.uppercased())
-                .font(.caption)
+                .font(AppFonts.metricLabel)
                 .foregroundStyle(.secondary)
                 .frame(height: 30, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -30,11 +30,11 @@ struct MetricCard: View {
             // Section 2: Value (35pt)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(value)
-                    .font(.system(size: 32, weight: .bold))
+                    .font(AppFonts.metricValue)
                     .foregroundStyle(.primary)
                 if !unit.isEmpty {
                     Text(unit)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(AppFonts.metricUnit)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -50,7 +50,7 @@ struct MetricCard: View {
                         .font(.caption2)
                         .foregroundStyle(direction.color)
                     Text(changeAmount)
-                        .font(.caption)
+                        .font(AppFonts.metricProgress)
                         .foregroundStyle(direction.color)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
@@ -355,6 +355,12 @@ struct ExerciseMetricsView: View {
                             .font(AppFonts.addSetButton)
                             .foregroundStyle(.black)
                     }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(.black, lineWidth: 1)
+                    )
                 }
                 .buttonStyle(.plain)
             }

@@ -99,10 +99,10 @@ struct FilteredExerciseListView: View {
                 }
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
-        .background(Color(.systemGroupedBackground))
+        .background(.white)
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {

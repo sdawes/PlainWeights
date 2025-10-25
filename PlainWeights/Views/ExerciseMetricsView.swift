@@ -22,7 +22,7 @@ struct MetricCard: View {
         VStack(spacing: 0) {
             // Section 1: Label (30pt)
             Text(label.uppercased())
-                .font(AppFonts.metricLabel)
+                .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(height: 30, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -30,11 +30,11 @@ struct MetricCard: View {
             // Section 2: Value (35pt)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(value)
-                    .font(AppFonts.metricValue)
+                    .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(.primary)
                 if !unit.isEmpty {
                     Text(unit)
-                        .font(AppFonts.metricUnit)
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -50,7 +50,7 @@ struct MetricCard: View {
                         .font(.caption2)
                         .foregroundStyle(direction.color)
                     Text(changeAmount)
-                        .font(AppFonts.metricProgress)
+                        .font(.caption)
                         .foregroundStyle(direction.color)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
@@ -266,7 +266,7 @@ struct ExerciseMetricsView: View {
                     selectedMode = .last
                 }) {
                     Text("Last")
-                        .font(.system(.headline, design: .monospaced))
+                        .font(.headline)
                         .foregroundStyle(selectedMode == .last ? .primary : .secondary)
                 }
                 .buttonStyle(.plain)
@@ -275,7 +275,7 @@ struct ExerciseMetricsView: View {
                     selectedMode = .best
                 }) {
                     Text("Best")
-                        .font(.system(.headline, design: .monospaced))
+                        .font(.headline)
                         .foregroundStyle(selectedMode == .best ? .primary : .secondary)
                 }
                 .buttonStyle(.plain)
@@ -331,7 +331,7 @@ struct ExerciseMetricsView: View {
 
                 // Label: "Today X/Y kg"
                 Text("Today \(formatTodayVolume())/\(formatLastVolume()) kg")
-                    .font(AppFonts.progressLabel)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
@@ -352,7 +352,7 @@ struct ExerciseMetricsView: View {
                             .font(.body)
                             .foregroundStyle(.blue)
                         Text("Add Set")
-                            .font(AppFonts.addSetButton)
+                            .font(.body)
                             .foregroundStyle(.black)
                     }
                     .padding(.horizontal, 12)

@@ -49,7 +49,7 @@ struct ExerciseDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     // Title
                     TextField("Title", text: $exerciseName)
-                        .font(AppFonts.exerciseTitle)
+                        .font(.largeTitle.bold())
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
                         .textFieldStyle(.plain)
@@ -62,7 +62,7 @@ struct ExerciseDetailView: View {
 
                     // Notes as subtitle
                     TextField("Add notes about form, target muscles, etc...", text: $noteText)
-                        .font(AppFonts.exerciseNotes)
+                        .font(.caption)
                         .foregroundStyle(.black)
                         .textFieldStyle(.plain)
                         .lineLimit(2)
@@ -110,7 +110,7 @@ struct ExerciseDetailView: View {
                     ForEach(todaySets, id: \.persistentModelID) { set in
                         HStack(alignment: .bottom) {
                             Text(ExerciseSetFormatters.formatSet(set))
-                                .font(AppFonts.setDetail)
+                                .font(.body.monospacedDigit())
                                 .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
                             Spacer()
@@ -123,7 +123,7 @@ struct ExerciseDetailView: View {
                             }
 
                             Text(Formatters.formatTimeHM(set.timestamp))
-                                .font(AppFonts.timeLabel)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -136,7 +136,7 @@ struct ExerciseDetailView: View {
                     }
                 } header: {
                     Text("TODAY'S SETS")
-                        .font(AppFonts.sectionHeader)
+                        .font(.footnote)
                         .textCase(.uppercase)
                         .foregroundStyle(.secondary)
                 }
@@ -149,7 +149,7 @@ struct ExerciseDetailView: View {
                         ForEach(dayGroup.sets, id: \.persistentModelID) { set in
                             HStack(alignment: .bottom) {
                                 Text(ExerciseSetFormatters.formatSet(set))
-                                    .font(AppFonts.setDetail)
+                                    .font(.body.monospacedDigit())
                                     .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
                                 Spacer()
@@ -162,7 +162,7 @@ struct ExerciseDetailView: View {
                                 }
 
                                 Text(Formatters.formatTimeHM(set.timestamp))
-                                    .font(AppFonts.timeLabel)
+                                    .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -176,13 +176,13 @@ struct ExerciseDetailView: View {
                     } header: {
                         HStack {
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                .font(AppFonts.dateHeader)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
 
                             Spacer()
 
                             Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
-                                .font(AppFonts.dateHeader)
+                                .font(.caption)
                                 .foregroundStyle(.tertiary)
                         }
                     }

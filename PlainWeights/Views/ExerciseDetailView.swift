@@ -60,8 +60,8 @@ struct ExerciseDetailView: View {
 
                     // Notes as subtitle
                     TextField("Add notes about form, target muscles, etc...", text: $noteText)
-                        .font(.caption.italic())
-                        .foregroundStyle(.tertiary)
+                        .font(AppFonts.exerciseNotes)
+                        .foregroundStyle(.black)
                         .textFieldStyle(.plain)
                         .lineLimit(1)
                         .focused($notesFocused)

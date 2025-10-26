@@ -102,13 +102,7 @@ struct FilteredExerciseListView: View {
         .listStyle(.insetGrouped)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
-        .background {
-            if #available(iOS 18.0, *) {
-                AnimatedMeshGradientBackground()
-            } else {
-                Color(.systemGroupedBackground)
-            }
-        }
+        .background(Color(red: 0.94, green: 0.96, blue: 0.99))
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {

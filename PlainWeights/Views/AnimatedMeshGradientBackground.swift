@@ -50,7 +50,7 @@ struct AnimatedMeshGradientBackground: View {
 
     /// Animate colors by subtly shifting hue values over time
     private func animatedColors(for date: Date) -> [Color] {
-        let phase = date.timeIntervalSince1970 * 0.15 // Slow animation speed
+        let phase = date.timeIntervalSince1970 * 0.05 // Very slow animation speed (was 0.15)
 
         return baseColors.enumerated().map { index, color in
             // Different phase offset for each color creates organic movement

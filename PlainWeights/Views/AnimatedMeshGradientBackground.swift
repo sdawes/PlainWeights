@@ -10,22 +10,22 @@ import SwiftUI
 
 @available(iOS 18.0, *)
 struct AnimatedMeshGradientBackground: View {
-    // Grey-blue color palette for professional, subtle aesthetic
+    // Very subtle grey-blue palette - barely visible depth effect
     private let baseColors: [Color] = [
-        // Top row - lighter grey-blues
-        Color(red: 0.82, green: 0.86, blue: 0.90),
-        Color(red: 0.75, green: 0.80, blue: 0.86),
-        Color(red: 0.78, green: 0.83, blue: 0.88),
+        // Top row - almost white with hint of blue
+        Color(red: 0.96, green: 0.97, blue: 0.98),
+        Color(red: 0.95, green: 0.96, blue: 0.98),
+        Color(red: 0.96, green: 0.96, blue: 0.98),
 
-        // Middle row - medium blue-greys
-        Color(red: 0.68, green: 0.74, blue: 0.82),
-        Color(red: 0.60, green: 0.68, blue: 0.78),
-        Color(red: 0.65, green: 0.72, blue: 0.80),
+        // Middle row - very light grey-blue
+        Color(red: 0.94, green: 0.95, blue: 0.97),
+        Color(red: 0.93, green: 0.94, blue: 0.96),
+        Color(red: 0.94, green: 0.94, blue: 0.97),
 
-        // Bottom row - darker grey-blues
-        Color(red: 0.72, green: 0.78, blue: 0.84),
-        Color(red: 0.58, green: 0.66, blue: 0.76),
-        Color(red: 0.70, green: 0.76, blue: 0.82)
+        // Bottom row - light grey-blue
+        Color(red: 0.92, green: 0.93, blue: 0.95),
+        Color(red: 0.91, green: 0.92, blue: 0.95),
+        Color(red: 0.92, green: 0.92, blue: 0.95)
     ]
 
     // Fixed point positions for 3x3 grid

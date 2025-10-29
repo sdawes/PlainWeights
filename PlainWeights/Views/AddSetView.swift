@@ -16,6 +16,7 @@ struct AddSetView: View {
     @State private var weightText = ""
     @State private var repsText = ""
     @State private var isWarmUpSet = false
+    @State private var isDropSet = false
     @FocusState private var focusedField: Field?
 
     enum Field {
@@ -100,6 +101,18 @@ struct AddSetView: View {
                 }
                 .padding(.horizontal, 16)
 
+                // Drop set toggle
+                HStack {
+                    Text("Drop set")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Toggle("", isOn: $isDropSet)
+                        .labelsHidden()
+                        .tint(isDropSet ? .teal : .blue)
+                }
+                .padding(.horizontal, 16)
+
                 // Add Set button - matching ExerciseDetailView design
                 HStack {
                     Spacer()
@@ -158,6 +171,7 @@ struct AddSetView: View {
                 weight: weight,
                 reps: reps,
                 isWarmUp: isWarmUpSet,
+                isDropSet: isDropSet,
                 to: exercise,
                 context: context
             )

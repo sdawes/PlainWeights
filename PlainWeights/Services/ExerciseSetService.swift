@@ -20,12 +20,14 @@ enum ExerciseSetService {
     ///   - weight: Weight in kg
     ///   - reps: Number of repetitions
     ///   - isWarmUp: Whether this is a warm-up set
+    ///   - isDropSet: Whether this is a drop set
     ///   - exercise: Parent exercise
     ///   - context: SwiftData model context
     static func addSet(
         weight: Double,
         reps: Int,
         isWarmUp: Bool = false,
+        isDropSet: Bool = false,
         to exercise: Exercise,
         context: ModelContext
     ) throws {
@@ -43,6 +45,7 @@ enum ExerciseSetService {
             weight: weight,
             reps: reps,
             isWarmUp: isWarmUp,
+            isDropSet: isDropSet,
             exercise: exercise
         )
 
@@ -66,6 +69,7 @@ enum ExerciseSetService {
             weight: set.weight,
             reps: set.reps,
             isWarmUp: false, // New sets default to working sets
+            isDropSet: false, // New sets default to regular sets
             exercise: exercise
         )
 
@@ -98,6 +102,20 @@ enum ExerciseSetService {
         context: ModelContext
     ) throws {
         set.isWarmUp.toggle()
+        try context.save()
+    }
+
+    // MARK: - Toggle Drop Set
+
+    /// Toggle the drop set status of a set
+    /// - Parameters:
+    ///   - set: The set to modify
+    ///   - context: SwiftData model context
+    static func toggleDropSetStatus(
+        _ set: ExerciseSet,
+        context: ModelContext
+    ) throws {
+        set.isDropSet.toggle()
         try context.save()
     }
 

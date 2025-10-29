@@ -155,6 +155,36 @@ struct ExerciseMetricsView: View {
         return CGFloat(state.progressBarRatio)
     }
 
+    // Check if max weight set is a drop set (Last mode)
+    private var isLastMaxWeightDropSet: Bool {
+        guard let lastInfo = progressState?.lastCompletedDayInfo else { return false }
+        // Get sets from the last completed day
+        let calendar = Calendar.current
+        let lastDayStart = calendar.startOfDay(for: lastInfo.date)
+        let lastDaySets = sets.filter { set in
+            calendar.startOfDay(for: set.timestamp) == lastDayStart
+        }
+        // Find sets that match the max weight
+        let maxWeightSets = lastDaySets.filter { !$0.isWarmUp && $0.weight == lastInfo.maxWeight }
+        // Check if any are drop sets
+        return maxWeightSets.contains { $0.isDropSet }
+    }
+
+    // Check if max weight set is a drop set (Best mode)
+    private var isBestMaxWeightDropSet: Bool {
+        guard let best = bestDayMetrics else { return false }
+        // Find sets from best day that match the max weight
+        let calendar = Calendar.current
+        let bestDayStart = calendar.startOfDay(for: best.date)
+        let maxWeightSets = setsExcludingToday.filter { set in
+            !set.isWarmUp &&
+            set.weight == best.maxWeight &&
+            calendar.startOfDay(for: set.timestamp) == bestDayStart
+        }
+        // Check if any are drop sets
+        return maxWeightSets.contains { $0.isDropSet }
+    }
+
     // MARK: - Best Mode Format Functions
 
     private func formatBestWeight() -> String {
@@ -320,11 +350,23 @@ struct ExerciseMetricsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            // Action button
+            // Action button row
             HStack(spacing: 8) {
+                // Drop set indicator (left side)
+                if selectedMode == .last ? isLastMaxWeightDropSet : isBestMaxWeightDropSet {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.down.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.teal)
+                        Text("Drop Set")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Spacer()
 
-                // Add Set button (with previous values pre-filled)
+                // Add Set button (right side with previous values pre-filled)
                 Button(action: {
                     addSetConfig = .previous(
                         exercise: exercise,

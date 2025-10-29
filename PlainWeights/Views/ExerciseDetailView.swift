@@ -80,7 +80,7 @@ struct ExerciseDetailView: View {
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets())
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             .padding(.bottom, 0)
 
             // Metrics container section
@@ -115,6 +115,12 @@ struct ExerciseDetailView: View {
                                     .font(.system(size: 9, weight: .bold))
                                     .foregroundStyle(Color(red: 0.7, green: 0.1, blue: 0.1).opacity(0.7))
                                     .textCase(.uppercase)
+                            }
+
+                            if set.isDropSet {
+                                Image(systemName: "chevron.down.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.teal)
                             }
 
                             Text(Formatters.formatTimeHM(set.timestamp))
@@ -154,6 +160,12 @@ struct ExerciseDetailView: View {
                                         .font(.system(size: 9, weight: .bold))
                                         .foregroundStyle(Color(red: 0.7, green: 0.1, blue: 0.1).opacity(0.7))
                                         .textCase(.uppercase)
+                                }
+
+                                if set.isDropSet {
+                                    Image(systemName: "chevron.down.circle.fill")
+                                        .font(.caption)
+                                        .foregroundStyle(.teal)
                                 }
 
                                 Text(Formatters.formatTimeHM(set.timestamp))
@@ -198,6 +210,7 @@ struct ExerciseDetailView: View {
         .scrollContentBackground(.hidden)
         .background(Color(red: 0.94, green: 0.96, blue: 0.99))
         .scrollDismissesKeyboard(.immediately)
+        .contentMargins(.top, 0, for: .scrollContent)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if nameFocused {
@@ -217,6 +230,7 @@ struct ExerciseDetailView: View {
                 }
             }
         }
+        .navigationBarTitleDisplayMode(.inline)
         .alert("Delete Exercise", isPresented: $showingDeleteAlert) {
             Button("Delete", role: .destructive) {
                 deleteExercise()

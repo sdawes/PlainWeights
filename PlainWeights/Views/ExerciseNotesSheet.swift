@@ -14,6 +14,8 @@ struct ExerciseNotesSheet: View {
     @FocusState private var isFocused: Bool
     let onSave: () -> Void
 
+    private let maxLines = 10
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
@@ -23,7 +25,7 @@ struct ExerciseNotesSheet: View {
 
                 TextEditor(text: $noteText)
                     .font(.body)
-                    .frame(minHeight: 150)
+                    .frame(height: 220)
                     .padding(8)
                     .background(Color.white)
                     .overlay(
@@ -31,6 +33,12 @@ struct ExerciseNotesSheet: View {
                             .stroke(Color.black, lineWidth: 1)
                     )
                     .focused($isFocused)
+                    .onChange(of: noteText) { oldValue, newValue in
+                        let lines = newValue.components(separatedBy: .newlines)
+                        if lines.count > maxLines {
+                            noteText = oldValue
+                        }
+                    }
 
                 Spacer()
             }
@@ -55,6 +63,5 @@ struct ExerciseNotesSheet: View {
                 isFocused = true
             }
         }
-        .presentationDetents([.medium, .large])
     }
 }

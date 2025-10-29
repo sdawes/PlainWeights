@@ -112,7 +112,10 @@ struct FilteredExerciseListView: View {
                     .allowsHitTesting(false)
             }
             ToolbarItem(placement: .primaryAction) {
-                Button { showingAddExercise = true } label: { Image(systemName: "plus") }
+                Button { showingAddExercise = true } label: {
+                    Image(systemName: "plus")
+                        .font(.callout)
+                }
             }
             #if DEBUG
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -120,7 +123,10 @@ struct FilteredExerciseListView: View {
                     Button("Print Data to Console") {
                         TestDataGenerator.printCurrentData(modelContext: modelContext)
                     }
-                    Button("Generate Test Data") {
+
+                    Divider()
+
+                    Button("Generate Test Data", role: .destructive) {
                         TestDataGenerator.generateTestData(modelContext: modelContext)
                     }
                     Button("Clear All Data", role: .destructive) {

@@ -21,8 +21,8 @@ struct ExerciseDetailView: View {
     @State private var exerciseName: String = ""
     @State private var noteText: String = ""
     @FocusState private var nameFocused: Bool
-    @FocusState private var notesFocused: Bool
     @State private var showingDeleteAlert = false
+    @State private var showingNotesSheet = false
 
     // Metric mode selection
     @State private var selectedMode: MetricMode = .last
@@ -56,24 +56,6 @@ struct ExerciseDetailView: View {
                         .onSubmit {
                             nameFocused = false
                             updateExerciseName()
-                        }
-
-                    // Notes as subtitle
-                    TextField("Add notes about form, target muscles, etc...", text: $noteText)
-                        .font(.caption.italic())
-                        .foregroundStyle(.tertiary)
-                        .textFieldStyle(.plain)
-                        .lineLimit(1)
-                        .focused($notesFocused)
-                        .submitLabel(.done)
-                        .onSubmit {
-                            notesFocused = false
-                            updateNote()
-                        }
-                        .onChange(of: noteText) { _, newValue in
-                            if newValue.count > 40 {
-                                noteText = String(newValue.prefix(40))
-                            }
                         }
                 }
                 .padding(.horizontal, 8)
@@ -213,15 +195,18 @@ struct ExerciseDetailView: View {
         .contentMargins(.top, 0, for: .scrollContent)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { showingNotesSheet = true }) {
+                    Image(systemName: "note.text")
+                        .font(.callout)
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
                 if nameFocused {
                     Button("Done") {
                         nameFocused = false
                         updateExerciseName()
-                    }
-                } else if notesFocused {
-                    Button("Done") {
-                        notesFocused = false
-                        updateNote()
                     }
                 } else {
                     IconComponents.deleteIcon {
@@ -244,6 +229,13 @@ struct ExerciseDetailView: View {
                 exercise: config.exercise,
                 initialWeight: config.initialWeight,
                 initialReps: config.initialReps
+            )
+        }
+        .sheet(isPresented: $showingNotesSheet) {
+            ExerciseNotesSheet(
+                exercise: exercise,
+                noteText: $noteText,
+                onSave: updateNote
             )
         }
         .onAppear {

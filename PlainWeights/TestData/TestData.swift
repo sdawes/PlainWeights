@@ -5,10 +5,10 @@
 //  PlainWeights
 //
 //  Created by Claude on 25/09/2025.
-//  Last Updated: 29 Oct 2025 at 20:28:49
+//  Last Updated: 1 Nov 2025 at 08:09:51
 //
 //  Real Gym Data
-//  48 exercises, 29 workout sessions (22 Sep 2025 - 29 Oct 2025)
+//  51 exercises, 30 workout sessions (22 Sep 2025 - 30 Oct 2025)
 
 #if DEBUG
 import Foundation
@@ -21,7 +21,7 @@ class TestData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData")
-        logger.info("Generating test data (Real gym data - 48 exercises, 29 sessions)...")
+        logger.info("Generating test data (Real gym data - 51 exercises, 30 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -33,7 +33,7 @@ class TestData {
     // MARK: - Data Generation
 
     private static func generateGymData(modelContext: ModelContext) {
-        // EXPORT DATE: 29 Oct 2025 at 20:28:49
+        // EXPORT DATE: 1 Nov 2025 at 08:09:51
 
         // Exercise definitions with notes
         let exerciseData: [(name: String, category: String, note: String?)] = [
@@ -85,6 +85,9 @@ class TestData {
     (name: "EZ bar curl", category: "Biceps", note: nil),
     (name: "Front lateral dumbbell raise", category: "Shoulder", note: nil),
     (name: "Ball tricep pushdown", category: "Tricep", note: nil),
+    (name: "Romanian deadlift ", category: "Legs", note: nil),
+    (name: "Hanging leg raises", category: "Core", note: nil),
+    (name: "Box jumps", category: "Legs", note: nil),
         ]
 
         // Create exercises
@@ -869,6 +872,35 @@ class TestData {
         addSet(exercise: "Tricep rope pushdown", weight: 45.0, reps: 11, timestamp: date(2025, 10, 29, 17, 44, 33))
         addSet(exercise: "Tricep rope pushdown", weight: 45.0, reps: 10, timestamp: date(2025, 10, 29, 17, 46, 49))
 
+        // SESSION 30: 2025-10-30 18:59:43
+        // Tricep rope pushdown: 1 sets
+        addSet(exercise: "Tricep rope pushdown", weight: 45.0, reps: 10, timestamp: date(2025, 10, 30, 18, 59, 43))
+        // Leg press: 4 sets
+        addSet(exercise: "Leg press", weight: 120.0, reps: 10, timestamp: date(2025, 10, 30, 19, 14, 10))
+        addSet(exercise: "Leg press", weight: 120.0, reps: 10, timestamp: date(2025, 10, 30, 19, 16, 3))
+        addSet(exercise: "Leg press", weight: 120.0, reps: 6, timestamp: date(2025, 10, 30, 19, 18, 22))
+        addSet(exercise: "Leg press", weight: 100.0, reps: 12, timestamp: date(2025, 10, 30, 19, 22, 8))
+        // Romanian deadlift : 3 sets
+        addSet(exercise: "Romanian deadlift ", weight: 40.0, reps: 10, timestamp: date(2025, 10, 30, 19, 25, 37))
+        addSet(exercise: "Romanian deadlift ", weight: 50.0, reps: 10, timestamp: date(2025, 10, 30, 19, 27, 28))
+        addSet(exercise: "Romanian deadlift ", weight: 50.0, reps: 10, timestamp: date(2025, 10, 30, 19, 34, 42))
+        // Dumbbell split squats: 1 sets
+        addSet(exercise: "Dumbbell split squats", weight: 12.5, reps: 6, timestamp: date(2025, 10, 30, 19, 34, 58))
+        // Hanging leg raises: 4 sets
+        addSet(exercise: "Hanging leg raises", weight: 0.0, reps: 11, timestamp: date(2025, 10, 30, 19, 41, 37))
+        addSet(exercise: "Hanging leg raises", weight: 0.0, reps: 11, timestamp: date(2025, 10, 30, 19, 43, 30))
+        addSet(exercise: "Hanging leg raises", weight: 0.0, reps: 11, timestamp: date(2025, 10, 30, 19, 45, 44))
+        addSet(exercise: "Hanging leg raises", weight: 0.0, reps: 6, timestamp: date(2025, 10, 30, 19, 47, 25))
+        // Calf Raises: 4 sets
+        addSet(exercise: "Calf Raises", weight: 40.0, reps: 15, timestamp: date(2025, 10, 30, 19, 48, 41))
+        addSet(exercise: "Calf Raises", weight: 40.0, reps: 15, timestamp: date(2025, 10, 30, 19, 50, 50))
+        addSet(exercise: "Calf Raises", weight: 40.0, reps: 14, timestamp: date(2025, 10, 30, 19, 52, 23))
+        addSet(exercise: "Calf Raises", weight: 40.0, reps: 15, timestamp: date(2025, 10, 30, 19, 53, 51))
+        // Box jumps: 3 sets
+        addSet(exercise: "Box jumps", weight: 0.0, reps: 10, timestamp: date(2025, 10, 30, 19, 56, 47))
+        addSet(exercise: "Box jumps", weight: 0.0, reps: 12, timestamp: date(2025, 10, 30, 19, 57, 36))
+        addSet(exercise: "Box jumps", weight: 0.0, reps: 12, timestamp: date(2025, 10, 30, 20, 0, 0))
+
         // Save all changes
         do {
             try modelContext.save()
@@ -892,4 +924,4 @@ class TestData {
 
 #endif
 
-// COPY TO HERE ===================
+// COPY TO HERE ==========================================================

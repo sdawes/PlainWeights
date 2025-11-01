@@ -38,10 +38,13 @@ struct MetricCard: View {
                     Text(unit)
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.secondary)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
                 }
             }
             .frame(height: 35, alignment: .center)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
 
             // Section 3: Progress indicator (35pt)
             if let changeAmount = changeAmount, let direction = changeDirection {
@@ -204,17 +207,20 @@ struct ExerciseMetricsView: View {
 
     private func formatBestWeightChange() -> String? {
         guard let indicators = bestModeIndicators else { return nil }
+        if abs(indicators.weightImprovement) == 0 { return "same" }
         return "\(Formatters.formatWeight(abs(indicators.weightImprovement))) kg"
     }
 
     private func formatBestRepsChange() -> String? {
         guard let indicators = bestModeIndicators else { return nil }
         let amount = abs(indicators.repsImprovement)
+        if amount == 0 { return "same" }
         return "\(amount) rep\(amount == 1 ? "" : "s")"
     }
 
     private func formatBestVolumeChange() -> String? {
         guard let indicators = bestModeIndicators else { return nil }
+        if abs(indicators.volumeImprovement) == 0 { return "same" }
         return "\(Formatters.formatVolume(abs(indicators.volumeImprovement))) kg"
     }
 
@@ -245,6 +251,7 @@ struct ExerciseMetricsView: View {
         guard let pr = progressState?.personalRecords else {
             return nil
         }
+        if abs(pr.weightImprovement) == 0 { return "same" }
         return "\(Formatters.formatWeight(abs(pr.weightImprovement))) kg"
     }
 
@@ -253,22 +260,24 @@ struct ExerciseMetricsView: View {
             return nil
         }
         let amount = abs(pr.repsImprovement)
+        if amount == 0 { return "same" }
         let repsText = amount == 1 ? "rep" : "reps"
         return "\(amount) \(repsText)"
     }
 
     private func formatVolumeChange() -> String? {
         guard let diff = volumeDifference else {
-            // When equal (no difference), show "0 kg"
+            // When equal (no difference), show "same"
             guard let state = progressState, state.todayVolume > 0 else {
                 return nil
             }
             let lastVolume = state.lastCompletedDayInfo?.volume ?? 0
             if state.todayVolume == lastVolume {
-                return "0 kg"
+                return "same"
             }
             return nil
         }
+        if diff.amount == 0 { return "same" }
         return "\(Formatters.formatVolume(diff.amount)) kg"
     }
 
@@ -316,9 +325,9 @@ struct ExerciseMetricsView: View {
                     changeDirection: selectedMode == .last ? progressState?.personalRecords?.repsDirection : bestModeIndicators?.repsDirection
                 )
 
-                // Card 3: Volume
+                // Card 3: Total
                 MetricCard(
-                    label: "Volume",
+                    label: "Total",
                     value: selectedMode == .last ? formatVolume() : formatBestVolume(),
                     unit: "kg",
                     changeAmount: selectedMode == .last ? formatVolumeChange() : formatBestVolumeChange(),

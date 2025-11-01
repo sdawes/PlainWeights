@@ -102,7 +102,7 @@ struct FilteredExerciseListView: View {
         .listStyle(.insetGrouped)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
-        .background(Color(red: 0.94, green: 0.96, blue: 0.99))
+        .background(Color(red: 0.91, green: 0.93, blue: 0.99))
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {

@@ -57,6 +57,8 @@ struct ExerciseDetailView: View {
                             nameFocused = false
                             updateExerciseName()
                         }
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
                 }
                 .padding(.horizontal, 8)
             }
@@ -190,7 +192,7 @@ struct ExerciseDetailView: View {
         .listStyle(.insetGrouped)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
-        .background(Color(red: 0.94, green: 0.96, blue: 0.99))
+        .background(Color(red: 0.91, green: 0.93, blue: 0.99))
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.top, 0, for: .scrollContent)
         .toolbar {

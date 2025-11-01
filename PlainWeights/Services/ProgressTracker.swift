@@ -15,12 +15,12 @@ enum ProgressTracker {
     
     /// Determine the fill color for progress bar based on achievement percentage
     static func barFillColor(percentOfLast: Int) -> Color {
-        percentOfLast >= 100 ? .green : .accentColor
+        percentOfLast >= 100 ? Color(red: 0.0, green: 0.6, blue: 0.0) : .accentColor
     }
     
     /// Determine color for gains display based on performance
     static func gainsColor(gainsPercent: Int) -> Color {
-        if gainsPercent > 0 { return .green }
+        if gainsPercent > 0 { return Color(red: 0.0, green: 0.6, blue: 0.0) }
         if gainsPercent < 0 { return Color(red: 0.7, green: 0.1, blue: 0.1) }
         return .secondary
     }
@@ -51,7 +51,7 @@ enum ProgressTracker {
 
         var color: Color {
             switch self {
-            case .up: return .green                                  // Green for improvements
+            case .up: return Color(red: 0.0, green: 0.6, blue: 0.0)  // Darker green for improvements
             case .down: return Color(red: 0.7, green: 0.1, blue: 0.1)  // Darker red for decreases
             case .same: return .blue                                 // Blue for no change
             }

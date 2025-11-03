@@ -301,6 +301,17 @@ struct ExerciseMetricsView: View {
         return Formatters.formatVolume(lastVolume)
     }
 
+    private func formatLastSessionSummary() -> String {
+        if let lastInfo = progressState?.lastCompletedDayInfo {
+            let weight = Formatters.formatWeight(lastInfo.maxWeight)
+            let reps = lastInfo.maxWeightReps
+            let volume = Formatters.formatVolume(lastInfo.volume)
+            return "Last: \(weight) kg × \(reps) reps · \(volume) kg total"
+        } else {
+            return "Last: 0 kg × 0 reps · 0 kg total"
+        }
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -312,6 +323,11 @@ struct ExerciseMetricsView: View {
                 }
             }
             .pickerStyle(.segmented)
+
+            // Last session summary
+            Text(formatLastSessionSummary())
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
 
             // Three metric cards
             HStack(spacing: 12) {

@@ -325,6 +325,83 @@ struct ExerciseMetricsView: View {
         return (text, lastWorkingSet.isDropSet)
     }
 
+    private func formatThisSetProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
+        // Need both today's set and last session data
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }),
+              let lastInfo = progressState?.lastCompletedDayInfo else {
+            return nil
+        }
+
+        let todayWeight = lastWorkingSet.weight
+        let lastWeight = lastInfo.maxWeight
+        let diff = todayWeight - lastWeight
+
+        let direction: ProgressTracker.PRDirection
+        let text: String
+
+        if diff > 0 {
+            direction = .up
+            text = "+\(Formatters.formatWeight(diff)) kg"
+        } else if diff < 0 {
+            direction = .down
+            text = "\(Formatters.formatWeight(diff)) kg" // formatWeight includes minus sign
+        } else {
+            direction = .same
+            text = "0 kg"
+        }
+
+        return (text, direction)
+    }
+
+    private func formatThisSetRepsProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
+        // Need both today's set and last session data
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }),
+              let lastInfo = progressState?.lastCompletedDayInfo else {
+            return nil
+        }
+
+        let todayReps = lastWorkingSet.reps
+        let lastReps = lastInfo.maxWeightReps
+        let diff = todayReps - lastReps
+
+        let direction: ProgressTracker.PRDirection
+        let text: String
+
+        if diff > 0 {
+            direction = .up
+            text = "+\(diff) reps"
+        } else if diff < 0 {
+            direction = .down
+            text = "\(diff) reps" // includes minus sign
+        } else {
+            direction = .same
+            text = "0 reps"
+        }
+
+        return (text, direction)
+    }
+
+    private func formatThisSetVolumeProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
+        guard let state = progressState else { return nil }
+
+        let todayVolume = state.todayVolume
+        let lastVolume = state.lastCompletedDayInfo?.volume ?? 0
+        let diff = todayVolume - lastVolume
+
+        let direction = volumeDirection // Reuse existing volume direction logic
+        let text: String
+
+        if diff > 0 {
+            text = "+\(Formatters.formatVolume(diff)) kg total"
+        } else if diff < 0 {
+            text = "\(Formatters.formatVolume(diff)) kg total" // includes minus sign
+        } else {
+            text = "0 kg total"
+        }
+
+        return (text, direction)
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -344,48 +421,87 @@ struct ExerciseMetricsView: View {
 
             // This set display (today's most recent working set)
             if let setInfo = formatThisSet() {
-                HStack(spacing: 6) {
-                    Text(setInfo.text)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.primary)
-
-                    if setInfo.isDropSet {
-                        Image(systemName: "chevron.down.circle.fill")
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 6) {
+                        Text(setInfo.text)
                             .font(.title3)
-                            .foregroundStyle(.teal)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.primary)
+
+                        if setInfo.isDropSet {
+                            Image(systemName: "chevron.down.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.teal)
+                        }
+                    }
+
+                    // Progress pills (comparison to last session)
+                    VStack(alignment: .leading, spacing: 4) {
+                        // Row of pills
+                        HStack(spacing: 8) {
+                            // Weight pill
+                            if let progress = formatThisSetProgress() {
+                                HStack(spacing: 6) {
+                                    Image(systemName: progress.direction == .up ? "arrow.up" :
+                                                     progress.direction == .down ? "arrow.down" : "minus")
+                                        .font(.caption2)
+                                        .foregroundStyle(.white)
+
+                                    Text(progress.text)
+                                        .font(.caption)
+                                        .foregroundStyle(.white)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(progress.direction.color)
+                                .clipShape(Capsule())
+                            }
+
+                            // Reps pill
+                            if let repsProgress = formatThisSetRepsProgress() {
+                                HStack(spacing: 6) {
+                                    Image(systemName: repsProgress.direction == .up ? "arrow.up" :
+                                                     repsProgress.direction == .down ? "arrow.down" : "minus")
+                                        .font(.caption2)
+                                        .foregroundStyle(.white)
+
+                                    Text(repsProgress.text)
+                                        .font(.caption)
+                                        .foregroundStyle(.white)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(repsProgress.direction.color)
+                                .clipShape(Capsule())
+                            }
+
+                            Spacer()
+
+                            // Volume pill (right-aligned)
+                            if let volumeProgress = formatThisSetVolumeProgress() {
+                                HStack(spacing: 6) {
+                                    Image(systemName: volumeProgress.direction == .up ? "arrow.up" :
+                                                     volumeProgress.direction == .down ? "arrow.down" : "minus")
+                                        .font(.caption2)
+                                        .foregroundStyle(.white)
+
+                                    Text(volumeProgress.text)
+                                        .font(.caption)
+                                        .foregroundStyle(.white)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(volumeProgress.direction.color)
+                                .clipShape(Capsule())
+                            }
+                        }
+
+                        // Label underneath pills
+                        Text("vs last session")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
-            }
-
-            // Three metric cards
-            HStack(spacing: 12) {
-                // Card 1: Weight
-                MetricCard(
-                    label: "Weight",
-                    value: selectedMode == .last ? formatWeight() : formatBestWeight(),
-                    unit: "kg",
-                    changeAmount: selectedMode == .last ? formatWeightChange() : formatBestWeightChange(),
-                    changeDirection: selectedMode == .last ? progressState?.personalRecords?.weightDirection : bestModeIndicators?.weightDirection
-                )
-
-                // Card 2: Reps
-                MetricCard(
-                    label: "Reps",
-                    value: selectedMode == .last ? formatReps() : formatBestReps(),
-                    unit: "reps",
-                    changeAmount: selectedMode == .last ? formatRepsChange() : formatBestRepsChange(),
-                    changeDirection: selectedMode == .last ? progressState?.personalRecords?.repsDirection : bestModeIndicators?.repsDirection
-                )
-
-                // Card 3: Total
-                MetricCard(
-                    label: "Total",
-                    value: selectedMode == .last ? formatVolume() : formatBestVolume(),
-                    unit: "kg",
-                    changeAmount: selectedMode == .last ? formatVolumeChange() : formatBestVolumeChange(),
-                    changeDirection: selectedMode == .last ? volumeDirection : bestModeIndicators?.volumeDirection
-                )
             }
 
             // Progress bar

@@ -312,6 +312,19 @@ struct ExerciseMetricsView: View {
         }
     }
 
+    private func formatThisSet() -> (text: String, isDropSet: Bool)? {
+        // Get the most recent working set from today (skip warm-ups)
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
+            return nil
+        }
+
+        let weight = Formatters.formatWeight(lastWorkingSet.weight)
+        let reps = lastWorkingSet.reps
+        let text = "This set: \(weight) kg × \(reps) reps"
+
+        return (text, lastWorkingSet.isDropSet)
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -328,6 +341,22 @@ struct ExerciseMetricsView: View {
             Text(formatLastSessionSummary())
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+
+            // This set display (today's most recent working set)
+            if let setInfo = formatThisSet() {
+                HStack(spacing: 6) {
+                    Text(setInfo.text)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+
+                    if setInfo.isDropSet {
+                        Image(systemName: "chevron.down.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.teal)
+                    }
+                }
+            }
 
             // Three metric cards
             HStack(spacing: 12) {

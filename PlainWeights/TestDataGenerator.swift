@@ -122,11 +122,13 @@ class TestDataGenerator {
         print("        let exerciseData: [(name: String, category: String, note: String?)] = [")
         for exercise in exercises {
             if let note = exercise.note, !note.isEmpty {
-                // Escape quotes in note text
-                let escapedNote = note.replacingOccurrences(of: "\"", with: "\\\"")
+                // Escape quotes and newlines in note text
+                let escapedNote = note
+                    .replacingOccurrences(of: "\"", with: "\\\"")
+                    .replacingOccurrences(of: "\n", with: ", ")
                 print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: \"\(escapedNote)\"),")
             } else {
-                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: nil),")
+                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: nil as String?),")
             }
         }
         print("        ]")
@@ -154,14 +156,21 @@ class TestDataGenerator {
         print("        // Helper function to add a working set")
         print("        func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date) {")
         print("            guard let ex = exercises[exercise] else { return }")
-        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, exercise: ex)")
+        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isDropSet: false, exercise: ex)")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add a warm-up set")
         print("        func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date) {")
         print("            guard let ex = exercises[exercise] else { return }")
-        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, exercise: ex)")
+        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, isDropSet: false, exercise: ex)")
+        print("            modelContext.insert(set)")
+        print("        }")
+        print("")
+        print("        // Helper function to add a drop set")
+        print("        func addDropSet(exercise: String, weight: Double, reps: Int, timestamp: Date) {")
+        print("            guard let ex = exercises[exercise] else { return }")
+        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isDropSet: true, exercise: ex)")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
@@ -209,6 +218,8 @@ class TestDataGenerator {
 
                             if item.set.isWarmUp {
                                 print("        addWarmUpSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
+                            } else if item.set.isDropSet {
+                                print("        addDropSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
                             } else {
                                 print("        addSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
                             }

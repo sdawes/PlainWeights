@@ -15,7 +15,13 @@ enum ProgressTracker {
     
     /// Determine the fill color for progress bar based on achievement percentage
     static func barFillColor(percentOfLast: Int) -> Color {
-        percentOfLast >= 100 ? Color(red: 0.0, green: 0.6, blue: 0.0) : .accentColor
+        if percentOfLast > 100 {
+            return Color(red: 0.0, green: 0.6, blue: 0.0)  // Green when past target (matches arrows)
+        } else if percentOfLast == 100 {
+            return .blue  // Blue when equal to target
+        } else {
+            return Color(red: 0.7, green: 0.1, blue: 0.1)  // Red when under target (matches arrows)
+        }
     }
     
     /// Determine color for gains display based on performance

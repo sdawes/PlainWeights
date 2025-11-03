@@ -144,7 +144,15 @@ struct ExerciseMetricsView: View {
         )
     }
 
-    /// Get the weight and reps values from the last working (non-warm-up) set
+    /// Get the weight and reps values from today's last working set (for display only)
+    private var todayLastSetForDisplay: (weight: Double?, reps: Int?) {
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
+            return (nil, nil)
+        }
+        return (lastWorkingSet.weight, lastWorkingSet.reps)
+    }
+
+    /// Get the weight and reps values from the last working set (all-time, for pre-filling form)
     private var lastWorkingSetValues: (weight: Double?, reps: Int?) {
         guard let lastWorkingSet = sets.first(where: { !$0.isWarmUp }) else {
             return (nil, nil)
@@ -375,7 +383,7 @@ struct ExerciseMetricsView: View {
 
                 Spacer()
 
-                // Add Set button (right side with previous values pre-filled)
+                // Add Set button (right side with previous values pre-filled from all-time)
                 Button(action: {
                     addSetConfig = .previous(
                         exercise: exercise,

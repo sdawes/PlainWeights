@@ -81,7 +81,7 @@ struct ExerciseDetailView: View {
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
+            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
 
             // Today's sets section
             if !todaySets.isEmpty {
@@ -122,6 +122,7 @@ struct ExerciseDetailView: View {
                 } header: {
                     Text("TODAY'S SETS")
                         .font(.footnote)
+                        .fontWeight(.bold)
                         .textCase(.uppercase)
                         .foregroundStyle(.black)
                 }
@@ -168,14 +169,17 @@ struct ExerciseDetailView: View {
                         HStack {
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
                                 .font(.caption)
+                                .fontWeight(.bold)
                                 .foregroundStyle(.black)
 
                             Spacer()
 
                             Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
                                 .font(.caption)
+                                .fontWeight(.bold)
                                 .foregroundStyle(.black)
                         }
+                        .padding(.bottom, 4)
                     }
                 }
             }
@@ -195,6 +199,26 @@ struct ExerciseDetailView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.top, 0, for: .scrollContent)
+        .overlay(alignment: .bottomTrailing) {
+            Button(action: {
+                let lastWorkingSet = sets.first(where: { !$0.isWarmUp })
+                addSetConfig = .previous(
+                    exercise: exercise,
+                    weight: lastWorkingSet?.weight,
+                    reps: lastWorkingSet?.reps
+                )
+            }) {
+                Image(systemName: "plus")
+                    .font(.title2)
+                    .foregroundStyle(.white)
+            }
+            .frame(width: 48, height: 48)
+            .background(.blue)
+            .clipShape(Circle())
+            .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 4)
+            .padding(.trailing, 20)
+            .padding(.bottom, 20)
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingNotesSheet = true }) {

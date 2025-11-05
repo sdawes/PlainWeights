@@ -5,10 +5,10 @@
 //  PlainWeights
 //
 //  Created by Claude on 25/09/2025.
-//  Last Updated: 5 Nov 2025 at 16:21:02
+//  Last Updated: 5 Nov 2025 at 19:06:10
 //
 //  Real Gym Data
-//  53 exercises, 34 workout sessions (22 Sep 2025 - 04 Nov 2025)
+//  55 exercises, 34 workout sessions (22 Sep 2025 - 05 Nov 2025)
 
 #if DEBUG
 import Foundation
@@ -21,7 +21,7 @@ class TestData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData")
-        logger.info("Generating test data (Real gym data - 53 exercises, 34 sessions)...")
+        logger.info("Generating test data (Real gym data - 55 exercises, 34 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -33,7 +33,7 @@ class TestData {
     // MARK: - Data Generation
 
     private static func generateGymData(modelContext: ModelContext) {
-        // EXPORT DATE: 5 Nov 2025 at 16:21:02
+        // EXPORT DATE: 5 Nov 2025 at 19:06:10
 
         // Exercise definitions with notes
         let exerciseData: [(name: String, category: String, note: String?)] = [
@@ -51,8 +51,8 @@ class TestData {
     (name: "Calf Raises", category: "Legs", note: nil as String?),
     (name: "Deadlifts (Trapbar)", category: "Back", note: nil as String?),
     (name: "Dumbbell lateral raises", category: "Shoulders", note: nil as String?),
-    (name: "Single cable lateral raise", category: "Shoulders", note: "2 is 15kg and 3 is 17.5"),
-    (name: "Front lateral cable raise", category: "Shoulders", note: "3 is 17.5, 4 23 and 5 28.5"),
+    (name: "Single cable lateral raise", category: "Shoulders", note: "2 - 15kg, 3 - 17.5"),
+    (name: "Front lateral cable raise", category: "Shoulders", note: "3 is 17.5, 4 23 and 5 28.5, 2 handed pull"),
     (name: "Seated dumbbell Arnold press", category: "Shoulders", note: nil as String?),
     (name: "Upright cable row", category: "Shoulders", note: nil as String?),
     (name: "Butterfly sit up", category: "Core", note: nil as String?),
@@ -72,7 +72,7 @@ class TestData {
     (name: "Leg press", category: "Legs", note: nil as String?),
     (name: "Dumbbell chest press", category: "Chest", note: nil as String?),
     (name: "Pull ups", category: "Back", note: nil as String?),
-    (name: "Shoulder press machine ", category: "Shoulders", note: "Plate 4 is 32kg, 5 is 37.5"),
+    (name: "Shoulder press machine ", category: "Shoulders", note: "4 - 32kg, 5 - 37.5, 6 - 43kg"),
     (name: "Tricep rope pushdown", category: "Triceps", note: "7 is 39.5 and 8 is 45"),
     (name: "Lat pull down", category: "Back", note: nil as String?),
     (name: "Chest press machine", category: "Chest", note: nil as String?),
@@ -90,6 +90,8 @@ class TestData {
     (name: "Box jumps", category: "Legs", note: nil as String?),
     (name: "Cable chest flys mid", category: "Chest", note: "6 holes from the top"),
     (name: "Press-ups", category: "Chest", note: nil as String?),
+    (name: "Seated dumbbell curl (on knee)", category: "Bicep", note: nil as String?),
+    (name: "Seated tricep dips", category: "Tricep", note: "With bench level box full out"),
         ]
 
         // Create exercises
@@ -941,11 +943,7 @@ class TestData {
         // Press-ups: 1 sets
         addSet(exercise: "Press-ups", weight: 0.0, reps: 10, timestamp: date(2025, 11, 1, 9, 52, 25))
 
-        // SESSION 32: 2025-11-02 01:55:26
-        // Deadlifts (Trapbar): 1 sets
-        addSet(exercise: "Deadlifts (Trapbar)", weight: 70.0, reps: 12, timestamp: date(2025, 11, 2, 1, 55, 26))
-
-        // SESSION 33: 2025-11-03 17:11:55
+        // SESSION 32: 2025-11-03 17:11:55
         // Pull ups: 4 sets
         addSet(exercise: "Pull ups", weight: 0.0, reps: 7, timestamp: date(2025, 11, 3, 17, 11, 55))
         addSet(exercise: "Pull ups", weight: 0.0, reps: 7, timestamp: date(2025, 11, 3, 17, 14, 11))
@@ -972,7 +970,7 @@ class TestData {
         addSet(exercise: "Dumbbell hammer curls ", weight: 10.0, reps: 15, timestamp: date(2025, 11, 3, 17, 57, 10))
         addSet(exercise: "Dumbbell hammer curls ", weight: 10.0, reps: 13, timestamp: date(2025, 11, 3, 17, 59, 15))
 
-        // SESSION 34: 2025-11-04 16:46:00
+        // SESSION 33: 2025-11-04 16:46:00
         // Leg press: 4 sets
         addSet(exercise: "Leg press", weight: 120.0, reps: 10, timestamp: date(2025, 11, 4, 16, 46, 0))
         addSet(exercise: "Leg press", weight: 120.0, reps: 11, timestamp: date(2025, 11, 4, 16, 48, 25))
@@ -991,6 +989,51 @@ class TestData {
         // Toes to bar: 2 sets
         addSet(exercise: "Toes to bar", weight: 0.0, reps: 12, timestamp: date(2025, 11, 4, 17, 23, 40))
         addSet(exercise: "Toes to bar", weight: 0.0, reps: 12, timestamp: date(2025, 11, 4, 17, 25, 54))
+
+        // SESSION 34: 2025-11-05 17:09:47
+        // Shoulder press machine : 3 sets
+        addSet(exercise: "Shoulder press machine ", weight: 37.5, reps: 10, timestamp: date(2025, 11, 5, 17, 9, 47))
+        addSet(exercise: "Shoulder press machine ", weight: 37.5, reps: 13, timestamp: date(2025, 11, 5, 17, 11, 34))
+        addSet(exercise: "Shoulder press machine ", weight: 43.0, reps: 8, timestamp: date(2025, 11, 5, 17, 14, 33))
+        // Single cable lateral raise: 4 sets
+        addWarmUpSet(exercise: "Single cable lateral raise", weight: 15.0, reps: 12, timestamp: date(2025, 11, 5, 17, 17, 56))
+        addSet(exercise: "Single cable lateral raise", weight: 17.5, reps: 12, timestamp: date(2025, 11, 5, 17, 19, 34))
+        addSet(exercise: "Single cable lateral raise", weight: 20.0, reps: 10, timestamp: date(2025, 11, 5, 17, 21, 48))
+        addSet(exercise: "Single cable lateral raise", weight: 20.0, reps: 10, timestamp: date(2025, 11, 5, 17, 24, 19))
+        // Front lateral cable raise: 1 sets
+        addSet(exercise: "Front lateral cable raise", weight: 20.0, reps: 15, timestamp: date(2025, 11, 5, 17, 25, 59))
+        // Reverse Cable Flys: 3 sets
+        addSet(exercise: "Reverse Cable Flys", weight: 15.0, reps: 15, timestamp: date(2025, 11, 5, 17, 28, 53))
+        addSet(exercise: "Reverse Cable Flys", weight: 17.5, reps: 10, timestamp: date(2025, 11, 5, 17, 30, 43))
+        addSet(exercise: "Reverse Cable Flys", weight: 17.5, reps: 10, timestamp: date(2025, 11, 5, 17, 33, 5))
+        // Front lateral cable raise: 2 sets
+        addSet(exercise: "Front lateral cable raise", weight: 20.0, reps: 15, timestamp: date(2025, 11, 5, 17, 34, 28))
+        addSet(exercise: "Front lateral cable raise", weight: 23.0, reps: 15, timestamp: date(2025, 11, 5, 17, 36, 47))
+        // Bicep rope curls: 1 sets
+        addSet(exercise: "Bicep rope curls", weight: 45.0, reps: 15, timestamp: date(2025, 11, 5, 17, 38, 49))
+        // Tricep rope pushdown: 2 sets
+        addSet(exercise: "Tricep rope pushdown", weight: 39.5, reps: 15, timestamp: date(2025, 11, 5, 17, 40, 24))
+        addSet(exercise: "Tricep rope pushdown", weight: 39.5, reps: 17, timestamp: date(2025, 11, 5, 17, 42, 56))
+        // Bicep rope curls: 2 sets
+        addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 15, timestamp: date(2025, 11, 5, 17, 43, 56))
+        addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 13, timestamp: date(2025, 11, 5, 17, 46, 30))
+        // Seated dumbbell curl (on knee): 1 sets
+        addSet(exercise: "Seated dumbbell curl (on knee)", weight: 10.0, reps: 12, timestamp: date(2025, 11, 5, 17, 50, 13))
+        // Seated tricep dips: 1 sets
+        addSet(exercise: "Seated tricep dips", weight: 0.0, reps: 10, timestamp: date(2025, 11, 5, 17, 51, 55))
+        // Seated dumbbell curl (on knee): 1 sets
+        addSet(exercise: "Seated dumbbell curl (on knee)", weight: 10.0, reps: 15, timestamp: date(2025, 11, 5, 17, 54, 47))
+        // Seated tricep dips: 1 sets
+        addSet(exercise: "Seated tricep dips", weight: 0.0, reps: 12, timestamp: date(2025, 11, 5, 17, 55, 44))
+        // Seated dumbbell curl (on knee): 1 sets
+        addSet(exercise: "Seated dumbbell curl (on knee)", weight: 10.0, reps: 14, timestamp: date(2025, 11, 5, 17, 58, 15))
+        // Seated tricep dips: 1 sets
+        addSet(exercise: "Seated tricep dips", weight: 0.0, reps: 13, timestamp: date(2025, 11, 5, 17, 58, 47))
+        // Deadlifts (Trapbar): 4 sets
+        addSet(exercise: "Deadlifts (Trapbar)", weight: 60.0, reps: 10, timestamp: date(2025, 11, 5, 18, 1, 45))
+        addSet(exercise: "Deadlifts (Trapbar)", weight: 65.0, reps: 10, timestamp: date(2025, 11, 5, 18, 3, 35))
+        addSet(exercise: "Deadlifts (Trapbar)", weight: 70.0, reps: 12, timestamp: date(2025, 11, 5, 18, 6, 10))
+        addSet(exercise: "Deadlifts (Trapbar)", weight: 70.0, reps: 12, timestamp: date(2025, 11, 5, 18, 8, 54))
 
         // Save all changes
         do {

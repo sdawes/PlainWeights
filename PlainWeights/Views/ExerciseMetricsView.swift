@@ -92,6 +92,194 @@ enum MetricMode: String, CaseIterable {
     case best = "Best Ever"
 }
 
+// MARK: - Data Structures for Section Components
+
+struct TargetMetricsData {
+    let headerLabel: String
+    let date: Date?
+    let weight: Double
+    let reps: Int
+    let totalVolume: Double
+}
+
+struct ThisSetData {
+    let weight: String
+    let reps: Int
+    let isDropSet: Bool
+    let comparisonLabel: String
+    let weightProgress: (text: String, direction: ProgressTracker.PRDirection)?
+    let repsProgress: (text: String, direction: ProgressTracker.PRDirection)?
+}
+
+struct ProgressBarData {
+    let progressRatio: CGFloat
+    let barFillColor: Color
+    let progressText: String
+}
+
+// MARK: - TargetMetricsSection Component
+
+struct TargetMetricsSection: View {
+    let data: TargetMetricsData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
+            HStack {
+                Text(data.headerLabel)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+
+                Spacer()
+
+                if let date = data.date {
+                    Text(Formatters.formatAbbreviatedDayHeader(date))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            // Metric values: Weight × Reps
+            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                Text("\(Formatters.formatWeight(data.weight)) kg")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+                Text("× \(data.reps) reps")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+            }
+
+            // Total volume
+            Text("\(Formatters.formatVolume(data.totalVolume)) kg total")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+// MARK: - ThisSetSection Component
+
+struct ThisSetSection: View {
+    let data: ThisSetData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Header row with "THIS SET" and "vs last session"
+                HStack {
+                    Text("THIS SET")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+
+                    Spacer()
+
+                    Text(data.comparisonLabel)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                // Set values
+                HStack(alignment: .lastTextBaseline, spacing: 6) {
+                    Text("\(data.weight) kg")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+
+                    Text("× \(data.reps) reps")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+
+                    if data.isDropSet {
+                        Image(systemName: "chevron.down.circle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.teal)
+                    }
+                }
+            }
+
+            // Progress pills
+            HStack(spacing: 8) {
+                if let progress = data.weightProgress {
+                    ProgressPillView(text: progress.text, direction: progress.direction)
+                }
+
+                if let repsProgress = data.repsProgress {
+                    ProgressPillView(text: repsProgress.text, direction: repsProgress.direction)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - ProgressBarSection Component
+
+struct ProgressBarSection: View {
+    let data: ProgressBarData
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            // Thin progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background track (grey)
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.secondary.opacity(0.2))
+                        .frame(height: 4)
+
+                    // Fill (blue/green based on progress)
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(data.barFillColor)
+                        .frame(width: geometry.size.width * data.progressRatio, height: 4)
+                }
+            }
+            .frame(height: 4)
+            .frame(maxWidth: .infinity)
+
+            // Progress percentage text (right-aligned)
+            Text(data.progressText)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+// MARK: - MetricViewStats Wrapper Component
+
+struct MetricViewStats: View {
+    let targetMetrics: TargetMetricsData
+    let thisSet: ThisSetData?
+    let progressBar: ProgressBarData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // 1. Target Metrics Section
+            TargetMetricsSection(data: targetMetrics)
+                .padding(.bottom, 20)
+
+            // 2. Horizontal Divider Line (standalone)
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(height: 1)
+                .padding(.bottom, 20)
+
+            // 3. This Set Section (conditional)
+            if let setData = thisSet {
+                ThisSetSection(data: setData)
+                    .padding(.bottom, 20)
+            }
+
+            // 4. Progress Bar Section
+            ProgressBarSection(data: progressBar)
+        }
+        .padding(.horizontal, 8)
+    }
+}
+
 // MARK: - ExerciseMetricsView
 
 struct ExerciseMetricsView: View {
@@ -187,23 +375,10 @@ struct ExerciseMetricsView: View {
         return max(0, remaining) // Don't show negative
     }
 
-    // Formatted progress text: "31% complete 476/1,547 kg (1,071 kg to go)"
+    // Formatted progress text: "XX% of last complete"
     private var formattedProgressText: String {
         let percentage = progressPercentage
-        let remaining = remainingVolume
-        let todayVol = Formatters.formatVolume(progressState?.todayVolume ?? 0)
-        let targetVol = Formatters.formatVolume(targetVolume)
-
-        if remaining > 0 {
-            return "\(percentage)% complete \(todayVol)/\(targetVol) kg (\(Formatters.formatVolume(remaining)) kg to go)"
-        } else if percentage >= 100 {
-            let over = (progressState?.todayVolume ?? 0) - targetVolume
-            if over > 0 {
-                return "\(percentage)% complete \(todayVol)/\(targetVol) kg (\(Formatters.formatVolume(over)) kg over!)"
-            }
-            return "100% complete \(todayVol)/\(targetVol) kg"
-        }
-        return "\(percentage)% complete \(todayVol)/\(targetVol) kg"
+        return "\(percentage)% of last complete"
     }
 
     private func formatLastSessionSummary() -> (text: String, date: Date?) {
@@ -329,199 +504,90 @@ struct ExerciseMetricsView: View {
         return (text, direction)
     }
 
+    // MARK: - Data Builders
+
+    private func buildTargetMetricsData() -> TargetMetricsData {
+        let summary = formatLastSessionSummary()
+
+        if selectedMode == .best {
+            if let best = bestDayMetrics {
+                return TargetMetricsData(
+                    headerLabel: "BEST EVER",
+                    date: summary.date,
+                    weight: best.maxWeight,
+                    reps: best.repsAtMaxWeight,
+                    totalVolume: best.totalVolume
+                )
+            } else {
+                return TargetMetricsData(
+                    headerLabel: "BEST EVER",
+                    date: nil,
+                    weight: 0,
+                    reps: 0,
+                    totalVolume: 0
+                )
+            }
+        } else {
+            if let lastInfo = progressState?.lastCompletedDayInfo {
+                return TargetMetricsData(
+                    headerLabel: "LAST MAX WEIGHT",
+                    date: summary.date,
+                    weight: lastInfo.maxWeight,
+                    reps: lastInfo.maxWeightReps,
+                    totalVolume: lastInfo.volume
+                )
+            } else {
+                return TargetMetricsData(
+                    headerLabel: "LAST MAX WEIGHT",
+                    date: nil,
+                    weight: 0,
+                    reps: 0,
+                    totalVolume: 0
+                )
+            }
+        }
+    }
+
+    private func buildThisSetData() -> ThisSetData? {
+        guard let setInfo = formatThisSet() else { return nil }
+
+        return ThisSetData(
+            weight: setInfo.weight,
+            reps: setInfo.reps,
+            isDropSet: setInfo.isDropSet,
+            comparisonLabel: selectedMode == .best ? "vs best ever" : "vs last session",
+            weightProgress: formatThisSetProgress(),
+            repsProgress: formatThisSetRepsProgress()
+        )
+    }
+
+    private func buildProgressBarData() -> ProgressBarData {
+        return ProgressBarData(
+            progressRatio: progressBarRatio,
+            barFillColor: progressState?.barFillColor ?? .blue,
+            progressText: formattedProgressText
+        )
+    }
+
     // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Picker: Last vs Best
+        VStack(alignment: .leading, spacing: 0) {
+            // Segmented Picker (Last Session / Best Ever)
             Picker("Metric Mode", selection: $selectedMode) {
                 ForEach(MetricMode.allCases, id: \.self) { mode in
                     Text(mode.rawValue).tag(mode)
                 }
             }
             .pickerStyle(.segmented)
+            .padding(.bottom, 20)
 
-            // Target metrics (no card background)
-            let summary = formatLastSessionSummary()
-            VStack(alignment: .leading, spacing: 8) {
-                // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
-                HStack {
-                    Text(selectedMode == .best ? "BEST EVER" : "LAST MAX WEIGHT")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.secondary)
-                        .textCase(.uppercase)
-
-                    Spacer()
-
-                    if let date = summary.date {
-                        Text(Formatters.formatAbbreviatedDayHeader(date))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                // Metric values
-                if selectedMode == .best {
-                    if let best = bestDayMetrics {
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("\(Formatters.formatWeight(best.maxWeight)) kg")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.primary)
-                            Text("× \(best.repsAtMaxWeight) reps")
-                                .font(.title2)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Text("\(Formatters.formatVolume(best.totalVolume)) kg total")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("0 kg")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.primary)
-                            Text("× 0 reps")
-                                .font(.title2)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Text("0 kg total")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                } else {
-                    if let lastInfo = progressState?.lastCompletedDayInfo {
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.primary)
-                            Text("× \(lastInfo.maxWeightReps) reps")
-                                .font(.title2)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Text("\(Formatters.formatVolume(lastInfo.volume)) kg total")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("0 kg")
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.primary)
-                            Text("× 0 reps")
-                                .font(.title2)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Text("0 kg total")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-
-            // This set display (today's most recent working set)
-            if let setInfo = formatThisSet() {
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        // Header label (like "LAST MAX WEIGHT")
-                        Text("THIS SET")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.secondary)
-                            .textCase(.uppercase)
-
-                        // Set values
-                        HStack(spacing: 6) {
-                            Text("\(setInfo.weight) kg × \(setInfo.reps) reps")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.primary)
-
-                            if setInfo.isDropSet {
-                                Image(systemName: "chevron.down.circle.fill")
-                                    .font(.caption)
-                                    .foregroundStyle(.teal)
-                            }
-                        }
-                    }
-
-                    // Progress pills (comparison - solid colors, no volume pill)
-                    VStack(alignment: .leading, spacing: 8) {
-                        // Row of pills
-                        HStack(spacing: 8) {
-                            // Weight pill
-                            if let progress = formatThisSetProgress() {
-                                ProgressPillView(text: progress.text, direction: progress.direction)
-                            }
-
-                            // Reps pill
-                            if let repsProgress = formatThisSetRepsProgress() {
-                                ProgressPillView(text: repsProgress.text, direction: repsProgress.direction)
-                            }
-                        }
-
-                        // Label underneath pills
-                        Text(selectedMode == .best ? "vs best ever" : "vs last session")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.bottom, 12)
-            }
-
-            // Enhanced Progress Display (Dual Metrics)
-            VStack(alignment: .leading, spacing: 8) {
-                // Thin progress bar
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Background track (grey)
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(Color.secondary.opacity(0.2))
-                            .frame(height: 4)
-
-                        // Fill (blue/green based on progress)
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(progressState?.barFillColor ?? .blue)
-                            .frame(width: geometry.size.width * progressBarRatio, height: 4)
-                    }
-                }
-                .frame(height: 4)
-
-                // Single-line combined progress text
-                Text(formattedProgressText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            // Action button row
-            HStack(spacing: 8) {
-                Spacer()
-
-                // Add Set button (right side with previous values pre-filled from all-time)
-                Button(action: {
-                    addSetConfig = .previous(
-                        exercise: exercise,
-                        weight: lastWorkingSetValues.weight,
-                        reps: lastWorkingSetValues.reps
-                    )
-                }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.body)
-                            .foregroundStyle(.blue)
-                        Text("Add Set")
-                            .foregroundStyle(.black)
-                    }
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.regular)
-            }
+            // Metric View Stats (contains all three sections + divider)
+            MetricViewStats(
+                targetMetrics: buildTargetMetricsData(),
+                thisSet: buildThisSetData(),
+                progressBar: buildProgressBarData()
+            )
         }
     }
 }

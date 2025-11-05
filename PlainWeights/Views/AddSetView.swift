@@ -137,6 +137,7 @@ struct AddSetView: View {
                 Spacer()
             }
             .padding(16)
+            .background(AnimatedGradientBackground())
             .navigationTitle("Add Set")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

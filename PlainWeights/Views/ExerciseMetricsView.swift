@@ -25,7 +25,7 @@ struct HeroMetricView: View {
                 Text(headerLabel)
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.7))
                     .textCase(.uppercase)
 
                 Spacer()
@@ -33,7 +33,7 @@ struct HeroMetricView: View {
                 if let date = date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
                         .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.white.opacity(0.5))
                 }
             }
 
@@ -42,22 +42,22 @@ struct HeroMetricView: View {
                 Text("\(Formatters.formatWeight(weight)) kg")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
                 Text("× \(reps) reps")
                     .font(.title2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.7))
             }
 
             // Total volume (medium, secondary)
             Text("\(Formatters.formatVolume(totalVolume)) kg total")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.7))
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.ultraThinMaterial)
+        .background(Color.blue)
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 4)
     }
 }
 
@@ -341,43 +341,87 @@ struct ExerciseMetricsView: View {
             }
             .pickerStyle(.segmented)
 
-            // Hero Target Card
+            // Target metrics (no card background)
             let summary = formatLastSessionSummary()
-            if selectedMode == .best {
-                if let best = bestDayMetrics {
-                    HeroMetricView(
-                        weight: best.maxWeight,
-                        reps: best.repsAtMaxWeight,
-                        totalVolume: best.totalVolume,
-                        headerLabel: "BEST EVER",
-                        date: summary.date
-                    )
-                } else {
-                    HeroMetricView(
-                        weight: 0,
-                        reps: 0,
-                        totalVolume: 0,
-                        headerLabel: "BEST EVER",
-                        date: nil
-                    )
+            VStack(alignment: .leading, spacing: 8) {
+                // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
+                HStack {
+                    Text(selectedMode == .best ? "BEST EVER" : "LAST MAX WEIGHT")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+
+                    Spacer()
+
+                    if let date = summary.date {
+                        Text(Formatters.formatAbbreviatedDayHeader(date))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-            } else {
-                if let lastInfo = progressState?.lastCompletedDayInfo {
-                    HeroMetricView(
-                        weight: lastInfo.maxWeight,
-                        reps: lastInfo.maxWeightReps,
-                        totalVolume: lastInfo.volume,
-                        headerLabel: "LAST MAX WEIGHT",
-                        date: summary.date
-                    )
+
+                // Metric values
+                if selectedMode == .best {
+                    if let best = bestDayMetrics {
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("\(Formatters.formatWeight(best.maxWeight)) kg")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.primary)
+                            Text("× \(best.repsAtMaxWeight) reps")
+                                .font(.title2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text("\(Formatters.formatVolume(best.totalVolume)) kg total")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("0 kg")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.primary)
+                            Text("× 0 reps")
+                                .font(.title2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text("0 kg total")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
                 } else {
-                    HeroMetricView(
-                        weight: 0,
-                        reps: 0,
-                        totalVolume: 0,
-                        headerLabel: "LAST MAX WEIGHT",
-                        date: nil
-                    )
+                    if let lastInfo = progressState?.lastCompletedDayInfo {
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.primary)
+                            Text("× \(lastInfo.maxWeightReps) reps")
+                                .font(.title2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text("\(Formatters.formatVolume(lastInfo.volume)) kg total")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("0 kg")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.primary)
+                            Text("× 0 reps")
+                                .font(.title2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text("0 kg total")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 
@@ -429,7 +473,6 @@ struct ExerciseMetricsView: View {
                     }
                 }
                 .padding(.bottom, 12)
-                .padding(.leading, 20)
             }
 
             // Enhanced Progress Display (Dual Metrics)
@@ -455,7 +498,6 @@ struct ExerciseMetricsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 20)
 
             // Action button row
             HStack(spacing: 8) {

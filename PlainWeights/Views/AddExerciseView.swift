@@ -28,6 +28,8 @@ struct AddExerciseView: View {
                 TextField("Exercise Name", text: $name)
                 TextField("Category", text: $category)
             }
+            .scrollContentBackground(.hidden)
+            .background(AnimatedGradientBackground())
             .navigationTitle("Add Exercise")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

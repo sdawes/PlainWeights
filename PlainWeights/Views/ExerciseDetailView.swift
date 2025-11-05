@@ -123,7 +123,7 @@ struct ExerciseDetailView: View {
                     Text("TODAY'S SETS")
                         .font(.footnote)
                         .textCase(.uppercase)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.black)
                 }
             }
 
@@ -168,13 +168,13 @@ struct ExerciseDetailView: View {
                         HStack {
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.black)
 
                             Spacer()
 
                             Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
                                 .font(.caption)
-                                .foregroundStyle(.tertiary)
+                                .foregroundStyle(.black)
                         }
                     }
                 }
@@ -190,9 +190,9 @@ struct ExerciseDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .listSectionSpacing(6)
+        .listSectionSpacing(20)
         .scrollContentBackground(.hidden)
-        .background(Color(.systemGroupedBackground))
+        .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.top, 0, for: .scrollContent)
         .toolbar {

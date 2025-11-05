@@ -9,75 +9,87 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - MetricCard Component
+// MARK: - Hero Metric Component
 
-struct MetricCard: View {
-    let label: String
-    let value: String
-    let unit: String
-    let changeAmount: String?
-    let changeDirection: ProgressTracker.PRDirection?
+struct HeroMetricView: View {
+    let weight: Double
+    let reps: Int
+    let totalVolume: Double
+    let headerLabel: String
+    let date: Date?
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Section 1: Label (30pt)
-            Text(label.uppercased())
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(height: 30, alignment: .center)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(alignment: .leading, spacing: 8) {
+            // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
+            HStack {
+                Text(headerLabel)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
 
-            // Section 2: Value (35pt)
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(value)
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.primary)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-                if !unit.isEmpty {
-                    Text(unit)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(1)
-                }
-            }
-            .frame(height: 35, alignment: .center)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .fixedSize(horizontal: false, vertical: true)
-
-            // Section 3: Progress indicator (35pt)
-            if let changeAmount = changeAmount, let direction = changeDirection {
-                HStack(spacing: 4) {
-                    Image(systemName: direction.iconName)
-                        .font(.caption2)
-                        .foregroundStyle(direction.color)
-                    Text(changeAmount)
-                        .font(.caption)
-                        .foregroundStyle(direction.color)
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(1)
-                }
-                .frame(height: 35, alignment: .center)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
                 Spacer()
-                    .frame(height: 35)
+
+                if let date = date {
+                    Text(Formatters.formatAbbreviatedDayHeader(date))
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
             }
+
+            // Hero metric: Weight (large) × Reps (smaller, lighter)
+            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                Text("\(Formatters.formatWeight(weight)) kg")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+                Text("× \(reps) reps")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+            }
+
+            // Total volume (medium, secondary)
+            Text("\(Formatters.formatVolume(totalVolume)) kg total")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 100)
-        .padding(16)
-        .background(Color(.systemGroupedBackground))
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+    }
+}
+
+// MARK: - Progress Pill Component
+
+struct ProgressPillView: View {
+    let text: String
+    let direction: ProgressTracker.PRDirection
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: direction == .up ? "arrow.up" :
+                             direction == .down ? "arrow.down" : "minus")
+                .font(.caption2)
+                .foregroundStyle(.white)
+
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(.white)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(direction.color)
+        .clipShape(Capsule())
     }
 }
 
 // MARK: - Metric Mode Enum
 
 enum MetricMode: String, CaseIterable {
-    case last = "Last"
-    case best = "Best"
+    case last = "Last Session"
+    case best = "Best Ever"
 }
 
 // MARK: - ExerciseMetricsView
@@ -93,30 +105,6 @@ struct ExerciseMetricsView: View {
     // Cached progress state
     private var progressState: ProgressTracker.ProgressState? {
         ProgressTracker.createProgressState(from: sets)
-    }
-
-    // Volume direction indicator
-    private var volumeDirection: ProgressTracker.PRDirection {
-        guard let state = progressState else { return .same }
-        return ProgressTracker.volumeComparisonDirection(
-            today: state.todayVolume,
-            last: state.lastCompletedDayInfo?.volume ?? 0
-        )
-    }
-
-    // Volume difference calculation
-    private var volumeDifference: (amount: Double, label: String)? {
-        guard let state = progressState, state.todayVolume > 0 else { return nil }
-
-        let lastVolume = state.lastCompletedDayInfo?.volume ?? 0
-        let diff = state.todayVolume - lastVolume
-
-        if diff > 0 {
-            return (diff, "more")
-        } else if diff < 0 {
-            return (abs(diff), "left")
-        }
-        return nil // Equal, no message
     }
 
     // Sets excluding today (for Best metrics - should only show PRs from previous days)
@@ -144,14 +132,6 @@ struct ExerciseMetricsView: View {
         )
     }
 
-    /// Get the weight and reps values from today's last working set (for display only)
-    private var todayLastSetForDisplay: (weight: Double?, reps: Int?) {
-        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
-            return (nil, nil)
-        }
-        return (lastWorkingSet.weight, lastWorkingSet.reps)
-    }
-
     /// Get the weight and reps values from the last working set (all-time, for pre-filling form)
     private var lastWorkingSetValues: (weight: Double?, reps: Int?) {
         guard let lastWorkingSet = sets.first(where: { !$0.isWarmUp }) else {
@@ -166,153 +146,91 @@ struct ExerciseMetricsView: View {
         return CGFloat(state.progressBarRatio)
     }
 
-    // Check if max weight set is a drop set (Last mode)
-    private var isLastMaxWeightDropSet: Bool {
-        guard let lastInfo = progressState?.lastCompletedDayInfo else { return false }
-        // Get sets from the last completed day
-        let calendar = Calendar.current
-        let lastDayStart = calendar.startOfDay(for: lastInfo.date)
-        let lastDaySets = sets.filter { set in
-            calendar.startOfDay(for: set.timestamp) == lastDayStart
-        }
-        // Find sets that match the max weight
-        let maxWeightSets = lastDaySets.filter { !$0.isWarmUp && $0.weight == lastInfo.maxWeight }
-        // Check if any are drop sets
-        return maxWeightSets.contains { $0.isDropSet }
-    }
-
-    // Check if max weight set is a drop set (Best mode)
-    private var isBestMaxWeightDropSet: Bool {
-        guard let best = bestDayMetrics else { return false }
-        // Find sets from best day that match the max weight
-        let calendar = Calendar.current
-        let bestDayStart = calendar.startOfDay(for: best.date)
-        let maxWeightSets = setsExcludingToday.filter { set in
-            !set.isWarmUp &&
-            set.weight == best.maxWeight &&
-            calendar.startOfDay(for: set.timestamp) == bestDayStart
-        }
-        // Check if any are drop sets
-        return maxWeightSets.contains { $0.isDropSet }
-    }
-
-    // MARK: - Best Mode Format Functions
-
-    private func formatBestWeight() -> String {
-        guard let best = bestDayMetrics else { return "0" }
-        return Formatters.formatWeight(best.maxWeight)
-    }
-
-    private func formatBestReps() -> String {
-        guard let best = bestDayMetrics else { return "0" }
-        return "\(best.repsAtMaxWeight)"
-    }
-
-    private func formatBestVolume() -> String {
-        guard let best = bestDayMetrics else { return "0" }
-        return Formatters.formatVolume(best.totalVolume)
-    }
-
-    private func formatBestWeightChange() -> String? {
-        guard let indicators = bestModeIndicators else { return nil }
-        if abs(indicators.weightImprovement) == 0 { return "same" }
-        return "\(Formatters.formatWeight(abs(indicators.weightImprovement))) kg"
-    }
-
-    private func formatBestRepsChange() -> String? {
-        guard let indicators = bestModeIndicators else { return nil }
-        let amount = abs(indicators.repsImprovement)
-        if amount == 0 { return "same" }
-        return "\(amount) rep\(amount == 1 ? "" : "s")"
-    }
-
-    private func formatBestVolumeChange() -> String? {
-        guard let indicators = bestModeIndicators else { return nil }
-        if abs(indicators.volumeImprovement) == 0 { return "same" }
-        return "\(Formatters.formatVolume(abs(indicators.volumeImprovement))) kg"
-    }
-
-    // MARK: - Last Mode Format Functions
-
-    private func formatWeight() -> String {
-        guard let lastInfo = progressState?.lastCompletedDayInfo else {
-            return "0"
-        }
-        return Formatters.formatWeight(lastInfo.maxWeight)
-    }
-
-    private func formatReps() -> String {
-        guard let lastInfo = progressState?.lastCompletedDayInfo else {
-            return "0"
-        }
-        return "\(lastInfo.maxWeightReps)"
-    }
-
-    private func formatVolume() -> String {
-        guard let lastInfo = progressState?.lastCompletedDayInfo else {
-            return "0"
-        }
-        return Formatters.formatVolume(lastInfo.volume)
-    }
-
-    private func formatWeightChange() -> String? {
-        guard let pr = progressState?.personalRecords else {
-            return nil
-        }
-        if abs(pr.weightImprovement) == 0 { return "same" }
-        return "\(Formatters.formatWeight(abs(pr.weightImprovement))) kg"
-    }
-
-    private func formatRepsChange() -> String? {
-        guard let pr = progressState?.personalRecords else {
-            return nil
-        }
-        let amount = abs(pr.repsImprovement)
-        if amount == 0 { return "same" }
-        let repsText = amount == 1 ? "rep" : "reps"
-        return "\(amount) \(repsText)"
-    }
-
-    private func formatVolumeChange() -> String? {
-        guard let diff = volumeDifference else {
-            // When equal (no difference), show "same"
-            guard let state = progressState, state.todayVolume > 0 else {
-                return nil
-            }
-            let lastVolume = state.lastCompletedDayInfo?.volume ?? 0
-            if state.todayVolume == lastVolume {
-                return "same"
-            }
-            return nil
-        }
-        if diff.amount == 0 { return "same" }
-        return "\(Formatters.formatVolume(diff.amount)) kg"
-    }
-
-    private func formatTodayVolume() -> String {
-        guard let state = progressState else { return "0" }
-        return Formatters.formatVolume(state.todayVolume)
-    }
-
-    private func formatLastVolume() -> String {
-        guard let lastVolume = progressState?.lastCompletedDayInfo?.volume else {
-            return "0"
-        }
-        return Formatters.formatVolume(lastVolume)
-    }
-
-    private func formatLastSessionSummary() -> String {
-        if let lastInfo = progressState?.lastCompletedDayInfo {
-            let weight = Formatters.formatWeight(lastInfo.maxWeight)
-            let reps = lastInfo.maxWeightReps
-            let volume = Formatters.formatVolume(lastInfo.volume)
-            return "Last: \(weight) kg × \(reps) reps · \(volume) kg total"
+    // Target volume based on selected mode (Last vs Best)
+    private var targetVolume: Double {
+        if selectedMode == .best {
+            return bestDayMetrics?.totalVolume ?? 0
         } else {
-            return "Last: 0 kg × 0 reps · 0 kg total"
+            return progressState?.lastCompletedDayInfo?.volume ?? 0
         }
     }
 
-    private func formatThisSet() -> (text: String, isDropSet: Bool)? {
+    // Comparison weight based on selected mode (Last vs Best)
+    private var comparisonWeight: Double? {
+        if selectedMode == .best {
+            return bestDayMetrics?.maxWeight
+        } else {
+            return progressState?.lastCompletedDayInfo?.maxWeight
+        }
+    }
+
+    // Comparison reps based on selected mode (Last vs Best)
+    private var comparisonReps: Int? {
+        if selectedMode == .best {
+            return bestDayMetrics?.repsAtMaxWeight
+        } else {
+            return progressState?.lastCompletedDayInfo?.maxWeightReps
+        }
+    }
+
+    // Progress percentage (0-100+)
+    private var progressPercentage: Int {
+        guard let state = progressState else { return 0 }
+        guard targetVolume > 0 else { return 0 }
+        return Int(round((state.todayVolume / targetVolume) * 100))
+    }
+
+    // Remaining volume to reach target
+    private var remainingVolume: Double {
+        guard let state = progressState else { return 0 }
+        let remaining = targetVolume - state.todayVolume
+        return max(0, remaining) // Don't show negative
+    }
+
+    // Formatted progress text: "31% complete 476/1,547 kg (1,071 kg to go)"
+    private var formattedProgressText: String {
+        let percentage = progressPercentage
+        let remaining = remainingVolume
+        let todayVol = Formatters.formatVolume(progressState?.todayVolume ?? 0)
+        let targetVol = Formatters.formatVolume(targetVolume)
+
+        if remaining > 0 {
+            return "\(percentage)% complete \(todayVol)/\(targetVol) kg (\(Formatters.formatVolume(remaining)) kg to go)"
+        } else if percentage >= 100 {
+            let over = (progressState?.todayVolume ?? 0) - targetVolume
+            if over > 0 {
+                return "\(percentage)% complete \(todayVol)/\(targetVol) kg (\(Formatters.formatVolume(over)) kg over!)"
+            }
+            return "100% complete \(todayVol)/\(targetVol) kg"
+        }
+        return "\(percentage)% complete \(todayVol)/\(targetVol) kg"
+    }
+
+    private func formatLastSessionSummary() -> (text: String, date: Date?) {
+        if selectedMode == .best {
+            // Best Ever mode
+            if let best = bestDayMetrics {
+                let weight = Formatters.formatWeight(best.maxWeight)
+                let reps = best.repsAtMaxWeight
+                let volume = Formatters.formatVolume(best.totalVolume)
+                return ("Best: \(weight) kg × \(reps) reps · \(volume) kg total", best.date)
+            } else {
+                return ("Best: 0 kg × 0 reps · 0 kg total", nil)
+            }
+        } else {
+            // Last Session mode
+            if let lastInfo = progressState?.lastCompletedDayInfo {
+                let weight = Formatters.formatWeight(lastInfo.maxWeight)
+                let reps = lastInfo.maxWeightReps
+                let volume = Formatters.formatVolume(lastInfo.volume)
+                return ("Last: \(weight) kg × \(reps) reps · \(volume) kg total", lastInfo.date)
+            } else {
+                return ("Last: 0 kg × 0 reps · 0 kg total", nil)
+            }
+        }
+    }
+
+    private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool)? {
         // Get the most recent working set from today (skip warm-ups)
         guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
             return nil
@@ -320,21 +238,17 @@ struct ExerciseMetricsView: View {
 
         let weight = Formatters.formatWeight(lastWorkingSet.weight)
         let reps = lastWorkingSet.reps
-        let text = "This set: \(weight) kg × \(reps) reps"
 
-        return (text, lastWorkingSet.isDropSet)
+        return (weight, reps, lastWorkingSet.isDropSet)
     }
 
     private func formatThisSetProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
-        // Need both today's set and last session data
         guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }),
-              let lastInfo = progressState?.lastCompletedDayInfo else {
+              let comparison = comparisonWeight else {
             return nil
         }
 
-        let todayWeight = lastWorkingSet.weight
-        let lastWeight = lastInfo.maxWeight
-        let diff = todayWeight - lastWeight
+        let diff = lastWorkingSet.weight - comparison
 
         let direction: ProgressTracker.PRDirection
         let text: String
@@ -354,15 +268,12 @@ struct ExerciseMetricsView: View {
     }
 
     private func formatThisSetRepsProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
-        // Need both today's set and last session data
         guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }),
-              let lastInfo = progressState?.lastCompletedDayInfo else {
+              let comparison = comparisonReps else {
             return nil
         }
 
-        let todayReps = lastWorkingSet.reps
-        let lastReps = lastInfo.maxWeightReps
-        let diff = todayReps - lastReps
+        let diff = lastWorkingSet.reps - comparison
 
         let direction: ProgressTracker.PRDirection
         let text: String
@@ -385,12 +296,28 @@ struct ExerciseMetricsView: View {
         guard let state = progressState else { return nil }
 
         let todayVolume = state.todayVolume
-        let lastVolume = state.lastCompletedDayInfo?.volume ?? 0
-        let diff = todayVolume - lastVolume
+        let comparisonVolume: Double
 
-        let direction = volumeDirection // Reuse existing volume direction logic
+        // Switch based on selected mode
+        if selectedMode == .best {
+            guard let best = bestDayMetrics else { return nil }
+            comparisonVolume = best.totalVolume
+        } else {
+            comparisonVolume = state.lastCompletedDayInfo?.volume ?? 0
+        }
+
+        let diff = todayVolume - comparisonVolume
+
+        let direction: ProgressTracker.PRDirection
+        if diff > 0 {
+            direction = .up
+        } else if diff < 0 {
+            direction = .down
+        } else {
+            direction = .same
+        }
+
         let text: String
-
         if diff > 0 {
             text = "+\(Formatters.formatVolume(diff)) kg total"
         } else if diff < 0 {
@@ -414,97 +341,98 @@ struct ExerciseMetricsView: View {
             }
             .pickerStyle(.segmented)
 
-            // Last session summary
-            Text(formatLastSessionSummary())
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            // Hero Target Card
+            let summary = formatLastSessionSummary()
+            if selectedMode == .best {
+                if let best = bestDayMetrics {
+                    HeroMetricView(
+                        weight: best.maxWeight,
+                        reps: best.repsAtMaxWeight,
+                        totalVolume: best.totalVolume,
+                        headerLabel: "BEST EVER",
+                        date: summary.date
+                    )
+                } else {
+                    HeroMetricView(
+                        weight: 0,
+                        reps: 0,
+                        totalVolume: 0,
+                        headerLabel: "BEST EVER",
+                        date: nil
+                    )
+                }
+            } else {
+                if let lastInfo = progressState?.lastCompletedDayInfo {
+                    HeroMetricView(
+                        weight: lastInfo.maxWeight,
+                        reps: lastInfo.maxWeightReps,
+                        totalVolume: lastInfo.volume,
+                        headerLabel: "LAST MAX WEIGHT",
+                        date: summary.date
+                    )
+                } else {
+                    HeroMetricView(
+                        weight: 0,
+                        reps: 0,
+                        totalVolume: 0,
+                        headerLabel: "LAST MAX WEIGHT",
+                        date: nil
+                    )
+                }
+            }
 
             // This set display (today's most recent working set)
             if let setInfo = formatThisSet() {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 6) {
-                        Text(setInfo.text)
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.primary)
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        // Header label (like "LAST MAX WEIGHT")
+                        Text("THIS SET")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
 
-                        if setInfo.isDropSet {
-                            Image(systemName: "chevron.down.circle.fill")
+                        // Set values
+                        HStack(spacing: 6) {
+                            Text("\(setInfo.weight) kg × \(setInfo.reps) reps")
                                 .font(.title3)
-                                .foregroundStyle(.teal)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.primary)
+
+                            if setInfo.isDropSet {
+                                Image(systemName: "chevron.down.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.teal)
+                            }
                         }
                     }
 
-                    // Progress pills (comparison to last session)
-                    VStack(alignment: .leading, spacing: 4) {
+                    // Progress pills (comparison - solid colors, no volume pill)
+                    VStack(alignment: .leading, spacing: 8) {
                         // Row of pills
                         HStack(spacing: 8) {
                             // Weight pill
                             if let progress = formatThisSetProgress() {
-                                HStack(spacing: 6) {
-                                    Image(systemName: progress.direction == .up ? "arrow.up" :
-                                                     progress.direction == .down ? "arrow.down" : "minus")
-                                        .font(.caption2)
-                                        .foregroundStyle(.white)
-
-                                    Text(progress.text)
-                                        .font(.caption)
-                                        .foregroundStyle(.white)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(progress.direction.color)
-                                .clipShape(Capsule())
+                                ProgressPillView(text: progress.text, direction: progress.direction)
                             }
 
                             // Reps pill
                             if let repsProgress = formatThisSetRepsProgress() {
-                                HStack(spacing: 6) {
-                                    Image(systemName: repsProgress.direction == .up ? "arrow.up" :
-                                                     repsProgress.direction == .down ? "arrow.down" : "minus")
-                                        .font(.caption2)
-                                        .foregroundStyle(.white)
-
-                                    Text(repsProgress.text)
-                                        .font(.caption)
-                                        .foregroundStyle(.white)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(repsProgress.direction.color)
-                                .clipShape(Capsule())
-                            }
-
-                            Spacer()
-
-                            // Volume pill (right-aligned)
-                            if let volumeProgress = formatThisSetVolumeProgress() {
-                                HStack(spacing: 6) {
-                                    Image(systemName: volumeProgress.direction == .up ? "arrow.up" :
-                                                     volumeProgress.direction == .down ? "arrow.down" : "minus")
-                                        .font(.caption2)
-                                        .foregroundStyle(.white)
-
-                                    Text(volumeProgress.text)
-                                        .font(.caption)
-                                        .foregroundStyle(.white)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(volumeProgress.direction.color)
-                                .clipShape(Capsule())
+                                ProgressPillView(text: repsProgress.text, direction: repsProgress.direction)
                             }
                         }
 
                         // Label underneath pills
-                        Text("vs last session")
+                        Text(selectedMode == .best ? "vs best ever" : "vs last session")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
+                .padding(.bottom, 12)
+                .padding(.leading, 20)
             }
 
-            // Progress bar
+            // Enhanced Progress Display (Dual Metrics)
             VStack(alignment: .leading, spacing: 8) {
                 // Thin progress bar
                 GeometryReader { geometry in
@@ -522,26 +450,15 @@ struct ExerciseMetricsView: View {
                 }
                 .frame(height: 4)
 
-                // Label: "Today X/Y kg"
-                Text("Today \(formatTodayVolume())/\(formatLastVolume()) kg")
+                // Single-line combined progress text
+                Text(formattedProgressText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .padding(.horizontal, 20)
 
             // Action button row
             HStack(spacing: 8) {
-                // Drop set indicator (left side)
-                if selectedMode == .last ? isLastMaxWeightDropSet : isBestMaxWeightDropSet {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.down.circle.fill")
-                            .font(.caption)
-                            .foregroundStyle(.teal)
-                        Text("Drop Set")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
                 Spacer()
 
                 // Add Set button (right side with previous values pre-filled from all-time)

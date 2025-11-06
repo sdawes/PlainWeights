@@ -104,6 +104,20 @@ struct ChartContentView: View {
             } else {
                 // Dual y-axis line chart
                 Chart(chartData) { dataPoint in
+                    // Weight area with gradient
+                    AreaMark(
+                        x: .value("Date", dataPoint.date),
+                        y: .value("Weight", dataPoint.weight / weightMax),
+                        series: .value("Type", "Weight")
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.blue.opacity(0.3), .blue.opacity(0.05)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+
                     // Weight line (normalized to 0-1 scale)
                     LineMark(
                         x: .value("Date", dataPoint.date),
@@ -120,30 +134,8 @@ struct ChartContentView: View {
                     )
                     .foregroundStyle(.green)
                 }
-                .chartYAxis {
-                    let stride = Array(stride(from: 0.0, through: 1.0, by: 0.25))
-
-                    // Left axis - Weight (kg)
-                    AxisMarks(position: .leading, values: stride) { value in
-                        AxisValueLabel {
-                            if let normalized = value.as(Double.self) {
-                                Text("\(Int(normalized * weightMax))")
-                                    .font(.caption2)
-                            }
-                        }
-                        AxisGridLine()
-                    }
-
-                    // Right axis - Reps
-                    AxisMarks(position: .trailing, values: stride) { value in
-                        AxisValueLabel {
-                            if let normalized = value.as(Double.self) {
-                                Text("\(Int(normalized * repsMax))")
-                                    .font(.caption2)
-                            }
-                        }
-                    }
-                }
+                .chartXAxis(.hidden)
+                .chartYAxis(.hidden)
                 .frame(height: 200)
             }
         }

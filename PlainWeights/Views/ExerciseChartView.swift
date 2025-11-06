@@ -17,6 +17,13 @@ struct WeightDataPoint: Identifiable {
     let reps: Int
 }
 
+// MARK: - Exercise Chart Type
+
+enum ExerciseChartType {
+    case repsOnly
+    case weightAndReps
+}
+
 // MARK: - Chart Toggle Button
 
 struct ChartToggleButton: View {
@@ -46,6 +53,13 @@ struct ChartContentView: View {
     let exercise: Exercise
     let sets: [ExerciseSet]
 
+    // Determine exercise chart type based on weight data
+    private var exerciseChartType: ExerciseChartType {
+        let workingSets = sets.filter { !$0.isWarmUp }
+        let allZeroWeight = workingSets.allSatisfy { $0.weight == 0 }
+        return allZeroWeight ? .repsOnly : .weightAndReps
+    }
+
     // Compute daily max weights and reps from sets
     private var chartData: [WeightDataPoint] {
         let calendar = Calendar.current
@@ -58,12 +72,21 @@ struct ChartContentView: View {
             calendar.startOfDay(for: set.timestamp)
         }
 
-        // For each day, find the set with max weight and get its reps
+        // For each day, find the appropriate max set based on exercise type
         let dataPoints = grouped.compactMap { (date, daySets) -> WeightDataPoint? in
-            guard let maxWeightSet = daySets.max(by: { $0.weight < $1.weight }) else {
-                return nil
+            if exerciseChartType == .repsOnly {
+                // For reps-only: find max reps per day
+                guard let maxRepsSet = daySets.max(by: { $0.reps < $1.reps }) else {
+                    return nil
+                }
+                return WeightDataPoint(date: date, weight: 0, reps: maxRepsSet.reps)
+            } else {
+                // For weight exercises: find max weight per day and get its reps
+                guard let maxWeightSet = daySets.max(by: { $0.weight < $1.weight }) else {
+                    return nil
+                }
+                return WeightDataPoint(date: date, weight: maxWeightSet.weight, reps: maxWeightSet.reps)
             }
-            return WeightDataPoint(date: date, weight: maxWeightSet.weight, reps: maxWeightSet.reps)
         }
 
         // Sort by date
@@ -96,37 +119,31 @@ struct ChartContentView: View {
                             .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                     )
             } else {
-                // Dual y-axis line chart
+                // Adaptive chart based on exercise type
                 Chart(chartData) { dataPoint in
-                    // Weight area with gradient
-                    AreaMark(
-                        x: .value("Date", dataPoint.date),
-                        y: .value("Weight", dataPoint.weight / weightMax),
-                        series: .value("Type", "Weight")
-                    )
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.blue.opacity(0.3), .blue.opacity(0.05)],
-                            startPoint: .top,
-                            endPoint: .bottom
+                    if exerciseChartType == .repsOnly {
+                        // Reps-only: show green line only
+                        LineMark(
+                            x: .value("Date", dataPoint.date),
+                            y: .value("Reps", Double(dataPoint.reps) / repsMax)
                         )
-                    )
+                        .foregroundStyle(.green)
+                    } else {
+                        // Weight and reps: show both lines
+                        LineMark(
+                            x: .value("Date", dataPoint.date),
+                            y: .value("Weight", dataPoint.weight / weightMax),
+                            series: .value("Type", "Weight")
+                        )
+                        .foregroundStyle(.blue)
 
-                    // Weight line (normalized to 0-1 scale)
-                    LineMark(
-                        x: .value("Date", dataPoint.date),
-                        y: .value("Weight", dataPoint.weight / weightMax),
-                        series: .value("Type", "Weight")
-                    )
-                    .foregroundStyle(.blue)
-
-                    // Reps line (normalized to 0-1 scale)
-                    LineMark(
-                        x: .value("Date", dataPoint.date),
-                        y: .value("Reps", Double(dataPoint.reps) / repsMax),
-                        series: .value("Type", "Reps")
-                    )
-                    .foregroundStyle(.green)
+                        LineMark(
+                            x: .value("Date", dataPoint.date),
+                            y: .value("Reps", Double(dataPoint.reps) / repsMax),
+                            series: .value("Type", "Reps")
+                        )
+                        .foregroundStyle(.green)
+                    }
                 }
                 .chartXAxis {
                     AxisMarks { value in

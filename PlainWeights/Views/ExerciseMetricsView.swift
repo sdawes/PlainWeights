@@ -292,7 +292,7 @@ struct MetricViewStats: View {
             // 2. Chart Content (only when expanded)
             if isChartExpanded {
                 ChartContentView(exercise: exercise, sets: sets)
-                    .padding(.top, 8)
+                    .padding(.top, 20)
             }
 
             // 3. Only show remaining sections if sets added today

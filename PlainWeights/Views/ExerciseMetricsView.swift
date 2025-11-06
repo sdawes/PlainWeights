@@ -164,6 +164,7 @@ struct TargetMetricsSection: View {
 
                 data.chartToggle
             }
+            .padding(.top, 12)
         }
     }
 }
@@ -292,7 +293,7 @@ struct MetricViewStats: View {
             // 2. Chart Content (only when expanded)
             if isChartExpanded {
                 ChartContentView(exercise: exercise, sets: sets)
-                    .padding(.top, 20)
+                    .padding(.top, 24)
             }
 
             // 3. Only show remaining sections if sets added today

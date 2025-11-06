@@ -128,6 +128,13 @@ struct ChartContentView: View {
                             y: .value("Reps", dataPoint.reps)
                         )
                         .foregroundStyle(.green)
+
+                        // Add PointMark for single data points
+                        PointMark(
+                            x: .value("Date", dataPoint.date),
+                            y: .value("Reps", dataPoint.reps)
+                        )
+                        .foregroundStyle(.green)
                     } else {
                         // Weight and reps: show both lines
 
@@ -153,6 +160,13 @@ struct ChartContentView: View {
                         )
                         .foregroundStyle(.blue)
 
+                        // Weight points (for single data points)
+                        PointMark(
+                            x: .value("Date", dataPoint.date),
+                            y: .value("Weight", dataPoint.weight / weightMax)
+                        )
+                        .foregroundStyle(.blue)
+
                         // Reps line (dotted green)
                         LineMark(
                             x: .value("Date", dataPoint.date),
@@ -161,6 +175,13 @@ struct ChartContentView: View {
                         )
                         .foregroundStyle(.green)
                         .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+
+                        // Reps points (for single data points)
+                        PointMark(
+                            x: .value("Date", dataPoint.date),
+                            y: .value("Reps", Double(dataPoint.reps) / repsMax)
+                        )
+                        .foregroundStyle(.green)
                     }
                 }
                 .chartXAxis {

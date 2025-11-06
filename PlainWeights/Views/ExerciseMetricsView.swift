@@ -100,6 +100,7 @@ struct TargetMetricsData {
     let weight: Double
     let reps: Int
     let totalVolume: Double
+    let chartToggle: ChartToggleButton
 }
 
 struct ThisSetData {
@@ -153,10 +154,16 @@ struct TargetMetricsSection: View {
                     .foregroundStyle(.secondary)
             }
 
-            // Total volume
-            Text("\(Formatters.formatVolume(data.totalVolume)) kg total")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            // Total volume with chart toggle
+            HStack {
+                Text("\(Formatters.formatVolume(data.totalVolume)) kg total")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                data.chartToggle
+            }
         }
     }
 }
@@ -275,15 +282,18 @@ struct MetricViewStats: View {
     let progressBar: ProgressBarData
     let exercise: Exercise
     let sets: [ExerciseSet]
+    @Binding var isChartExpanded: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 1. Target Metrics Section (always visible)
+            // 1. Target Metrics Section (always visible, includes chart toggle)
             TargetMetricsSection(data: targetMetrics)
 
-            // 2. Chart Section (always visible)
-            ExerciseChartView(exercise: exercise, sets: sets)
-                .padding(.top, 20)
+            // 2. Chart Content (only when expanded)
+            if isChartExpanded {
+                ChartContentView(exercise: exercise, sets: sets)
+                    .padding(.top, 8)
+            }
 
             // 3. Only show remaining sections if sets added today
             if let setData = thisSet {
@@ -313,6 +323,9 @@ struct ExerciseMetricsView: View {
     let sets: [ExerciseSet]
     @Binding var selectedMode: MetricMode
     @Binding var addSetConfig: AddSetConfig?
+
+    // Chart expansion state
+    @State private var isChartExpanded: Bool = false
 
     // MARK: - Computed Properties
 
@@ -401,10 +414,14 @@ struct ExerciseMetricsView: View {
         return max(0, remaining) // Don't show negative
     }
 
-    // Formatted progress text: "XX% of last complete"
+    // Formatted progress text: mode-aware
     private var formattedProgressText: String {
         let percentage = progressPercentage
-        return "\(percentage)% of last complete"
+        if selectedMode == .best {
+            return "\(percentage)% of best ever total volume"
+        } else {
+            return "\(percentage)% of last session's total volume"
+        }
     }
 
     private func formatLastSessionSummary() -> (text: String, date: Date?) {
@@ -534,6 +551,7 @@ struct ExerciseMetricsView: View {
 
     private func buildTargetMetricsData() -> TargetMetricsData {
         let summary = formatLastSessionSummary()
+        let chartToggle = ChartToggleButton(isExpanded: $isChartExpanded)
 
         if selectedMode == .best {
             if let best = bestDayMetrics {
@@ -542,7 +560,8 @@ struct ExerciseMetricsView: View {
                     date: summary.date,
                     weight: best.maxWeight,
                     reps: best.repsAtMaxWeight,
-                    totalVolume: best.totalVolume
+                    totalVolume: best.totalVolume,
+                    chartToggle: chartToggle
                 )
             } else {
                 return TargetMetricsData(
@@ -550,7 +569,8 @@ struct ExerciseMetricsView: View {
                     date: nil,
                     weight: 0,
                     reps: 0,
-                    totalVolume: 0
+                    totalVolume: 0,
+                    chartToggle: chartToggle
                 )
             }
         } else {
@@ -560,7 +580,8 @@ struct ExerciseMetricsView: View {
                     date: summary.date,
                     weight: lastInfo.maxWeight,
                     reps: lastInfo.maxWeightReps,
-                    totalVolume: lastInfo.volume
+                    totalVolume: lastInfo.volume,
+                    chartToggle: chartToggle
                 )
             } else {
                 return TargetMetricsData(
@@ -568,7 +589,8 @@ struct ExerciseMetricsView: View {
                     date: nil,
                     weight: 0,
                     reps: 0,
-                    totalVolume: 0
+                    totalVolume: 0,
+                    chartToggle: chartToggle
                 )
             }
         }
@@ -615,7 +637,8 @@ struct ExerciseMetricsView: View {
                 thisSet: buildThisSetData(),
                 progressBar: buildProgressBarData(),
                 exercise: exercise,
-                sets: sets
+                sets: sets,
+                isChartExpanded: $isChartExpanded
             )
         }
     }

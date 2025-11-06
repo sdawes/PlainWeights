@@ -326,7 +326,7 @@ struct ExerciseMetricsView: View {
     @Binding var addSetConfig: AddSetConfig?
 
     // Chart expansion state
-    @State private var isChartExpanded: Bool = false
+    @State private var isChartExpanded: Bool = true
 
     // MARK: - Computed Properties
 

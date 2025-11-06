@@ -107,14 +107,16 @@ struct ChartContentView: View {
                     // Weight line (normalized to 0-1 scale)
                     LineMark(
                         x: .value("Date", dataPoint.date),
-                        y: .value("Weight", dataPoint.weight / weightMax)
+                        y: .value("Weight", dataPoint.weight / weightMax),
+                        series: .value("Type", "Weight")
                     )
                     .foregroundStyle(.blue)
 
                     // Reps line (normalized to 0-1 scale)
                     LineMark(
                         x: .value("Date", dataPoint.date),
-                        y: .value("Reps", Double(dataPoint.reps) / repsMax)
+                        y: .value("Reps", Double(dataPoint.reps) / repsMax),
+                        series: .value("Type", "Reps")
                     )
                     .foregroundStyle(.green)
                 }

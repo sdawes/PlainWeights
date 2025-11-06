@@ -257,24 +257,25 @@ struct MetricViewStats: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 1. Target Metrics Section
+            // 1. Target Metrics Section (always visible)
             TargetMetricsSection(data: targetMetrics)
-                .padding(.bottom, 20)
 
-            // 2. Horizontal Divider Line (standalone)
-            Rectangle()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(height: 1)
-                .padding(.bottom, 20)
-
-            // 3. This Set Section (conditional)
+            // 2. Only show remaining sections if sets added today
             if let setData = thisSet {
+                // Divider
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.3))
+                    .frame(height: 1)
+                    .padding(.top, 20)
+                    .padding(.bottom, 20)
+
+                // This Set Section
                 ThisSetSection(data: setData)
                     .padding(.bottom, 20)
-            }
 
-            // 4. Progress Bar Section
-            ProgressBarSection(data: progressBar)
+                // Progress Bar Section
+                ProgressBarSection(data: progressBar)
+            }
         }
         .padding(.horizontal, 8)
     }

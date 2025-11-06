@@ -142,8 +142,15 @@ struct ChartContentView: View {
                                 y: .value("Reps", dataPoint.reps)
                             )
                             .foregroundStyle(.green)
-                            .annotation(position: .trailing) {
-                                if dataPoint.date == chartData.last?.date {
+
+                            // Invisible PointMark for annotation (only on last point)
+                            if dataPoint.date == chartData.last?.date {
+                                PointMark(
+                                    x: .value("Date", dataPoint.date),
+                                    y: .value("Reps", dataPoint.reps)
+                                )
+                                .opacity(0)
+                                .annotation(position: .trailing) {
                                     Text("Reps")
                                         .font(.system(size: 9))
                                         .foregroundStyle(.green)
@@ -192,13 +199,6 @@ struct ChartContentView: View {
                                 series: .value("Type", "Weight")
                             )
                             .foregroundStyle(.blue)
-                            .annotation(position: .trailing) {
-                                if dataPoint.date == chartData.last?.date {
-                                    Text("Weight")
-                                        .font(.system(size: 9))
-                                        .foregroundStyle(.blue)
-                                }
-                            }
 
                             // Reps line (dotted green)
                             LineMark(
@@ -208,8 +208,26 @@ struct ChartContentView: View {
                             )
                             .foregroundStyle(.green)
                             .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
-                            .annotation(position: .trailing) {
-                                if dataPoint.date == chartData.last?.date {
+
+                            // Invisible PointMarks for annotations (only on last point)
+                            if dataPoint.date == chartData.last?.date {
+                                PointMark(
+                                    x: .value("Date", dataPoint.date),
+                                    y: .value("Weight", dataPoint.weight / weightMax)
+                                )
+                                .opacity(0)
+                                .annotation(position: .trailing) {
+                                    Text("Weight")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(.blue)
+                                }
+
+                                PointMark(
+                                    x: .value("Date", dataPoint.date),
+                                    y: .value("Reps", Double(dataPoint.reps) / repsMax)
+                                )
+                                .opacity(0)
+                                .annotation(position: .trailing) {
                                     Text("Reps")
                                         .font(.system(size: 9))
                                         .foregroundStyle(.green)

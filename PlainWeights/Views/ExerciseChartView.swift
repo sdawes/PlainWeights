@@ -33,19 +33,14 @@ struct ChartToggleButton: View {
         Button(action: {
             isExpanded.toggle()
         }) {
-            HStack(spacing: 6) {
+            HStack(spacing: 4) {
                 Text(isExpanded ? "Hide Chart" : "Show Chart")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.blue)
 
-                Circle()
-                    .fill(.secondary.opacity(0.2))
-                    .frame(width: 18, height: 18)
-                    .overlay {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 8, weight: .medium))
-                            .foregroundStyle(.white)
-                    }
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.blue)
             }
             .id(isExpanded)
         }

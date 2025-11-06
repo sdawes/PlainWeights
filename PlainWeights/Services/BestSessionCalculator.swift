@@ -89,18 +89,19 @@ enum BestSessionCalculator {
 
     // MARK: - Best Day Metrics
 
-    /// Calculate best day metrics - finds the best performance day at max weight
+    /// Calculate best day metrics - finds the best individual set performance at max weight
     ///
     /// Logic:
     /// - Priority 1: Find the maximum weight ever lifted
-    /// - Priority 2: Among all days where that max weight was lifted, find the day with highest total volume
-    /// - Returns all metrics from that single best day (max weight, max reps at max weight, total volume)
+    /// - Priority 2: Among ALL sets at that max weight, find the one with highest reps
+    /// - Priority 3: Use that set's date to calculate the day's total volume (for display)
+    /// - Includes today's sets (so first set can beat historic best immediately)
     /// - For bodyweight exercises, finds the day with highest total reps
     ///
-    /// Performance: O(n) for filtering + O(d) for day grouping where d = number of unique days
+    /// Performance: O(n) for filtering + O(n) for finding best set
     ///
-    /// - Parameter sets: Array of exercise sets to analyze
-    /// - Returns: BestDayMetrics with max weight, reps, and total day volume, or nil if no working sets
+    /// - Parameter sets: Array of exercise sets to analyze (including today's sets)
+    /// - Returns: BestDayMetrics with max weight, best reps at that weight, and total day volume, or nil if no working sets
     static func calculateBestDayMetrics(from sets: [ExerciseSet]) -> BestDayMetrics? {
         // Filter out warm-up sets
         let workingSets = sets.filter { !$0.isWarmUp }
@@ -143,44 +144,31 @@ enum BestSessionCalculator {
                 isBodyweight: true
             )
         } else {
-            // For weighted exercises: find max weight, then best volume day at that weight
+            // For weighted exercises: find max weight, then set with highest reps at that weight
             let maxWeight = workingSets.map { $0.weight }.max() ?? 0
 
             // Get all sets with max weight
             let maxWeightSets = workingSets.filter { $0.weight == maxWeight }
 
-            // Get all unique days where max weight was lifted
-            let daysWithMaxWeight = Set(maxWeightSets.map { calendar.startOfDay(for: $0.timestamp) })
-
-            // For each day with max weight, calculate total volume and max reps at max weight
-            var dayMetrics: [Date: (volume: Double, maxReps: Int)] = [:]
-
-            for dayStart in daysWithMaxWeight {
-                // Get all working sets from this day
-                let setsFromDay = workingSets.filter { calendar.startOfDay(for: $0.timestamp) == dayStart }
-
-                // Calculate total volume for the entire day
-                let totalVolume = setsFromDay.reduce(0.0) { sum, set in
-                    sum + (set.weight * Double(set.reps))
-                }
-
-                // Find the highest reps at max weight on this day
-                let maxWeightSetsFromDay = setsFromDay.filter { $0.weight == maxWeight }
-                let maxRepsAtMaxWeight = maxWeightSetsFromDay.map { $0.reps }.max() ?? 0
-
-                dayMetrics[dayStart] = (volume: totalVolume, maxReps: maxRepsAtMaxWeight)
-            }
-
-            // Find the day with the highest total volume
-            guard let bestDay = dayMetrics.max(by: { $0.value.volume < $1.value.volume }) else {
+            // Among all sets at max weight, find the one with highest reps
+            guard let bestSet = maxWeightSets.max(by: { $0.reps < $1.reps }) else {
                 return nil
             }
 
+            // Use that set's date to calculate the total volume for that day
+            let bestDate = calendar.startOfDay(for: bestSet.timestamp)
+            let setsFromBestDay = workingSets.filter {
+                calendar.startOfDay(for: $0.timestamp) == bestDate
+            }
+            let totalVolume = setsFromBestDay.reduce(0.0) { sum, set in
+                sum + (set.weight * Double(set.reps))
+            }
+
             return BestDayMetrics(
-                maxWeight: maxWeight,
-                repsAtMaxWeight: bestDay.value.maxReps,
-                totalVolume: bestDay.value.volume,
-                date: bestDay.key,
+                maxWeight: bestSet.weight,
+                repsAtMaxWeight: bestSet.reps,
+                totalVolume: totalVolume,
+                date: bestSet.timestamp,
                 isBodyweight: false
             )
         }

@@ -89,19 +89,22 @@ enum BestSessionCalculator {
 
     // MARK: - Best Day Metrics
 
-    /// Calculate best day metrics - finds the best individual set performance at max weight
+    /// Calculate best day metrics - finds the best individual set performance
     ///
     /// Logic:
-    /// - Priority 1: Find the maximum weight ever lifted
-    /// - Priority 2: Among ALL sets at that max weight, find the one with highest reps
-    /// - Priority 3: Use that set's date to calculate the day's total volume (for display)
+    /// - Weighted exercises:
+    ///   - Priority 1: Find the maximum weight ever lifted
+    ///   - Priority 2: Among ALL sets at that max weight, find the one with highest reps
+    ///   - Priority 3: Use that set's date to calculate the day's total volume (for display)
+    /// - Bodyweight exercises (all sets have 0 weight):
+    ///   - Find the single set with highest reps
+    ///   - Volume is always 0 (0 kg × reps = 0 kg)
     /// - Includes today's sets (so first set can beat historic best immediately)
-    /// - For bodyweight exercises, finds the day with highest total reps
     ///
     /// Performance: O(n) for filtering + O(n) for finding best set
     ///
     /// - Parameter sets: Array of exercise sets to analyze (including today's sets)
-    /// - Returns: BestDayMetrics with max weight, best reps at that weight, and total day volume, or nil if no working sets
+    /// - Returns: BestDayMetrics with max weight, best reps, and total volume (0 for bodyweight), or nil if no working sets
     static func calculateBestDayMetrics(from sets: [ExerciseSet]) -> BestDayMetrics? {
         // Filter out warm-up sets
         let workingSets = sets.filter { !$0.isWarmUp }
@@ -113,34 +116,16 @@ enum BestSessionCalculator {
         let calendar = Calendar.current
 
         if isBodyweightExercise {
-            // For bodyweight: find the day with highest total reps
-            var dayMetrics: [Date: (totalReps: Int, maxReps: Int)] = [:]
-
-            for set in workingSets {
-                let dayStart = calendar.startOfDay(for: set.timestamp)
-
-                // Get all sets from this day
-                let setsFromDay = workingSets.filter { calendar.startOfDay(for: $0.timestamp) == dayStart }
-
-                // Calculate total reps for the day
-                let totalReps = setsFromDay.reduce(0) { $0 + $1.reps }
-
-                // Find max reps from any set on this day
-                let maxReps = setsFromDay.map { $0.reps }.max() ?? 0
-
-                dayMetrics[dayStart] = (totalReps: totalReps, maxReps: maxReps)
-            }
-
-            // Find the day with highest total reps
-            guard let bestDay = dayMetrics.max(by: { $0.value.totalReps < $1.value.totalReps }) else {
+            // For bodyweight: find the single set with highest reps (matches weighted logic)
+            guard let bestSet = workingSets.max(by: { $0.reps < $1.reps }) else {
                 return nil
             }
 
             return BestDayMetrics(
                 maxWeight: 0,
-                repsAtMaxWeight: bestDay.value.maxReps,
-                totalVolume: Double(bestDay.value.totalReps),
-                date: bestDay.key,
+                repsAtMaxWeight: bestSet.reps,
+                totalVolume: 0,  // Always 0 for bodyweight (0 kg × reps = 0 kg)
+                date: bestSet.timestamp,
                 isBodyweight: true
             )
         } else {

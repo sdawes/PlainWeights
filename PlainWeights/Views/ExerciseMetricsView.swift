@@ -281,7 +281,11 @@ struct MetricViewStats: View {
             // 1. Target Metrics Section (always visible)
             TargetMetricsSection(data: targetMetrics)
 
-            // 2. Only show remaining sections if sets added today
+            // 2. Chart Section (always visible)
+            ExerciseChartView(exercise: exercise, sets: sets)
+                .padding(.top, 20)
+
+            // 3. Only show remaining sections if sets added today
             if let setData = thisSet {
                 // Divider
                 Rectangle()
@@ -296,10 +300,6 @@ struct MetricViewStats: View {
 
                 // Progress Bar Section
                 ProgressBarSection(data: progressBar)
-                    .padding(.bottom, 20)
-
-                // Chart Section
-                ExerciseChartView(exercise: exercise, sets: sets)
             }
         }
         .padding(.horizontal, 8)

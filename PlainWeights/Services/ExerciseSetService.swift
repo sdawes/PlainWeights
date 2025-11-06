@@ -51,6 +51,9 @@ enum ExerciseSetService {
 
         context.insert(set)
         try context.save()
+
+        // Detect and mark PB after adding the set
+        try detectAndMarkPB(for: set, exercise: exercise, context: context)
     }
 
     // MARK: - Repeat Set
@@ -103,6 +106,11 @@ enum ExerciseSetService {
     ) throws {
         set.isWarmUp.toggle()
         try context.save()
+
+        // Recalculate PBs since warm-up status affects eligibility
+        if let exercise = set.exercise {
+            try detectAndMarkPB(for: set, exercise: exercise, context: context)
+        }
     }
 
     // MARK: - Toggle Drop Set
@@ -116,6 +124,69 @@ enum ExerciseSetService {
         context: ModelContext
     ) throws {
         set.isDropSet.toggle()
+        try context.save()
+    }
+
+    // MARK: - PB Detection
+
+    /// Detect and mark personal best (PB) for a new set
+    ///
+    /// Logic:
+    /// 1. Weight takes precedence (highest weight wins)
+    /// 2. If multiple sets at same max weight, highest reps wins
+    /// 3. If same weight AND reps, earliest timestamp keeps PB
+    /// 4. Warm-up sets are excluded from PB consideration
+    ///
+    /// - Parameters:
+    ///   - newSet: The newly added set to evaluate
+    ///   - exercise: Parent exercise
+    ///   - context: SwiftData model context
+    static func detectAndMarkPB(
+        for newSet: ExerciseSet,
+        exercise: Exercise,
+        context: ModelContext
+    ) throws {
+        // Only working sets can be PBs (exclude warm-ups)
+        guard !newSet.isWarmUp else { return }
+
+        // Fetch all working sets for this exercise
+        let exerciseID = exercise.persistentModelID
+        let descriptor = FetchDescriptor<ExerciseSet>(
+            predicate: #Predicate<ExerciseSet> { set in
+                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp
+            },
+            sortBy: [SortDescriptor(\.timestamp)]
+        )
+
+        let allWorkingSets = try context.fetch(descriptor)
+
+        // Find max weight
+        guard let maxWeight = allWorkingSets.map({ $0.weight }).max() else {
+            // No sets exist, make this one the PB
+            newSet.isPB = true
+            try context.save()
+            return
+        }
+
+        // Get all sets at max weight
+        let setsAtMaxWeight = allWorkingSets.filter { $0.weight == maxWeight }
+
+        // Find max reps at max weight
+        guard let maxReps = setsAtMaxWeight.map({ $0.reps }).max() else { return }
+
+        // Get all sets at max weight and max reps
+        let bestSets = setsAtMaxWeight.filter { $0.reps == maxReps }
+
+        // Earliest timestamp wins (first achiever keeps PB)
+        guard let currentPB = bestSets.min(by: { $0.timestamp < $1.timestamp }) else { return }
+
+        // Clear all PB flags first
+        for set in allWorkingSets {
+            set.isPB = false
+        }
+
+        // Mark the winner
+        currentPB.isPB = true
         try context.save()
     }
 

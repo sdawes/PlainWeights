@@ -102,9 +102,27 @@ struct ExerciseDetailView: View {
                             }
 
                             if set.isDropSet {
-                                Image(systemName: "chevron.down.circle.fill")
-                                    .font(.caption)
-                                    .foregroundStyle(.teal)
+                                Circle()
+                                    .fill(.teal)
+                                    .frame(width: 20, height: 20)
+                                    .overlay {
+                                        Image(systemName: "chevron.down")
+                                            .font(.system(size: 10))
+                                            .foregroundStyle(.white)
+                                    }
+                            }
+
+                            if set.isPB {
+                                Circle()
+                                    .fill(.purple)
+                                    .frame(width: 20, height: 20)
+                                    .overlay {
+                                        Text("PB")
+                                            .font(.system(size: 9))
+                                            .italic()
+                                            .fontWeight(.bold)
+                                            .foregroundStyle(.white)
+                                    }
                             }
 
                             Text(Formatters.formatTimeHM(set.timestamp))
@@ -148,9 +166,27 @@ struct ExerciseDetailView: View {
                                 }
 
                                 if set.isDropSet {
-                                    Image(systemName: "chevron.down.circle.fill")
-                                        .font(.caption)
-                                        .foregroundStyle(.teal)
+                                    Circle()
+                                        .fill(.teal)
+                                        .frame(width: 20, height: 20)
+                                        .overlay {
+                                            Image(systemName: "chevron.down")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(.white)
+                                        }
+                                }
+
+                                if set.isPB {
+                                    Circle()
+                                        .fill(.purple)
+                                        .frame(width: 20, height: 20)
+                                        .overlay {
+                                            Text("PB")
+                                                .font(.system(size: 9))
+                                                .italic()
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(.white)
+                                        }
                                 }
 
                                 Text(Formatters.formatTimeHM(set.timestamp))

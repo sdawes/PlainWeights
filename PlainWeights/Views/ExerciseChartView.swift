@@ -14,6 +14,7 @@ struct WeightDataPoint: Identifiable {
     let id = UUID()
     let date: Date
     let weight: Double
+    let reps: Int
 }
 
 // MARK: - Chart Toggle Button
@@ -45,7 +46,7 @@ struct ChartContentView: View {
     let exercise: Exercise
     let sets: [ExerciseSet]
 
-    // Compute daily max weights from sets
+    // Compute daily max weights and reps from sets
     private var chartData: [WeightDataPoint] {
         let calendar = Calendar.current
 
@@ -57,16 +58,25 @@ struct ChartContentView: View {
             calendar.startOfDay(for: set.timestamp)
         }
 
-        // For each day, find the max weight
+        // For each day, find the set with max weight and get its reps
         let dataPoints = grouped.compactMap { (date, daySets) -> WeightDataPoint? in
-            guard let maxWeight = daySets.map({ $0.weight }).max() else {
+            guard let maxWeightSet = daySets.max(by: { $0.weight < $1.weight }) else {
                 return nil
             }
-            return WeightDataPoint(date: date, weight: maxWeight)
+            return WeightDataPoint(date: date, weight: maxWeightSet.weight, reps: maxWeightSet.reps)
         }
 
         // Sort by date
         return dataPoints.sorted { $0.date < $1.date }
+    }
+
+    // Normalization values for dual y-axis
+    private var weightMax: Double {
+        chartData.map { $0.weight }.max() ?? 1
+    }
+
+    private var repsMax: Double {
+        Double(chartData.map { $0.reps }.max() ?? 1)
     }
 
     var body: some View {
@@ -92,12 +102,45 @@ struct ChartContentView: View {
                             .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                     )
             } else {
-                // Line chart
+                // Dual y-axis line chart
                 Chart(chartData) { dataPoint in
+                    // Weight line (normalized to 0-1 scale)
                     LineMark(
                         x: .value("Date", dataPoint.date),
-                        y: .value("Weight", dataPoint.weight)
+                        y: .value("Weight", dataPoint.weight / weightMax)
                     )
+                    .foregroundStyle(.blue)
+
+                    // Reps line (normalized to 0-1 scale)
+                    LineMark(
+                        x: .value("Date", dataPoint.date),
+                        y: .value("Reps", Double(dataPoint.reps) / repsMax)
+                    )
+                    .foregroundStyle(.green)
+                }
+                .chartYAxis {
+                    let stride = Array(stride(from: 0.0, through: 1.0, by: 0.25))
+
+                    // Left axis - Weight (kg)
+                    AxisMarks(position: .leading, values: stride) { value in
+                        AxisValueLabel {
+                            if let normalized = value.as(Double.self) {
+                                Text("\(Int(normalized * weightMax))")
+                                    .font(.caption2)
+                            }
+                        }
+                        AxisGridLine()
+                    }
+
+                    // Right axis - Reps
+                    AxisMarks(position: .trailing, values: stride) { value in
+                        AxisValueLabel {
+                            if let normalized = value.as(Double.self) {
+                                Text("\(Int(normalized * repsMax))")
+                                    .font(.caption2)
+                            }
+                        }
+                    }
                 }
                 .frame(height: 200)
             }

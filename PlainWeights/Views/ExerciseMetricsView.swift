@@ -185,7 +185,7 @@ struct ThisSetSection: View {
                 }
 
                 // Set values
-                HStack(alignment: .lastTextBaseline, spacing: 6) {
+                HStack(alignment: .center, spacing: 6) {
                     Text("\(data.weight) kg")
                         .font(.title3)
                         .fontWeight(.bold)
@@ -198,10 +198,10 @@ struct ThisSetSection: View {
                     if data.isDropSet {
                         Circle()
                             .fill(.teal)
-                            .frame(width: 20, height: 20)
+                            .frame(width: 16, height: 16)
                             .overlay {
                                 Image(systemName: "chevron.down")
-                                    .font(.system(size: 10))
+                                    .font(.system(size: 8))
                                     .foregroundStyle(.white)
                             }
                     }
@@ -209,10 +209,10 @@ struct ThisSetSection: View {
                     if data.isPB {
                         Circle()
                             .fill(.purple)
-                            .frame(width: 20, height: 20)
+                            .frame(width: 16, height: 16)
                             .overlay {
                                 Text("PB")
-                                    .font(.system(size: 9))
+                                    .font(.system(size: 7))
                                     .italic()
                                     .fontWeight(.bold)
                                     .foregroundStyle(.white)

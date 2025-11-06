@@ -164,7 +164,7 @@ struct TargetMetricsSection: View {
 
                 data.chartToggle
             }
-            .padding(.top, 20)
+            .padding(.top, 8)
         }
     }
 }

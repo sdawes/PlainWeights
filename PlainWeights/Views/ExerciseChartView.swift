@@ -130,6 +130,22 @@ struct ChartContentView: View {
                         .foregroundStyle(.green)
                     } else {
                         // Weight and reps: show both lines
+
+                        // Subtle gradient under weight line
+                        AreaMark(
+                            x: .value("Date", dataPoint.date),
+                            y: .value("Weight", dataPoint.weight / weightMax),
+                            series: .value("Type", "Weight")
+                        )
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.blue.opacity(0.15), .blue.opacity(0.02)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+
+                        // Weight line (solid blue)
                         LineMark(
                             x: .value("Date", dataPoint.date),
                             y: .value("Weight", dataPoint.weight / weightMax),
@@ -137,12 +153,14 @@ struct ChartContentView: View {
                         )
                         .foregroundStyle(.blue)
 
+                        // Reps line (dotted green)
                         LineMark(
                             x: .value("Date", dataPoint.date),
                             y: .value("Reps", Double(dataPoint.reps) / repsMax),
                             series: .value("Type", "Reps")
                         )
                         .foregroundStyle(.green)
+                        .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
                     }
                 }
                 .chartXAxis {

@@ -93,6 +93,11 @@ struct ChartContentView: View {
         return dataPoints.sorted { $0.date < $1.date }
     }
 
+    // Check if we have only a single data point
+    private var hasSingleDataPoint: Bool {
+        chartData.count == 1
+    }
+
     // Normalization values for dual y-axis
     private var weightMax: Double {
         chartData.map { $0.weight }.max() ?? 1
@@ -122,66 +127,74 @@ struct ChartContentView: View {
                 // Adaptive chart based on exercise type
                 Chart(chartData) { dataPoint in
                     if exerciseChartType == .repsOnly {
-                        // Reps-only: show green line only (solid, no gradient)
-                        LineMark(
-                            x: .value("Date", dataPoint.date),
-                            y: .value("Reps", dataPoint.reps)
-                        )
-                        .foregroundStyle(.green)
-
-                        // Add PointMark for single data points
-                        PointMark(
-                            x: .value("Date", dataPoint.date),
-                            y: .value("Reps", dataPoint.reps)
-                        )
-                        .foregroundStyle(.green)
-                    } else {
-                        // Weight and reps: show both lines
-
-                        // Subtle gradient under weight line
-                        AreaMark(
-                            x: .value("Date", dataPoint.date),
-                            y: .value("Weight", dataPoint.weight / weightMax),
-                            series: .value("Type", "Weight")
-                        )
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.blue.opacity(0.15), .blue.opacity(0.02)],
-                                startPoint: .top,
-                                endPoint: .bottom
+                        if hasSingleDataPoint {
+                            // Single data point: show small green dot only
+                            PointMark(
+                                x: .value("Date", dataPoint.date),
+                                y: .value("Reps", dataPoint.reps)
                             )
-                        )
+                            .foregroundStyle(.green)
+                            .symbolSize(30)  // Small dot
+                        } else {
+                            // Multiple points: show green line only (solid, no gradient)
+                            LineMark(
+                                x: .value("Date", dataPoint.date),
+                                y: .value("Reps", dataPoint.reps)
+                            )
+                            .foregroundStyle(.green)
+                        }
+                    } else {
+                        // Weight and reps: show both series
+                        if hasSingleDataPoint {
+                            // Single data point: show small blue dot for weight
+                            PointMark(
+                                x: .value("Date", dataPoint.date),
+                                y: .value("Weight", dataPoint.weight / weightMax)
+                            )
+                            .foregroundStyle(.blue)
+                            .symbolSize(30)  // Small dot
 
-                        // Weight line (solid blue)
-                        LineMark(
-                            x: .value("Date", dataPoint.date),
-                            y: .value("Weight", dataPoint.weight / weightMax),
-                            series: .value("Type", "Weight")
-                        )
-                        .foregroundStyle(.blue)
+                            // Single data point: show small green dot for reps
+                            PointMark(
+                                x: .value("Date", dataPoint.date),
+                                y: .value("Reps", Double(dataPoint.reps) / repsMax)
+                            )
+                            .foregroundStyle(.green)
+                            .symbolSize(30)  // Small dot
+                        } else {
+                            // Multiple points: show lines with gradient
 
-                        // Weight points (for single data points)
-                        PointMark(
-                            x: .value("Date", dataPoint.date),
-                            y: .value("Weight", dataPoint.weight / weightMax)
-                        )
-                        .foregroundStyle(.blue)
+                            // Subtle gradient under weight line
+                            AreaMark(
+                                x: .value("Date", dataPoint.date),
+                                y: .value("Weight", dataPoint.weight / weightMax),
+                                series: .value("Type", "Weight")
+                            )
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.blue.opacity(0.15), .blue.opacity(0.02)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
 
-                        // Reps line (dotted green)
-                        LineMark(
-                            x: .value("Date", dataPoint.date),
-                            y: .value("Reps", Double(dataPoint.reps) / repsMax),
-                            series: .value("Type", "Reps")
-                        )
-                        .foregroundStyle(.green)
-                        .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                            // Weight line (solid blue)
+                            LineMark(
+                                x: .value("Date", dataPoint.date),
+                                y: .value("Weight", dataPoint.weight / weightMax),
+                                series: .value("Type", "Weight")
+                            )
+                            .foregroundStyle(.blue)
 
-                        // Reps points (for single data points)
-                        PointMark(
-                            x: .value("Date", dataPoint.date),
-                            y: .value("Reps", Double(dataPoint.reps) / repsMax)
-                        )
-                        .foregroundStyle(.green)
+                            // Reps line (dotted green)
+                            LineMark(
+                                x: .value("Date", dataPoint.date),
+                                y: .value("Reps", Double(dataPoint.reps) / repsMax),
+                                series: .value("Type", "Reps")
+                            )
+                            .foregroundStyle(.green)
+                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                        }
                     }
                 }
                 .chartXAxis {

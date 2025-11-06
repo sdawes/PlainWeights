@@ -106,6 +106,7 @@ struct ThisSetData {
     let weight: String
     let reps: Int
     let isDropSet: Bool
+    let isPB: Bool
     let comparisonLabel: String
     let weightProgress: (text: String, direction: ProgressTracker.PRDirection)?
     let repsProgress: (text: String, direction: ProgressTracker.PRDirection)?
@@ -195,9 +196,27 @@ struct ThisSetSection: View {
                         .foregroundStyle(.secondary)
 
                     if data.isDropSet {
-                        Image(systemName: "chevron.down.circle.fill")
-                            .font(.caption)
-                            .foregroundStyle(.teal)
+                        Circle()
+                            .fill(.teal)
+                            .frame(width: 20, height: 20)
+                            .overlay {
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.white)
+                            }
+                    }
+
+                    if data.isPB {
+                        Circle()
+                            .fill(.purple)
+                            .frame(width: 20, height: 20)
+                            .overlay {
+                                Text("PB")
+                                    .font(.system(size: 9))
+                                    .italic()
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                            }
                     }
                 }
             }
@@ -406,7 +425,7 @@ struct ExerciseMetricsView: View {
         }
     }
 
-    private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool)? {
+    private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool, isPB: Bool)? {
         // Get the most recent working set from today (skip warm-ups)
         guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
             return nil
@@ -415,7 +434,7 @@ struct ExerciseMetricsView: View {
         let weight = Formatters.formatWeight(lastWorkingSet.weight)
         let reps = lastWorkingSet.reps
 
-        return (weight, reps, lastWorkingSet.isDropSet)
+        return (weight, reps, lastWorkingSet.isDropSet, lastWorkingSet.isPB)
     }
 
     private func formatThisSetProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
@@ -556,6 +575,7 @@ struct ExerciseMetricsView: View {
             weight: setInfo.weight,
             reps: setInfo.reps,
             isDropSet: setInfo.isDropSet,
+            isPB: setInfo.isPB,
             comparisonLabel: selectedMode == .best ? "vs best ever" : "vs last session",
             weightProgress: formatThisSetProgress(),
             repsProgress: formatThisSetRepsProgress()

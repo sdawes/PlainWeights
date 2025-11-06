@@ -88,11 +88,17 @@ struct ChartContentView: View {
                 }
                 return WeightDataPoint(date: date, weight: 0, reps: maxRepsSet.reps)
             } else {
-                // For weight exercises: find max weight per day and get its reps
-                guard let maxWeightSet = daySets.max(by: { $0.weight < $1.weight }) else {
+                // For weight exercises: find max weight, then highest reps at that weight
+                let maxWeight = daySets.map { $0.weight }.max() ?? 0
+
+                // Get all sets with that max weight
+                let maxWeightSets = daySets.filter { $0.weight == maxWeight }
+
+                // Among max weight sets, find the one with highest reps
+                guard let bestSet = maxWeightSets.max(by: { $0.reps < $1.reps }) else {
                     return nil
                 }
-                return WeightDataPoint(date: date, weight: maxWeightSet.weight, reps: maxWeightSet.reps)
+                return WeightDataPoint(date: date, weight: bestSet.weight, reps: bestSet.reps)
             }
         }
 

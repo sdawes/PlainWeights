@@ -122,10 +122,10 @@ struct ChartContentView: View {
                 // Adaptive chart based on exercise type
                 Chart(chartData) { dataPoint in
                     if exerciseChartType == .repsOnly {
-                        // Reps-only: show green line only
+                        // Reps-only: show green line only (solid, no gradient)
                         LineMark(
                             x: .value("Date", dataPoint.date),
-                            y: .value("Reps", Double(dataPoint.reps) / repsMax)
+                            y: .value("Reps", dataPoint.reps)
                         )
                         .foregroundStyle(.green)
                     } else {

@@ -142,20 +142,6 @@ struct ChartContentView: View {
                                 y: .value("Reps", dataPoint.reps)
                             )
                             .foregroundStyle(.green)
-
-                            // Invisible PointMark for annotation (only on last point)
-                            if dataPoint.date == chartData.last?.date {
-                                PointMark(
-                                    x: .value("Date", dataPoint.date),
-                                    y: .value("Reps", dataPoint.reps)
-                                )
-                                .opacity(0)
-                                .annotation(position: .trailing) {
-                                    Text("Reps")
-                                        .font(.system(size: 9))
-                                        .foregroundStyle(.green)
-                                }
-                            }
                         }
                     } else {
                         // Weight and reps: show both series
@@ -208,31 +194,6 @@ struct ChartContentView: View {
                             )
                             .foregroundStyle(.green)
                             .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
-
-                            // Invisible PointMarks for annotations (only on last point)
-                            if dataPoint.date == chartData.last?.date {
-                                PointMark(
-                                    x: .value("Date", dataPoint.date),
-                                    y: .value("Weight", dataPoint.weight / weightMax)
-                                )
-                                .opacity(0)
-                                .annotation(position: .trailing) {
-                                    Text("Weight")
-                                        .font(.system(size: 9))
-                                        .foregroundStyle(.blue)
-                                }
-
-                                PointMark(
-                                    x: .value("Date", dataPoint.date),
-                                    y: .value("Reps", Double(dataPoint.reps) / repsMax)
-                                )
-                                .opacity(0)
-                                .annotation(position: .trailing) {
-                                    Text("Reps")
-                                        .font(.system(size: 9))
-                                        .foregroundStyle(.green)
-                                }
-                            }
                         }
                     }
                 }
@@ -250,6 +211,34 @@ struct ChartContentView: View {
                 }
                 .chartYScale(domain: .automatic(includesZero: false))
                 .frame(height: 130)
+
+                // Custom legend below chart (only for multi-point charts)
+                if !hasSingleDataPoint {
+                    HStack(spacing: 12) {
+                        if exerciseChartType == .weightAndReps {
+                            // Weight legend item
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(.blue)
+                                    .frame(width: 8, height: 8)
+                                Text("Weight")
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+
+                        // Reps legend item
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(.green)
+                                .frame(width: 8, height: 8)
+                            Text("Reps")
+                                .font(.system(size: 9))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
             }
         }
     }

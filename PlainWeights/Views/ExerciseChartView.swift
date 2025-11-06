@@ -142,6 +142,13 @@ struct ChartContentView: View {
                                 y: .value("Reps", dataPoint.reps)
                             )
                             .foregroundStyle(.green)
+                            .annotation(position: .trailing) {
+                                if dataPoint.date == chartData.last?.date {
+                                    Text("Reps")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(.green)
+                                }
+                            }
                         }
                     } else {
                         // Weight and reps: show both series
@@ -185,6 +192,13 @@ struct ChartContentView: View {
                                 series: .value("Type", "Weight")
                             )
                             .foregroundStyle(.blue)
+                            .annotation(position: .trailing) {
+                                if dataPoint.date == chartData.last?.date {
+                                    Text("Weight")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(.blue)
+                                }
+                            }
 
                             // Reps line (dotted green)
                             LineMark(
@@ -194,6 +208,13 @@ struct ChartContentView: View {
                             )
                             .foregroundStyle(.green)
                             .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                            .annotation(position: .trailing) {
+                                if dataPoint.date == chartData.last?.date {
+                                    Text("Reps")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(.green)
+                                }
+                            }
                         }
                     }
                 }

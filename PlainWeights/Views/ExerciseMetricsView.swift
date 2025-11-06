@@ -298,11 +298,11 @@ struct MetricViewStats: View {
 
             // 3. Only show remaining sections if sets added today
             if let setData = thisSet {
-                // Divider - aligns with chart top grid when chart is visible
+                // Divider
                 Rectangle()
                     .fill(Color.secondary.opacity(0.3))
                     .frame(height: 1)
-                    .padding(.top, isChartExpanded ? 0 : 20)
+                    .padding(.top, 20)
                     .padding(.bottom, 20)
 
                 // This Set Section

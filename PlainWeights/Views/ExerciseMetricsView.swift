@@ -192,7 +192,7 @@ struct ThisSetSection: View {
                         .foregroundStyle(.primary)
 
                     Text("× \(data.reps) reps")
-                        .font(.title3)
+                        .font(.callout)
                         .foregroundStyle(.secondary)
 
                     if data.isDropSet {

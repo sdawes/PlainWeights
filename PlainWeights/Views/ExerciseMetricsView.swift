@@ -38,7 +38,7 @@ struct HeroMetricView: View {
             }
 
             // Hero metric: Weight (large) × Reps (smaller, lighter)
-            HStack(alignment: .lastTextBaseline, spacing: 4) {
+            HStack(alignment: .center, spacing: 4) {
                 Text("\(Formatters.formatWeight(weight)) kg")
                     .font(.largeTitle)
                     .fontWeight(.bold)

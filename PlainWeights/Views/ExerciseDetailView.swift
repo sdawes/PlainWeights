@@ -87,7 +87,7 @@ struct ExerciseDetailView: View {
             if !todaySets.isEmpty {
                 Section {
                     ForEach(todaySets, id: \.persistentModelID) { set in
-                        HStack(alignment: .bottom) {
+                        HStack(alignment: .center) {
                             Text(ExerciseSetFormatters.formatSet(set))
                                 .monospacedDigit()
                                 .foregroundStyle(set.isWarmUp ? .secondary : .primary)
@@ -151,7 +151,7 @@ struct ExerciseDetailView: View {
                 ForEach(historicDayGroups, id: \.date) { dayGroup in
                     Section {
                         ForEach(dayGroup.sets, id: \.persistentModelID) { set in
-                            HStack(alignment: .bottom) {
+                            HStack(alignment: .center) {
                                 Text(ExerciseSetFormatters.formatSet(set))
                                     .monospacedDigit()
                                     .foregroundStyle(set.isWarmUp ? .secondary : .primary)

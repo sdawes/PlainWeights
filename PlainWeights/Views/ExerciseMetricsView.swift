@@ -273,6 +273,8 @@ struct MetricViewStats: View {
     let targetMetrics: TargetMetricsData
     let thisSet: ThisSetData?
     let progressBar: ProgressBarData
+    let exercise: Exercise
+    let sets: [ExerciseSet]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -294,6 +296,10 @@ struct MetricViewStats: View {
 
                 // Progress Bar Section
                 ProgressBarSection(data: progressBar)
+                    .padding(.bottom, 20)
+
+                // Chart Section
+                ExerciseChartView(exercise: exercise, sets: sets)
             }
         }
         .padding(.horizontal, 8)
@@ -607,7 +613,9 @@ struct ExerciseMetricsView: View {
             MetricViewStats(
                 targetMetrics: buildTargetMetricsData(),
                 thisSet: buildThisSetData(),
-                progressBar: buildProgressBarData()
+                progressBar: buildProgressBarData(),
+                exercise: exercise,
+                sets: sets
             )
         }
     }

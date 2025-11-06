@@ -81,12 +81,6 @@ struct ChartContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("PERFORMANCE CHART")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-
             if chartData.isEmpty {
                 // Empty state
                 RoundedRectangle(cornerRadius: 8)
@@ -134,8 +128,18 @@ struct ChartContentView: View {
                     )
                     .foregroundStyle(.green)
                 }
-                .chartXAxis(.hidden)
-                .chartYAxis(.hidden)
+                .chartXAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
+                        AxisTick()
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
+                        AxisTick()
+                    }
+                }
                 .frame(height: 200)
             }
         }
@@ -148,7 +152,7 @@ struct ExerciseChartView: View {
     let exercise: Exercise
     let sets: [ExerciseSet]
 
-    @State private var isExpanded: Bool = false
+    @State private var isExpanded: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

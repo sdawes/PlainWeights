@@ -102,59 +102,13 @@ struct ChartContentView: View {
         Double(chartData.map { $0.reps }.max() ?? 1)
     }
 
-    // Calculate dynamic chart height based on data variance
-    private var dynamicChartHeight: CGFloat {
-        guard !chartData.isEmpty else { return 100 }
-
-        if exerciseChartType == .repsOnly {
-            // Calculate reps variance
-            let min = Double(chartData.map { $0.reps }.min() ?? 0)
-            let max = Double(chartData.map { $0.reps }.max() ?? 1)
-            let range = max - min
-
-            return calculateHeight(range: range, minValue: min)
-        } else {
-            // Calculate weight variance
-            let min = chartData.map { $0.weight }.min() ?? 0
-            let max = chartData.map { $0.weight }.max() ?? 1
-            let range = max - min
-
-            return calculateHeight(range: range, minValue: min)
-        }
-    }
-
-    private func calculateHeight(range: Double, minValue: Double) -> CGFloat {
-        // Prevent division by zero
-        guard minValue > 0 else { return 120 }
-
-        // Calculate percentage variance relative to starting value
-        let variancePercent = (range / minValue) * 100
-
-        // Height scale:
-        // - 0-5% variance: 100pt (compact - very little progression)
-        // - 5-15% variance: 140pt (moderate - typical progression)
-        // - 15-30% variance: 180pt (good - significant progression)
-        // - 30%+ variance: 220pt (expanded - major progression)
-
-        switch variancePercent {
-        case 0..<5:
-            return 100
-        case 5..<15:
-            return 140
-        case 15..<30:
-            return 180
-        default:
-            return 220
-        }
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if chartData.isEmpty {
                 // Empty state
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.secondary.opacity(0.1))
-                    .frame(height: 100)
+                    .frame(height: 130)
                     .overlay(
                         Text("No data to display")
                             .font(.callout)
@@ -203,7 +157,8 @@ struct ChartContentView: View {
                         AxisTick()
                     }
                 }
-                .frame(height: dynamicChartHeight)
+                .chartYScale(domain: .automatic(includesZero: false))
+                .frame(height: 130)
             }
         }
     }

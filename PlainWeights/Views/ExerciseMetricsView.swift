@@ -272,6 +272,17 @@ struct ProgressBarSection: View {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(data.barFillColor)
                         .frame(width: geometry.size.width * data.progressRatio, height: 4)
+
+                    // 100% goal line (only when over 100%)
+                    if data.progressRatio > 1.0 {
+                        Rectangle()
+                            .fill(Color.secondary.opacity(0.5))
+                            .frame(width: 2, height: 8)
+                            .position(
+                                x: geometry.size.width * 1.0,
+                                y: geometry.size.height / 2
+                            )
+                    }
                 }
             }
             .frame(height: 4)

@@ -107,6 +107,7 @@ struct ThisSetData {
     let weight: String
     let reps: Int
     let isDropSet: Bool
+    let isPauseAtTop: Bool
     let isPB: Bool
     let comparisonLabel: String
     let weightProgress: (text: String, direction: ProgressTracker.PRDirection)?
@@ -207,6 +208,17 @@ struct ThisSetSection: View {
                             .frame(width: 16, height: 16)
                             .overlay {
                                 Image(systemName: "chevron.down")
+                                    .font(.system(size: 8))
+                                    .foregroundStyle(.white)
+                            }
+                    }
+
+                    if data.isPauseAtTop {
+                        Circle()
+                            .fill(.pink)
+                            .frame(width: 16, height: 16)
+                            .overlay {
+                                Image(systemName: "pause.fill")
                                     .font(.system(size: 8))
                                     .foregroundStyle(.white)
                             }
@@ -447,7 +459,7 @@ struct ExerciseMetricsView: View {
         }
     }
 
-    private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool, isPB: Bool)? {
+    private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool, isPauseAtTop: Bool, isPB: Bool)? {
         // Get the most recent working set from today (skip warm-ups)
         guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
             return nil
@@ -456,7 +468,7 @@ struct ExerciseMetricsView: View {
         let weight = Formatters.formatWeight(lastWorkingSet.weight)
         let reps = lastWorkingSet.reps
 
-        return (weight, reps, lastWorkingSet.isDropSet, lastWorkingSet.isPB)
+        return (weight, reps, lastWorkingSet.isDropSet, lastWorkingSet.isPauseAtTop, lastWorkingSet.isPB)
     }
 
     private func formatThisSetProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
@@ -602,6 +614,7 @@ struct ExerciseMetricsView: View {
             weight: setInfo.weight,
             reps: setInfo.reps,
             isDropSet: setInfo.isDropSet,
+            isPauseAtTop: setInfo.isPauseAtTop,
             isPB: setInfo.isPB,
             comparisonLabel: selectedMode == .best ? "vs best ever" : "vs last session",
             weightProgress: formatThisSetProgress(),

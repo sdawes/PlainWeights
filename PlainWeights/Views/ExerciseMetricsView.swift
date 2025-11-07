@@ -154,17 +154,15 @@ struct TargetMetricsSection: View {
                     .foregroundStyle(.secondary)
             }
 
-            // Total volume with chart toggle
-            HStack {
-                Text("\(Formatters.formatVolume(data.totalVolume)) kg total")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            // Total volume
+            Text("\(Formatters.formatVolume(data.totalVolume)) kg total")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
 
-                Spacer()
-
-                data.chartToggle
-            }
-            .padding(.top, 8)
+            // Chart toggle button (on its own line)
+            data.chartToggle
+                .padding(.top, 12)
         }
     }
 }
@@ -326,7 +324,7 @@ struct ExerciseMetricsView: View {
     @Binding var addSetConfig: AddSetConfig?
 
     // Chart expansion state
-    @State private var isChartExpanded: Bool = true
+    @State private var isChartExpanded: Bool = false
 
     // MARK: - Computed Properties
 

@@ -34,7 +34,7 @@ struct ChartToggleButton: View {
             isExpanded.toggle()
         }) {
             HStack(spacing: 4) {
-                Text(isExpanded ? "Hide Chart" : "Show Chart")
+                Text("Chart")
                     .font(.caption)
                     .foregroundStyle(.blue)
 

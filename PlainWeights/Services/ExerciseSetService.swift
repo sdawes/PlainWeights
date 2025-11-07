@@ -28,6 +28,7 @@ enum ExerciseSetService {
         reps: Int,
         isWarmUp: Bool = false,
         isDropSet: Bool = false,
+        isPauseAtTop: Bool = false,
         to exercise: Exercise,
         context: ModelContext
     ) throws {
@@ -46,6 +47,7 @@ enum ExerciseSetService {
             reps: reps,
             isWarmUp: isWarmUp,
             isDropSet: isDropSet,
+            isPauseAtTop: isPauseAtTop,
             exercise: exercise
         )
 

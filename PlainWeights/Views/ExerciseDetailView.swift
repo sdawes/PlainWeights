@@ -112,6 +112,17 @@ struct ExerciseDetailView: View {
                                     }
                             }
 
+                            if set.isPauseAtTop {
+                                Circle()
+                                    .fill(.pink)
+                                    .frame(width: 20, height: 20)
+                                    .overlay {
+                                        Image(systemName: "pause.fill")
+                                            .font(.system(size: 10))
+                                            .foregroundStyle(.white)
+                                    }
+                            }
+
                             if set.isPB {
                                 Circle()
                                     .fill(.purple)
@@ -171,6 +182,17 @@ struct ExerciseDetailView: View {
                                         .frame(width: 20, height: 20)
                                         .overlay {
                                             Image(systemName: "chevron.down")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(.white)
+                                        }
+                                }
+
+                                if set.isPauseAtTop {
+                                    Circle()
+                                        .fill(.pink)
+                                        .frame(width: 20, height: 20)
+                                        .overlay {
+                                            Image(systemName: "pause.fill")
                                                 .font(.system(size: 10))
                                                 .foregroundStyle(.white)
                                         }

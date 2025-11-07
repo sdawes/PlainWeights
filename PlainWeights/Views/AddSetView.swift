@@ -17,6 +17,7 @@ struct AddSetView: View {
     @State private var repsText = ""
     @State private var isWarmUpSet = false
     @State private var isDropSet = false
+    @State private var isPauseAtTop = false
     @FocusState private var focusedField: Field?
 
     enum Field {
@@ -113,6 +114,18 @@ struct AddSetView: View {
                 }
                 .padding(.horizontal, 16)
 
+                // Pause at top toggle
+                HStack {
+                    Text("Pause at top")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Toggle("", isOn: $isPauseAtTop)
+                        .labelsHidden()
+                        .tint(isPauseAtTop ? .pink : .blue)
+                }
+                .padding(.horizontal, 16)
+
                 // Add Set button - matching ExerciseDetailView design
                 HStack {
                     Spacer()
@@ -173,6 +186,7 @@ struct AddSetView: View {
                 reps: reps,
                 isWarmUp: isWarmUpSet,
                 isDropSet: isDropSet,
+                isPauseAtTop: isPauseAtTop,
                 to: exercise,
                 context: context
             )

@@ -89,7 +89,7 @@ struct ProgressPillView: View {
 
 enum MetricMode: String, CaseIterable {
     case last = "Last Session"
-    case best = "Best Ever"
+    case best = "Last Best"
 }
 
 // MARK: - Data Structures for Section Components

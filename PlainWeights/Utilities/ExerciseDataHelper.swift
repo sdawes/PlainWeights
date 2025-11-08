@@ -19,6 +19,9 @@ enum ExerciseDataHelper {
         let maxWeight: Double
         let maxWeightReps: Int
         let totalSets: Int
+        let isDropSet: Bool         // Whether the max weight set was a drop set
+        let isPauseAtTop: Bool      // Whether the max weight set was a pause at top set
+        let isPB: Bool              // Whether the max weight set is marked as a PB
     }
 
     /// Complete session metrics for the Exercise Summary component
@@ -63,13 +66,19 @@ enum ExerciseDataHelper {
         let maxWeightReps = maxWeightSets.map { $0.reps }.max() ?? 0
         let totalSets = lastDaySets.count
 
+        // Find the actual best set to get its flags (matches BestSessionCalculator logic)
+        let bestSet = maxWeightSets.max(by: { $0.reps < $1.reps })
+
         return LastCompletedDayInfo(
             date: lastDate,
             sets: lastDaySets,
             volume: volume,
             maxWeight: maxWeight,
             maxWeightReps: maxWeightReps,
-            totalSets: totalSets
+            totalSets: totalSets,
+            isDropSet: bestSet?.isDropSet ?? false,
+            isPauseAtTop: bestSet?.isPauseAtTop ?? false,
+            isPB: bestSet?.isPB ?? false
         )
     }
 

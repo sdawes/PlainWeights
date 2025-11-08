@@ -27,6 +27,9 @@ enum BestSessionCalculator {
         let totalVolume: Double      // Total volume for that entire day
         let date: Date              // Date when this PR occurred
         let isBodyweight: Bool
+        let isDropSet: Bool         // Whether the best set was a drop set
+        let isPauseAtTop: Bool      // Whether the best set was a pause at top set
+        let isPB: Bool              // Whether the best set is marked as a PB
     }
 
     // MARK: - PR Calculation
@@ -126,7 +129,10 @@ enum BestSessionCalculator {
                 repsAtMaxWeight: bestSet.reps,
                 totalVolume: 0,  // Always 0 for bodyweight (0 kg × reps = 0 kg)
                 date: bestSet.timestamp,
-                isBodyweight: true
+                isBodyweight: true,
+                isDropSet: bestSet.isDropSet,
+                isPauseAtTop: bestSet.isPauseAtTop,
+                isPB: bestSet.isPB
             )
         } else {
             // For weighted exercises: find max weight, then set with highest reps at that weight
@@ -154,7 +160,10 @@ enum BestSessionCalculator {
                 repsAtMaxWeight: bestSet.reps,
                 totalVolume: totalVolume,
                 date: bestSet.timestamp,
-                isBodyweight: false
+                isBodyweight: false,
+                isDropSet: bestSet.isDropSet,
+                isPauseAtTop: bestSet.isPauseAtTop,
+                isPB: bestSet.isPB
             )
         }
     }

@@ -101,6 +101,9 @@ struct TargetMetricsData {
     let reps: Int
     let totalVolume: Double
     let chartToggle: ChartToggleButton
+    let isDropSet: Bool
+    let isPauseAtTop: Bool
+    let isPB: Bool
 }
 
 struct ThisSetData {
@@ -144,7 +147,7 @@ struct TargetMetricsSection: View {
                 }
             }
 
-            // Metric values: Weight × Reps
+            // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 4) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
                     .font(.largeTitle)
@@ -153,6 +156,42 @@ struct TargetMetricsSection: View {
                 Text("× \(data.reps) reps")
                     .font(.title2)
                     .foregroundStyle(.secondary)
+
+                // Set indicator icons (matching ThisSetSection design)
+                if data.isDropSet {
+                    Circle()
+                        .fill(.teal)
+                        .frame(width: 12, height: 12)
+                        .overlay {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 6))
+                                .foregroundStyle(.white)
+                        }
+                }
+
+                if data.isPauseAtTop {
+                    Circle()
+                        .fill(.pink)
+                        .frame(width: 12, height: 12)
+                        .overlay {
+                            Image(systemName: "pause.fill")
+                                .font(.system(size: 6))
+                                .foregroundStyle(.white)
+                        }
+                }
+
+                if data.isPB {
+                    Circle()
+                        .fill(.purple)
+                        .frame(width: 12, height: 12)
+                        .overlay {
+                            Text("PB")
+                                .font(.system(size: 5))
+                                .italic()
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white)
+                        }
+                }
             }
 
             // Total volume
@@ -588,7 +627,10 @@ struct ExerciseMetricsView: View {
                     weight: best.maxWeight,
                     reps: best.repsAtMaxWeight,
                     totalVolume: best.totalVolume,
-                    chartToggle: chartToggle
+                    chartToggle: chartToggle,
+                    isDropSet: best.isDropSet,
+                    isPauseAtTop: best.isPauseAtTop,
+                    isPB: best.isPB
                 )
             } else {
                 return TargetMetricsData(
@@ -597,7 +639,10 @@ struct ExerciseMetricsView: View {
                     weight: 0,
                     reps: 0,
                     totalVolume: 0,
-                    chartToggle: chartToggle
+                    chartToggle: chartToggle,
+                    isDropSet: false,
+                    isPauseAtTop: false,
+                    isPB: false
                 )
             }
         } else {
@@ -608,7 +653,10 @@ struct ExerciseMetricsView: View {
                     weight: lastInfo.maxWeight,
                     reps: lastInfo.maxWeightReps,
                     totalVolume: lastInfo.volume,
-                    chartToggle: chartToggle
+                    chartToggle: chartToggle,
+                    isDropSet: lastInfo.isDropSet,
+                    isPauseAtTop: lastInfo.isPauseAtTop,
+                    isPB: lastInfo.isPB
                 )
             } else {
                 return TargetMetricsData(
@@ -617,7 +665,10 @@ struct ExerciseMetricsView: View {
                     weight: 0,
                     reps: 0,
                     totalVolume: 0,
-                    chartToggle: chartToggle
+                    chartToggle: chartToggle,
+                    isDropSet: false,
+                    isPauseAtTop: false,
+                    isPB: false
                 )
             }
         }

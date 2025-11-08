@@ -173,7 +173,7 @@ enum ProgressTracker {
     struct ProgressState {
         let todayVolume: Double
         let todayWeightVolume: Double  // Weight-only volume for display
-        let lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int)?
+        let lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int, isDropSet: Bool, isPauseAtTop: Bool, isPB: Bool)?
         let progressRatioUnclamped: Double
         let progressBarRatio: Double
         let percentOfLast: Int
@@ -206,13 +206,16 @@ enum ProgressTracker {
                 self.unit = "kg"
             }
 
-            // Build lastCompletedDayInfo for backward compatibility
-            if let lastMetrics = lastMetrics {
+            // Build lastCompletedDayInfo with set flags from ExerciseDataHelper
+            if let lastDayInfo = ExerciseDataHelper.getLastCompletedDayInfo(from: sets) {
                 self.lastCompletedDayInfo = (
-                    date: lastMetrics.date,
-                    volume: lastMetrics.value,
-                    maxWeight: lastMetrics.maxWeight,
-                    maxWeightReps: lastMetrics.maxWeightReps
+                    date: lastDayInfo.date,
+                    volume: lastDayInfo.volume,
+                    maxWeight: lastDayInfo.maxWeight,
+                    maxWeightReps: lastDayInfo.maxWeightReps,
+                    isDropSet: lastDayInfo.isDropSet,
+                    isPauseAtTop: lastDayInfo.isPauseAtTop,
+                    isPB: lastDayInfo.isPB
                 )
             } else {
                 self.lastCompletedDayInfo = nil

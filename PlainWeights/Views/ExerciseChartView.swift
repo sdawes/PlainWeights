@@ -15,6 +15,7 @@ struct WeightDataPoint: Identifiable {
     let date: Date
     let weight: Double
     let reps: Int
+    let isPB: Bool
 }
 
 // MARK: - Exercise Chart Type
@@ -76,12 +77,15 @@ struct ChartContentView: View {
 
         // For each day, find the appropriate max set based on exercise type
         let dataPoints = grouped.compactMap { (date, daySets) -> WeightDataPoint? in
+            // Check if any set on this day is a PB
+            let hasPB = daySets.contains { $0.isPB }
+
             if exerciseChartType == .repsOnly {
                 // For reps-only: find max reps per day
                 guard let maxRepsSet = daySets.max(by: { $0.reps < $1.reps }) else {
                     return nil
                 }
-                return WeightDataPoint(date: date, weight: 0, reps: maxRepsSet.reps)
+                return WeightDataPoint(date: date, weight: 0, reps: maxRepsSet.reps, isPB: hasPB)
             } else {
                 // For weight exercises: find max weight, then highest reps at that weight
                 let maxWeight = daySets.map { $0.weight }.max() ?? 0
@@ -93,7 +97,7 @@ struct ChartContentView: View {
                 guard let bestSet = maxWeightSets.max(by: { $0.reps < $1.reps }) else {
                     return nil
                 }
-                return WeightDataPoint(date: date, weight: bestSet.weight, reps: bestSet.reps)
+                return WeightDataPoint(date: date, weight: bestSet.weight, reps: bestSet.reps, isPB: hasPB)
             }
         }
 
@@ -142,7 +146,7 @@ struct ChartContentView: View {
                                 y: .value("Reps", dataPoint.reps)
                             )
                             .foregroundStyle(.green)
-                            .symbolSize(30)  // Small dot
+                            .symbolSize(20)  // Smaller dot
                         } else {
                             // Multiple points: show green line only (solid, no gradient)
                             LineMark(
@@ -154,21 +158,21 @@ struct ChartContentView: View {
                     } else {
                         // Weight and reps: show both series
                         if hasSingleDataPoint {
-                            // Single data point: show small blue dot for weight
+                            // Single data point: show blue dot for weight (use actual value, not normalized)
                             PointMark(
                                 x: .value("Date", dataPoint.date),
-                                y: .value("Weight", dataPoint.weight / weightMax)
+                                y: .value("Weight", dataPoint.weight)
                             )
                             .foregroundStyle(.blue)
-                            .symbolSize(30)  // Small dot
+                            .symbolSize(20)  // Smaller dot
 
-                            // Single data point: show small green dot for reps
+                            // Single data point: show green dot for reps (use actual value, not normalized)
                             PointMark(
                                 x: .value("Date", dataPoint.date),
-                                y: .value("Reps", Double(dataPoint.reps) / repsMax)
+                                y: .value("Reps", dataPoint.reps)
                             )
                             .foregroundStyle(.green)
-                            .symbolSize(30)  // Small dot
+                            .symbolSize(20)  // Smaller dot
                         } else {
                             // Multiple points: show lines with gradient
 
@@ -202,6 +206,34 @@ struct ChartContentView: View {
                             )
                             .foregroundStyle(.green)
                             .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                        }
+                    }
+
+                    // PB indicator: vertical line from top to bottom with badge at top
+                    if dataPoint.isPB {
+                        // Vertical line extending from top to bottom of chart
+                        RuleMark(x: .value("PB Date", dataPoint.date))
+                            .foregroundStyle(.purple.opacity(0.3))
+                            .lineStyle(StrokeStyle(lineWidth: 1))
+
+                        // PB badge at top (positioned using invisible point)
+                        PointMark(
+                            x: .value("Date", dataPoint.date),
+                            y: .value("PB", exerciseChartType == .repsOnly ? Double(dataPoint.reps) :
+                                       (hasSingleDataPoint ? max(dataPoint.weight, Double(dataPoint.reps)) : 1.0))
+                        )
+                        .opacity(0)  // Invisible point, just for annotation positioning
+                        .annotation(position: .top, spacing: 4) {
+                            Circle()
+                                .fill(.purple)
+                                .frame(width: 12, height: 12)
+                                .overlay {
+                                    Text("PB")
+                                        .font(.system(size: 6))
+                                        .italic()
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.white)
+                                }
                         }
                     }
                 }

@@ -89,7 +89,7 @@ struct ProgressPillView: View {
 
 enum MetricMode: String, CaseIterable {
     case last = "Last Session"
-    case best = "Last Best"
+    case best = "Last PB"
 }
 
 // MARK: - Data Structures for Section Components
@@ -159,7 +159,7 @@ struct TargetMetricsSection: View {
             Text("\(Formatters.formatVolume(data.totalVolume)) kg total")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .padding(.top, 4)
+                .padding(.top, 0)
 
             // Chart toggle button (on its own line)
             data.chartToggle
@@ -261,31 +261,36 @@ struct ProgressBarSection: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 8) {
             // Thin progress bar
-            GeometryReader { geometry in
+            GeometryReader { g in
                 ZStack(alignment: .leading) {
-                    // Background track (grey)
+                    // Track (4pt tall), centred within an 8pt area
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color.secondary.opacity(0.2))
                         .frame(height: 4)
+                        .frame(maxHeight: .infinity, alignment: .center)
 
-                    // Fill (blue/green based on progress)
+                    // Fill (capped at track width)
                     RoundedRectangle(cornerRadius: 2)
                         .fill(data.barFillColor)
-                        .frame(width: geometry.size.width * data.progressRatio, height: 4)
+                        .frame(
+                            width: min(g.size.width, g.size.width * data.progressRatio),
+                            height: 4
+                        )
+                        .frame(maxHeight: .infinity, alignment: .center)
 
-                    // 100% goal line (only when over 100%)
+                    // 100% goal line, only when > 100%
                     if data.progressRatio > 1.0 {
                         Rectangle()
                             .fill(Color.secondary.opacity(0.5))
                             .frame(width: 2, height: 8)
-                            .position(
-                                x: geometry.size.width * 1.0,
-                                y: geometry.size.height / 2
-                            )
+                            // centre at y = 4 (mid of 8pt), x = width - 1 (keep inside)
+                            .position(x: g.size.width - 1, y: 4)
+                            .allowsHitTesting(false)
                     }
                 }
+                .frame(height: 8) // <- prevents clipping of the 8pt line
             }
-            .frame(height: 4)
+            .frame(height: 8)
             .frame(maxWidth: .infinity)
 
             // Progress percentage text (right-aligned)
@@ -440,9 +445,9 @@ struct ExerciseMetricsView: View {
     private var formattedProgressText: String {
         let percentage = progressPercentage
         if selectedMode == .best {
-            return "\(percentage)% of best ever total volume"
+            return "\(percentage)% of best total volume"
         } else {
-            return "\(percentage)% of last session's total volume"
+            return "\(percentage)% of last total volume"
         }
     }
 

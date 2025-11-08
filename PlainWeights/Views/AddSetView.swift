@@ -8,6 +8,175 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Weight and Reps Input Container
+
+struct WeightRepsInputContainer: View {
+    @Binding var weightText: String
+    @Binding var repsText: String
+    @FocusState.Binding var focusedField: AddSetView.Field?
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Weight input box
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Weight (kg)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                TextField("Enter weight (optional)", text: $weightText)
+                    .keyboardType(.decimalPad)
+                    .focused($focusedField, equals: .weight)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        focusedField = .reps
+                    }
+                    .padding(16)
+                    .background(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(focusedField == .weight ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .weight ? 2 : 1)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+
+            // Reps input box
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Reps")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                TextField("Enter reps (optional)", text: $repsText)
+                    .keyboardType(.numberPad)
+                    .focused($focusedField, equals: .reps)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        focusedField = nil
+                    }
+                    .padding(16)
+                    .background(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(focusedField == .reps ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .reps ? 2 : 1)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+        }
+        .padding(16)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// MARK: - Set Options Toggles
+
+struct SetOptionsToggles: View {
+    @Binding var isWarmUpSet: Bool
+    @Binding var isDropSet: Bool
+    @Binding var isPauseAtTop: Bool
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // Warm-up toggle
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(isWarmUpSet ? .orange : .secondary)
+                    .frame(width: 20, height: 20)
+                    .overlay {
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.white)
+                    }
+
+                Text("Warm-up set")
+                    .font(.subheadline)
+                    .foregroundStyle(isWarmUpSet ? .primary : .secondary)
+
+                Spacer()
+
+                Toggle("", isOn: $isWarmUpSet)
+                    .labelsHidden()
+                    .tint(isWarmUpSet ? Color(red: 0.7, green: 0.1, blue: 0.1) : .blue)
+            }
+
+            // Drop set toggle
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(isDropSet ? .teal : .secondary)
+                    .frame(width: 20, height: 20)
+                    .overlay {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.white)
+                    }
+
+                Text("Drop set")
+                    .font(.subheadline)
+                    .foregroundStyle(isDropSet ? .primary : .secondary)
+
+                Spacer()
+
+                Toggle("", isOn: $isDropSet)
+                    .labelsHidden()
+                    .tint(isDropSet ? .teal : .blue)
+            }
+
+            // Pause at top toggle
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(isPauseAtTop ? .pink : .secondary)
+                    .frame(width: 20, height: 20)
+                    .overlay {
+                        Image(systemName: "pause.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.white)
+                    }
+
+                Text("Pause at top")
+                    .font(.subheadline)
+                    .foregroundStyle(isPauseAtTop ? .primary : .secondary)
+
+                Spacer()
+
+                Toggle("", isOn: $isPauseAtTop)
+                    .labelsHidden()
+                    .tint(isPauseAtTop ? .pink : .blue)
+            }
+        }
+        .padding(16)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// MARK: - Add Set Button
+
+struct AddSetButton: View {
+    let action: () -> Void
+    let isEnabled: Bool
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.body)
+                Text("Add Set")
+                    .font(.body.bold())
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(isEnabled ? Color.blue : Color.gray)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .disabled(!isEnabled)
+        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+    }
+}
+
+// MARK: - Main Add Set View
+
 struct AddSetView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -37,120 +206,24 @@ struct AddSetView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
-                // Input fields container - matching ExerciseSummaryView style
-                VStack(spacing: 16) {
-                    // Weight input box
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Weight (kg)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        TextField("Enter weight (optional)", text: $weightText)
-                            .keyboardType(.decimalPad)
-                            .focused($focusedField, equals: .weight)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                focusedField = .reps
-                            }
-                            .padding(12)
-                            .background(Color.white)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(focusedField == .weight ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .weight ? 2 : 1)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-
-                    // Reps input box
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Reps")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        TextField("Enter reps (optional)", text: $repsText)
-                            .keyboardType(.numberPad)
-                            .focused($focusedField, equals: .reps)
-                            .submitLabel(.done)
-                            .onSubmit {
-                                focusedField = nil
-                            }
-                            .padding(12)
-                            .background(Color.white)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(focusedField == .reps ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .reps ? 2 : 1)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                }
-                .padding(16)
-                .background(Color.white)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                // Weight and reps input container
+                WeightRepsInputContainer(
+                    weightText: $weightText,
+                    repsText: $repsText,
+                    focusedField: $focusedField
                 )
 
-                // Warm-up toggle
-                HStack {
-                    Text("Warm-up set")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Toggle("", isOn: $isWarmUpSet)
-                        .labelsHidden()
-                        .tint(isWarmUpSet ? Color(red: 0.7, green: 0.1, blue: 0.1) : .blue)
-                }
-                .padding(.horizontal, 16)
-
-                // Drop set toggle
-                HStack {
-                    Text("Drop set")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Toggle("", isOn: $isDropSet)
-                        .labelsHidden()
-                        .tint(isDropSet ? .teal : .blue)
-                }
-                .padding(.horizontal, 16)
-
-                // Pause at top toggle
-                HStack {
-                    Text("Pause at top")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Toggle("", isOn: $isPauseAtTop)
-                        .labelsHidden()
-                        .tint(isPauseAtTop ? .pink : .blue)
-                }
-                .padding(.horizontal, 16)
-
-                // Add Set button - matching ExerciseDetailView design
-                HStack {
-                    Spacer()
-                    Button(action: addSet) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.caption)
-                            Text("Add Set")
-                                .font(.caption.bold())
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(canAddSet ? Color.blue : Color.gray)
-                        .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Rectangle())
-                    .disabled(!canAddSet)
-                }
+                // Set options toggles
+                SetOptionsToggles(
+                    isWarmUpSet: $isWarmUpSet,
+                    isDropSet: $isDropSet,
+                    isPauseAtTop: $isPauseAtTop
+                )
 
                 Spacer()
             }
             .padding(16)
-            .background(AnimatedGradientBackground())
+            .background(Color.white)
             .navigationTitle("Add Set")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -159,6 +232,15 @@ struct AddSetView: View {
                         dismiss()
                     }
                 }
+            }
+            .safeAreaInset(edge: .bottom) {
+                AddSetButton(
+                    action: addSet,
+                    isEnabled: canAddSet
+                )
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color.white)
             }
             .onAppear {
                 focusedField = .weight

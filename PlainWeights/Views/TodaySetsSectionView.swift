@@ -24,10 +24,14 @@ struct TodaySetsSectionView: View {
                 Spacer()
 
                 if set.isWarmUp {
-                    Text("WARM UP")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(Color(red: 0.7, green: 0.1, blue: 0.1).opacity(0.7))
-                        .textCase(.uppercase)
+                    Circle()
+                        .fill(.orange)
+                        .frame(width: 20, height: 20)
+                        .overlay {
+                            Image(systemName: "flame.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.white)
+                        }
                 }
 
                 Text(Formatters.formatTimeHM(set.timestamp))

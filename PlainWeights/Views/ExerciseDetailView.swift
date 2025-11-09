@@ -163,6 +163,10 @@ struct ExerciseDetailView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            addSetConfig = .edit(set: set, exercise: exercise)
+                        }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
                                 deleteSet(set)
@@ -261,6 +265,10 @@ struct ExerciseDetailView: View {
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                addSetConfig = .edit(set: set, exercise: exercise)
+                            }
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     deleteSet(set)
@@ -358,7 +366,8 @@ struct ExerciseDetailView: View {
             AddSetView(
                 exercise: config.exercise,
                 initialWeight: config.initialWeight,
-                initialReps: config.initialReps
+                initialReps: config.initialReps,
+                setToEdit: config.setToEdit
             )
         }
         .sheet(isPresented: $showingNotesSheet) {

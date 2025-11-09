@@ -103,6 +103,56 @@ enum ExerciseSetService {
         try context.save()
     }
 
+    // MARK: - Update Set
+
+    /// Update an existing exercise set
+    /// - Parameters:
+    ///   - set: The set to update
+    ///   - weight: New weight in kg
+    ///   - reps: New number of repetitions
+    ///   - isWarmUp: Whether this is a warm-up set
+    ///   - isDropSet: Whether this is a drop set
+    ///   - isPauseAtTop: Whether this is a pause at top set
+    ///   - isTimedSet: Whether this is a timed/tempo set
+    ///   - tempoSeconds: Tempo duration in seconds (only used when isTimedSet is true)
+    ///   - context: SwiftData model context
+    static func updateSet(
+        _ set: ExerciseSet,
+        weight: Double,
+        reps: Int,
+        isWarmUp: Bool,
+        isDropSet: Bool,
+        isPauseAtTop: Bool,
+        isTimedSet: Bool,
+        tempoSeconds: Int,
+        context: ModelContext
+    ) throws {
+        // Validation
+        guard weight >= 0, reps >= 0 else {
+            throw ExerciseSetError.invalidInput
+        }
+
+        guard weight > 0 || reps > 0 else {
+            throw ExerciseSetError.invalidInput
+        }
+
+        // Update all fields (timestamp is preserved)
+        set.weight = weight
+        set.reps = reps
+        set.isWarmUp = isWarmUp
+        set.isDropSet = isDropSet
+        set.isPauseAtTop = isPauseAtTop
+        set.isTimedSet = isTimedSet
+        set.tempoSeconds = tempoSeconds
+
+        try context.save()
+
+        // Recalculate PBs since values or warm-up status may have changed
+        if let exercise = set.exercise {
+            try detectAndMarkPB(for: set, exercise: exercise, context: context)
+        }
+    }
+
     // MARK: - Toggle Warm-Up
 
     /// Toggle the warm-up status of a set

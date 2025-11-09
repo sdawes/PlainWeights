@@ -196,13 +196,22 @@ struct SetOptionsToggles: View {
 struct AddSetButton: View {
     let action: () -> Void
     let isEnabled: Bool
+    let title: String
+    let iconName: String
+
+    init(action: @escaping () -> Void, isEnabled: Bool, title: String = "Add Set", iconName: String = "plus.circle.fill") {
+        self.action = action
+        self.isEnabled = isEnabled
+        self.title = title
+        self.iconName = iconName
+    }
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                Image(systemName: "plus.circle.fill")
+                Image(systemName: iconName)
                     .font(.body)
-                Text("Add Set")
+                Text(title)
                     .font(.body.bold())
             }
             .foregroundStyle(.white)
@@ -224,6 +233,7 @@ struct AddSetView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     let exercise: Exercise
+    let setToEdit: ExerciseSet?
 
     @State private var weightText = ""
     @State private var repsText = ""
@@ -238,13 +248,27 @@ struct AddSetView: View {
         case weight, reps
     }
 
-    init(exercise: Exercise, initialWeight: Double? = nil, initialReps: Int? = nil) {
+    init(exercise: Exercise, initialWeight: Double? = nil, initialReps: Int? = nil, setToEdit: ExerciseSet? = nil) {
         self.exercise = exercise
-        if let initialWeight = initialWeight, initialWeight >= 0 {
-            _weightText = State(initialValue: Formatters.formatWeight(initialWeight))
-        }
-        if let initialReps = initialReps, initialReps >= 0 {
-            _repsText = State(initialValue: String(initialReps))
+        self.setToEdit = setToEdit
+
+        // If editing, pre-populate all fields from the set
+        if let set = setToEdit {
+            _weightText = State(initialValue: Formatters.formatWeight(set.weight))
+            _repsText = State(initialValue: String(set.reps))
+            _isWarmUpSet = State(initialValue: set.isWarmUp)
+            _isDropSet = State(initialValue: set.isDropSet)
+            _isPauseAtTop = State(initialValue: set.isPauseAtTop)
+            _isTimedSet = State(initialValue: set.isTimedSet)
+            _tempoSecondsText = State(initialValue: set.isTimedSet && set.tempoSeconds > 0 ? String(set.tempoSeconds) : "")
+        } else {
+            // If adding new set, use initial values
+            if let initialWeight = initialWeight, initialWeight >= 0 {
+                _weightText = State(initialValue: Formatters.formatWeight(initialWeight))
+            }
+            if let initialReps = initialReps, initialReps >= 0 {
+                _repsText = State(initialValue: String(initialReps))
+            }
         }
     }
 
@@ -267,10 +291,12 @@ struct AddSetView: View {
                     tempoSecondsText: $tempoSecondsText
                 )
 
-                // Add Set button (moved up from bottom)
+                // Add/Update Set button (moved up from bottom)
                 AddSetButton(
                     action: addSet,
-                    isEnabled: canAddSet
+                    isEnabled: canAddSet,
+                    title: setToEdit == nil ? "Add Set" : "Update Set",
+                    iconName: setToEdit == nil ? "plus.circle.fill" : "checkmark.circle.fill"
                 )
                 .padding(.top, 8)
 
@@ -278,7 +304,7 @@ struct AddSetView: View {
             }
             .padding(16)
             .background(Color.white)
-            .navigationTitle("Add Set")
+            .navigationTitle(setToEdit == nil ? "Add Set" : "Edit Set")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -317,20 +343,36 @@ struct AddSetView: View {
         let tempoSeconds = Int(tempoSecondsText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
 
         do {
-            try ExerciseSetService.addSet(
-                weight: weight,
-                reps: reps,
-                isWarmUp: isWarmUpSet,
-                isDropSet: isDropSet,
-                isPauseAtTop: isPauseAtTop,
-                isTimedSet: isTimedSet,
-                tempoSeconds: tempoSeconds,
-                to: exercise,
-                context: context
-            )
+            if let setToEdit = setToEdit {
+                // Update existing set
+                try ExerciseSetService.updateSet(
+                    setToEdit,
+                    weight: weight,
+                    reps: reps,
+                    isWarmUp: isWarmUpSet,
+                    isDropSet: isDropSet,
+                    isPauseAtTop: isPauseAtTop,
+                    isTimedSet: isTimedSet,
+                    tempoSeconds: tempoSeconds,
+                    context: context
+                )
+            } else {
+                // Add new set
+                try ExerciseSetService.addSet(
+                    weight: weight,
+                    reps: reps,
+                    isWarmUp: isWarmUpSet,
+                    isDropSet: isDropSet,
+                    isPauseAtTop: isPauseAtTop,
+                    isTimedSet: isTimedSet,
+                    tempoSeconds: tempoSeconds,
+                    to: exercise,
+                    context: context
+                )
+            }
             dismiss()
         } catch {
-            print("Error adding set: \(error)")
+            print("Error \(setToEdit == nil ? "adding" : "updating") set: \(error)")
         }
     }
 }

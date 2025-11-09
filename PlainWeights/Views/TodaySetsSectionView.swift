@@ -13,6 +13,7 @@ struct TodaySetsSectionView: View {
     let todaySets: [ExerciseSet]
     let isMostRecentSet: (ExerciseSet, [ExerciseSet]) -> Bool
     let deleteSet: (ExerciseSet) -> Void
+    let onSetTap: (ExerciseSet) -> Void
 
     var body: some View {
         ForEach(todaySets, id: \.persistentModelID) { set in
@@ -91,6 +92,10 @@ struct TodaySetsSectionView: View {
                 Text(Formatters.formatTimeHM(set.timestamp))
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                onSetTap(set)
             }
             .listRowSeparator(isFirst(set) ? .hidden : .visible, edges: .top)
             .listRowSeparator(isLast(set) ? .hidden : .visible, edges: .bottom)

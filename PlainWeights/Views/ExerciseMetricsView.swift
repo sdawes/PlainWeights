@@ -236,7 +236,7 @@ struct ThisSetSection: View {
     let data: ThisSetData
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 8) {
             VStack(alignment: .leading, spacing: 8) {
                 // Header row with "THIS SET" and "vs last session"
                 HStack {
@@ -341,7 +341,7 @@ struct ProgressBarSection: View {
     let lastSetTimestamp: Date?
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 8) {
+        VStack(alignment: .trailing, spacing: 4) {
             // Rest timer (right-aligned, above progress bar)
             if let timestamp = lastSetTimestamp {
                 RestTimerView(startTime: timestamp)
@@ -421,7 +421,7 @@ struct MetricViewStats: View {
 
                 // This Set Section
                 ThisSetSection(data: setData)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 8)
 
                 // Progress Bar Section
                 ProgressBarSection(data: progressBar, lastSetTimestamp: lastSetTimestamp)

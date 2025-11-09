@@ -29,6 +29,8 @@ enum BestSessionCalculator {
         let isBodyweight: Bool
         let isDropSet: Bool         // Whether the best set was a drop set
         let isPauseAtTop: Bool      // Whether the best set was a pause at top set
+        let isTimedSet: Bool        // Whether the best set was a timed set
+        let tempoSeconds: Int       // Tempo duration in seconds
         let isPB: Bool              // Whether the best set is marked as a PB
     }
 
@@ -132,6 +134,8 @@ enum BestSessionCalculator {
                 isBodyweight: true,
                 isDropSet: bestSet.isDropSet,
                 isPauseAtTop: bestSet.isPauseAtTop,
+                isTimedSet: bestSet.isTimedSet,
+                tempoSeconds: bestSet.tempoSeconds,
                 isPB: bestSet.isPB
             )
         } else {
@@ -163,6 +167,8 @@ enum BestSessionCalculator {
                 isBodyweight: false,
                 isDropSet: bestSet.isDropSet,
                 isPauseAtTop: bestSet.isPauseAtTop,
+                isTimedSet: bestSet.isTimedSet,
+                tempoSeconds: bestSet.tempoSeconds,
                 isPB: bestSet.isPB
             )
         }

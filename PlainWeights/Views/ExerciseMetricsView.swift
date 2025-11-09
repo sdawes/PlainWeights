@@ -103,6 +103,8 @@ struct TargetMetricsData {
     let chartToggle: ChartToggleButton
     let isDropSet: Bool
     let isPauseAtTop: Bool
+    let isTimedSet: Bool
+    let tempoSeconds: Int
     let isPB: Bool
 }
 
@@ -111,6 +113,8 @@ struct ThisSetData {
     let reps: Int
     let isDropSet: Bool
     let isPauseAtTop: Bool
+    let isTimedSet: Bool
+    let tempoSeconds: Int
     let isPB: Bool
     let comparisonLabel: String
     let weightProgress: (text: String, direction: ProgressTracker.PRDirection)?
@@ -177,6 +181,25 @@ struct TargetMetricsSection: View {
                             Image(systemName: "pause.fill")
                                 .font(.system(size: 6))
                                 .foregroundStyle(.white)
+                        }
+                }
+
+                if data.isTimedSet {
+                    Circle()
+                        .fill(.black)
+                        .frame(width: 12, height: 12)
+                        .overlay {
+                            if data.tempoSeconds > 0 {
+                                Text("\(data.tempoSeconds)")
+                                    .font(.system(size: 7))
+                                    .italic()
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                            } else {
+                                Image(systemName: "timer")
+                                    .font(.system(size: 6))
+                                    .foregroundStyle(.white)
+                            }
                         }
                 }
 
@@ -260,6 +283,25 @@ struct ThisSetSection: View {
                                 Image(systemName: "pause.fill")
                                     .font(.system(size: 8))
                                     .foregroundStyle(.white)
+                            }
+                    }
+
+                    if data.isTimedSet {
+                        Circle()
+                            .fill(.black)
+                            .frame(width: 16, height: 16)
+                            .overlay {
+                                if data.tempoSeconds > 0 {
+                                    Text("\(data.tempoSeconds)")
+                                        .font(.system(size: 9))
+                                        .italic()
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.white)
+                                } else {
+                                    Image(systemName: "timer")
+                                        .font(.system(size: 8))
+                                        .foregroundStyle(.white)
+                                }
                             }
                     }
 
@@ -514,7 +556,7 @@ struct ExerciseMetricsView: View {
         }
     }
 
-    private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool, isPauseAtTop: Bool, isPB: Bool)? {
+    private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool, isPauseAtTop: Bool, isTimedSet: Bool, tempoSeconds: Int, isPB: Bool)? {
         // Get the most recent working set from today (skip warm-ups)
         guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
             return nil
@@ -523,7 +565,7 @@ struct ExerciseMetricsView: View {
         let weight = Formatters.formatWeight(lastWorkingSet.weight)
         let reps = lastWorkingSet.reps
 
-        return (weight, reps, lastWorkingSet.isDropSet, lastWorkingSet.isPauseAtTop, lastWorkingSet.isPB)
+        return (weight, reps, lastWorkingSet.isDropSet, lastWorkingSet.isPauseAtTop, lastWorkingSet.isTimedSet, lastWorkingSet.tempoSeconds, lastWorkingSet.isPB)
     }
 
     private func formatThisSetProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
@@ -630,6 +672,8 @@ struct ExerciseMetricsView: View {
                     chartToggle: chartToggle,
                     isDropSet: best.isDropSet,
                     isPauseAtTop: best.isPauseAtTop,
+                    isTimedSet: best.isTimedSet,
+                    tempoSeconds: best.tempoSeconds,
                     isPB: best.isPB
                 )
             } else {
@@ -642,6 +686,8 @@ struct ExerciseMetricsView: View {
                     chartToggle: chartToggle,
                     isDropSet: false,
                     isPauseAtTop: false,
+                    isTimedSet: false,
+                    tempoSeconds: 0,
                     isPB: false
                 )
             }
@@ -656,6 +702,8 @@ struct ExerciseMetricsView: View {
                     chartToggle: chartToggle,
                     isDropSet: lastInfo.isDropSet,
                     isPauseAtTop: lastInfo.isPauseAtTop,
+                    isTimedSet: lastInfo.isTimedSet,
+                    tempoSeconds: lastInfo.tempoSeconds,
                     isPB: lastInfo.isPB
                 )
             } else {
@@ -668,6 +716,8 @@ struct ExerciseMetricsView: View {
                     chartToggle: chartToggle,
                     isDropSet: false,
                     isPauseAtTop: false,
+                    isTimedSet: false,
+                    tempoSeconds: 0,
                     isPB: false
                 )
             }
@@ -682,6 +732,8 @@ struct ExerciseMetricsView: View {
             reps: setInfo.reps,
             isDropSet: setInfo.isDropSet,
             isPauseAtTop: setInfo.isPauseAtTop,
+            isTimedSet: setInfo.isTimedSet,
+            tempoSeconds: setInfo.tempoSeconds,
             isPB: setInfo.isPB,
             comparisonLabel: selectedMode == .best ? "vs best ever" : "vs last session",
             weightProgress: formatThisSetProgress(),

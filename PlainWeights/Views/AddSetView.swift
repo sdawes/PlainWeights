@@ -73,6 +73,8 @@ struct SetOptionsToggles: View {
     @Binding var isWarmUpSet: Bool
     @Binding var isDropSet: Bool
     @Binding var isPauseAtTop: Bool
+    @Binding var isTimedSet: Bool
+    @Binding var tempoSecondsText: String
 
     var body: some View {
         VStack(spacing: 16) {
@@ -141,6 +143,47 @@ struct SetOptionsToggles: View {
                     .labelsHidden()
                     .tint(isPauseAtTop ? .pink : .blue)
             }
+
+            // Timed set toggle
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(isTimedSet ? .black : .secondary)
+                    .frame(width: 20, height: 20)
+                    .overlay {
+                        Image(systemName: "timer")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.white)
+                    }
+
+                Text("Timed set")
+                    .font(.subheadline)
+                    .foregroundStyle(isTimedSet ? .primary : .secondary)
+
+                if isTimedSet {
+                    TextField("0", text: $tempoSecondsText)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 60)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background(Color.white)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                    Text("s")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Toggle("", isOn: $isTimedSet)
+                    .labelsHidden()
+                    .tint(isTimedSet ? .black : .blue)
+            }
         }
         .padding(16)
         .background(Color(.systemGray6))
@@ -187,6 +230,8 @@ struct AddSetView: View {
     @State private var isWarmUpSet = false
     @State private var isDropSet = false
     @State private var isPauseAtTop = false
+    @State private var isTimedSet = false
+    @State private var tempoSecondsText = ""
     @FocusState private var focusedField: Field?
 
     enum Field {
@@ -217,8 +262,17 @@ struct AddSetView: View {
                 SetOptionsToggles(
                     isWarmUpSet: $isWarmUpSet,
                     isDropSet: $isDropSet,
-                    isPauseAtTop: $isPauseAtTop
+                    isPauseAtTop: $isPauseAtTop,
+                    isTimedSet: $isTimedSet,
+                    tempoSecondsText: $tempoSecondsText
                 )
+
+                // Add Set button (moved up from bottom)
+                AddSetButton(
+                    action: addSet,
+                    isEnabled: canAddSet
+                )
+                .padding(.top, 8)
 
                 Spacer()
             }
@@ -232,15 +286,12 @@ struct AddSetView: View {
                         dismiss()
                     }
                 }
-            }
-            .safeAreaInset(edge: .bottom) {
-                AddSetButton(
-                    action: addSet,
-                    isEnabled: canAddSet
-                )
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color.white)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        addSet()
+                    }
+                    .disabled(!canAddSet)
+                }
             }
             .onAppear {
                 focusedField = .weight
@@ -262,6 +313,9 @@ struct AddSetView: View {
             return
         }
 
+        // Parse tempo seconds (empty or invalid input defaults to 0)
+        let tempoSeconds = Int(tempoSecondsText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+
         do {
             try ExerciseSetService.addSet(
                 weight: weight,
@@ -269,6 +323,8 @@ struct AddSetView: View {
                 isWarmUp: isWarmUpSet,
                 isDropSet: isDropSet,
                 isPauseAtTop: isPauseAtTop,
+                isTimedSet: isTimedSet,
+                tempoSeconds: tempoSeconds,
                 to: exercise,
                 context: context
             )

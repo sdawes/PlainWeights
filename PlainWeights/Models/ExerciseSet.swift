@@ -16,16 +16,20 @@ final class ExerciseSet {
     var isWarmUp: Bool = false       // flag to exclude from performance calculations
     var isDropSet: Bool = false      // flag to indicate drop set (included in performance calculations)
     var isPauseAtTop: Bool = false   // flag to indicate pause at top technique
+    var isTimedSet: Bool = false     // flag to indicate timed/tempo set (slow controlled movement)
+    var tempoSeconds: Int = 0        // tempo duration in seconds (only used when isTimedSet is true)
     var isPB: Bool = false           // flag to indicate personal best (highest weight, then reps, then earliest timestamp)
     var exercise: Exercise?  // parent (optional to handle cascade delete properly)
 
-    init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isDropSet: Bool = false, isPauseAtTop: Bool = false, isPB: Bool = false, exercise: Exercise) {
+    init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isDropSet: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, exercise: Exercise) {
         self.timestamp = timestamp
         self.weight = weight
         self.reps = reps
         self.isWarmUp = isWarmUp
         self.isDropSet = isDropSet
         self.isPauseAtTop = isPauseAtTop
+        self.isTimedSet = isTimedSet
+        self.tempoSeconds = tempoSeconds
         self.isPB = isPB
         self.exercise = exercise
 

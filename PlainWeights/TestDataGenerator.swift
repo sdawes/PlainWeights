@@ -118,17 +118,35 @@ class TestDataGenerator {
         print("    private static func generateGymData(modelContext: ModelContext) {")
         print("        // EXPORT DATE: \(today)")
         print("")
-        print("        // Exercise definitions with notes")
-        print("        let exerciseData: [(name: String, category: String, note: String?)] = [")
+        print("        // Exercise definitions with notes and timestamps")
+        print("        let exerciseData: [(name: String, category: String, note: String?, createdDate: Date, lastUpdated: Date)] = [")
         for exercise in exercises {
+            let calendar = Calendar.current
+
+            // Extract createdDate components
+            let cY = calendar.component(.year, from: exercise.createdDate)
+            let cM = calendar.component(.month, from: exercise.createdDate)
+            let cD = calendar.component(.day, from: exercise.createdDate)
+            let cH = calendar.component(.hour, from: exercise.createdDate)
+            let cMin = calendar.component(.minute, from: exercise.createdDate)
+            let cS = calendar.component(.second, from: exercise.createdDate)
+
+            // Extract lastUpdated components
+            let lY = calendar.component(.year, from: exercise.lastUpdated)
+            let lM = calendar.component(.month, from: exercise.lastUpdated)
+            let lD = calendar.component(.day, from: exercise.lastUpdated)
+            let lH = calendar.component(.hour, from: exercise.lastUpdated)
+            let lMin = calendar.component(.minute, from: exercise.lastUpdated)
+            let lS = calendar.component(.second, from: exercise.lastUpdated)
+
             if let note = exercise.note, !note.isEmpty {
                 // Escape quotes and newlines in note text
                 let escapedNote = note
                     .replacingOccurrences(of: "\"", with: "\\\"")
                     .replacingOccurrences(of: "\n", with: ", ")
-                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: \"\(escapedNote)\"),")
+                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: \"\(escapedNote)\", createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
             } else {
-                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: nil as String?),")
+                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: nil as String?, createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
             }
         }
         print("        ]")
@@ -136,7 +154,8 @@ class TestDataGenerator {
         print("        // Create exercises")
         print("        var exercises: [String: Exercise] = [:]")
         print("        for data in exerciseData {")
-        print("            let exercise = Exercise(name: data.name, category: data.category, note: data.note)")
+        print("            let exercise = Exercise(name: data.name, category: data.category, note: data.note, createdDate: data.createdDate)")
+        print("            exercise.lastUpdated = data.lastUpdated")
         print("            exercises[data.name] = exercise")
         print("            modelContext.insert(exercise)")
         print("        }")
@@ -154,23 +173,23 @@ class TestDataGenerator {
         print("        }")
         print("")
         print("        // Helper function to add a working set")
-        print("        func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date) {")
+        print("        func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
         print("            guard let ex = exercises[exercise] else { return }")
-        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isDropSet: false, exercise: ex)")
+        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isDropSet: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add a warm-up set")
-        print("        func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date) {")
+        print("        func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0) {")
         print("            guard let ex = exercises[exercise] else { return }")
-        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, isDropSet: false, exercise: ex)")
+        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, isDropSet: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: false, exercise: ex)")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add a drop set")
-        print("        func addDropSet(exercise: String, weight: Double, reps: Int, timestamp: Date) {")
+        print("        func addDropSet(exercise: String, weight: Double, reps: Int, timestamp: Date, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
         print("            guard let ex = exercises[exercise] else { return }")
-        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isDropSet: true, exercise: ex)")
+        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isDropSet: true, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
@@ -216,12 +235,24 @@ class TestDataGenerator {
                             let min = calendar.component(.minute, from: item.set.timestamp)
                             let s = calendar.component(.second, from: item.set.timestamp)
 
+                            // Build optional parameters string
+                            var optionalParams = ""
+                            if item.set.isPauseAtTop {
+                                optionalParams += ", isPauseAtTop: true"
+                            }
+                            if item.set.isTimedSet {
+                                optionalParams += ", isTimedSet: true, tempoSeconds: \(item.set.tempoSeconds)"
+                            }
+                            if item.set.isPB {
+                                optionalParams += ", isPB: true"
+                            }
+
                             if item.set.isWarmUp {
-                                print("        addWarmUpSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
+                                print("        addWarmUpSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s))\(optionalParams))")
                             } else if item.set.isDropSet {
-                                print("        addDropSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
+                                print("        addDropSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s))\(optionalParams))")
                             } else {
-                                print("        addSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s)))")
+                                print("        addSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s))\(optionalParams))")
                             }
                         }
                     }
@@ -232,6 +263,15 @@ class TestDataGenerator {
 
         print("        // Save all changes")
         print("        do {")
+        print("            try modelContext.save()")
+        print("")
+        print("            // Recalculate PB flags for all exercises (safety net to ensure correctness)")
+        print("            for (_, exercise) in exercises {")
+        print("                // Get all sets for this exercise and recalculate PBs")
+        print("                for set in exercise.sets where !set.isWarmUp {")
+        print("                    try ExerciseSetService.detectAndMarkPB(for: set, exercise: exercise, context: modelContext)")
+        print("                }")
+        print("            }")
         print("            try modelContext.save()")
         print("        } catch {")
         print("            print(\"Error saving test data: \\(error)\")")
@@ -276,13 +316,9 @@ class TestDataGenerator {
                 modelContext.delete(exercise)
             }
         }
-        
+
         try? modelContext.save()
         logger.info("All data cleared")
     }
-    
-    
-    
-    
 }
 #endif

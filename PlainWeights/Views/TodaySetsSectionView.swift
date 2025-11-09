@@ -34,6 +34,60 @@ struct TodaySetsSectionView: View {
                         }
                 }
 
+                if set.isDropSet {
+                    Circle()
+                        .fill(.teal)
+                        .frame(width: 20, height: 20)
+                        .overlay {
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.white)
+                        }
+                }
+
+                if set.isPauseAtTop {
+                    Circle()
+                        .fill(.pink)
+                        .frame(width: 20, height: 20)
+                        .overlay {
+                            Image(systemName: "pause.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.white)
+                        }
+                }
+
+                if set.isTimedSet {
+                    Circle()
+                        .fill(.black)
+                        .frame(width: 20, height: 20)
+                        .overlay {
+                            if set.tempoSeconds > 0 {
+                                Text("\(set.tempoSeconds)")
+                                    .font(.system(size: 11))
+                                    .italic()
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                            } else {
+                                Image(systemName: "timer")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                }
+
+                if set.isPB {
+                    Circle()
+                        .fill(.purple)
+                        .frame(width: 20, height: 20)
+                        .overlay {
+                            Text("PB")
+                                .font(.system(size: 9))
+                                .italic()
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white)
+                        }
+                }
+
                 Text(Formatters.formatTimeHM(set.timestamp))
                 .font(.caption)
                 .foregroundStyle(.secondary)

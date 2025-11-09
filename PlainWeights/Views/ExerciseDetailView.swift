@@ -127,6 +127,25 @@ struct ExerciseDetailView: View {
                                     }
                             }
 
+                            if set.isTimedSet {
+                                Circle()
+                                    .fill(.black)
+                                    .frame(width: 20, height: 20)
+                                    .overlay {
+                                        if set.tempoSeconds > 0 {
+                                            Text("\(set.tempoSeconds)")
+                                                .font(.system(size: 11))
+                                                .italic()
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(.white)
+                                        } else {
+                                            Image(systemName: "timer")
+                                                .font(.system(size: 10))
+                                                .foregroundStyle(.white)
+                                        }
+                                    }
+                            }
+
                             if set.isPB {
                                 Circle()
                                     .fill(.purple)
@@ -203,6 +222,25 @@ struct ExerciseDetailView: View {
                                             Image(systemName: "pause.fill")
                                                 .font(.system(size: 10))
                                                 .foregroundStyle(.white)
+                                        }
+                                }
+
+                                if set.isTimedSet {
+                                    Circle()
+                                        .fill(.black)
+                                        .frame(width: 20, height: 20)
+                                        .overlay {
+                                            if set.tempoSeconds > 0 {
+                                                Text("\(set.tempoSeconds)")
+                                                    .font(.system(size: 11))
+                                                    .italic()
+                                                    .fontWeight(.bold)
+                                                    .foregroundStyle(.white)
+                                            } else {
+                                                Image(systemName: "timer")
+                                                    .font(.system(size: 10))
+                                                    .foregroundStyle(.white)
+                                            }
                                         }
                                 }
 

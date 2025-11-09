@@ -21,6 +21,9 @@ enum ExerciseSetService {
     ///   - reps: Number of repetitions
     ///   - isWarmUp: Whether this is a warm-up set
     ///   - isDropSet: Whether this is a drop set
+    ///   - isPauseAtTop: Whether this is a pause at top set
+    ///   - isTimedSet: Whether this is a timed/tempo set
+    ///   - tempoSeconds: Tempo duration in seconds (only used when isTimedSet is true)
     ///   - exercise: Parent exercise
     ///   - context: SwiftData model context
     static func addSet(
@@ -29,6 +32,8 @@ enum ExerciseSetService {
         isWarmUp: Bool = false,
         isDropSet: Bool = false,
         isPauseAtTop: Bool = false,
+        isTimedSet: Bool = false,
+        tempoSeconds: Int = 0,
         to exercise: Exercise,
         context: ModelContext
     ) throws {
@@ -48,6 +53,8 @@ enum ExerciseSetService {
             isWarmUp: isWarmUp,
             isDropSet: isDropSet,
             isPauseAtTop: isPauseAtTop,
+            isTimedSet: isTimedSet,
+            tempoSeconds: tempoSeconds,
             exercise: exercise
         )
 

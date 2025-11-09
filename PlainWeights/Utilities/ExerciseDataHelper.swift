@@ -21,6 +21,8 @@ enum ExerciseDataHelper {
         let totalSets: Int
         let isDropSet: Bool         // Whether the max weight set was a drop set
         let isPauseAtTop: Bool      // Whether the max weight set was a pause at top set
+        let isTimedSet: Bool        // Whether the max weight set was a timed set
+        let tempoSeconds: Int       // Tempo duration in seconds
         let isPB: Bool              // Whether the max weight set is marked as a PB
     }
 
@@ -78,6 +80,8 @@ enum ExerciseDataHelper {
             totalSets: totalSets,
             isDropSet: bestSet?.isDropSet ?? false,
             isPauseAtTop: bestSet?.isPauseAtTop ?? false,
+            isTimedSet: bestSet?.isTimedSet ?? false,
+            tempoSeconds: bestSet?.tempoSeconds ?? 0,
             isPB: bestSet?.isPB ?? false
         )
     }

@@ -173,7 +173,7 @@ enum ProgressTracker {
     struct ProgressState {
         let todayVolume: Double
         let todayWeightVolume: Double  // Weight-only volume for display
-        let lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int, isDropSet: Bool, isPauseAtTop: Bool, isPB: Bool)?
+        let lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int, isDropSet: Bool, isPauseAtTop: Bool, isTimedSet: Bool, tempoSeconds: Int, isPB: Bool)?
         let progressRatioUnclamped: Double
         let progressBarRatio: Double
         let percentOfLast: Int
@@ -215,6 +215,8 @@ enum ProgressTracker {
                     maxWeightReps: lastDayInfo.maxWeightReps,
                     isDropSet: lastDayInfo.isDropSet,
                     isPauseAtTop: lastDayInfo.isPauseAtTop,
+                    isTimedSet: lastDayInfo.isTimedSet,
+                    tempoSeconds: lastDayInfo.tempoSeconds,
                     isPB: lastDayInfo.isPB
                 )
             } else {

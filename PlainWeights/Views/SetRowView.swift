@@ -21,7 +21,7 @@ struct SetRowView: View {
                 .monospacedDigit()
                 .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
-            // Segment 2: Icon Container (120pt fixed, 8pt left padding)
+            // Segment 2: Icon Container (flexible width, fills available space)
             HStack(spacing: 5) {
                 if set.isWarmUp {
                     Circle()
@@ -88,10 +88,7 @@ struct SetRowView: View {
                         }
                 }
             }
-            .frame(width: 120, alignment: .leading)
-            .padding(.leading, 8)
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .trailing)
 
             // Segment 3: Timestamp (50pt fixed, right-aligned)
             Text(Formatters.formatTimeHM(set.timestamp))

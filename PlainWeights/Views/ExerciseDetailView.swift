@@ -87,93 +87,11 @@ struct ExerciseDetailView: View {
             if !todaySets.isEmpty {
                 Section {
                     ForEach(todaySets, id: \.persistentModelID) { set in
-                        HStack(alignment: .center) {
-                            Text(ExerciseSetFormatters.formatSet(set))
-                                .monospacedDigit()
-                                .foregroundStyle(set.isWarmUp ? .secondary : .primary)
-
-                            Spacer()
-
-                            if set.isWarmUp {
-                                Circle()
-                                    .fill(.orange)
-                                    .frame(width: 20, height: 20)
-                                    .overlay {
-                                        Image(systemName: "flame.fill")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(.white)
-                                    }
-                            }
-
-                            if set.isDropSet {
-                                Circle()
-                                    .fill(.teal)
-                                    .frame(width: 20, height: 20)
-                                    .overlay {
-                                        Image(systemName: "chevron.down")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(.white)
-                                    }
-                            }
-
-                            if set.isPauseAtTop {
-                                Circle()
-                                    .fill(.pink)
-                                    .frame(width: 20, height: 20)
-                                    .overlay {
-                                        Image(systemName: "pause.fill")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(.white)
-                                    }
-                            }
-
-                            if set.isTimedSet {
-                                Circle()
-                                    .fill(.black)
-                                    .frame(width: 20, height: 20)
-                                    .overlay {
-                                        if set.tempoSeconds > 0 {
-                                            Text("\(set.tempoSeconds)")
-                                                .font(.system(size: 11))
-                                                .italic()
-                                                .fontWeight(.bold)
-                                                .foregroundStyle(.white)
-                                        } else {
-                                            Image(systemName: "timer")
-                                                .font(.system(size: 10))
-                                                .foregroundStyle(.white)
-                                        }
-                                    }
-                            }
-
-                            if set.isPB {
-                                Circle()
-                                    .fill(.purple)
-                                    .frame(width: 20, height: 20)
-                                    .overlay {
-                                        Text("PB")
-                                            .font(.system(size: 9))
-                                            .italic()
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(.white)
-                                    }
-                            }
-
-                            Text(Formatters.formatTimeHM(set.timestamp))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            addSetConfig = .edit(set: set, exercise: exercise)
-                        }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                deleteSet(set)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
-                            }
-                        }
+                        SetRowView(
+                            set: set,
+                            onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
+                            onDelete: { deleteSet(set) }
+                        )
                     }
                 } header: {
                     Text("TODAY'S SETS")
@@ -189,93 +107,11 @@ struct ExerciseDetailView: View {
                 ForEach(historicDayGroups, id: \.date) { dayGroup in
                     Section {
                         ForEach(dayGroup.sets, id: \.persistentModelID) { set in
-                            HStack(alignment: .center) {
-                                Text(ExerciseSetFormatters.formatSet(set))
-                                    .monospacedDigit()
-                                    .foregroundStyle(set.isWarmUp ? .secondary : .primary)
-
-                                Spacer()
-
-                                if set.isWarmUp {
-                                    Circle()
-                                        .fill(.orange)
-                                        .frame(width: 20, height: 20)
-                                        .overlay {
-                                            Image(systemName: "flame.fill")
-                                                .font(.system(size: 10))
-                                                .foregroundStyle(.white)
-                                        }
-                                }
-
-                                if set.isDropSet {
-                                    Circle()
-                                        .fill(.teal)
-                                        .frame(width: 20, height: 20)
-                                        .overlay {
-                                            Image(systemName: "chevron.down")
-                                                .font(.system(size: 10))
-                                                .foregroundStyle(.white)
-                                        }
-                                }
-
-                                if set.isPauseAtTop {
-                                    Circle()
-                                        .fill(.pink)
-                                        .frame(width: 20, height: 20)
-                                        .overlay {
-                                            Image(systemName: "pause.fill")
-                                                .font(.system(size: 10))
-                                                .foregroundStyle(.white)
-                                        }
-                                }
-
-                                if set.isTimedSet {
-                                    Circle()
-                                        .fill(.black)
-                                        .frame(width: 20, height: 20)
-                                        .overlay {
-                                            if set.tempoSeconds > 0 {
-                                                Text("\(set.tempoSeconds)")
-                                                    .font(.system(size: 11))
-                                                    .italic()
-                                                    .fontWeight(.bold)
-                                                    .foregroundStyle(.white)
-                                            } else {
-                                                Image(systemName: "timer")
-                                                    .font(.system(size: 10))
-                                                    .foregroundStyle(.white)
-                                            }
-                                        }
-                                }
-
-                                if set.isPB {
-                                    Circle()
-                                        .fill(.purple)
-                                        .frame(width: 20, height: 20)
-                                        .overlay {
-                                            Text("PB")
-                                                .font(.system(size: 9))
-                                                .italic()
-                                                .fontWeight(.bold)
-                                                .foregroundStyle(.white)
-                                        }
-                                }
-
-                                Text(Formatters.formatTimeHM(set.timestamp))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                addSetConfig = .edit(set: set, exercise: exercise)
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    deleteSet(set)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
+                            SetRowView(
+                                set: set,
+                                onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
+                                onDelete: { deleteSet(set) }
+                            )
                         }
                     } header: {
                         HStack {

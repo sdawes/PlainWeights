@@ -234,6 +234,7 @@ struct TargetMetricsSection: View {
 
 struct ThisSetSection: View {
     let data: ThisSetData
+    let lastSetTimestamp: Date?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -320,14 +321,24 @@ struct ThisSetSection: View {
                 }
             }
 
-            // Progress pills
-            HStack(spacing: 8) {
-                if let progress = data.weightProgress {
-                    ProgressPillView(text: progress.text, direction: progress.direction)
+            // Progress pills and timer
+            HStack(alignment: .bottom, spacing: 8) {
+                // Progress pills
+                HStack(spacing: 8) {
+                    if let progress = data.weightProgress {
+                        ProgressPillView(text: progress.text, direction: progress.direction)
+                    }
+
+                    if let repsProgress = data.repsProgress {
+                        ProgressPillView(text: repsProgress.text, direction: repsProgress.direction)
+                    }
                 }
 
-                if let repsProgress = data.repsProgress {
-                    ProgressPillView(text: repsProgress.text, direction: repsProgress.direction)
+                Spacer()
+
+                // Rest timer
+                if let timestamp = lastSetTimestamp {
+                    RestTimerView(startTime: timestamp)
                 }
             }
         }
@@ -338,15 +349,9 @@ struct ThisSetSection: View {
 
 struct ProgressBarSection: View {
     let data: ProgressBarData
-    let lastSetTimestamp: Date?
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
-            // Rest timer (right-aligned, above progress bar)
-            if let timestamp = lastSetTimestamp {
-                RestTimerView(startTime: timestamp)
-            }
-
             // Thin progress bar
             GeometryReader { g in
                 ZStack(alignment: .leading) {
@@ -420,11 +425,11 @@ struct MetricViewStats: View {
                     .padding(.bottom, 20)
 
                 // This Set Section
-                ThisSetSection(data: setData)
-                    .padding(.bottom, 8)
+                ThisSetSection(data: setData, lastSetTimestamp: lastSetTimestamp)
+                    .padding(.bottom, 11)
 
                 // Progress Bar Section
-                ProgressBarSection(data: progressBar, lastSetTimestamp: lastSetTimestamp)
+                ProgressBarSection(data: progressBar)
             }
         }
         .padding(.horizontal, 8)

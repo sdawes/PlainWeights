@@ -338,9 +338,15 @@ struct ThisSetSection: View {
 
 struct ProgressBarSection: View {
     let data: ProgressBarData
+    let lastSetTimestamp: Date?
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 8) {
+            // Rest timer (right-aligned, above progress bar)
+            if let timestamp = lastSetTimestamp {
+                RestTimerView(startTime: timestamp)
+            }
+
             // Thin progress bar
             GeometryReader { g in
                 ZStack(alignment: .leading) {
@@ -388,6 +394,7 @@ struct MetricViewStats: View {
     let targetMetrics: TargetMetricsData
     let thisSet: ThisSetData?
     let progressBar: ProgressBarData
+    let lastSetTimestamp: Date?
     let exercise: Exercise
     let sets: [ExerciseSet]
     @Binding var isChartExpanded: Bool
@@ -417,7 +424,7 @@ struct MetricViewStats: View {
                     .padding(.bottom, 20)
 
                 // Progress Bar Section
-                ProgressBarSection(data: progressBar)
+                ProgressBarSection(data: progressBar, lastSetTimestamp: lastSetTimestamp)
             }
         }
         .padding(.horizontal, 8)
@@ -452,6 +459,11 @@ struct ExerciseMetricsView: View {
     // Today's sets
     private var todaySets: [ExerciseSet] {
         TodaySessionCalculator.getTodaysSets(from: sets)
+    }
+
+    // Last set timestamp (for rest timer)
+    private var lastSetTimestamp: Date? {
+        todaySets.first(where: { !$0.isWarmUp })?.timestamp
     }
 
     // Best day metrics (excludes today's sets - only shows all-time PRs from previous days)
@@ -767,6 +779,7 @@ struct ExerciseMetricsView: View {
                 targetMetrics: buildTargetMetricsData(),
                 thisSet: buildThisSetData(),
                 progressBar: buildProgressBarData(),
+                lastSetTimestamp: lastSetTimestamp,
                 exercise: exercise,
                 sets: sets,
                 isChartExpanded: $isChartExpanded

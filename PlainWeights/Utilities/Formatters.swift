@@ -79,6 +79,13 @@ enum Formatters {
         timeHMFormatter.string(from: date)
     }
 
+    /// Format duration in minutes:seconds (e.g., "0:00", "1:30", "3:45")
+    static func formatDuration(_ seconds: TimeInterval) -> String {
+        let minutes = Int(seconds) / 60
+        let remainingSeconds = Int(seconds) % 60
+        return String(format: "%d:%02d", minutes, remainingSeconds)
+    }
+
     /// Format exercise last done date with smart relative display
     /// - Parameter date: The date the exercise was last performed
     /// - Returns: Smart formatted string like "yesterday", "3 days ago", "last week", etc.

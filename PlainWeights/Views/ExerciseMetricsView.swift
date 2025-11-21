@@ -100,7 +100,6 @@ struct TargetMetricsData {
     let weight: Double
     let reps: Int
     let totalVolume: Double
-    let chartToggle: ChartToggleButton
     let isDropSet: Bool
     let isPauseAtTop: Bool
     let isTimedSet: Bool
@@ -222,10 +221,6 @@ struct TargetMetricsSection: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.top, 0)
-
-            // Chart toggle button (on its own line)
-            data.chartToggle
-                .padding(.top, 12)
         }
     }
 }
@@ -402,18 +397,15 @@ struct MetricViewStats: View {
     let lastSetTimestamp: Date?
     let exercise: Exercise
     let sets: [ExerciseSet]
-    @Binding var isChartExpanded: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 1. Target Metrics Section (always visible, includes chart toggle)
+            // 1. Target Metrics Section (always visible)
             TargetMetricsSection(data: targetMetrics)
 
-            // 2. Chart Content (only when expanded)
-            if isChartExpanded {
-                ChartContentView(exercise: exercise, sets: sets)
-                    .padding(.top, 32)
-            }
+            // 2. Chart Content (always visible)
+            ChartContentView(exercise: exercise, sets: sets)
+                .padding(.top, 32)
 
             // 3. Only show remaining sections if sets added today
             if let setData = thisSet {
@@ -443,9 +435,6 @@ struct ExerciseMetricsView: View {
     let sets: [ExerciseSet]
     @Binding var selectedMode: MetricMode
     @Binding var addSetConfig: AddSetConfig?
-
-    // Chart expansion state
-    @State private var isChartExpanded: Bool = false
 
     // MARK: - Computed Properties
 
@@ -676,7 +665,6 @@ struct ExerciseMetricsView: View {
 
     private func buildTargetMetricsData() -> TargetMetricsData {
         let summary = formatLastSessionSummary()
-        let chartToggle = ChartToggleButton(isExpanded: $isChartExpanded)
 
         if selectedMode == .best {
             if let best = bestDayMetrics {
@@ -686,7 +674,6 @@ struct ExerciseMetricsView: View {
                     weight: best.maxWeight,
                     reps: best.repsAtMaxWeight,
                     totalVolume: best.totalVolume,
-                    chartToggle: chartToggle,
                     isDropSet: best.isDropSet,
                     isPauseAtTop: best.isPauseAtTop,
                     isTimedSet: best.isTimedSet,
@@ -700,7 +687,6 @@ struct ExerciseMetricsView: View {
                     weight: 0,
                     reps: 0,
                     totalVolume: 0,
-                    chartToggle: chartToggle,
                     isDropSet: false,
                     isPauseAtTop: false,
                     isTimedSet: false,
@@ -716,7 +702,6 @@ struct ExerciseMetricsView: View {
                     weight: lastInfo.maxWeight,
                     reps: lastInfo.maxWeightReps,
                     totalVolume: lastInfo.volume,
-                    chartToggle: chartToggle,
                     isDropSet: lastInfo.isDropSet,
                     isPauseAtTop: lastInfo.isPauseAtTop,
                     isTimedSet: lastInfo.isTimedSet,
@@ -730,7 +715,6 @@ struct ExerciseMetricsView: View {
                     weight: 0,
                     reps: 0,
                     totalVolume: 0,
-                    chartToggle: chartToggle,
                     isDropSet: false,
                     isPauseAtTop: false,
                     isTimedSet: false,
@@ -786,8 +770,7 @@ struct ExerciseMetricsView: View {
                 progressBar: buildProgressBarData(),
                 lastSetTimestamp: lastSetTimestamp,
                 exercise: exercise,
-                sets: sets,
-                isChartExpanded: $isChartExpanded
+                sets: sets
             )
         }
     }

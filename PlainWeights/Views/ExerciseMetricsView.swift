@@ -88,8 +88,8 @@ struct ProgressPillView: View {
 // MARK: - Metric Mode Enum
 
 enum MetricMode: String, CaseIterable {
-    case last = "Last Session"
-    case best = "Last PB"
+    case last = "Previous"
+    case best = "Best"
 }
 
 // MARK: - Data Structures for Section Components
@@ -247,7 +247,7 @@ struct TargetMetricsSectionWithPicker: View {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                        .frame(width: 100, alignment: .trailing)  // Match picker width for alignment
+                        .frame(width: 140, alignment: .trailing)  // Match picker width for alignment
                 }
             }
 
@@ -327,13 +327,13 @@ struct TargetMetricsSectionWithPicker: View {
 
                 // Mini segmented picker (baseline-aligned with total volume)
                 Picker("Mode", selection: $selectedMode) {
-                    Text("Last").tag(MetricMode.last)
+                    Text("Previous").tag(MetricMode.last)
                     Text("Best").tag(MetricMode.best)
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                .frame(width: 100)
-                .scaleEffect(0.8, anchor: .trailing)  // Anchor to trailing edge for right alignment
+                .frame(width: 140)
+                .scaleEffect(0.75, anchor: .trailing)  // Anchor to trailing edge for right alignment
             }
             .padding(.top, 0)
             .frame(maxWidth: .infinity, alignment: .leading)

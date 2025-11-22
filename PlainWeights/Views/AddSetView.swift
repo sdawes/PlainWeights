@@ -97,7 +97,7 @@ struct SetOptionsToggles: View {
 
                 Toggle("", isOn: $isWarmUpSet)
                     .labelsHidden()
-                    .tint(isWarmUpSet ? Color(red: 0.7, green: 0.1, blue: 0.1) : .blue)
+                    .tint(isWarmUpSet ? .orange : .blue)
             }
 
             // Drop set toggle

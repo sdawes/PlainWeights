@@ -67,13 +67,12 @@ struct ExerciseDetailView: View {
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             .padding(.bottom, 0)
 
-            // Metrics container section
+            // Target metrics card (Last Max Weight / Best Ever)
             Section {
-                ExerciseMetricsView(
+                TargetMetricsCard(
                     exercise: exercise,
                     sets: sets,
-                    selectedMode: $selectedMode,
-                    addSetConfig: $addSetConfig
+                    selectedMode: $selectedMode
                 )
                 .padding(16)
                 .background(Color(.systemBackground))
@@ -82,6 +81,37 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+
+            // Chart card
+            Section {
+                ChartCard(
+                    exercise: exercise,
+                    sets: sets
+                )
+                .padding(16)
+                .background(Color(.systemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+
+            // This Set metrics card (only when sets added today)
+            if TodaySessionCalculator.getTodaysSets(from: sets).first(where: { !$0.isWarmUp }) != nil {
+                Section {
+                    ThisSetCard(
+                        exercise: exercise,
+                        sets: sets,
+                        selectedMode: selectedMode
+                    )
+                    .padding(16)
+                    .background(Color(.systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+            }
 
             // Today's sets section
             if !todaySets.isEmpty {
@@ -142,7 +172,7 @@ struct ExerciseDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .listSectionSpacing(20)
+        .listSectionSpacing(10)
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)

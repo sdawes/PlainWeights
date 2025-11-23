@@ -76,28 +76,29 @@ struct ExerciseDetailView: View {
                 )
                 .padding(16)
                 .background(Color(.systemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .cornerRadius(16)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
 
             // This Set metrics card (only when sets added today - moved here for logical grouping)
-            if TodaySessionCalculator.getTodaysSets(from: sets).first(where: { !$0.isWarmUp }) != nil {
-                Section {
-                    ThisSetCard(
-                        exercise: exercise,
-                        sets: sets,
-                        selectedMode: selectedMode
-                    )
-                    .padding(16)
-                    .background(Color(.systemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                }
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-            }
+            // COMMENTED OUT - Testing new inline progress design
+//            if TodaySessionCalculator.getTodaysSets(from: sets).first(where: { !$0.isWarmUp }) != nil {
+//                Section {
+//                    ThisSetCard(
+//                        exercise: exercise,
+//                        sets: sets,
+//                        selectedMode: selectedMode
+//                    )
+//                    .padding(16)
+//                    .background(Color(.systemBackground))
+//                    .clipShape(RoundedRectangle(cornerRadius: 16))
+//                }
+//                .listRowSeparator(.hidden)
+//                .listRowBackground(Color.clear)
+//                .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+//            }
 
             // Chart card
             Section {
@@ -116,11 +117,13 @@ struct ExerciseDetailView: View {
             // Today's sets section
             if !todaySets.isEmpty {
                 Section {
-                    ForEach(todaySets, id: \.persistentModelID) { set in
+                    ForEach(todaySets.indices, id: \.self) { index in
+                        let set = todaySets[index]
                         SetRowView(
                             set: set,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
-                            onDelete: { deleteSet(set) }
+                            onDelete: { deleteSet(set) },
+                            progressComparison: index == 0 ? calculateProgressComparison(for: set) : nil
                         )
                     }
                 } header: {
@@ -302,6 +305,56 @@ struct ExerciseDetailView: View {
             dismiss()
         } catch {
             print("Failed to delete exercise: \(error)")
+        }
+    }
+
+    /// Calculate progress comparison data for the first set of today
+    private func calculateProgressComparison(for currentSet: ExerciseSet) -> ProgressComparison? {
+        // Get comparison data based on selected mode
+        if selectedMode == .last {
+            // Compare against last session's max weight
+            let progressState = ProgressTracker.createProgressState(from: sets)
+            guard let lastInfo = progressState.lastCompletedDayInfo else {
+                return nil
+            }
+
+            let weightDelta = currentSet.weight - lastInfo.maxWeight
+            let repsDelta = currentSet.reps - lastInfo.maxWeightReps
+
+            // Calculate volume progress
+            let todayVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
+            let volumeDelta = todayVolume - lastInfo.volume
+            let volumeProgress = lastInfo.volume > 0 ? volumeDelta / lastInfo.volume : 0
+
+            return ProgressComparison(
+                weightDelta: weightDelta,
+                repsDelta: repsDelta,
+                comparisonMode: "(vs Last)",
+                volumeProgress: volumeProgress
+            )
+        } else {
+            // Compare against best ever
+            let setsExcludingToday = sets.filter {
+                Calendar.current.startOfDay(for: $0.timestamp) < Calendar.current.startOfDay(for: Date())
+            }
+            guard let bestMetrics = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday) else {
+                return nil
+            }
+
+            let weightDelta = currentSet.weight - bestMetrics.maxWeight
+            let repsDelta = currentSet.reps - bestMetrics.repsAtMaxWeight
+
+            // Calculate volume progress
+            let todayVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
+            let volumeDelta = todayVolume - bestMetrics.totalVolume
+            let volumeProgress = bestMetrics.totalVolume > 0 ? volumeDelta / bestMetrics.totalVolume : 0
+
+            return ProgressComparison(
+                weightDelta: weightDelta,
+                repsDelta: repsDelta,
+                comparisonMode: "(vs Best)",
+                volumeProgress: volumeProgress
+            )
         }
     }
 }

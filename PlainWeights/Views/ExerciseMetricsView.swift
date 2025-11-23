@@ -49,7 +49,7 @@ struct HeroMetricView: View {
             }
 
             // Total volume (medium, secondary)
-            Text("\(Formatters.formatVolume(totalVolume)) kg total")
+            Text("\(Formatters.formatVolume(totalVolume)) kg total volume")
                 .font(.subheadline)
                 .foregroundStyle(.white.opacity(0.7))
         }
@@ -217,7 +217,7 @@ struct TargetMetricsSection: View {
             }
 
             // Total volume (will have picker added by parent)
-            Text("\(Formatters.formatVolume(data.totalVolume)) kg total")
+            Text("\(Formatters.formatVolume(data.totalVolume)) kg total volume")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.top, 0)
@@ -319,7 +319,7 @@ struct TargetMetricsSectionWithPicker: View {
 
             // Total volume with picker in same HStack for baseline alignment
             HStack(alignment: .lastTextBaseline) {
-                Text("\(Formatters.formatVolume(data.totalVolume)) kg total")
+                Text("\(Formatters.formatVolume(data.totalVolume)) kg total volume")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 

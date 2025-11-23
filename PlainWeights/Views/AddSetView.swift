@@ -78,6 +78,21 @@ struct SetOptionsToggles: View {
 
     var body: some View {
         VStack(spacing: 16) {
+            // Info message about mutual exclusivity
+            HStack(spacing: 8) {
+                Image(systemName: "info.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.blue)
+
+                Text("You can select only one set type at a time")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.blue.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+
             // Warm-up toggle
             HStack(spacing: 10) {
                 Circle()
@@ -95,7 +110,18 @@ struct SetOptionsToggles: View {
 
                 Spacer()
 
-                Toggle("", isOn: $isWarmUpSet)
+                Toggle("", isOn: Binding(
+                    get: { isWarmUpSet },
+                    set: { newValue in
+                        if newValue {
+                            // Turn off other toggles when this one is enabled
+                            isDropSet = false
+                            isPauseAtTop = false
+                            isTimedSet = false
+                        }
+                        isWarmUpSet = newValue
+                    }
+                ))
                     .labelsHidden()
                     .tint(isWarmUpSet ? .orange : .blue)
             }
@@ -117,7 +143,18 @@ struct SetOptionsToggles: View {
 
                 Spacer()
 
-                Toggle("", isOn: $isDropSet)
+                Toggle("", isOn: Binding(
+                    get: { isDropSet },
+                    set: { newValue in
+                        if newValue {
+                            // Turn off other toggles when this one is enabled
+                            isWarmUpSet = false
+                            isPauseAtTop = false
+                            isTimedSet = false
+                        }
+                        isDropSet = newValue
+                    }
+                ))
                     .labelsHidden()
                     .tint(isDropSet ? .teal : .blue)
             }
@@ -139,7 +176,18 @@ struct SetOptionsToggles: View {
 
                 Spacer()
 
-                Toggle("", isOn: $isPauseAtTop)
+                Toggle("", isOn: Binding(
+                    get: { isPauseAtTop },
+                    set: { newValue in
+                        if newValue {
+                            // Turn off other toggles when this one is enabled
+                            isWarmUpSet = false
+                            isDropSet = false
+                            isTimedSet = false
+                        }
+                        isPauseAtTop = newValue
+                    }
+                ))
                     .labelsHidden()
                     .tint(isPauseAtTop ? .pink : .blue)
             }
@@ -180,7 +228,18 @@ struct SetOptionsToggles: View {
 
                 Spacer()
 
-                Toggle("", isOn: $isTimedSet)
+                Toggle("", isOn: Binding(
+                    get: { isTimedSet },
+                    set: { newValue in
+                        if newValue {
+                            // Turn off other toggles when this one is enabled
+                            isWarmUpSet = false
+                            isDropSet = false
+                            isPauseAtTop = false
+                        }
+                        isTimedSet = newValue
+                    }
+                ))
                     .labelsHidden()
                     .tint(isTimedSet ? .black : .blue)
             }

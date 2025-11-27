@@ -78,21 +78,6 @@ struct SetOptionsToggles: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Info message about mutual exclusivity
-            HStack(spacing: 8) {
-                Image(systemName: "info.circle.fill")
-                    .font(.caption)
-                    .foregroundStyle(.blue)
-
-                Text("You can select only one set type at a time")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color.blue.opacity(0.1))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-
             // Warm-up toggle
             HStack(spacing: 10) {
                 Circle()

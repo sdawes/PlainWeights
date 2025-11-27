@@ -297,7 +297,7 @@ struct SetRowView: View {
         }
         .listRowBackground(
             progressComparison != nil ?
-                Color.blue.opacity(0.05) : Color.clear
+                Color.gray.opacity(0.1) : Color(.systemBackground)
         )
         .listRowSeparator(progressComparison != nil ? .hidden : .automatic)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {

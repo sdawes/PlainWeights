@@ -159,9 +159,27 @@ struct SetRowView: View {
 
                 // Line 3: Volume progress text with timer on right
                 HStack(alignment: .top, spacing: 8) {
-                    Text(formatVolumeProgress(progress.volumeProgress, comparisonMode: progress.comparisonMode))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    // Volume progress with colored percentage
+                    HStack(spacing: 2) {
+                        Text("Total Volume ")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+
+                        if progress.volumeProgress == 0 {
+                            Text("same")
+                                .font(.caption2)
+                                .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
+                        } else {
+                            let percentage = Int(progress.volumeProgress * 100)
+                            Text(progress.volumeProgress > 0 ? "+\(percentage)%" : "\(percentage)%")
+                                .font(.caption2)
+                                .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
+                        }
+
+                        Text(" of \(progress.comparisonMode == "(vs Last)" ? "last" : "best")")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
 
                     Spacer()
 
@@ -341,6 +359,16 @@ struct SetRowView: View {
             return "Total Volume \(percentage)% of \(comparisonText)"
         } else {
             return "Total Volume same as \(comparisonText)"
+        }
+    }
+
+    private func volumeProgressColor(for progress: Double) -> Color {
+        if progress > 0 {
+            return .pw_green
+        } else if progress < 0 {
+            return .pw_red
+        } else {
+            return .pw_blue
         }
     }
 }

@@ -43,4 +43,6 @@ extension Color {
     // Progress indicators
     /// Red for negative progress indicators
     static let pw_red = Color.red
+    /// Green for positive progress indicators
+    static let pw_green = Color.green
 }

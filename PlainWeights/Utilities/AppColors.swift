@@ -45,4 +45,6 @@ extension Color {
     static let pw_red = Color.red
     /// Green for positive progress indicators
     static let pw_green = Color.green
+    /// Amber/gold for overflow/bonus progress beyond 100%
+    static let pw_amber = Color(red: 0.95, green: 0.66, blue: 0.11) // #f2a81d
 }

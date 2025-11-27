@@ -140,6 +140,8 @@ struct SetRowView: View {
 
                 // Line 2: Progress bar
                 GeometryReader { geometry in
+                    let totalRatio = 1.0 + progress.volumeProgress // e.g., 1.5 for +50%
+
                     ZStack(alignment: .leading) {
                         // Background track
                         Rectangle()
@@ -147,15 +149,46 @@ struct SetRowView: View {
                             .frame(height: 4)
                             .cornerRadius(2)
 
-                        // Progress fill
-                        Rectangle()
-                            .fill(progress.volumeProgress >= 0 ? Color.green : Color.pw_red)
-                            .frame(width: geometry.size.width * min(abs(progress.volumeProgress), 1.0), height: 4)
-                            .cornerRadius(2)
+                        if totalRatio > 1.0 {
+                            // Exceeded 100%: blue (baseline) + green (bonus) with marker
+                            let markerPosition = geometry.size.width * (1.0 / totalRatio)
+                            let overflowWidth = geometry.size.width - markerPosition
+
+                            // Blue segment (up to 100% - baseline met)
+                            Rectangle()
+                                .fill(Color.pw_blue)
+                                .frame(width: markerPosition, height: 4)
+                                .cornerRadius(2)
+
+                            // Green segment (overflow beyond 100% - bonus)
+                            Rectangle()
+                                .fill(Color.green)
+                                .frame(width: overflowWidth, height: 4)
+                                .cornerRadius(2)
+                                .position(x: markerPosition + overflowWidth / 2, y: 6)
+
+                            // Black vertical marker at 100% (centered, extends above and below bar)
+                            Rectangle()
+                                .fill(Color.black)
+                                .frame(width: 2, height: 12)
+                                .position(x: markerPosition, y: 6)
+                        } else if totalRatio >= 1.0 {
+                            // Exactly 100%: full blue bar (target met)
+                            Rectangle()
+                                .fill(Color.pw_blue)
+                                .frame(width: geometry.size.width, height: 4)
+                                .cornerRadius(2)
+                        } else {
+                            // Below 100%: red partial fill (behind target)
+                            Rectangle()
+                                .fill(Color.pw_red)
+                                .frame(width: geometry.size.width * max(totalRatio, 0), height: 4)
+                                .cornerRadius(2)
+                        }
                     }
                 }
-                .frame(height: 4)
-                .padding(.bottom, 4)
+                .frame(height: 12) // Accommodate marker extending above and below
+                .padding(.bottom, 2)
 
                 // Line 3: Volume progress text with timer on right
                 HStack(alignment: .top, spacing: 8) {

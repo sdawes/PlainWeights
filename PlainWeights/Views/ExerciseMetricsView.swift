@@ -122,6 +122,7 @@ struct ThisSetData {
 
 struct ProgressBarData {
     let progressRatio: CGFloat
+    let unclampedRatio: CGFloat
     let barFillColor: Color
     let progressText: String
 }
@@ -472,28 +473,45 @@ struct ProgressBarSection: View {
                         .frame(height: 4)
                         .frame(maxHeight: .infinity, alignment: .center)
 
-                    // Fill (capped at track width)
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(data.barFillColor)
-                        .frame(
-                            width: min(g.size.width, g.size.width * data.progressRatio),
-                            height: 4
-                        )
-                        .frame(maxHeight: .infinity, alignment: .center)
+                    if data.unclampedRatio > 1.0 {
+                        // Exceeded 100%: blue (baseline) + green (bonus) with marker
+                        let markerPosition = g.size.width * (1.0 / data.unclampedRatio)
+                        let overflowWidth = g.size.width - markerPosition
 
-                    // 100% goal line, only when > 100%
-                    if data.progressRatio > 1.0 {
+                        // Blue segment (up to 100% - baseline met)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.pw_blue)
+                            .frame(width: markerPosition, height: 4)
+                            .frame(maxHeight: .infinity, alignment: .center)
+
+                        // Green segment (overflow beyond 100% - bonus)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.green)
+                            .frame(width: overflowWidth, height: 4)
+                            .position(x: markerPosition + overflowWidth / 2, y: 6)
+
+                        // Black vertical marker at 100% (centered, extends above and below bar)
                         Rectangle()
-                            .fill(Color.secondary.opacity(0.5))
-                            .frame(width: 2, height: 8)
-                            // centre at y = 4 (mid of 8pt), x = width - 1 (keep inside)
-                            .position(x: g.size.width - 1, y: 4)
-                            .allowsHitTesting(false)
+                            .fill(Color.black)
+                            .frame(width: 2, height: 12)
+                            .position(x: markerPosition, y: 6)
+                    } else if data.unclampedRatio >= 1.0 {
+                        // Exactly 100%: full blue bar (target met)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.pw_blue)
+                            .frame(width: g.size.width, height: 4)
+                            .frame(maxHeight: .infinity, alignment: .center)
+                    } else {
+                        // Below 100%: red partial fill (behind target)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.pw_red)
+                            .frame(width: g.size.width * data.progressRatio, height: 4)
+                            .frame(maxHeight: .infinity, alignment: .center)
                     }
                 }
-                .frame(height: 8) // <- prevents clipping of the 8pt line
+                .frame(height: 12)
             }
-            .frame(height: 8)
+            .frame(height: 12)
             .frame(maxWidth: .infinity)
 
             // Progress percentage text (right-aligned)
@@ -736,6 +754,12 @@ struct ThisSetCard: View {
         return CGFloat(state.progressBarRatio)
     }
 
+    // Unclamped progress ratio (can exceed 1.0)
+    private var progressRatioUnclamped: CGFloat {
+        guard let state = progressState else { return 0 }
+        return CGFloat(state.progressRatioUnclamped)
+    }
+
     // Progress percentage
     private var progressPercentage: Int {
         guard let state = progressState else { return 0 }
@@ -773,6 +797,7 @@ struct ThisSetCard: View {
     private func buildProgressBarData() -> ProgressBarData {
         return ProgressBarData(
             progressRatio: progressBarRatio,
+            unclampedRatio: progressRatioUnclamped,
             barFillColor: progressState?.barFillColor ?? .blue,
             progressText: formattedProgressText
         )
@@ -911,6 +936,12 @@ struct ExerciseMetricsView: View {
     private var progressBarRatio: CGFloat {
         guard let state = progressState else { return 0 }
         return CGFloat(state.progressBarRatio)
+    }
+
+    // Unclamped progress ratio (can exceed 1.0)
+    private var progressRatioUnclamped: CGFloat {
+        guard let state = progressState else { return 0 }
+        return CGFloat(state.progressRatioUnclamped)
     }
 
     // Target volume based on selected mode (Last vs Best)
@@ -1171,6 +1202,7 @@ struct ExerciseMetricsView: View {
     private func buildProgressBarData() -> ProgressBarData {
         return ProgressBarData(
             progressRatio: progressBarRatio,
+            unclampedRatio: progressRatioUnclamped,
             barFillColor: progressState?.barFillColor ?? .blue,
             progressText: formattedProgressText
         )

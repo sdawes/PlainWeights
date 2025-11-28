@@ -12,13 +12,13 @@ struct AnimatedGradientBackground: View {
 
     var body: some View {
         ZStack {
-            // Base light grey
-            Color(red: 0.95, green: 0.95, blue: 0.95)
+            // Base with slight blue tint
+            Color(red: 0.93, green: 0.95, blue: 0.97)
 
             // Soft blue glow (more saturated)
             RadialGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.70, green: 0.82, blue: 0.98).opacity(0.75),
+                    Color(red: 0.60, green: 0.78, blue: 0.98).opacity(0.85),
                     Color.clear
                 ]),
                 center: .topLeading,
@@ -28,10 +28,10 @@ struct AnimatedGradientBackground: View {
             .blur(radius: 70)
             .offset(x: animate ? -60 : -20, y: animate ? -120 : -60)
 
-            // Soft green glow (more saturated)
+            // Soft blue glow (bottom right - secondary)
             RadialGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.75, green: 0.94, blue: 0.80).opacity(0.75),
+                    Color(red: 0.65, green: 0.80, blue: 0.96).opacity(0.75),
                     Color.clear
                 ]),
                 center: .bottomTrailing,
@@ -41,10 +41,10 @@ struct AnimatedGradientBackground: View {
             .blur(radius: 70)
             .offset(x: animate ? 120 : 60, y: animate ? 160 : 120)
 
-            // Neutral middle lift
+            // Blue-tinted middle lift
             RadialGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.92, green: 0.92, blue: 0.94).opacity(0.50),
+                    Color(red: 0.88, green: 0.91, blue: 0.96).opacity(0.55),
                     Color.clear
                 ]),
                 center: .center,

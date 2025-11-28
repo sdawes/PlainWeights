@@ -148,7 +148,20 @@ struct ChartContentView: View {
                             .foregroundStyle(.green)
                             .symbolSize(20)  // Smaller dot
                         } else {
-                            // Multiple points: show green line only (solid, no gradient)
+                            // Multiple points: show green line with gradient
+                            // Subtle gradient under reps line
+                            AreaMark(
+                                x: .value("Date", dataPoint.date),
+                                y: .value("Reps", dataPoint.reps)
+                            )
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.green.opacity(0.15), .green.opacity(0.02)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+
                             LineMark(
                                 x: .value("Date", dataPoint.date),
                                 y: .value("Reps", dataPoint.reps)

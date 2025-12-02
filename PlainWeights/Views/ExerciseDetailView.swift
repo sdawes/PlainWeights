@@ -333,7 +333,9 @@ struct ExerciseDetailView: View {
                 weightDelta: weightDelta,
                 repsDelta: repsDelta,
                 comparisonMode: "(vs Last)",
-                volumeProgress: volumeProgress
+                volumeProgress: volumeProgress,
+                cumulativeVolume: cumulativeVolume,
+                comparisonVolume: lastInfo.volume
             )
         } else {
             // Compare against best ever
@@ -355,7 +357,9 @@ struct ExerciseDetailView: View {
                 weightDelta: weightDelta,
                 repsDelta: repsDelta,
                 comparisonMode: "(vs Best)",
-                volumeProgress: volumeProgress
+                volumeProgress: volumeProgress,
+                cumulativeVolume: cumulativeVolume,
+                comparisonVolume: bestMetrics.totalVolume
             )
         }
     }

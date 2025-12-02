@@ -15,7 +15,9 @@ struct ProgressComparison {
     let weightDelta: Double  // Difference from comparison weight
     let repsDelta: Int       // Difference from comparison reps
     let comparisonMode: String  // "vs Last" or "vs Best"
-    let volumeProgress: Double  // Percentage progress (0.0 to 1.0)
+    let volumeProgress: Double  // Percentage progress (e.g., 0.5 = 50%, -0.2 = -20%)
+    let cumulativeVolume: Double  // Current cumulative volume in kg
+    let comparisonVolume: Double  // Last/best session volume in kg for comparison
 }
 
 // MARK: - Set Row View
@@ -136,72 +138,58 @@ struct SetRowView: View {
                         .foregroundStyle(.secondary)
                         .padding(.leading, 4)
                 }
-                .padding(.bottom, 8)
+                .padding(.bottom, 12)
 
-                // Line 2: Progress bar (fixed height, badge as overlay)
-                ZStack(alignment: .trailing) {
-                    // Progress bar (full width)
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            // Background track
+                // Line 2: Progress bar
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Background track
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(height: 4)
+                            .cornerRadius(2)
+
+                        if progress.volumeProgress >= 0 {
+                            // At or over 100%: Full green bar
                             Rectangle()
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(height: 4)
+                                .fill(Color.green)
+                                .frame(width: geometry.size.width, height: 4)
                                 .cornerRadius(2)
-
-                            if progress.volumeProgress >= 0 {
-                                // At or over 100%: Full green bar
-                                Rectangle()
-                                    .fill(Color.green)
-                                    .frame(width: geometry.size.width, height: 4)
-                                    .cornerRadius(2)
-                            } else {
-                                // Under 100%: Red partial fill
-                                let fillRatio = max(1.0 + progress.volumeProgress, 0)
-                                Rectangle()
-                                    .fill(Color.pw_red)
-                                    .frame(width: geometry.size.width * fillRatio, height: 4)
-                                    .cornerRadius(2)
-                            }
+                        } else {
+                            // Under 100%: Red partial fill
+                            let fillRatio = max(1.0 + progress.volumeProgress, 0)
+                            Rectangle()
+                                .fill(Color.pw_red)
+                                .frame(width: geometry.size.width * fillRatio, height: 4)
+                                .cornerRadius(2)
                         }
                     }
-                    .frame(height: 4)
-
-                    // Overflow badge (overlaid, doesn't affect height)
-                    if progress.volumeProgress > 0 {
-                        Text("+\(Int(progress.volumeProgress * 100))%")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.green)
-                            .clipShape(Capsule())
-                            .padding(.leading, 6)
-                    }
                 }
-                .frame(height: 18)
+                .frame(height: 4)
 
                 // Line 3: Volume progress text with timer on right
                 HStack(alignment: .top, spacing: 8) {
-                    // Volume progress with colored percentage
+                    // Volume progress showing cumulative kg and percentage of comparison
                     HStack(spacing: 2) {
-                        Text("Total Volume ")
+                        Text("Total Volume: ")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
 
-                        if progress.volumeProgress == 0 {
-                            Text("same")
-                                .font(.caption2)
-                                .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
-                        } else {
-                            let percentage = Int(progress.volumeProgress * 100)
-                            Text(progress.volumeProgress > 0 ? "+\(percentage)%" : "\(percentage)%")
-                                .font(.caption2)
-                                .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
-                        }
+                        Text("\(Formatters.formatVolume(progress.cumulativeVolume)) kg")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.primary)
 
-                        Text(" of \(progress.comparisonMode == "(vs Last)" ? "last" : "best")")
+                        Text(" (")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+
+                        let percentage = Int((progress.cumulativeVolume / progress.comparisonVolume) * 100)
+                        Text("\(percentage)%")
+                            .font(.caption2)
+                            .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
+
+                        Text(" of \(Formatters.formatVolume(progress.comparisonVolume)) kg)")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }

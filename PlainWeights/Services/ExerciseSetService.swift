@@ -99,7 +99,47 @@ enum ExerciseSetService {
         _ set: ExerciseSet,
         context: ModelContext
     ) throws {
+        let wasPB = set.isPB
+        let exercise = set.exercise
+
         context.delete(set)
+        try context.save()
+
+        // If deleted set was PB, recalculate for the exercise
+        if wasPB, let exercise = exercise {
+            try recalculatePB(for: exercise, context: context)
+        }
+    }
+
+    /// Recalculate PB for an exercise after a PB set is deleted
+    /// - Parameters:
+    ///   - exercise: The exercise to recalculate PB for
+    ///   - context: SwiftData model context
+    static func recalculatePB(for exercise: Exercise, context: ModelContext) throws {
+        let exerciseID = exercise.persistentModelID
+        let descriptor = FetchDescriptor<ExerciseSet>(
+            predicate: #Predicate<ExerciseSet> { set in
+                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp
+            }
+        )
+
+        let allWorkingSets = try context.fetch(descriptor)
+
+        // Clear all PB flags
+        for set in allWorkingSets {
+            set.isPB = false
+        }
+
+        // Find new PB (max weight, then max reps, then earliest timestamp)
+        guard let maxWeight = allWorkingSets.map({ $0.weight }).max() else { return }
+        let setsAtMaxWeight = allWorkingSets.filter { $0.weight == maxWeight }
+        guard let maxReps = setsAtMaxWeight.map({ $0.reps }).max() else { return }
+        let bestSets = setsAtMaxWeight.filter { $0.reps == maxReps }
+
+        if let newPB = bestSets.min(by: { $0.timestamp < $1.timestamp }) {
+            newPB.isPB = true
+        }
+
         try context.save()
     }
 

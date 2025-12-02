@@ -25,31 +25,54 @@ struct SetRowView: View {
     let onTap: () -> Void
     let onDelete: () -> Void
     let progressComparison: ProgressComparison?  // Optional progress data for first set
+    let cumulativeVolume: Double  // Running total of weight × reps up to and including this set
 
-    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, progressComparison: ProgressComparison? = nil) {
+    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, progressComparison: ProgressComparison? = nil, cumulativeVolume: Double = 0) {
         self.set = set
         self.onTap = onTap
         self.onDelete = onDelete
         self.progressComparison = progressComparison
+        self.cumulativeVolume = cumulativeVolume
     }
 
     var body: some View {
         // New 5-column layout
         HStack(spacing: 0) {
-            // Column 1
-            Text("1")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .border(Color.gray)
+            // Column 1 - Weight
+            VStack(spacing: 2) {
+                Text("Weight")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text("\(Formatters.formatWeight(set.weight)) kg")
+                    .font(.body)
+                    .monospacedDigit()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .border(Color.gray)
 
-            // Column 2
-            Text("2")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .border(Color.gray)
+            // Column 2 - Reps
+            VStack(spacing: 2) {
+                Text("Reps")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text("\(set.reps)")
+                    .font(.body)
+                    .monospacedDigit()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .border(Color.gray)
 
-            // Column 3
-            Text("3")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .border(Color.gray)
+            // Column 3 - Cumulative Total
+            VStack(spacing: 2) {
+                Text("Total")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text("\(Formatters.formatVolume(cumulativeVolume))")
+                    .font(.body)
+                    .monospacedDigit()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .border(Color.gray)
 
             // Column 4
             Text("4")

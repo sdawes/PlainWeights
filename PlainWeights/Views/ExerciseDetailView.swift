@@ -119,11 +119,16 @@ struct ExerciseDetailView: View {
                 Section {
                     ForEach(todaySets.indices, id: \.self) { index in
                         let set = todaySets[index]
+                        // Calculate cumulative volume up to and including this set
+                        let cumulativeVolume = todaySets.prefix(index + 1).reduce(0.0) { total, s in
+                            total + (s.weight * Double(s.reps))
+                        }
                         SetRowView(
                             set: set,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            progressComparison: index == 0 ? calculateProgressComparison(for: set) : nil
+                            progressComparison: index == 0 ? calculateProgressComparison(for: set) : nil,
+                            cumulativeVolume: cumulativeVolume
                         )
                     }
                 } header: {
@@ -139,11 +144,16 @@ struct ExerciseDetailView: View {
             if !historicDayGroups.isEmpty {
                 ForEach(historicDayGroups, id: \.date) { dayGroup in
                     Section {
-                        ForEach(dayGroup.sets, id: \.persistentModelID) { set in
+                        ForEach(Array(dayGroup.sets.enumerated()), id: \.element.persistentModelID) { index, set in
+                            // Calculate cumulative volume up to and including this set within the day
+                            let cumulativeVolume = dayGroup.sets.prefix(index + 1).reduce(0.0) { total, s in
+                                total + (s.weight * Double(s.reps))
+                            }
                             SetRowView(
                                 set: set,
                                 onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
-                                onDelete: { deleteSet(set) }
+                                onDelete: { deleteSet(set) },
+                                cumulativeVolume: cumulativeVolume
                             )
                         }
                     } header: {

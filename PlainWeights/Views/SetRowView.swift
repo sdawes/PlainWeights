@@ -41,52 +41,59 @@ struct SetRowView: View {
     var body: some View {
         // 6-column layout
         HStack(spacing: 0) {
-            // Column 0 - Set Number
+            // Column 0 - Set Number (left-aligned)
             Text("\(setNumber)")
                 .font(.body)
                 .fontWeight(.bold)
                 .monospacedDigit()
-                .frame(width: 30)
+                .lineLimit(1)
+                .frame(width: 30, alignment: .leading)
                 .frame(maxHeight: .infinity)
                         
             // Column 1 - Weight (wider)
-            VStack(spacing: 2) {
+            VStack(spacing: 3) {
                 Text("Weight")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
                 Text("\(Formatters.formatWeight(set.weight)) kg")
                     .font(.body)
                     .monospacedDigit()
+                    .lineLimit(1)
                 if let progress = progressComparison {
                     progressPill(delta: progress.weightDelta, unit: "kg")
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .layoutPriority(1)
-                        
+
             // Column 2 - Reps (wider)
-            VStack(spacing: 2) {
+            VStack(spacing: 3) {
                 Text("Reps")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
                 Text("\(set.reps) rep")
                     .font(.body)
                     .monospacedDigit()
+                    .lineLimit(1)
                 if let progress = progressComparison {
                     progressPill(delta: Double(progress.repsDelta), unit: "reps")
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .layoutPriority(1)
-                        
+
             // Column 3 - Cumulative Total (wider)
-            VStack(spacing: 2) {
+            VStack(spacing: 3) {
                 Text("Total")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
                 Text("\(Formatters.formatVolume(cumulativeVolume)) kg")
                     .font(.body)
                     .monospacedDigit()
+                    .lineLimit(1)
                 if let progress = progressComparison {
                     let volumeDelta = cumulativeVolume - progress.lastSessionVolume
                     progressPill(delta: volumeDelta, unit: "kg")
@@ -94,15 +101,8 @@ struct SetRowView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .layoutPriority(1)
-                        
-            // Column 4 - Time
-            Text(Formatters.formatTimeHM(set.timestamp))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(width: 45)
-                .frame(maxHeight: .infinity)
-                
-            // Column 5 - Icons (narrow, stacked vertically)
+
+            // Column 4 - Icons (narrow, stacked vertically)
             VStack(spacing: 2) {
                 if set.isWarmUp {
                     Circle()
@@ -157,9 +157,17 @@ struct SetRowView: View {
                         }
                 }
             }
-            .frame(width: 24, alignment: .center)
+            .frame(width: 30, alignment: .center)
             .frame(maxHeight: .infinity)
-                    }
+
+            // Column 5 - Time (center-aligned)
+            Text(Formatters.formatTimeHM(set.timestamp))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .frame(width: 38, alignment: .center)
+                .frame(maxHeight: .infinity)
+        }
         .frame(height: 44)
         .padding(8)
         .contentShape(Rectangle())

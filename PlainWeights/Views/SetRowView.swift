@@ -27,18 +27,28 @@ struct SetRowView: View {
     let onDelete: () -> Void
     let progressComparison: ProgressComparison?  // Optional progress data for first set
     let cumulativeVolume: Double  // Running total of weight × reps up to and including this set
+    let setNumber: Int  // 1-based set number for display
 
-    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, progressComparison: ProgressComparison? = nil, cumulativeVolume: Double = 0) {
+    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, progressComparison: ProgressComparison? = nil, cumulativeVolume: Double = 0, setNumber: Int = 0) {
         self.set = set
         self.onTap = onTap
         self.onDelete = onDelete
         self.progressComparison = progressComparison
         self.cumulativeVolume = cumulativeVolume
+        self.setNumber = setNumber
     }
 
     var body: some View {
-        // New 5-column layout
+        // 6-column layout
         HStack(spacing: 0) {
+            // Column 0 - Set Number
+            Text("\(setNumber)")
+                .font(.body)
+                .fontWeight(.bold)
+                .monospacedDigit()
+                .frame(width: 30)
+                .frame(maxHeight: .infinity)
+                        
             // Column 1 - Weight (wider)
             VStack(spacing: 2) {
                 Text("Weight")
@@ -53,14 +63,13 @@ struct SetRowView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .layoutPriority(1)
-            .border(Color.gray)
-
+                        
             // Column 2 - Reps (wider)
             VStack(spacing: 2) {
                 Text("Reps")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Text("\(set.reps)")
+                Text("\(set.reps) rep")
                     .font(.body)
                     .monospacedDigit()
                 if let progress = progressComparison {
@@ -69,14 +78,13 @@ struct SetRowView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .layoutPriority(1)
-            .border(Color.gray)
-
+                        
             // Column 3 - Cumulative Total (wider)
             VStack(spacing: 2) {
                 Text("Total")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                Text("\(Formatters.formatVolume(cumulativeVolume))")
+                Text("\(Formatters.formatVolume(cumulativeVolume)) kg")
                     .font(.body)
                     .monospacedDigit()
                 if let progress = progressComparison {
@@ -86,75 +94,72 @@ struct SetRowView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .layoutPriority(1)
-            .border(Color.gray)
-
-            // Column 4 - Icons (narrower, right-aligned)
-            HStack(spacing: 4) {
+                        
+            // Column 4 - Time
+            Text(Formatters.formatTimeHM(set.timestamp))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(width: 45)
+                .frame(maxHeight: .infinity)
+                
+            // Column 5 - Icons (narrow, stacked vertically)
+            VStack(spacing: 2) {
                 if set.isWarmUp {
                     Circle()
                         .fill(.orange)
-                        .frame(width: 20, height: 20)
+                        .frame(width: 16, height: 16)
                         .overlay {
                             Image(systemName: "flame.fill")
-                                .font(.system(size: 10))
+                                .font(.system(size: 8))
                                 .foregroundStyle(.white)
                         }
                 }
                 if set.isDropSet {
                     Circle()
                         .fill(.teal)
-                        .frame(width: 20, height: 20)
+                        .frame(width: 16, height: 16)
                         .overlay {
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 10))
+                                .font(.system(size: 8))
                                 .foregroundStyle(.white)
                         }
                 }
                 if set.isPauseAtTop {
                     Circle()
                         .fill(.pink)
-                        .frame(width: 20, height: 20)
+                        .frame(width: 16, height: 16)
                         .overlay {
                             Image(systemName: "pause.fill")
-                                .font(.system(size: 10))
+                                .font(.system(size: 8))
                                 .foregroundStyle(.white)
                         }
                 }
                 if set.isTimedSet {
                     Circle()
                         .fill(.black)
-                        .frame(width: 20, height: 20)
+                        .frame(width: 16, height: 16)
                         .overlay {
                             Text("\(set.tempoSeconds)s")
-                                .font(.system(size: 8, weight: .bold))
+                                .font(.system(size: 6, weight: .bold))
                                 .foregroundStyle(.white)
                         }
                 }
                 if set.isPB {
                     Circle()
                         .fill(.purple)
-                        .frame(width: 20, height: 20)
+                        .frame(width: 16, height: 16)
                         .overlay {
                             Text("PB")
-                                .font(.system(size: 9))
+                                .font(.system(size: 7))
                                 .italic()
                                 .fontWeight(.bold)
                                 .foregroundStyle(.white)
                         }
                 }
             }
-            .frame(width: 50, alignment: .trailing)
+            .frame(width: 24, alignment: .center)
             .frame(maxHeight: .infinity)
-            .border(Color.gray)
-
-            // Column 5 - Time (narrower)
-            Text(Formatters.formatTimeHM(set.timestamp))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(width: 45)
-                .frame(maxHeight: .infinity)
-                .border(Color.gray)
-        }
+                    }
         .frame(height: 44)
         .padding(8)
         .contentShape(Rectangle())
@@ -162,7 +167,7 @@ struct SetRowView: View {
             onTap()
         }
         .listRowBackground(Color(.systemBackground))
-        .listRowSeparator(progressComparison != nil ? .hidden : .automatic)
+        .listRowSeparator(.automatic)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 onDelete()

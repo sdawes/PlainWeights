@@ -128,7 +128,8 @@ struct ExerciseDetailView: View {
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
                             progressComparison: calculateProgressComparison(for: set),
-                            cumulativeVolume: cumulativeVolume
+                            cumulativeVolume: cumulativeVolume,
+                            setNumber: todaySets.count - index
                         )
                     }
                 } header: {
@@ -145,15 +146,16 @@ struct ExerciseDetailView: View {
                 ForEach(historicDayGroups, id: \.date) { dayGroup in
                     Section {
                         ForEach(Array(dayGroup.sets.enumerated()), id: \.element.persistentModelID) { index, set in
-                            // Calculate cumulative volume up to and including this set within the day
-                            let cumulativeVolume = dayGroup.sets.prefix(index + 1).reduce(0.0) { total, s in
+                            // Calculate cumulative volume (sets are newest-first, so use suffix)
+                            let cumulativeVolume = dayGroup.sets.suffix(from: index).reduce(0.0) { total, s in
                                 total + (s.weight * Double(s.reps))
                             }
                             SetRowView(
                                 set: set,
                                 onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                                 onDelete: { deleteSet(set) },
-                                cumulativeVolume: cumulativeVolume
+                                cumulativeVolume: cumulativeVolume,
+                                setNumber: dayGroup.sets.count - index
                             )
                         }
                     } header: {

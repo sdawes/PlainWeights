@@ -119,8 +119,8 @@ struct ExerciseDetailView: View {
                 Section {
                     ForEach(todaySets.indices, id: \.self) { index in
                         let set = todaySets[index]
-                        // Calculate cumulative volume up to and including this set
-                        let cumulativeVolume = todaySets.prefix(index + 1).reduce(0.0) { total, s in
+                        // Calculate cumulative volume (sum from this set to end, since array is newest-first)
+                        let cumulativeVolume = todaySets.suffix(from: index).reduce(0.0) { total, s in
                             total + (s.weight * Double(s.reps))
                         }
                         SetRowView(

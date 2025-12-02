@@ -88,9 +88,8 @@ struct SetRowView: View {
             .layoutPriority(1)
             .border(Color.gray)
 
-            // Column 4 - Icons (narrower)
+            // Column 4 - Icons (narrower, right-aligned)
             HStack(spacing: 4) {
-                Spacer()
                 if set.isWarmUp {
                     Circle()
                         .fill(.orange)
@@ -144,7 +143,7 @@ struct SetRowView: View {
                         }
                 }
             }
-            .frame(width: 50)
+            .frame(width: 50, alignment: .trailing)
             .frame(maxHeight: .infinity)
             .border(Color.gray)
 

@@ -34,313 +34,36 @@ struct SetRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if let progress = progressComparison {
-                // Line 1: Weight and reps with deltas (full display)
-                HStack(alignment: .center, spacing: 4) {
-                    // Weight with delta
-                    Text("\(Formatters.formatWeight(set.weight)) kg")
-                        .monospacedDigit()
-                        .foregroundStyle(.primary)
-                    Text(deltaText(for: progress.weightDelta))
-                        .font(.system(size: 13))
-                        .italic()
-                        .monospacedDigit()
-                        .foregroundStyle(deltaColor(for: progress.weightDelta))
+        // New 5-column layout
+        HStack(spacing: 0) {
+            // Column 1
+            Text("1")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .border(Color.gray)
 
-                    Text("×")
-                        .foregroundStyle(.secondary)
+            // Column 2
+            Text("2")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .border(Color.gray)
 
-                    // Reps with delta
-                    Text("\(set.reps) reps")
-                        .monospacedDigit()
-                        .foregroundStyle(.primary)
-                    Text(deltaText(for: Double(progress.repsDelta)))
-                        .font(.system(size: 13))
-                        .italic()
-                        .monospacedDigit()
-                        .foregroundStyle(deltaColor(for: Double(progress.repsDelta)))
+            // Column 3
+            Text("3")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .border(Color.gray)
 
-                    Spacer()
+            // Column 4
+            Text("4")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .border(Color.gray)
 
-                    // Icons and timestamp
-                    HStack(spacing: 5) {
-                        if set.isWarmUp {
-                            Circle()
-                                .fill(.orange)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "flame.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isDropSet {
-                            Circle()
-                                .fill(.teal)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "chevron.down")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isPauseAtTop {
-                            Circle()
-                                .fill(.pink)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "pause.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isTimedSet {
-                            Circle()
-                                .fill(.black)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    if set.tempoSeconds > 0 {
-                                        Text("\(set.tempoSeconds)")
-                                            .font(.system(size: 11))
-                                            .italic()
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(.white)
-                                    } else {
-                                        Image(systemName: "timer")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(.white)
-                                    }
-                                }
-                        }
-
-                        if set.isPB {
-                            Circle()
-                                .fill(.purple)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Text("PB")
-                                        .font(.system(size: 9))
-                                        .italic()
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.white)
-                                }
-                        }
-                    }
-
-                    Text(Formatters.formatTimeHM(set.timestamp))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.leading, 4)
-                }
-                .padding(.bottom, 8)
-
-                // Line 2: Progress bar
-                GeometryReader { geometry in
-                    let totalRatio = 1.0 + progress.volumeProgress // e.g., 1.5 for +50%
-
-                    ZStack(alignment: .leading) {
-                        // Background track
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 4)
-                            .cornerRadius(2)
-
-                        if totalRatio > 1.0 {
-                            // Exceeded 100%: blue (baseline) + green (bonus) with marker
-                            let markerPosition = geometry.size.width * (1.0 / totalRatio)
-                            let overflowWidth = geometry.size.width - markerPosition
-
-                            // Blue segment (up to 100% - baseline met)
-                            Rectangle()
-                                .fill(Color.pw_blue)
-                                .frame(width: markerPosition, height: 4)
-                                .cornerRadius(2)
-
-                            // Green segment (overflow beyond 100% - bonus)
-                            Rectangle()
-                                .fill(Color.green)
-                                .frame(width: overflowWidth, height: 4)
-                                .cornerRadius(2)
-                                .position(x: markerPosition + overflowWidth / 2, y: 6)
-
-                            // Black vertical marker at 100% (centered, extends above and below bar)
-                            Rectangle()
-                                .fill(Color.black)
-                                .frame(width: 2, height: 12)
-                                .position(x: markerPosition, y: 6)
-                        } else if totalRatio >= 1.0 {
-                            // Exactly 100%: full blue bar (target met)
-                            Rectangle()
-                                .fill(Color.pw_blue)
-                                .frame(width: geometry.size.width, height: 4)
-                                .cornerRadius(2)
-                        } else {
-                            // Below 100%: red partial fill (behind target)
-                            Rectangle()
-                                .fill(Color.pw_red)
-                                .frame(width: geometry.size.width * max(totalRatio, 0), height: 4)
-                                .cornerRadius(2)
-                        }
-                    }
-                }
-                .frame(height: 12) // Accommodate marker extending above and below
-                .padding(.bottom, 2)
-
-                // Line 3: Volume progress text with timer on right
-                HStack(alignment: .top, spacing: 8) {
-                    // Volume progress with colored percentage
-                    HStack(spacing: 2) {
-                        Text("Total Volume ")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
-                        if progress.volumeProgress == 0 {
-                            Text("same")
-                                .font(.caption2)
-                                .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
-                        } else {
-                            let percentage = Int(progress.volumeProgress * 100)
-                            Text(progress.volumeProgress > 0 ? "+\(percentage)%" : "\(percentage)%")
-                                .font(.caption2)
-                                .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
-                        }
-
-                        Text(" of \(progress.comparisonMode == "(vs Last)" ? "last" : "best")")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    // Rest timer pill (right-aligned, disappears after 5 minutes)
-                    TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
-                        let rawElapsed = context.date.timeIntervalSince(set.timestamp)
-
-                        // Only show timer for first 5 minutes (300 seconds)
-                        if rawElapsed < 300 {
-                            let elapsed = min(rawElapsed, 120)
-
-                            let timerColor: Color = {
-                                if elapsed < 60 {
-                                    return .black
-                                } else if elapsed < 120 {
-                                    return .orange
-                                } else {
-                                    return .pw_red
-                                }
-                            }()
-
-                            HStack(spacing: 4) {
-                                Image(systemName: "timer")
-                                    .font(.caption)
-                                    .foregroundStyle(timerColor)
-
-                                Text(Formatters.formatDuration(elapsed))
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .italic()
-                                    .foregroundStyle(timerColor)
-                                    .monospacedDigit()
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .overlay(
-                                Capsule()
-                                    .stroke(timerColor, lineWidth: 1)
-                            )
-                        }
-                    }
-                }
-            } else {
-                // Normal display (no progress data)
-                HStack(alignment: .center, spacing: 0) {
-                    Text(ExerciseSetFormatters.formatSet(set))
-                        .monospacedDigit()
-                        .foregroundStyle(set.isWarmUp ? .secondary : .primary)
-                        .lineLimit(1)
-                        .fixedSize(horizontal: true, vertical: false)
-
-                    // Icon Container (flexible width, fills available space)
-                    HStack(spacing: 5) {
-                        if set.isWarmUp {
-                            Circle()
-                                .fill(.orange)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "flame.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isDropSet {
-                            Circle()
-                                .fill(.teal)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "chevron.down")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isPauseAtTop {
-                            Circle()
-                                .fill(.pink)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "pause.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isTimedSet {
-                            Circle()
-                                .fill(.black)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    if set.tempoSeconds > 0 {
-                                        Text("\(set.tempoSeconds)")
-                                            .font(.system(size: 11))
-                                            .italic()
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(.white)
-                                    } else {
-                                        Image(systemName: "timer")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(.white)
-                                    }
-                                }
-                        }
-
-                        if set.isPB {
-                            Circle()
-                                .fill(.purple)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Text("PB")
-                                        .font(.system(size: 9))
-                                        .italic()
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.white)
-                                }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-
-                    Text(Formatters.formatTimeHM(set.timestamp))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 50, alignment: .trailing)
-                        .padding(.leading, 4)
-                }
-            }
+            // Column 5 - Time
+            Text(Formatters.formatTimeHM(set.timestamp))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .border(Color.gray)
         }
+        .frame(height: 44)
         .padding(8)
         .contentShape(Rectangle())
         .onTapGesture {

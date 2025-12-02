@@ -127,7 +127,7 @@ struct ExerciseDetailView: View {
                             set: set,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            progressComparison: index == 0 ? calculateProgressComparison(for: set) : nil,
+                            progressComparison: calculateProgressComparison(for: set),
                             cumulativeVolume: cumulativeVolume
                         )
                     }
@@ -340,7 +340,8 @@ struct ExerciseDetailView: View {
                 weightDelta: weightDelta,
                 repsDelta: repsDelta,
                 comparisonMode: "(vs Last)",
-                volumeProgress: volumeProgress
+                volumeProgress: volumeProgress,
+                lastSessionVolume: lastInfo.volume
             )
         } else {
             // Compare against best ever
@@ -363,7 +364,8 @@ struct ExerciseDetailView: View {
                 weightDelta: weightDelta,
                 repsDelta: repsDelta,
                 comparisonMode: "(vs Best)",
-                volumeProgress: volumeProgress
+                volumeProgress: volumeProgress,
+                lastSessionVolume: bestMetrics.totalVolume
             )
         }
     }

@@ -42,7 +42,7 @@ struct SetRowView: View {
                     Text("\(Formatters.formatWeight(set.weight)) kg")
                         .monospacedDigit()
                         .foregroundStyle(.primary)
-                    Text(deltaText(for: progress.weightDelta))
+                    Text(progressIndicatorText(for: progress.weightDelta))
                         .font(.system(size: 13))
                         .italic()
                         .monospacedDigit()
@@ -55,7 +55,7 @@ struct SetRowView: View {
                     Text("\(set.reps) reps")
                         .monospacedDigit()
                         .foregroundStyle(.primary)
-                    Text(deltaText(for: Double(progress.repsDelta)))
+                    Text(progressIndicatorText(for: Double(progress.repsDelta)))
                         .font(.system(size: 13))
                         .italic()
                         .monospacedDigit()
@@ -138,57 +138,49 @@ struct SetRowView: View {
                 }
                 .padding(.bottom, 8)
 
-                // Line 2: Progress bar
-                GeometryReader { geometry in
-                    let totalRatio = 1.0 + progress.volumeProgress // e.g., 1.5 for +50%
-
-                    ZStack(alignment: .leading) {
-                        // Background track
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 4)
-                            .cornerRadius(2)
-
-                        if totalRatio > 1.0 {
-                            // Exceeded 100%: blue (baseline) + green (bonus) with marker
-                            let markerPosition = geometry.size.width * (1.0 / totalRatio)
-                            let overflowWidth = geometry.size.width - markerPosition
-
-                            // Blue segment (up to 100% - baseline met)
+                // Line 2: Progress bar (fixed height, badge as overlay)
+                ZStack(alignment: .trailing) {
+                    // Progress bar (full width)
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            // Background track
                             Rectangle()
-                                .fill(Color.pw_blue)
-                                .frame(width: markerPosition, height: 4)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(height: 4)
                                 .cornerRadius(2)
 
-                            // Green segment (overflow beyond 100% - bonus)
-                            Rectangle()
-                                .fill(Color.green)
-                                .frame(width: overflowWidth, height: 4)
-                                .cornerRadius(2)
-                                .position(x: markerPosition + overflowWidth / 2, y: 6)
-
-                            // Black vertical marker at 100% (centered, extends above and below bar)
-                            Rectangle()
-                                .fill(Color.black)
-                                .frame(width: 2, height: 12)
-                                .position(x: markerPosition, y: 6)
-                        } else if totalRatio >= 1.0 {
-                            // Exactly 100%: full blue bar (target met)
-                            Rectangle()
-                                .fill(Color.pw_blue)
-                                .frame(width: geometry.size.width, height: 4)
-                                .cornerRadius(2)
-                        } else {
-                            // Below 100%: red partial fill (behind target)
-                            Rectangle()
-                                .fill(Color.pw_red)
-                                .frame(width: geometry.size.width * max(totalRatio, 0), height: 4)
-                                .cornerRadius(2)
+                            if progress.volumeProgress >= 0 {
+                                // At or over 100%: Full green bar
+                                Rectangle()
+                                    .fill(Color.green)
+                                    .frame(width: geometry.size.width, height: 4)
+                                    .cornerRadius(2)
+                            } else {
+                                // Under 100%: Red partial fill
+                                let fillRatio = max(1.0 + progress.volumeProgress, 0)
+                                Rectangle()
+                                    .fill(Color.pw_red)
+                                    .frame(width: geometry.size.width * fillRatio, height: 4)
+                                    .cornerRadius(2)
+                            }
                         }
                     }
+                    .frame(height: 4)
+
+                    // Overflow badge (overlaid, doesn't affect height)
+                    if progress.volumeProgress > 0 {
+                        Text("+\(Int(progress.volumeProgress * 100))%")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.green)
+                            .clipShape(Capsule())
+                            .padding(.leading, 6)
+                    }
                 }
-                .frame(height: 12) // Accommodate marker extending above and below
-                .padding(.bottom, 2)
+                .frame(height: 18)
 
                 // Line 3: Volume progress text with timer on right
                 HStack(alignment: .top, spacing: 8) {
@@ -369,7 +361,9 @@ struct SetRowView: View {
         }
     }
 
-    private func deltaText(for delta: Double) -> String {
+    /// Returns formatted text for progress indicators (+/- value in brackets)
+    /// Progress indicators show the difference between current set and comparison baseline
+    private func progressIndicatorText(for delta: Double) -> String {
         if delta > 0 {
             return "(+\(Int(delta)))"
         } else if delta < 0 {

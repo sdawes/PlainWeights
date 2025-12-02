@@ -119,11 +119,15 @@ struct ExerciseDetailView: View {
                 Section {
                     ForEach(todaySets.indices, id: \.self) { index in
                         let set = todaySets[index]
+                        // Calculate cumulative volume (sum from this set to end, since array is newest-first)
+                        let cumulativeVolume = todaySets.suffix(from: index).reduce(0.0) { total, s in
+                            total + (s.weight * Double(s.reps))
+                        }
                         SetRowView(
                             set: set,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            progressComparison: index == 0 ? calculateProgressComparison(for: set) : nil
+                            progressComparison: calculateProgressComparison(for: set, cumulativeVolume: cumulativeVolume)
                         )
                     }
                 } header: {
@@ -308,8 +312,8 @@ struct ExerciseDetailView: View {
         }
     }
 
-    /// Calculate progress comparison data for the first set of today
-    private func calculateProgressComparison(for currentSet: ExerciseSet) -> ProgressComparison? {
+    /// Calculate progress comparison data for a today's set
+    private func calculateProgressComparison(for currentSet: ExerciseSet, cumulativeVolume: Double) -> ProgressComparison? {
         // Get comparison data based on selected mode
         if selectedMode == .last {
             // Compare against last session's max weight
@@ -321,9 +325,8 @@ struct ExerciseDetailView: View {
             let weightDelta = currentSet.weight - lastInfo.maxWeight
             let repsDelta = currentSet.reps - lastInfo.maxWeightReps
 
-            // Calculate volume progress
-            let todayVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
-            let volumeDelta = todayVolume - lastInfo.volume
+            // Calculate volume progress using cumulative volume at this set
+            let volumeDelta = cumulativeVolume - lastInfo.volume
             let volumeProgress = lastInfo.volume > 0 ? volumeDelta / lastInfo.volume : 0
 
             return ProgressComparison(
@@ -344,9 +347,8 @@ struct ExerciseDetailView: View {
             let weightDelta = currentSet.weight - bestMetrics.maxWeight
             let repsDelta = currentSet.reps - bestMetrics.repsAtMaxWeight
 
-            // Calculate volume progress
-            let todayVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
-            let volumeDelta = todayVolume - bestMetrics.totalVolume
+            // Calculate volume progress using cumulative volume at this set
+            let volumeDelta = cumulativeVolume - bestMetrics.totalVolume
             let volumeProgress = bestMetrics.totalVolume > 0 ? volumeDelta / bestMetrics.totalVolume : 0
 
             return ProgressComparison(

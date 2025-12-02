@@ -127,7 +127,8 @@ struct ExerciseDetailView: View {
                             set: set,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            progressComparison: calculateProgressComparison(for: set, cumulativeVolume: cumulativeVolume)
+                            progressComparison: calculateProgressComparison(for: set, cumulativeVolume: cumulativeVolume),
+                            showTimer: index == 0  // Only show timer on most recent set
                         )
                     }
                 } header: {

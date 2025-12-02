@@ -43,8 +43,8 @@ extension Color {
     // Progress indicators
     /// Red for negative progress indicators
     static let pw_red = Color.red
-    /// Green for positive progress indicators
-    static let pw_green = Color.green
+    /// Green for positive progress indicators (slightly darker than system green)
+    static let pw_green = Color(red: 0.2, green: 0.78, blue: 0.35)
     /// Amber/gold for overflow/bonus progress beyond 100%
     static let pw_amber = Color(red: 0.95, green: 0.66, blue: 0.11) // #f2a81d
 }

@@ -27,12 +27,14 @@ struct SetRowView: View {
     let onTap: () -> Void
     let onDelete: () -> Void
     let progressComparison: ProgressComparison?  // Optional progress data for first set
+    let showTimer: Bool  // Only show timer on most recent set
 
-    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, progressComparison: ProgressComparison? = nil) {
+    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, progressComparison: ProgressComparison? = nil, showTimer: Bool = false) {
         self.set = set
         self.onTap = onTap
         self.onDelete = onDelete
         self.progressComparison = progressComparison
+        self.showTimer = showTimer
     }
 
     var body: some View {
@@ -40,28 +42,33 @@ struct SetRowView: View {
             if let progress = progressComparison {
                 // Line 1: Weight and reps with deltas (full display)
                 HStack(alignment: .center, spacing: 4) {
-                    // Weight with delta
-                    Text("\(Formatters.formatWeight(set.weight)) kg")
-                        .monospacedDigit()
-                        .foregroundStyle(.primary)
-                    Text(progressIndicatorText(for: progress.weightDelta))
-                        .font(.system(size: 13))
-                        .italic()
-                        .monospacedDigit()
-                        .foregroundStyle(deltaColor(for: progress.weightDelta))
+                    // Weight and reps group (shrinks to fit, never wraps)
+                    HStack(spacing: 4) {
+                        // Weight with delta
+                        Text("\(Formatters.formatWeight(set.weight)) kg")
+                            .monospacedDigit()
+                            .foregroundStyle(.primary)
+                        Text(weightProgressText(for: progress.weightDelta))
+                            .font(.system(size: 13))
+                            .italic()
+                            .monospacedDigit()
+                            .foregroundStyle(deltaColor(for: progress.weightDelta))
 
-                    Text("×")
-                        .foregroundStyle(.secondary)
+                        Text("×")
+                            .foregroundStyle(.secondary)
 
-                    // Reps with delta
-                    Text("\(set.reps) reps")
-                        .monospacedDigit()
-                        .foregroundStyle(.primary)
-                    Text(progressIndicatorText(for: Double(progress.repsDelta)))
-                        .font(.system(size: 13))
-                        .italic()
-                        .monospacedDigit()
-                        .foregroundStyle(deltaColor(for: Double(progress.repsDelta)))
+                        // Reps with delta
+                        Text("\(set.reps) reps")
+                            .monospacedDigit()
+                            .foregroundStyle(.primary)
+                        Text(repsProgressText(for: progress.repsDelta))
+                            .font(.system(size: 13))
+                            .italic()
+                            .monospacedDigit()
+                            .foregroundStyle(deltaColor(for: Double(progress.repsDelta)))
+                    }
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                     Spacer()
 
@@ -138,7 +145,7 @@ struct SetRowView: View {
                         .foregroundStyle(.secondary)
                         .padding(.leading, 4)
                 }
-                .padding(.bottom, 12)
+                .padding(.bottom, 8)
 
                 // Line 2: Progress bar
                 GeometryReader { geometry in
@@ -149,11 +156,34 @@ struct SetRowView: View {
                             .frame(height: 4)
                             .cornerRadius(2)
 
-                        if progress.volumeProgress >= 0 {
-                            // At or over 100%: Full green bar
+                        if progress.volumeProgress > 0 {
+                            // Over 100%: Green for bonus (right of 100% line), grey for baseline (left)
+                            let markerRatio = 1 / (1 + progress.volumeProgress)
+                            let markerPosition = geometry.size.width * markerRatio
+
+                            // Grey baseline portion (left of 100% marker)
                             Rectangle()
-                                .fill(Color.green)
-                                .frame(width: geometry.size.width, height: 4)
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: markerPosition, height: 4)
+                                .cornerRadius(2)
+
+                            // Green bonus portion (right of 100% marker)
+                            Rectangle()
+                                .fill(Color.pw_green)
+                                .frame(width: geometry.size.width - markerPosition, height: 4)
+                                .cornerRadius(2)
+                                .offset(x: markerPosition)
+
+                            // 100% marker line
+                            Rectangle()
+                                .fill(Color.black)
+                                .frame(width: 1, height: 12)
+                                .position(x: markerPosition, y: 4)
+                        } else if progress.volumeProgress == 0 {
+                            // Exactly 100%: Full green bar, no marker
+                            Rectangle()
+                                .fill(Color.pw_green)
+                                .frame(height: 4)
                                 .cornerRadius(2)
                         } else {
                             // Under 100%: Red partial fill
@@ -165,73 +195,62 @@ struct SetRowView: View {
                         }
                     }
                 }
-                .frame(height: 4)
+                .frame(height: 8)
+                .padding(.bottom, 1)
 
                 // Line 3: Volume progress text with timer on right
                 HStack(alignment: .top, spacing: 8) {
-                    // Volume progress showing cumulative kg and percentage of comparison
+                    // Volume progress showing cumulative kg and percentage
                     HStack(spacing: 2) {
                         Text("Total Volume: ")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
 
-                        Text("\(Formatters.formatVolume(progress.cumulativeVolume)) kg")
+                        Text("\(Formatters.formatVolume(progress.cumulativeVolume)) kg ")
                             .font(.caption2)
                             .fontWeight(.semibold)
                             .foregroundStyle(.primary)
 
-                        Text(" (")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
                         let percentage = Int((progress.cumulativeVolume / progress.comparisonVolume) * 100)
-                        Text("\(percentage)%")
+                        Text("(\(percentage)%)")
                             .font(.caption2)
                             .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
-
-                        Text(" of \(Formatters.formatVolume(progress.comparisonVolume)) kg)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
                     }
 
                     Spacer()
 
-                    // Rest timer pill (right-aligned, disappears after 5 minutes)
-                    TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
-                        let rawElapsed = context.date.timeIntervalSince(set.timestamp)
+                    // Rest timer (right-aligned, only on most recent set, disappears after 5 minutes)
+                    if showTimer {
+                        TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
+                            let rawElapsed = context.date.timeIntervalSince(set.timestamp)
 
-                        // Only show timer for first 5 minutes (300 seconds)
-                        if rawElapsed < 300 {
-                            let elapsed = min(rawElapsed, 120)
+                            // Only show timer for first 5 minutes (300 seconds)
+                            if rawElapsed < 300 {
+                                let elapsed = min(rawElapsed, 120)
 
-                            let timerColor: Color = {
-                                if elapsed < 60 {
-                                    return .black
-                                } else if elapsed < 120 {
-                                    return .orange
-                                } else {
-                                    return .pw_red
-                                }
-                            }()
+                                let timerColor: Color = {
+                                    if elapsed < 60 {
+                                        return .black
+                                    } else if elapsed < 120 {
+                                        return .orange
+                                    } else {
+                                        return .pw_red
+                                    }
+                                }()
 
-                            HStack(spacing: 4) {
-                                Image(systemName: "timer")
-                                    .font(.caption)
-                                    .foregroundStyle(timerColor)
+                                HStack(spacing: 4) {
+                                    Image(systemName: "timer")
+                                        .font(.caption2)
+                                        .foregroundStyle(timerColor)
 
-                                Text(Formatters.formatDuration(elapsed))
-                                    .font(.caption)
-                                    .fontWeight(.bold)
-                                    .italic()
+                                    Text(Formatters.formatDuration(elapsed))
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .italic()
                                     .foregroundStyle(timerColor)
                                     .monospacedDigit()
                             }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .overlay(
-                                Capsule()
-                                    .stroke(timerColor, lineWidth: 1)
-                            )
+                        }
                         }
                     }
                 }
@@ -349,13 +368,23 @@ struct SetRowView: View {
         }
     }
 
-    /// Returns formatted text for progress indicators (+/- value in brackets)
-    /// Progress indicators show the difference between current set and comparison baseline
-    private func progressIndicatorText(for delta: Double) -> String {
+    /// Returns formatted text for weight progress indicators (+/- value in kg)
+    private func weightProgressText(for delta: Double) -> String {
         if delta > 0 {
-            return "(+\(Int(delta)))"
+            return "(+\(Int(delta)) kg)"
         } else if delta < 0 {
-            return "(\(Int(delta)))"
+            return "(\(Int(delta)) kg)"
+        } else {
+            return "(same)"
+        }
+    }
+
+    /// Returns formatted text for reps progress indicators (+/- value with rep/reps)
+    private func repsProgressText(for delta: Int) -> String {
+        if delta > 0 {
+            return "(+\(delta) \(delta == 1 ? "rep" : "reps"))"
+        } else if delta < 0 {
+            return "(\(delta) \(delta == -1 ? "rep" : "reps"))"
         } else {
             return "(same)"
         }

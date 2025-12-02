@@ -346,11 +346,8 @@ struct SetRowView: View {
         .onTapGesture {
             onTap()
         }
-        .listRowBackground(
-            progressComparison != nil ?
-                Color.gray.opacity(0.1) : Color(.systemBackground)
-        )
-        .listRowSeparator(progressComparison != nil ? .hidden : .automatic)
+        .listRowBackground(Color(.systemBackground))
+        .listRowSeparator(.automatic)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 onDelete()

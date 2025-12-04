@@ -48,11 +48,7 @@ struct SetRowView: View {
                         Text("\(Formatters.formatWeight(set.weight)) kg")
                             .monospacedDigit()
                             .foregroundStyle(.primary)
-                        Text(weightProgressText(for: progress.weightDelta))
-                            .font(.system(size: 13))
-                            .italic()
-                            .monospacedDigit()
-                            .foregroundStyle(deltaColor(for: progress.weightDelta))
+                        weightProgressView(for: progress.weightDelta)
 
                         Text("×")
                             .foregroundStyle(.secondary)
@@ -61,11 +57,7 @@ struct SetRowView: View {
                         Text("\(set.reps) reps")
                             .monospacedDigit()
                             .foregroundStyle(.primary)
-                        Text(repsProgressText(for: progress.repsDelta))
-                            .font(.system(size: 13))
-                            .italic()
-                            .monospacedDigit()
-                            .foregroundStyle(deltaColor(for: Double(progress.repsDelta)))
+                        repsProgressView(for: progress.repsDelta)
                     }
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -211,7 +203,9 @@ struct SetRowView: View {
                             .fontWeight(.semibold)
                             .foregroundStyle(.primary)
 
-                        let percentage = Int((progress.cumulativeVolume / progress.comparisonVolume) * 100)
+                        let percentage = progress.comparisonVolume > 0
+                            ? Int((progress.cumulativeVolume / progress.comparisonVolume) * 100)
+                            : 0
                         Text("(\(percentage)%)")
                             .font(.caption2)
                             .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
@@ -358,35 +352,59 @@ struct SetRowView: View {
 
     // MARK: - Helper Methods
 
-    private func deltaColor(for delta: Double) -> Color {
+    @ViewBuilder
+    private func weightProgressView(for delta: Double) -> some View {
         if delta > 0 {
-            return .green
+            HStack(spacing: 2) {
+                Image(systemName: "arrowtriangle.up.fill")
+                    .font(.system(size: 10))
+                Text("\(Int(delta))")
+                    .monospacedDigit()
+            }
+            .font(.system(size: 13))
+            .foregroundStyle(Color.green)
         } else if delta < 0 {
-            return .pw_red
+            HStack(spacing: 2) {
+                Image(systemName: "arrowtriangle.down.fill")
+                    .font(.system(size: 10))
+                Text("\(Int(abs(delta)))")
+                    .monospacedDigit()
+            }
+            .font(.system(size: 13))
+            .foregroundStyle(Color.pw_red)
         } else {
-            return .pw_blue
+            Text("SAME")
+                .font(.system(size: 11))
+                .fontWeight(.bold)
+                .foregroundStyle(Color.pw_blue)
         }
     }
 
-    /// Returns formatted text for weight progress indicators (+/- value in kg)
-    private func weightProgressText(for delta: Double) -> String {
+    @ViewBuilder
+    private func repsProgressView(for delta: Int) -> some View {
         if delta > 0 {
-            return "(+\(Int(delta)) kg)"
+            HStack(spacing: 2) {
+                Image(systemName: "arrowtriangle.up.fill")
+                    .font(.system(size: 10))
+                Text("\(delta)")
+                    .monospacedDigit()
+            }
+            .font(.system(size: 13))
+            .foregroundStyle(Color.green)
         } else if delta < 0 {
-            return "(\(Int(delta)) kg)"
+            HStack(spacing: 2) {
+                Image(systemName: "arrowtriangle.down.fill")
+                    .font(.system(size: 10))
+                Text("\(abs(delta))")
+                    .monospacedDigit()
+            }
+            .font(.system(size: 13))
+            .foregroundStyle(Color.pw_red)
         } else {
-            return "(same)"
-        }
-    }
-
-    /// Returns formatted text for reps progress indicators (+/- value with rep/reps)
-    private func repsProgressText(for delta: Int) -> String {
-        if delta > 0 {
-            return "(+\(delta) \(delta == 1 ? "rep" : "reps"))"
-        } else if delta < 0 {
-            return "(\(delta) \(delta == -1 ? "rep" : "reps"))"
-        } else {
-            return "(same)"
+            Text("SAME")
+                .font(.system(size: 11))
+                .fontWeight(.bold)
+                .foregroundStyle(Color.pw_blue)
         }
     }
 

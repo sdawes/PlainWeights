@@ -121,13 +121,13 @@ struct ExerciseDetailView: View {
                         let set = todaySets[index]
                         // Calculate cumulative volume (sum from this set to end, since array is newest-first)
                         let cumulativeVolume = todaySets.suffix(from: index).reduce(0.0) { total, s in
-                            total + (s.weight * Double(s.reps))
+                            s.isWarmUp ? total : total + (s.weight * Double(s.reps))
                         }
                         SetRowView(
                             set: set,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            progressComparison: calculateProgressComparison(for: set, cumulativeVolume: cumulativeVolume),
+                            progressComparison: set.isWarmUp ? nil : calculateProgressComparison(for: set, cumulativeVolume: cumulativeVolume),
                             showTimer: index == 0  // Only show timer on most recent set
                         )
                     }

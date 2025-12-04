@@ -29,11 +29,6 @@
 			path = PlainWeights;
 			sourceTree = "<group>";
 		};
-		1FB1C5172E50DA540053C668 /* PlainWeightsTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = PlainWeightsTests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,7 +55,6 @@
 				4AEA68D3CAAD43CBA0E4F488 /* CLAUDE.md */,
 				A1B2C3D4E5F60123456789AB /* AGENTS.md */,
 				1FB1C5082E50DA530053C668 /* PlainWeights */,
-				1FB1C5172E50DA540053C668 /* PlainWeightsTests */,
 				1FB1C5072E50DA530053C668 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,9 +105,6 @@
 			);
 			dependencies = (
 				1FB1C5162E50DA540053C668 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				1FB1C5172E50DA540053C668 /* PlainWeightsTests */,
 			);
 			name = PlainWeightsTests;
 			packageProductDependencies = (

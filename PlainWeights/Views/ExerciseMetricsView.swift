@@ -152,10 +152,10 @@ struct TargetMetricsSection: View {
             }
 
             // Metric values: Weight × Reps with set indicator icons
-            HStack(alignment: .lastTextBaseline, spacing: 4) {
+            HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                    .font(.system(size: 38))
+                    .fontWeight(.semibold)
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
                     .font(.title2)
@@ -253,10 +253,10 @@ struct TargetMetricsSectionWithPicker: View {
             }
 
             // Metric values: Weight × Reps with set indicator icons
-            HStack(alignment: .lastTextBaseline, spacing: 4) {
+            HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                    .font(.system(size: 38))
+                    .fontWeight(.semibold)
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
                     .font(.title2)

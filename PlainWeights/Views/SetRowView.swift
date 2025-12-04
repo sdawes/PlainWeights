@@ -208,6 +208,7 @@ struct SetRowView: View {
                             : 0
                         Text("(\(percentage)%)")
                             .font(.caption2)
+                            .fontWeight(.bold)
                             .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
                     }
 
@@ -355,7 +356,7 @@ struct SetRowView: View {
     @ViewBuilder
     private func weightProgressView(for delta: Double) -> some View {
         if delta > 0 {
-            HStack(spacing: 2) {
+            HStack(alignment: .center, spacing: 2) {
                 Image(systemName: "arrowtriangle.up.fill")
                     .font(.system(size: 10))
                 Text("\(Int(delta))")
@@ -364,7 +365,7 @@ struct SetRowView: View {
             .font(.system(size: 13))
             .foregroundStyle(Color.green)
         } else if delta < 0 {
-            HStack(spacing: 2) {
+            HStack(alignment: .center, spacing: 2) {
                 Image(systemName: "arrowtriangle.down.fill")
                     .font(.system(size: 10))
                 Text("\(Int(abs(delta)))")
@@ -383,7 +384,7 @@ struct SetRowView: View {
     @ViewBuilder
     private func repsProgressView(for delta: Int) -> some View {
         if delta > 0 {
-            HStack(spacing: 2) {
+            HStack(alignment: .center, spacing: 2) {
                 Image(systemName: "arrowtriangle.up.fill")
                     .font(.system(size: 10))
                 Text("\(delta)")
@@ -392,7 +393,7 @@ struct SetRowView: View {
             .font(.system(size: 13))
             .foregroundStyle(Color.green)
         } else if delta < 0 {
-            HStack(spacing: 2) {
+            HStack(alignment: .center, spacing: 2) {
                 Image(systemName: "arrowtriangle.down.fill")
                     .font(.system(size: 10))
                 Text("\(abs(delta))")

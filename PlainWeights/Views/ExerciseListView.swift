@@ -112,22 +112,30 @@ struct FilteredExerciseListView: View {
         .toolbar {
             if #available(iOS 26.0, *) {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Text("plainweights")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.black)
-                        .fixedSize(horizontal: true, vertical: false)
-                        .allowsHitTesting(false)
+                    HStack(spacing: 6) {
+                        Image(systemName: "dumbbell.fill")
+                            .font(.headline)
+                        Text("plainweights")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                    }
+                    .foregroundStyle(.black)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .allowsHitTesting(false)
                 }
                 .sharedBackgroundVisibility(.hidden)
             } else {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Text("plainweights")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.black)
-                        .fixedSize(horizontal: true, vertical: false)
-                        .allowsHitTesting(false)
+                    HStack(spacing: 6) {
+                        Image(systemName: "dumbbell.fill")
+                            .font(.headline)
+                        Text("plainweights")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                    }
+                    .foregroundStyle(.black)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .allowsHitTesting(false)
                 }
             }
             ToolbarItem(placement: .primaryAction) {

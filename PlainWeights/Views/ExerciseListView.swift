@@ -37,6 +37,11 @@ struct FilteredExerciseListView: View {
     @Binding var navigationPath: NavigationPath
     let searchText: String
 
+    #if DEBUG
+    @State private var showingGenerateDataAlert = false
+    @State private var showingClearDataAlert = false
+    #endif
+
     init(searchText: String, showingAddExercise: Binding<Bool>, navigationPath: Binding<NavigationPath>) {
         self.searchText = searchText
         self._showingAddExercise = showingAddExercise
@@ -127,10 +132,10 @@ struct FilteredExerciseListView: View {
                     Divider()
 
                     Button("Generate Test Data", role: .destructive) {
-                        TestDataGenerator.generateTestData(modelContext: modelContext)
+                        showingGenerateDataAlert = true
                     }
                     Button("Clear All Data", role: .destructive) {
-                        TestDataGenerator.clearAllData(modelContext: modelContext)
+                        showingClearDataAlert = true
                     }
                 } label: {
                     Image(systemName: "hammer.fill")
@@ -146,6 +151,24 @@ struct FilteredExerciseListView: View {
                 navigationPath.append(newExercise)
             }
         }
+        #if DEBUG
+        .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete & Generate", role: .destructive) {
+                TestDataGenerator.generateTestData(modelContext: modelContext)
+            }
+        } message: {
+            Text("This will DELETE all your existing workout data and replace it with test data. This cannot be undone.")
+        }
+        .alert("Clear All Data?", isPresented: $showingClearDataAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete All", role: .destructive) {
+                TestDataGenerator.clearAllData(modelContext: modelContext)
+            }
+        } message: {
+            Text("This will DELETE all your workout data including exercises and sets. This cannot be undone.")
+        }
+        #endif
     }
 
     // MARK: - Helper Functions

@@ -36,6 +36,7 @@ struct FilteredExerciseListView: View {
     @Binding var showingAddExercise: Bool
     @Binding var navigationPath: NavigationPath
     let searchText: String
+    @State private var showingSummary = false
 
     #if DEBUG
     @State private var showingGenerateDataAlert = false
@@ -168,7 +169,7 @@ struct FilteredExerciseListView: View {
             #endif
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    // TODO: Show today's summary
+                    showingSummary = true
                 } label: {
                     Image(systemName: "chart.bar.doc.horizontal")
                         .font(.callout)
@@ -180,6 +181,9 @@ struct FilteredExerciseListView: View {
                 // Navigate to the newly created exercise after sheet dismisses
                 navigationPath.append(newExercise)
             }
+        }
+        .fullScreenCover(isPresented: $showingSummary) {
+            SessionSummaryView()
         }
         #if DEBUG
         .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {

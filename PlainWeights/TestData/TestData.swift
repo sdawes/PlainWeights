@@ -1354,9 +1354,9 @@ class TestData {
         addSet(exercise: "Leg Raises", weight: 59.5, reps: 12, timestamp: date(2025, 11, 25, 17, 34, 37))
         addSet(exercise: "Leg Raises", weight: 59.5, reps: 11, timestamp: date(2025, 11, 25, 17, 36, 49))
         // Box jumps: 3 sets
-        addSet(exercise: "Box jumps", weight: 0.0, reps: 15, timestamp: date(2025, 11, 25, 17, 40, 26), isPB: true)
-        addSet(exercise: "Box jumps", weight: 0.0, reps: 15, timestamp: date(2025, 11, 25, 17, 43, 19))
-        addSet(exercise: "Box jumps", weight: 0.0, reps: 15, timestamp: date(2025, 11, 25, 17, 47, 13))
+        addSet(exercise: "Box jumps", weight: 0.0, reps: 15, timestamp: date(2025, 11, 25, 17, 40, 26))
+        addSet(exercise: "Box jumps", weight: 5.0, reps: 15, timestamp: date(2025, 11, 25, 17, 43, 19), isPB: true)
+        addSet(exercise: "Box jumps", weight: 5.0, reps: 15, timestamp: date(2025, 11, 25, 17, 47, 13))
         // T Bar Row: 2 sets
         addSet(exercise: "T Bar Row", weight: 35.0, reps: 10, timestamp: date(2025, 11, 25, 20, 32, 23))
         addSet(exercise: "T Bar Row", weight: 35.0, reps: 10, timestamp: date(2025, 11, 25, 20, 32, 32))

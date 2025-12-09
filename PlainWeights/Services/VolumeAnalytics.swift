@@ -13,17 +13,10 @@ enum VolumeAnalytics {
 
     // MARK: - Volume Calculations
 
-    /// Get effective load for volume calculations (treats 0kg as 1kg to maintain unit consistency)
-    /// - Parameter weight: The weight value from the exercise set
-    /// - Returns: Effective load in kg (1.0 for bodyweight, actual weight otherwise)
-    private static func effectiveLoad(for weight: Double) -> Double {
-        return weight == 0 ? 1.0 : weight
-    }
-    
     /// Calculate total volume for sets from today (excludes warm-up sets)
     static func todayVolume(from sets: [ExerciseSet]) -> Double {
         let todaySets = todaySets(from: sets)
-        return todaySets.filter { !$0.isWarmUp }.reduce(0) { $0 + effectiveLoad(for: $1.weight) * Double($1.reps) }
+        return todaySets.filter { !$0.isWarmUp }.reduce(0) { $0 + $1.weight * Double($1.reps) }
     }
 
     /// Get all sets from today
@@ -155,7 +148,7 @@ enum VolumeAnalytics {
 
     /// Calculate volume for a specific set of exercise sets (excludes warm-up sets)
     static func calculateVolume(for sets: [ExerciseSet]) -> Double {
-        sets.filter { !$0.isWarmUp }.reduce(0) { $0 + effectiveLoad(for: $1.weight) * Double($1.reps) }
+        sets.filter { !$0.isWarmUp }.reduce(0) { $0 + $1.weight * Double($1.reps) }
     }
     
     // MARK: - Progress Calculations

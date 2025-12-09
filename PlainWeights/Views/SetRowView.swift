@@ -43,7 +43,7 @@ struct SetRowView: View {
                 // Line 1: Weight and reps with deltas (full display)
                 HStack(alignment: .center, spacing: 4) {
                     // Weight and reps group (shrinks to fit, never wraps)
-                    HStack(spacing: 4) {
+                    HStack(alignment: .lastTextBaseline, spacing: 4) {
                         // Weight with delta
                         Text("\(Formatters.formatWeight(set.weight)) kg")
                             .monospacedDigit()
@@ -148,43 +148,47 @@ struct SetRowView: View {
                             .frame(height: 4)
                             .cornerRadius(2)
 
-                        if progress.volumeProgress > 0 {
-                            // Over 100%: Green for bonus (right of 100% line), grey for baseline (left)
-                            let markerRatio = 1 / (1 + progress.volumeProgress)
-                            let markerPosition = geometry.size.width * markerRatio
+                        // Only show colored progress when both volumes are > 0
+                        if progress.comparisonVolume > 0 && progress.cumulativeVolume > 0 {
+                            if progress.volumeProgress > 0 {
+                                // Over 100%: Green for bonus (right of 100% line), grey for baseline (left)
+                                let markerRatio = 1 / (1 + progress.volumeProgress)
+                                let markerPosition = geometry.size.width * markerRatio
 
-                            // Grey baseline portion (left of 100% marker)
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(width: markerPosition, height: 4)
-                                .cornerRadius(2)
+                                // Grey baseline portion (left of 100% marker)
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(width: markerPosition, height: 4)
+                                    .cornerRadius(2)
 
-                            // Green bonus portion (right of 100% marker)
-                            Rectangle()
-                                .fill(Color.pw_green)
-                                .frame(width: geometry.size.width - markerPosition, height: 4)
-                                .cornerRadius(2)
-                                .offset(x: markerPosition)
+                                // Green bonus portion (right of 100% marker)
+                                Rectangle()
+                                    .fill(Color.pw_green)
+                                    .frame(width: geometry.size.width - markerPosition, height: 4)
+                                    .cornerRadius(2)
+                                    .offset(x: markerPosition)
 
-                            // 100% marker line
-                            Rectangle()
-                                .fill(Color.black)
-                                .frame(width: 1, height: 12)
-                                .position(x: markerPosition, y: 4)
-                        } else if progress.volumeProgress == 0 {
-                            // Exactly 100%: Full green bar, no marker
-                            Rectangle()
-                                .fill(Color.pw_green)
-                                .frame(height: 4)
-                                .cornerRadius(2)
-                        } else {
-                            // Under 100%: Red partial fill
-                            let fillRatio = max(1.0 + progress.volumeProgress, 0)
-                            Rectangle()
-                                .fill(Color.pw_red)
-                                .frame(width: geometry.size.width * fillRatio, height: 4)
-                                .cornerRadius(2)
+                                // 100% marker line
+                                Rectangle()
+                                    .fill(Color.black)
+                                    .frame(width: 1, height: 12)
+                                    .position(x: markerPosition, y: 4)
+                            } else if progress.volumeProgress == 0 {
+                                // Exactly 100%: Full green bar, no marker
+                                Rectangle()
+                                    .fill(Color.pw_green)
+                                    .frame(height: 4)
+                                    .cornerRadius(2)
+                            } else {
+                                // Under 100%: Red partial fill
+                                let fillRatio = max(1.0 + progress.volumeProgress, 0)
+                                Rectangle()
+                                    .fill(Color.pw_red)
+                                    .frame(width: geometry.size.width * fillRatio, height: 4)
+                                    .cornerRadius(2)
+                            }
                         }
+                        // else: just show grey background track (already rendered above)
                     }
                 }
                 .frame(height: 8)
@@ -194,22 +198,23 @@ struct SetRowView: View {
                 HStack(alignment: .top, spacing: 8) {
                     // Volume progress showing cumulative kg and percentage
                     HStack(spacing: 2) {
-                        Text("Total Volume: ")
+                        Text("Total Weight: ")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
 
-                        Text("\(Formatters.formatVolume(progress.cumulativeVolume)) kg ")
-                            .font(.caption2)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.primary)
-
-                        let percentage = progress.comparisonVolume > 0
-                            ? Int((progress.cumulativeVolume / progress.comparisonVolume) * 100)
-                            : 0
-                        Text("(\(percentage)%)")
+                        Text("\(Formatters.formatVolume(progress.cumulativeVolume)) kg")
                             .font(.caption2)
                             .fontWeight(.bold)
-                            .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
+                            .foregroundStyle(.primary)
+
+                        // Only show percentage when both volumes are > 0
+                        if progress.comparisonVolume > 0 && progress.cumulativeVolume > 0 {
+                            let percentage = Int((progress.cumulativeVolume / progress.comparisonVolume) * 100)
+                            Text(" (\(percentage)%)")
+                                .font(.caption2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
+                        }
                     }
 
                     Spacer()
@@ -356,20 +361,24 @@ struct SetRowView: View {
     @ViewBuilder
     private func weightProgressView(for delta: Double) -> some View {
         if delta > 0 {
-            HStack(alignment: .center, spacing: 2) {
+            HStack(alignment: .lastTextBaseline, spacing: 2) {
                 Image(systemName: "arrowtriangle.up.fill")
                     .font(.system(size: 10))
+                    .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
                 Text("\(Int(delta))")
                     .monospacedDigit()
+                    .fontWeight(.bold)
             }
             .font(.system(size: 13))
             .foregroundStyle(Color.green)
         } else if delta < 0 {
-            HStack(alignment: .center, spacing: 2) {
+            HStack(alignment: .lastTextBaseline, spacing: 2) {
                 Image(systemName: "arrowtriangle.down.fill")
                     .font(.system(size: 10))
+                    .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
                 Text("\(Int(abs(delta)))")
                     .monospacedDigit()
+                    .fontWeight(.bold)
             }
             .font(.system(size: 13))
             .foregroundStyle(Color.pw_red)
@@ -384,20 +393,24 @@ struct SetRowView: View {
     @ViewBuilder
     private func repsProgressView(for delta: Int) -> some View {
         if delta > 0 {
-            HStack(alignment: .center, spacing: 2) {
+            HStack(alignment: .lastTextBaseline, spacing: 2) {
                 Image(systemName: "arrowtriangle.up.fill")
                     .font(.system(size: 10))
+                    .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
                 Text("\(delta)")
                     .monospacedDigit()
+                    .fontWeight(.bold)
             }
             .font(.system(size: 13))
             .foregroundStyle(Color.green)
         } else if delta < 0 {
-            HStack(alignment: .center, spacing: 2) {
+            HStack(alignment: .lastTextBaseline, spacing: 2) {
                 Image(systemName: "arrowtriangle.down.fill")
                     .font(.system(size: 10))
+                    .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
                 Text("\(abs(delta))")
                     .monospacedDigit()
+                    .fontWeight(.bold)
             }
             .font(.system(size: 13))
             .foregroundStyle(Color.pw_red)

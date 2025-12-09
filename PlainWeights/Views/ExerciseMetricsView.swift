@@ -48,10 +48,14 @@ struct HeroMetricView: View {
                     .foregroundStyle(.white.opacity(0.7))
             }
 
-            // Total volume (medium, secondary)
-            Text("\(Formatters.formatVolume(totalVolume)) kg total volume")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.7))
+            // Total weight (medium, secondary)
+            HStack(spacing: 4) {
+                Text("\(Formatters.formatVolume(totalVolume)) kg")
+                    .fontWeight(.bold)
+                Text("total weight")
+            }
+            .font(.subheadline)
+            .foregroundStyle(.white.opacity(0.7))
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -217,11 +221,15 @@ struct TargetMetricsSection: View {
                 }
             }
 
-            // Total volume (will have picker added by parent)
-            Text("\(Formatters.formatVolume(data.totalVolume)) kg total volume")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .padding(.top, 0)
+            // Total weight (will have picker added by parent)
+            HStack(spacing: 4) {
+                Text("\(Formatters.formatVolume(data.totalVolume)) kg")
+                    .fontWeight(.bold)
+                Text("total weight")
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .padding(.top, 0)
         }
     }
 }
@@ -318,11 +326,15 @@ struct TargetMetricsSectionWithPicker: View {
                 }
             }
 
-            // Total volume with picker in same HStack for baseline alignment
+            // Total weight with picker in same HStack for baseline alignment
             HStack(alignment: .lastTextBaseline) {
-                Text("\(Formatters.formatVolume(data.totalVolume)) kg total volume")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    Text("\(Formatters.formatVolume(data.totalVolume)) kg")
+                        .fontWeight(.bold)
+                    Text("total weight")
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
 
                 Spacer()
 

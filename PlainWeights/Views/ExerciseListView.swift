@@ -110,11 +110,25 @@ struct FilteredExerciseListView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Image(systemName: "figure.strengthtraining.traditional")
-                    .font(.title3)
-                    .foregroundStyle(.black)
-                    .allowsHitTesting(false)
+            if #available(iOS 26.0, *) {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Text("plainweights")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.black)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .allowsHitTesting(false)
+                }
+                .sharedBackgroundVisibility(.hidden)
+            } else {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Text("plainweights")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.black)
+                        .fixedSize(horizontal: true, vertical: false)
+                        .allowsHitTesting(false)
+                }
             }
             ToolbarItem(placement: .primaryAction) {
                 Button { showingAddExercise = true } label: {

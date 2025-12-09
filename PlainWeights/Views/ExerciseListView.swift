@@ -144,6 +144,14 @@ struct FilteredExerciseListView: View {
                 }
             }
             #endif
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    // TODO: Show today's summary
+                } label: {
+                    Image(systemName: "chart.bar.doc.horizontal")
+                        .font(.callout)
+                }
+            }
         }
         .sheet(isPresented: $showingAddExercise) {
             AddExerciseView { newExercise in

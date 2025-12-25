@@ -77,6 +77,17 @@ struct SetRowView: View {
                                 }
                         }
 
+                        if set.isBonus {
+                            Circle()
+                                .fill(.yellow)
+                                .frame(width: 20, height: 20)
+                                .overlay {
+                                    Image(systemName: "star.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.white)
+                                }
+                        }
+
                         if set.isDropSet {
                             Circle()
                                 .fill(.teal)
@@ -259,7 +270,7 @@ struct SetRowView: View {
                 HStack(alignment: .center, spacing: 0) {
                     Text(ExerciseSetFormatters.formatSet(set))
                         .monospacedDigit()
-                        .foregroundStyle(set.isWarmUp ? .secondary : .primary)
+                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
 
@@ -271,6 +282,17 @@ struct SetRowView: View {
                                 .frame(width: 20, height: 20)
                                 .overlay {
                                     Image(systemName: "flame.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.white)
+                                }
+                        }
+
+                        if set.isBonus {
+                            Circle()
+                                .fill(.yellow)
+                                .frame(width: 20, height: 20)
+                                .overlay {
+                                    Image(systemName: "star.fill")
                                         .font(.system(size: 10))
                                         .foregroundStyle(.white)
                                 }

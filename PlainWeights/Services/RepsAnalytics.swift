@@ -21,7 +21,7 @@ enum RepsAnalytics {
     /// - Parameter sets: Array of ExerciseSet
     /// - Returns: Sum of reps from today only (excluding warm-ups)
     static func getTodayTotalReps(from sets: [ExerciseSet]) -> Int {
-        let todaySets = sets.filter { Calendar.current.isDateInToday($0.timestamp) && !$0.isWarmUp }
+        let todaySets = sets.filter { Calendar.current.isDateInToday($0.timestamp) && !$0.isWarmUp && !$0.isBonus }
         return calculateTotalReps(from: todaySets)
     }
 
@@ -54,7 +54,7 @@ enum RepsAnalytics {
 
         // Filter out today's sets and warm-ups
         let historicWorkingSets = sets.filter {
-            !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp
+            !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp && !$0.isBonus
         }
 
         guard let mostRecentDate = historicWorkingSets.first?.timestamp else {
@@ -78,7 +78,7 @@ enum RepsAnalytics {
 
         // Filter out today's sets and warm-ups
         let historicWorkingSets = sets.filter {
-            !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp
+            !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp && !$0.isBonus
         }
 
         guard let mostRecentDate = historicWorkingSets.first?.timestamp else {

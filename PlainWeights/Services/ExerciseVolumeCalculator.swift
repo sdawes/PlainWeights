@@ -18,7 +18,7 @@ enum ExerciseMetricsType {
     /// Analyzes working sets (excludes warm-ups) to detect exercise pattern
     static func determine(from sets: [ExerciseSet]) -> ExerciseMetricsType {
         // Only consider working sets for type detection
-        let workingSets = sets.filter { !$0.isWarmUp }
+        let workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
 
         // If no working sets, default to combined
         guard !workingSets.isEmpty else { return .combined }
@@ -64,7 +64,7 @@ enum ExerciseVolumeCalculator {
 
         // Single pass to calculate volume
         for set in sets {
-            guard !set.isWarmUp else { continue }
+            guard !set.isWarmUp && !set.isBonus else { continue }
 
             // Only calculate volume when both weight and reps are present
             if set.weight > 0 && set.reps > 0 {
@@ -84,7 +84,7 @@ enum ExerciseVolumeCalculator {
 
         // Single pass to calculate weight-based volume
         for set in sets {
-            guard !set.isWarmUp else { continue }
+            guard !set.isWarmUp && !set.isBonus else { continue }
 
             // Only calculate volume when both weight and reps are present
             if set.weight > 0 && set.reps > 0 {
@@ -109,7 +109,7 @@ enum ExerciseVolumeCalculator {
 
         // Single pass through sets to calculate all metrics
         for set in sets {
-            guard !set.isWarmUp else { continue }
+            guard !set.isWarmUp && !set.isBonus else { continue }
 
             totalSets += 1
 

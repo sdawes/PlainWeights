@@ -20,6 +20,7 @@ enum ExerciseSetService {
     ///   - weight: Weight in kg
     ///   - reps: Number of repetitions
     ///   - isWarmUp: Whether this is a warm-up set
+    ///   - isBonus: Whether this is a bonus set (excluded from metrics like warm-up)
     ///   - isDropSet: Whether this is a drop set
     ///   - isPauseAtTop: Whether this is a pause at top set
     ///   - isTimedSet: Whether this is a timed/tempo set
@@ -30,6 +31,7 @@ enum ExerciseSetService {
         weight: Double,
         reps: Int,
         isWarmUp: Bool = false,
+        isBonus: Bool = false,
         isDropSet: Bool = false,
         isPauseAtTop: Bool = false,
         isTimedSet: Bool = false,
@@ -51,6 +53,7 @@ enum ExerciseSetService {
             weight: weight,
             reps: reps,
             isWarmUp: isWarmUp,
+            isBonus: isBonus,
             isDropSet: isDropSet,
             isPauseAtTop: isPauseAtTop,
             isTimedSet: isTimedSet,
@@ -119,7 +122,7 @@ enum ExerciseSetService {
         let exerciseID = exercise.persistentModelID
         let descriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
-                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp
+                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp && !set.isBonus
             }
         )
 
@@ -151,6 +154,7 @@ enum ExerciseSetService {
     ///   - weight: New weight in kg
     ///   - reps: New number of repetitions
     ///   - isWarmUp: Whether this is a warm-up set
+    ///   - isBonus: Whether this is a bonus set (excluded from metrics like warm-up)
     ///   - isDropSet: Whether this is a drop set
     ///   - isPauseAtTop: Whether this is a pause at top set
     ///   - isTimedSet: Whether this is a timed/tempo set
@@ -161,6 +165,7 @@ enum ExerciseSetService {
         weight: Double,
         reps: Int,
         isWarmUp: Bool,
+        isBonus: Bool,
         isDropSet: Bool,
         isPauseAtTop: Bool,
         isTimedSet: Bool,
@@ -180,6 +185,7 @@ enum ExerciseSetService {
         set.weight = weight
         set.reps = reps
         set.isWarmUp = isWarmUp
+        set.isBonus = isBonus
         set.isDropSet = isDropSet
         set.isPauseAtTop = isPauseAtTop
         set.isTimedSet = isTimedSet
@@ -187,7 +193,7 @@ enum ExerciseSetService {
 
         try context.save()
 
-        // Recalculate PBs since values or warm-up status may have changed
+        // Recalculate PBs since values or warm-up/bonus status may have changed
         if let exercise = set.exercise {
             try detectAndMarkPB(for: set, exercise: exercise, context: context)
         }
@@ -234,7 +240,7 @@ enum ExerciseSetService {
     /// 1. Weight takes precedence (highest weight wins)
     /// 2. If multiple sets at same max weight, highest reps wins
     /// 3. If same weight AND reps, earliest timestamp keeps PB
-    /// 4. Warm-up sets are excluded from PB consideration
+    /// 4. Warm-up and bonus sets are excluded from PB consideration
     ///
     /// - Parameters:
     ///   - newSet: The newly added set to evaluate
@@ -245,14 +251,14 @@ enum ExerciseSetService {
         exercise: Exercise,
         context: ModelContext
     ) throws {
-        // Only working sets can be PBs (exclude warm-ups)
-        guard !newSet.isWarmUp else { return }
+        // Only working sets can be PBs (exclude warm-ups and bonus sets)
+        guard !newSet.isWarmUp && !newSet.isBonus else { return }
 
         // Fetch all working sets for this exercise
         let exerciseID = exercise.persistentModelID
         let descriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
-                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp
+                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp && !set.isBonus
             },
             sortBy: [SortDescriptor(\.timestamp)]
         )

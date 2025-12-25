@@ -58,7 +58,7 @@ struct ChartContentView: View {
 
     // Determine exercise chart type based on weight data
     private var exerciseChartType: ExerciseChartType {
-        let workingSets = sets.filter { !$0.isWarmUp }
+        let workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
         let allZeroWeight = workingSets.allSatisfy { $0.weight == 0 }
         return allZeroWeight ? .repsOnly : .weightAndReps
     }
@@ -68,7 +68,7 @@ struct ChartContentView: View {
         let calendar = Calendar.current
 
         // Filter out warm-up sets
-        let workingSets = sets.filter { !$0.isWarmUp }
+        let workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
 
         // Group sets by day
         let grouped = Dictionary(grouping: workingSets) { set in

@@ -71,6 +71,7 @@ struct WeightRepsInputContainer: View {
 
 struct SetOptionsToggles: View {
     @Binding var isWarmUpSet: Bool
+    @Binding var isBonusSet: Bool
     @Binding var isDropSet: Bool
     @Binding var isPauseAtTop: Bool
     @Binding var isTimedSet: Bool
@@ -100,6 +101,12 @@ struct SetOptionsToggles: View {
                        isSelected: isTimedSet, activeColor: .black) {
                 selectOption(timed: true)
             }
+            // Row 3
+            chipButton(icon: "star.fill", text: "Bonus",
+                       isSelected: isBonusSet, activeColor: .yellow) {
+                selectOption(bonus: true)
+            }
+            Color.clear // Empty cell
         }
         .padding(12)
         .background(Color(.systemGray6))
@@ -134,14 +141,26 @@ struct SetOptionsToggles: View {
 
     // MARK: - Selection Logic
 
-    private func selectOption(warmUp: Bool = false, dropSet: Bool = false,
+    private func selectOption(warmUp: Bool = false, bonus: Bool = false, dropSet: Bool = false,
                               pause: Bool = false, timed: Bool = false) {
-        // Toggle behavior: tap selected to deselect, tap unselected to select (and deselect others)
+        // Toggle behavior: tap selected to deselect, tap unselected to select
+        // Warm-up and Bonus are mutually exclusive (both exclude from metrics)
         if warmUp {
             if isWarmUpSet {
                 isWarmUpSet = false
             } else {
                 isWarmUpSet = true
+                isBonusSet = false // Mutually exclusive with bonus
+                isDropSet = false
+                isPauseAtTop = false
+                isTimedSet = false
+            }
+        } else if bonus {
+            if isBonusSet {
+                isBonusSet = false
+            } else {
+                isBonusSet = true
+                isWarmUpSet = false // Mutually exclusive with warm-up
                 isDropSet = false
                 isPauseAtTop = false
                 isTimedSet = false
@@ -152,6 +171,7 @@ struct SetOptionsToggles: View {
             } else {
                 isDropSet = true
                 isWarmUpSet = false
+                isBonusSet = false
                 isPauseAtTop = false
                 isTimedSet = false
             }
@@ -161,6 +181,7 @@ struct SetOptionsToggles: View {
             } else {
                 isPauseAtTop = true
                 isWarmUpSet = false
+                isBonusSet = false
                 isDropSet = false
                 isTimedSet = false
             }
@@ -170,6 +191,7 @@ struct SetOptionsToggles: View {
             } else {
                 isTimedSet = true
                 isWarmUpSet = false
+                isBonusSet = false
                 isDropSet = false
                 isPauseAtTop = false
             }
@@ -224,6 +246,7 @@ struct AddSetView: View {
     @State private var weightText = ""
     @State private var repsText = ""
     @State private var isWarmUpSet = false
+    @State private var isBonusSet = false
     @State private var isDropSet = false
     @State private var isPauseAtTop = false
     @State private var isTimedSet = false
@@ -242,6 +265,7 @@ struct AddSetView: View {
             _weightText = State(initialValue: Formatters.formatWeight(set.weight))
             _repsText = State(initialValue: String(set.reps))
             _isWarmUpSet = State(initialValue: set.isWarmUp)
+            _isBonusSet = State(initialValue: set.isBonus)
             _isDropSet = State(initialValue: set.isDropSet)
             _isPauseAtTop = State(initialValue: set.isPauseAtTop)
             _isTimedSet = State(initialValue: set.isTimedSet)
@@ -269,6 +293,7 @@ struct AddSetView: View {
                 // Set options toggles
                 SetOptionsToggles(
                     isWarmUpSet: $isWarmUpSet,
+                    isBonusSet: $isBonusSet,
                     isDropSet: $isDropSet,
                     isPauseAtTop: $isPauseAtTop,
                     isTimedSet: $isTimedSet
@@ -330,6 +355,7 @@ struct AddSetView: View {
                     weight: weight,
                     reps: reps,
                     isWarmUp: isWarmUpSet,
+                    isBonus: isBonusSet,
                     isDropSet: isDropSet,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
@@ -342,6 +368,7 @@ struct AddSetView: View {
                     weight: weight,
                     reps: reps,
                     isWarmUp: isWarmUpSet,
+                    isBonus: isBonusSet,
                     isDropSet: isDropSet,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,

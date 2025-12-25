@@ -26,7 +26,7 @@ enum TodaySessionCalculator {
         let today = calendar.startOfDay(for: Date())
 
         return sets
-            .filter { calendar.startOfDay(for: $0.timestamp) == today && !$0.isWarmUp }
+            .filter { calendar.startOfDay(for: $0.timestamp) == today && !$0.isWarmUp && !$0.isBonus }
             .first  // Sets are already sorted by timestamp descending
     }
 
@@ -49,14 +49,14 @@ enum TodaySessionCalculator {
     /// Get today's maximum weight lifted (for Best mode comparisons)
     static func getTodaysMaxWeight(from sets: [ExerciseSet]) -> Double {
         let todaySets = getTodaysSets(from: sets)
-        let workingSets = todaySets.filter { !$0.isWarmUp }
+        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
         return workingSets.map { $0.weight }.max() ?? 0.0
     }
 
     /// Get today's maximum reps performed (for Best mode comparisons)
     static func getTodaysMaxReps(from sets: [ExerciseSet]) -> Int {
         let todaySets = getTodaysSets(from: sets)
-        let workingSets = todaySets.filter { !$0.isWarmUp }
+        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
         return workingSets.map { $0.reps }.max() ?? 0
     }
 }

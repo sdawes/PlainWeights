@@ -205,7 +205,7 @@ struct SessionSummaryView: View {
             .font(.subheadline)
 
             // Max weight × reps
-            if let maxSet = workoutExercise.sets.filter({ !$0.isWarmUp }).max(by: { $0.weight < $1.weight }) {
+            if let maxSet = workoutExercise.sets.filter({ !$0.isWarmUp && !$0.isBonus }).max(by: { $0.weight < $1.weight }) {
                 HStack {
                     Text("Max:")
                         .foregroundStyle(.tertiary)

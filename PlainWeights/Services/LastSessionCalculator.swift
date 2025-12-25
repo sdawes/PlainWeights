@@ -55,7 +55,7 @@ enum LastSessionCalculator {
 
         let calendar = Calendar.current
         let lastSessionSets = sets.filter { set in
-            calendar.startOfDay(for: set.timestamp) == calendar.startOfDay(for: lastSessionInfo.date) && !set.isWarmUp
+            calendar.startOfDay(for: set.timestamp) == calendar.startOfDay(for: lastSessionInfo.date) && !set.isWarmUp && !set.isBonus
         }
 
         return ExerciseVolumeCalculator.getSessionMetrics(for: lastSessionSets, date: lastSessionInfo.date)

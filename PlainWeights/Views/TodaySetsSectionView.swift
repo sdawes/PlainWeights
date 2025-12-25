@@ -20,7 +20,7 @@ struct TodaySetsSectionView: View {
             HStack(alignment: .bottom) {
                 Text(ExerciseSetFormatters.formatSet(set))
                     .monospacedDigit()
-                    .foregroundStyle(set.isWarmUp ? .secondary : .primary)
+                    .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
                 Spacer()
 
@@ -30,6 +30,17 @@ struct TodaySetsSectionView: View {
                         .frame(width: 20, height: 20)
                         .overlay {
                             Image(systemName: "flame.fill")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.white)
+                        }
+                }
+
+                if set.isBonus {
+                    Circle()
+                        .fill(.yellow)
+                        .frame(width: 20, height: 20)
+                        .overlay {
+                            Image(systemName: "star.fill")
                                 .font(.system(size: 10))
                                 .foregroundStyle(.white)
                         }

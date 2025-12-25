@@ -725,7 +725,7 @@ struct ThisSetCard: View {
 
     // Last set timestamp
     private var lastSetTimestamp: Date? {
-        todaySets.first(where: { !$0.isWarmUp })?.timestamp
+        todaySets.first(where: { !$0.isWarmUp && !$0.isBonus })?.timestamp
     }
 
     // Best day metrics
@@ -816,7 +816,7 @@ struct ThisSetCard: View {
     }
 
     private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool, isPauseAtTop: Bool, isTimedSet: Bool, tempoSeconds: Int, isPB: Bool)? {
-        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp && !$0.isBonus }) else {
             return nil
         }
 
@@ -827,7 +827,7 @@ struct ThisSetCard: View {
     }
 
     private func formatThisSetProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
-        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }),
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp && !$0.isBonus }),
               let comparison = comparisonWeight else {
             return nil
         }
@@ -852,7 +852,7 @@ struct ThisSetCard: View {
     }
 
     private func formatThisSetRepsProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
-        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }),
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp && !$0.isBonus }),
               let comparison = comparisonReps else {
             return nil
         }
@@ -920,7 +920,7 @@ struct ExerciseMetricsView: View {
 
     // Last set timestamp (for rest timer)
     private var lastSetTimestamp: Date? {
-        todaySets.first(where: { !$0.isWarmUp })?.timestamp
+        todaySets.first(where: { !$0.isWarmUp && !$0.isBonus })?.timestamp
     }
 
     // Best day metrics (excludes today's sets - only shows all-time PRs from previous days)
@@ -938,7 +938,7 @@ struct ExerciseMetricsView: View {
 
     /// Get the weight and reps values from the last working set (all-time, for pre-filling form)
     private var lastWorkingSetValues: (weight: Double?, reps: Int?) {
-        guard let lastWorkingSet = sets.first(where: { !$0.isWarmUp }) else {
+        guard let lastWorkingSet = sets.first(where: { !$0.isWarmUp && !$0.isBonus }) else {
             return (nil, nil)
         }
         return (lastWorkingSet.weight, lastWorkingSet.reps)
@@ -1033,7 +1033,7 @@ struct ExerciseMetricsView: View {
 
     private func formatThisSet() -> (weight: String, reps: Int, isDropSet: Bool, isPauseAtTop: Bool, isTimedSet: Bool, tempoSeconds: Int, isPB: Bool)? {
         // Get the most recent working set from today (skip warm-ups)
-        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }) else {
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp && !$0.isBonus }) else {
             return nil
         }
 
@@ -1044,7 +1044,7 @@ struct ExerciseMetricsView: View {
     }
 
     private func formatThisSetProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
-        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }),
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp && !$0.isBonus }),
               let comparison = comparisonWeight else {
             return nil
         }
@@ -1069,7 +1069,7 @@ struct ExerciseMetricsView: View {
     }
 
     private func formatThisSetRepsProgress() -> (text: String, direction: ProgressTracker.PRDirection)? {
-        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp }),
+        guard let lastWorkingSet = todaySets.first(where: { !$0.isWarmUp && !$0.isBonus }),
               let comparison = comparisonReps else {
             return nil
         }

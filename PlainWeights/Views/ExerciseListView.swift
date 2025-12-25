@@ -111,34 +111,6 @@ struct FilteredExerciseListView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
-            if #available(iOS 26.0, *) {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "dumbbell.fill")
-                            .font(.headline)
-                        Text("plainweights")
-                            .font(.headline)
-                            .fontWeight(.bold)
-                    }
-                    .foregroundStyle(.black)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .allowsHitTesting(false)
-                }
-                .sharedBackgroundVisibility(.hidden)
-            } else {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "dumbbell.fill")
-                            .font(.headline)
-                        Text("plainweights")
-                            .font(.headline)
-                            .fontWeight(.bold)
-                    }
-                    .foregroundStyle(.black)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .allowsHitTesting(false)
-                }
-            }
             ToolbarItem(placement: .primaryAction) {
                 Button { showingAddExercise = true } label: {
                     Image(systemName: "plus")

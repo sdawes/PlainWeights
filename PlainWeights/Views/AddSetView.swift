@@ -67,171 +67,113 @@ struct WeightRepsInputContainer: View {
     }
 }
 
-// MARK: - Set Options Toggles
+// MARK: - Set Options Chips
 
 struct SetOptionsToggles: View {
     @Binding var isWarmUpSet: Bool
     @Binding var isDropSet: Bool
     @Binding var isPauseAtTop: Bool
     @Binding var isTimedSet: Bool
-    @Binding var tempoSecondsText: String
+
+    private let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
 
     var body: some View {
-        VStack(spacing: 16) {
-            // Warm-up toggle
-            HStack(spacing: 10) {
-                Circle()
-                    .fill(isWarmUpSet ? .orange : .secondary)
-                    .frame(width: 20, height: 20)
-                    .overlay {
-                        Image(systemName: "flame.fill")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.white)
-                    }
-
-                Text("Warm-up set")
-                    .font(.subheadline)
-                    .foregroundStyle(isWarmUpSet ? .primary : .secondary)
-
-                Spacer()
-
-                Toggle("", isOn: Binding(
-                    get: { isWarmUpSet },
-                    set: { newValue in
-                        if newValue {
-                            // Turn off other toggles when this one is enabled
-                            isDropSet = false
-                            isPauseAtTop = false
-                            isTimedSet = false
-                        }
-                        isWarmUpSet = newValue
-                    }
-                ))
-                    .labelsHidden()
-                    .tint(isWarmUpSet ? .orange : .blue)
+        LazyVGrid(columns: columns, spacing: 10) {
+            // Row 1
+            chipButton(icon: "flame.fill", text: "Warm-up",
+                       isSelected: isWarmUpSet, activeColor: .orange) {
+                selectOption(warmUp: true)
             }
-
-            // Drop set toggle
-            HStack(spacing: 10) {
-                Circle()
-                    .fill(isDropSet ? .teal : .secondary)
-                    .frame(width: 20, height: 20)
-                    .overlay {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.white)
-                    }
-
-                Text("Drop set")
-                    .font(.subheadline)
-                    .foregroundStyle(isDropSet ? .primary : .secondary)
-
-                Spacer()
-
-                Toggle("", isOn: Binding(
-                    get: { isDropSet },
-                    set: { newValue in
-                        if newValue {
-                            // Turn off other toggles when this one is enabled
-                            isWarmUpSet = false
-                            isPauseAtTop = false
-                            isTimedSet = false
-                        }
-                        isDropSet = newValue
-                    }
-                ))
-                    .labelsHidden()
-                    .tint(isDropSet ? .teal : .blue)
+            chipButton(icon: "chevron.down", text: "Drop set",
+                       isSelected: isDropSet, activeColor: .teal) {
+                selectOption(dropSet: true)
             }
-
-            // Pause at top toggle
-            HStack(spacing: 10) {
-                Circle()
-                    .fill(isPauseAtTop ? .pink : .secondary)
-                    .frame(width: 20, height: 20)
-                    .overlay {
-                        Image(systemName: "pause.fill")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.white)
-                    }
-
-                Text("Pause at top")
-                    .font(.subheadline)
-                    .foregroundStyle(isPauseAtTop ? .primary : .secondary)
-
-                Spacer()
-
-                Toggle("", isOn: Binding(
-                    get: { isPauseAtTop },
-                    set: { newValue in
-                        if newValue {
-                            // Turn off other toggles when this one is enabled
-                            isWarmUpSet = false
-                            isDropSet = false
-                            isTimedSet = false
-                        }
-                        isPauseAtTop = newValue
-                    }
-                ))
-                    .labelsHidden()
-                    .tint(isPauseAtTop ? .pink : .blue)
+            // Row 2
+            chipButton(icon: "pause.fill", text: "Pause",
+                       isSelected: isPauseAtTop, activeColor: .pink) {
+                selectOption(pause: true)
             }
-
-            // Timed set toggle
-            HStack(spacing: 10) {
-                Circle()
-                    .fill(isTimedSet ? .black : .secondary)
-                    .frame(width: 20, height: 20)
-                    .overlay {
-                        Image(systemName: "timer")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.white)
-                    }
-
-                Text("Timed set")
-                    .font(.subheadline)
-                    .foregroundStyle(isTimedSet ? .primary : .secondary)
-
-                if isTimedSet {
-                    TextField("0", text: $tempoSecondsText)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.center)
-                        .frame(width: 60)
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 8)
-                        .background(Color.white)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
-
-                    Text("s")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Toggle("", isOn: Binding(
-                    get: { isTimedSet },
-                    set: { newValue in
-                        if newValue {
-                            // Turn off other toggles when this one is enabled
-                            isWarmUpSet = false
-                            isDropSet = false
-                            isPauseAtTop = false
-                        }
-                        isTimedSet = newValue
-                    }
-                ))
-                    .labelsHidden()
-                    .tint(isTimedSet ? .black : .blue)
+            chipButton(icon: "timer", text: "Timed",
+                       isSelected: isTimedSet, activeColor: .black) {
+                selectOption(timed: true)
             }
         }
-        .padding(16)
+        .padding(12)
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    // MARK: - Helper Views
+
+    @ViewBuilder
+    private func chipButton(icon: String, text: String, isSelected: Bool,
+                            activeColor: Color, action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                Text(text)
+                    .font(.subheadline)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .background(isSelected ? activeColor : Color(.systemGray5))
+            .foregroundStyle(isSelected ? .white : .secondary)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .contentShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    // MARK: - Selection Logic
+
+    private func selectOption(warmUp: Bool = false, dropSet: Bool = false,
+                              pause: Bool = false, timed: Bool = false) {
+        // Toggle behavior: tap selected to deselect, tap unselected to select (and deselect others)
+        if warmUp {
+            if isWarmUpSet {
+                isWarmUpSet = false
+            } else {
+                isWarmUpSet = true
+                isDropSet = false
+                isPauseAtTop = false
+                isTimedSet = false
+            }
+        } else if dropSet {
+            if isDropSet {
+                isDropSet = false
+            } else {
+                isDropSet = true
+                isWarmUpSet = false
+                isPauseAtTop = false
+                isTimedSet = false
+            }
+        } else if pause {
+            if isPauseAtTop {
+                isPauseAtTop = false
+            } else {
+                isPauseAtTop = true
+                isWarmUpSet = false
+                isDropSet = false
+                isTimedSet = false
+            }
+        } else if timed {
+            if isTimedSet {
+                isTimedSet = false
+            } else {
+                isTimedSet = true
+                isWarmUpSet = false
+                isDropSet = false
+                isPauseAtTop = false
+            }
+        }
     }
 }
 
@@ -285,7 +227,6 @@ struct AddSetView: View {
     @State private var isDropSet = false
     @State private var isPauseAtTop = false
     @State private var isTimedSet = false
-    @State private var tempoSecondsText = ""
     @FocusState private var focusedField: Field?
 
     enum Field {
@@ -304,7 +245,6 @@ struct AddSetView: View {
             _isDropSet = State(initialValue: set.isDropSet)
             _isPauseAtTop = State(initialValue: set.isPauseAtTop)
             _isTimedSet = State(initialValue: set.isTimedSet)
-            _tempoSecondsText = State(initialValue: set.isTimedSet && set.tempoSeconds > 0 ? String(set.tempoSeconds) : "")
         } else {
             // If adding new set, use initial values
             if let initialWeight = initialWeight, initialWeight >= 0 {
@@ -331,8 +271,7 @@ struct AddSetView: View {
                     isWarmUpSet: $isWarmUpSet,
                     isDropSet: $isDropSet,
                     isPauseAtTop: $isPauseAtTop,
-                    isTimedSet: $isTimedSet,
-                    tempoSecondsText: $tempoSecondsText
+                    isTimedSet: $isTimedSet
                 )
 
                 // Add/Update Set button (moved up from bottom)
@@ -383,9 +322,6 @@ struct AddSetView: View {
             return
         }
 
-        // Parse tempo seconds (empty or invalid input defaults to 0)
-        let tempoSeconds = Int(tempoSecondsText.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
-
         do {
             if let setToEdit = setToEdit {
                 // Update existing set
@@ -397,7 +333,7 @@ struct AddSetView: View {
                     isDropSet: isDropSet,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
-                    tempoSeconds: tempoSeconds,
+                    tempoSeconds: 0,
                     context: context
                 )
             } else {
@@ -409,7 +345,7 @@ struct AddSetView: View {
                     isDropSet: isDropSet,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
-                    tempoSeconds: tempoSeconds,
+                    tempoSeconds: 0,
                     to: exercise,
                     context: context
                 )

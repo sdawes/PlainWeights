@@ -64,31 +64,61 @@ enum ExerciseSetService {
         context.insert(set)
         try context.save()
 
+        // Capture rest time on the previous set (how long since that set until this one)
+        try captureRestTimeOnPreviousSet(currentSet: set, exercise: exercise, context: context)
+
         // Detect and mark PB after adding the set
         try detectAndMarkPB(for: set, exercise: exercise, context: context)
     }
 
-    // MARK: - Repeat Set
+    // MARK: - Rest Time Capture
 
-    /// Create a duplicate of an existing set with current timestamp
+    /// Capture rest time on the previous set when a new set is added
     /// - Parameters:
-    ///   - set: The set to duplicate
+    ///   - currentSet: The newly added set
     ///   - exercise: Parent exercise
     ///   - context: SwiftData model context
-    static func repeatSet(
-        _ set: ExerciseSet,
-        for exercise: Exercise,
+    static func captureRestTimeOnPreviousSet(
+        currentSet: ExerciseSet,
+        exercise: Exercise,
         context: ModelContext
     ) throws {
-        let newSet = ExerciseSet(
-            weight: set.weight,
-            reps: set.reps,
-            isWarmUp: false, // New sets default to working sets
-            isDropSet: false, // New sets default to regular sets
-            exercise: exercise
+        let exerciseID = exercise.persistentModelID
+        let currentTimestamp = currentSet.timestamp
+
+        // Find the most recent set BEFORE this one for the same exercise
+        let descriptor = FetchDescriptor<ExerciseSet>(
+            predicate: #Predicate<ExerciseSet> { set in
+                set.exercise?.persistentModelID == exerciseID && set.timestamp < currentTimestamp
+            },
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
         )
 
-        context.insert(newSet)
+        var limitedDescriptor = descriptor
+        limitedDescriptor.fetchLimit = 1
+
+        guard let previousSet = try context.fetch(limitedDescriptor).first else {
+            // No previous set (this is the first set for this exercise today)
+            return
+        }
+
+        // Calculate rest time in seconds
+        let restTime = Int(currentTimestamp.timeIntervalSince(previousSet.timestamp))
+
+        // Cap at 180 seconds (3 minutes)
+        previousSet.restSeconds = min(restTime, 180)
+        try context.save()
+    }
+
+    /// Update rest time on a set (called when timer expires at 180s)
+    /// - Parameters:
+    ///   - set: The set to update
+    ///   - context: SwiftData model context
+    static func captureRestTimeExpiry(
+        for set: ExerciseSet,
+        context: ModelContext
+    ) throws {
+        set.restSeconds = 180
         try context.save()
     }
 

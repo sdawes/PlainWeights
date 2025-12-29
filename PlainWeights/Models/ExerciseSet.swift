@@ -20,6 +20,7 @@ final class ExerciseSet {
     var isTimedSet: Bool = false     // flag to indicate timed/tempo set (slow controlled movement)
     var tempoSeconds: Int = 0        // tempo duration in seconds (only used when isTimedSet is true)
     var isPB: Bool = false           // flag to indicate personal best (highest weight, then reps, then earliest timestamp)
+    var restSeconds: Int?            // seconds rested after this set (nil for first set or not yet captured)
     var exercise: Exercise?  // parent (optional to handle cascade delete properly)
 
     init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isBonus: Bool = false, isDropSet: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, exercise: Exercise) {

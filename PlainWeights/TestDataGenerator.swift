@@ -173,30 +173,34 @@ class TestDataGenerator {
         print("        }")
         print("")
         print("        // Helper function to add a working set")
-        print("        func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
+        print("        func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
         print("            guard let ex = exercises[exercise] else { return }")
         print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: false, isDropSet: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)")
+        print("            set.restSeconds = restSeconds")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add a warm-up set")
-        print("        func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0) {")
+        print("        func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0) {")
         print("            guard let ex = exercises[exercise] else { return }")
         print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, isBonus: false, isDropSet: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: false, exercise: ex)")
+        print("            set.restSeconds = restSeconds")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add a bonus set (excluded from metrics)")
-        print("        func addBonusSet(exercise: String, weight: Double, reps: Int, timestamp: Date, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0) {")
+        print("        func addBonusSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0) {")
         print("            guard let ex = exercises[exercise] else { return }")
         print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: true, isDropSet: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: false, exercise: ex)")
+        print("            set.restSeconds = restSeconds")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add a drop set")
-        print("        func addDropSet(exercise: String, weight: Double, reps: Int, timestamp: Date, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
+        print("        func addDropSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
         print("            guard let ex = exercises[exercise] else { return }")
         print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: false, isDropSet: true, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)")
+        print("            set.restSeconds = restSeconds")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
@@ -244,6 +248,9 @@ class TestDataGenerator {
 
                             // Build optional parameters string
                             var optionalParams = ""
+                            if let restSeconds = item.set.restSeconds {
+                                optionalParams += ", restSeconds: \(restSeconds)"
+                            }
                             if item.set.isPauseAtTop {
                                 optionalParams += ", isPauseAtTop: true"
                             }

@@ -23,6 +23,7 @@ struct ProgressComparison {
 // MARK: - Set Row View
 
 struct SetRowView: View {
+    @Environment(\.modelContext) private var modelContext
     let set: ExerciseSet
     let onTap: () -> Void
     let onDelete: () -> Void
@@ -230,40 +231,8 @@ struct SetRowView: View {
 
                     Spacer()
 
-                    // Rest timer (right-aligned, only on most recent set, disappears after 5 minutes)
-                    if showTimer {
-                        TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
-                            let rawElapsed = context.date.timeIntervalSince(set.timestamp)
-
-                            // Only show timer for first 5 minutes (300 seconds)
-                            if rawElapsed < 300 {
-                                let elapsed = min(rawElapsed, 180)
-
-                                let timerColor: Color = {
-                                    if elapsed < 60 {
-                                        return .black
-                                    } else if elapsed < 120 {
-                                        return .orange
-                                    } else {
-                                        return .pw_red
-                                    }
-                                }()
-
-                                HStack(spacing: 4) {
-                                    Image(systemName: "timer")
-                                        .font(.caption2)
-                                        .foregroundStyle(timerColor)
-
-                                    Text(Formatters.formatDuration(elapsed))
-                                        .font(.caption2)
-                                        .fontWeight(.bold)
-                                        .italic()
-                                    .foregroundStyle(timerColor)
-                                    .monospacedDigit()
-                            }
-                        }
-                        }
-                    }
+                    // Rest time display (static for captured, live timer for most recent)
+                    restTimeView
                 }
             } else {
                 // Normal display (no progress data)
@@ -354,11 +323,19 @@ struct SetRowView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
 
-                    Text(Formatters.formatTimeHM(set.timestamp))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 50, alignment: .trailing)
+                    // Show rest time if available, otherwise nothing
+                    if let restSeconds = set.restSeconds {
+                        HStack(spacing: 4) {
+                            Image(systemName: "moon.zzz")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Text(Formatters.formatDuration(Double(restSeconds)))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
                         .padding(.leading, 4)
+                    }
                 }
             }
         }
@@ -465,5 +442,86 @@ struct SetRowView: View {
         } else {
             return .pw_blue
         }
+    }
+
+    // MARK: - Rest Time Display
+
+    @ViewBuilder
+    private var restTimeView: some View {
+        // Priority 1: Show captured rest time (static display)
+        if let restSeconds = set.restSeconds {
+            staticRestTimeView(seconds: restSeconds)
+        }
+        // Priority 2: Show live timer only for most recent set (no captured rest time yet)
+        else if showTimer {
+            liveTimerView
+        }
+        // Priority 3: First set of session - show nothing
+    }
+
+    @ViewBuilder
+    private func staticRestTimeView(seconds: Int) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "moon.zzz")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            Text(Formatters.formatDuration(Double(seconds)))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+        }
+    }
+
+    @ViewBuilder
+    private var liveTimerView: some View {
+        TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
+            let rawElapsed = context.date.timeIntervalSince(set.timestamp)
+
+            // Only show timer for first 5 minutes (300 seconds)
+            if rawElapsed < 300 {
+                let elapsed = min(rawElapsed, 180)
+                let color = restTimeColor(for: Int(elapsed))
+
+                HStack(spacing: 4) {
+                    Image(systemName: "timer")
+                        .font(.caption2)
+                        .foregroundStyle(color)
+
+                    if elapsed >= 180 {
+                        Text("> 3 mins")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(color)
+                            .onAppear {
+                                // Capture the expiry when timer hits 180s
+                                captureRestTimeExpiry()
+                            }
+                    } else {
+                        Text(Formatters.formatDuration(elapsed))
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(color)
+                            .monospacedDigit()
+                    }
+                }
+            }
+        }
+    }
+
+    private func restTimeColor(for seconds: Int) -> Color {
+        if seconds < 60 {
+            return .black
+        } else if seconds < 120 {
+            return .orange
+        } else {
+            return .pw_red
+        }
+    }
+
+    private func captureRestTimeExpiry() {
+        // Only capture if not already captured
+        guard set.restSeconds == nil else { return }
+        try? ExerciseSetService.captureRestTimeExpiry(for: set, context: modelContext)
     }
 }

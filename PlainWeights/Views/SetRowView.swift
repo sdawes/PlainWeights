@@ -237,7 +237,7 @@ struct SetRowView: View {
 
                             // Only show timer for first 5 minutes (300 seconds)
                             if rawElapsed < 300 {
-                                let elapsed = min(rawElapsed, 120)
+                                let elapsed = min(rawElapsed, 180)
 
                                 let timerColor: Color = {
                                     if elapsed < 60 {

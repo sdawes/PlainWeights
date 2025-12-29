@@ -459,11 +459,6 @@ struct ThisSetSection: View {
                 }
 
                 Spacer()
-
-                // Rest timer
-                if let timestamp = lastSetTimestamp {
-                    RestTimerView(startTime: timestamp)
-                }
             }
         }
     }

@@ -77,6 +77,13 @@ struct ExerciseDetailView: View {
                 .padding(16)
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
+            } header: {
+                Text(selectedMode == .last ? "PREVIOUS SESSION" : "BEST EVER")
+                    .font(.footnote)
+                    .fontWeight(.bold)
+                    .textCase(.uppercase)
+                    .foregroundStyle(.black)
+                    .padding(.leading, 16)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)

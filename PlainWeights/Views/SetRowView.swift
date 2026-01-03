@@ -41,198 +41,63 @@ struct SetRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             if let progress = progressComparison {
-                // Line 1: Weight and reps with deltas (full display)
-                HStack(alignment: .center, spacing: 4) {
-                    // Weight and reps group (shrinks to fit, never wraps)
-                    HStack(alignment: .lastTextBaseline, spacing: 4) {
-                        // Weight with delta
-                        Text("\(Formatters.formatWeight(set.weight)) kg")
+                // Grid layout: 3 rows × 8 columns
+                Grid(alignment: .leading, horizontalSpacing: 4, verticalSpacing: 6) {
+                    // Row 1: Weight | kg | × | Reps | rep(s) | Badge | Badge | PB
+                    GridRow(alignment: .center) {
+                        Text(Formatters.formatWeight(set.weight))
                             .monospacedDigit()
-                            .foregroundStyle(.primary)
-                        weightProgressView(for: progress.weightDelta)
+                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+
+                        Text("kg")
+                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
                         Text("×")
                             .foregroundStyle(.secondary)
 
-                        // Reps with delta
-                        Text("\(set.reps) reps")
+                        Text("\(set.reps)")
                             .monospacedDigit()
-                            .foregroundStyle(.primary)
+                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+
+                        Text(set.reps == 1 ? "rep" : "reps")
+                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+
+                        // Badges in cols 6-8 (right-aligned within 3-column span)
+                        badgesView
+                            .gridCellColumns(3)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+
+                    // Row 2: Weight delta (col 1) | empty | empty | Reps delta (col 4) | empty cols
+                    GridRow(alignment: .center) {
+                        weightProgressView(for: progress.weightDelta)
+
+                        Color.clear
+                        Color.clear
+
                         repsProgressView(for: progress.repsDelta)
-                    }
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
 
-                    Spacer()
-
-                    // Icons and timestamp
-                    HStack(spacing: 5) {
-                        if set.isWarmUp {
-                            Circle()
-                                .fill(.orange)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "flame.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isBonus {
-                            Circle()
-                                .fill(.yellow)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "star.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isDropSet {
-                            Circle()
-                                .fill(.teal)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "chevron.down")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isPauseAtTop {
-                            Circle()
-                                .fill(.pink)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "pause.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isTimedSet {
-                            Circle()
-                                .fill(.black)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    if set.tempoSeconds > 0 {
-                                        Text("\(set.tempoSeconds)")
-                                            .font(.system(size: 11))
-                                            .italic()
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(.white)
-                                    } else {
-                                        Image(systemName: "timer")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(.white)
-                                    }
-                                }
-                        }
-
-                        if set.isPB {
-                            Circle()
-                                .fill(.purple)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Text("PB")
-                                        .font(.system(size: 9))
-                                        .italic()
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.white)
-                                }
-                        }
+                        Color.clear
+                            .gridCellColumns(4)
                     }
 
-                    Text(Formatters.formatTimeHM(set.timestamp))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.leading, 4)
-                }
-                .padding(.bottom, 8)
+                    // Row 3: Total weight (cols 1-6) | Timer (cols 7-8)
+                    GridRow(alignment: .center) {
+                        HStack(spacing: 4) {
+                            Text("Total weight:")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
 
-                // Line 2: Progress bar
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Background track
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(height: 4)
-                            .cornerRadius(2)
-
-                        // Only show colored progress when both volumes are > 0
-                        if progress.comparisonVolume > 0 && progress.cumulativeVolume > 0 {
-                            if progress.volumeProgress > 0 {
-                                // Over 100%: Green for bonus (right of 100% line), grey for baseline (left)
-                                let markerRatio = 1 / (1 + progress.volumeProgress)
-                                let markerPosition = geometry.size.width * markerRatio
-
-                                // Grey baseline portion (left of 100% marker)
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(width: markerPosition, height: 4)
-                                    .cornerRadius(2)
-
-                                // Green bonus portion (right of 100% marker)
-                                Rectangle()
-                                    .fill(Color.pw_green)
-                                    .frame(width: geometry.size.width - markerPosition, height: 4)
-                                    .cornerRadius(2)
-                                    .offset(x: markerPosition)
-
-                                // 100% marker line
-                                Rectangle()
-                                    .fill(Color.black)
-                                    .frame(width: 1, height: 12)
-                                    .position(x: markerPosition, y: 4)
-                            } else if progress.volumeProgress == 0 {
-                                // Exactly 100%: Full green bar, no marker
-                                Rectangle()
-                                    .fill(Color.pw_green)
-                                    .frame(height: 4)
-                                    .cornerRadius(2)
-                            } else {
-                                // Under 100%: Red partial fill
-                                let fillRatio = max(1.0 + progress.volumeProgress, 0)
-                                Rectangle()
-                                    .fill(Color.pw_red)
-                                    .frame(width: geometry.size.width * fillRatio, height: 4)
-                                    .cornerRadius(2)
-                            }
-                        }
-                        // else: just show grey background track (already rendered above)
-                    }
-                }
-                .frame(height: 8)
-                .padding(.bottom, 1)
-
-                // Line 3: Volume progress text with timer on right
-                HStack(alignment: .top, spacing: 8) {
-                    // Volume progress showing cumulative kg and percentage
-                    HStack(spacing: 2) {
-                        Text("Total Weight: ")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
-                        Text("\(Formatters.formatVolume(progress.cumulativeVolume)) kg")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.primary)
-
-                        // Only show percentage when both volumes are > 0
-                        if progress.comparisonVolume > 0 && progress.cumulativeVolume > 0 {
-                            let percentage = Int((progress.cumulativeVolume / progress.comparisonVolume) * 100)
-                            Text(" (\(percentage)%)")
+                            Text("\(Formatters.formatVolume(progress.cumulativeVolume)) / \(Formatters.formatVolume(progress.comparisonVolume)) kg")
                                 .font(.caption2)
                                 .fontWeight(.bold)
-                                .foregroundStyle(volumeProgressColor(for: progress.volumeProgress))
+                                .foregroundStyle(.primary)
                         }
+                        .gridCellColumns(6)
+
+                        restTimeView
+                            .gridCellColumns(2)
                     }
-
-                    Spacer()
-
-                    // Rest time display (static for captured, live timer for most recent)
-                    restTimeView
                 }
             } else {
                 // Normal display (no progress data)
@@ -243,85 +108,9 @@ struct SetRowView: View {
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
 
-                    // Icon Container (flexible width, fills available space)
-                    HStack(spacing: 5) {
-                        if set.isWarmUp {
-                            Circle()
-                                .fill(.orange)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "flame.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isBonus {
-                            Circle()
-                                .fill(.yellow)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "star.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isDropSet {
-                            Circle()
-                                .fill(.teal)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "chevron.down")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isPauseAtTop {
-                            Circle()
-                                .fill(.pink)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Image(systemName: "pause.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-
-                        if set.isTimedSet {
-                            Circle()
-                                .fill(.black)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    if set.tempoSeconds > 0 {
-                                        Text("\(set.tempoSeconds)")
-                                            .font(.system(size: 11))
-                                            .italic()
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(.white)
-                                    } else {
-                                        Image(systemName: "timer")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(.white)
-                                    }
-                                }
-                        }
-
-                        if set.isPB {
-                            Circle()
-                                .fill(.purple)
-                                .frame(width: 20, height: 20)
-                                .overlay {
-                                    Text("PB")
-                                        .font(.system(size: 9))
-                                        .italic()
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(.white)
-                                }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    // Badges (using shared badgesView)
+                    badgesView
+                        .frame(maxWidth: .infinity, alignment: .trailing)
 
                     // Show rest time if available, otherwise nothing
                     if let restSeconds = set.restSeconds {
@@ -356,6 +145,103 @@ struct SetRowView: View {
     }
 
     // MARK: - Helper Methods
+
+    // Badges view: PB always in rightmost position, user badges fill from right
+    @ViewBuilder
+    private var badgesView: some View {
+        HStack(spacing: 5) {
+            // User badges (max 2, displayed left of PB)
+            // Order: warm-up → bonus → drop → pause → timed
+            ForEach(userBadges.prefix(2), id: \.self) { badge in
+                badgeCircle(for: badge)
+            }
+
+            // PB badge always rightmost when present
+            if set.isPB {
+                Circle()
+                    .fill(.purple)
+                    .frame(width: 20, height: 20)
+                    .overlay {
+                        Text("PB")
+                            .font(.system(size: 9))
+                            .italic()
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
+                    }
+            }
+        }
+    }
+
+    private var userBadges: [String] {
+        var badges: [String] = []
+        if set.isWarmUp { badges.append("warmup") }
+        if set.isBonus { badges.append("bonus") }
+        if set.isDropSet { badges.append("dropset") }
+        if set.isPauseAtTop { badges.append("pause") }
+        if set.isTimedSet { badges.append("timed") }
+        return badges
+    }
+
+    @ViewBuilder
+    private func badgeCircle(for badge: String) -> some View {
+        switch badge {
+        case "warmup":
+            Circle()
+                .fill(.orange)
+                .frame(width: 20, height: 20)
+                .overlay {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white)
+                }
+        case "bonus":
+            Circle()
+                .fill(.yellow)
+                .frame(width: 20, height: 20)
+                .overlay {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white)
+                }
+        case "dropset":
+            Circle()
+                .fill(.teal)
+                .frame(width: 20, height: 20)
+                .overlay {
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white)
+                }
+        case "pause":
+            Circle()
+                .fill(.pink)
+                .frame(width: 20, height: 20)
+                .overlay {
+                    Image(systemName: "pause.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.white)
+                }
+        case "timed":
+            Circle()
+                .fill(.black)
+                .frame(width: 20, height: 20)
+                .overlay {
+                    if set.tempoSeconds > 0 {
+                        Text("\(set.tempoSeconds)")
+                            .font(.system(size: 11))
+                            .italic()
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
+                    } else {
+                        Image(systemName: "timer")
+                            .font(.system(size: 10))
+                            .foregroundStyle(.white)
+                    }
+                }
+        default:
+            EmptyView()
+        }
+    }
 
     @ViewBuilder
     private func weightProgressView(for delta: Double) -> some View {

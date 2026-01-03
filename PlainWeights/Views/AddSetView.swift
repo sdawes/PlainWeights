@@ -76,41 +76,54 @@ struct SetOptionsToggles: View {
     @Binding var isPauseAtTop: Bool
     @Binding var isTimedSet: Bool
 
+    @State private var showMaxWarning = false
+
     private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
+
+    // Count of currently selected options (max 2 allowed)
+    private var selectedCount: Int {
+        [isWarmUpSet, isBonusSet, isDropSet, isPauseAtTop, isTimedSet]
+            .filter { $0 }.count
+    }
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 10) {
             // Row 1
             chipButton(icon: "flame.fill", text: "Warm-up",
                        isSelected: isWarmUpSet, activeColor: .orange) {
-                selectOption(warmUp: true)
+                toggleOption(&isWarmUpSet)
             }
             chipButton(icon: "chevron.down", text: "Drop set",
                        isSelected: isDropSet, activeColor: .teal) {
-                selectOption(dropSet: true)
+                toggleOption(&isDropSet)
             }
             // Row 2
             chipButton(icon: "pause.fill", text: "Pause",
                        isSelected: isPauseAtTop, activeColor: .pink) {
-                selectOption(pause: true)
+                toggleOption(&isPauseAtTop)
             }
             chipButton(icon: "timer", text: "Timed",
                        isSelected: isTimedSet, activeColor: .black) {
-                selectOption(timed: true)
+                toggleOption(&isTimedSet)
             }
             // Row 3
             chipButton(icon: "star.fill", text: "Bonus",
                        isSelected: isBonusSet, activeColor: .yellow) {
-                selectOption(bonus: true)
+                toggleOption(&isBonusSet)
             }
             Color.clear // Empty cell
         }
         .padding(12)
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .alert("Maximum 2 options", isPresented: $showMaxWarning) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Please deselect an option before adding another.")
+        }
     }
 
     // MARK: - Helper Views
@@ -141,60 +154,16 @@ struct SetOptionsToggles: View {
 
     // MARK: - Selection Logic
 
-    private func selectOption(warmUp: Bool = false, bonus: Bool = false, dropSet: Bool = false,
-                              pause: Bool = false, timed: Bool = false) {
-        // Toggle behavior: tap selected to deselect, tap unselected to select
-        // Warm-up and Bonus are mutually exclusive (both exclude from metrics)
-        if warmUp {
-            if isWarmUpSet {
-                isWarmUpSet = false
-            } else {
-                isWarmUpSet = true
-                isBonusSet = false // Mutually exclusive with bonus
-                isDropSet = false
-                isPauseAtTop = false
-                isTimedSet = false
-            }
-        } else if bonus {
-            if isBonusSet {
-                isBonusSet = false
-            } else {
-                isBonusSet = true
-                isWarmUpSet = false // Mutually exclusive with warm-up
-                isDropSet = false
-                isPauseAtTop = false
-                isTimedSet = false
-            }
-        } else if dropSet {
-            if isDropSet {
-                isDropSet = false
-            } else {
-                isDropSet = true
-                isWarmUpSet = false
-                isBonusSet = false
-                isPauseAtTop = false
-                isTimedSet = false
-            }
-        } else if pause {
-            if isPauseAtTop {
-                isPauseAtTop = false
-            } else {
-                isPauseAtTop = true
-                isWarmUpSet = false
-                isBonusSet = false
-                isDropSet = false
-                isTimedSet = false
-            }
-        } else if timed {
-            if isTimedSet {
-                isTimedSet = false
-            } else {
-                isTimedSet = true
-                isWarmUpSet = false
-                isBonusSet = false
-                isDropSet = false
-                isPauseAtTop = false
-            }
+    private func toggleOption(_ option: inout Bool) {
+        if option {
+            // Always allow deselecting
+            option = false
+        } else if selectedCount < 2 {
+            // Allow selecting if under limit
+            option = true
+        } else {
+            // Show warning for 3rd selection attempt
+            showMaxWarning = true
         }
     }
 }

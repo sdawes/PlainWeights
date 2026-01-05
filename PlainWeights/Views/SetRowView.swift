@@ -85,7 +85,8 @@ struct SetRowView: View {
             if hasComparisonData {
                 HStack(spacing: 4) {
                     // Prev comparison
-                    Text("Prev:")
+                    Text("Previous:")
+                        .fontWeight(.bold)
                         .foregroundStyle(.secondary)
                     deltaText(for: prevWeightDelta, suffix: "kg")
                     deltaText(for: prevRepsDelta, suffix: "reps")
@@ -96,6 +97,7 @@ struct SetRowView: View {
 
                     // Best comparison
                     Text("Best:")
+                        .fontWeight(.bold)
                         .foregroundStyle(.secondary)
                     deltaText(for: bestWeightDelta, suffix: "kg")
                     deltaText(for: bestRepsDelta, suffix: "reps")

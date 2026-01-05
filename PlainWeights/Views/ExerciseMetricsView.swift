@@ -9,6 +9,28 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Dashed Line Shapes
+
+/// Horizontal dashed line shape
+struct DashedLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: 0, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.width, y: rect.midY))
+        return path
+    }
+}
+
+/// Vertical dashed line shape
+struct DashedVerticalLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: 0))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.height))
+        return path
+    }
+}
+
 // MARK: - Hero Metric Component
 
 struct HeroMetricView: View {
@@ -593,13 +615,6 @@ struct TargetMetricsCard: View {
         BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
     }
 
-    // Today's max for progress comparison
-    private var todayMaxWeight: Double? {
-        let todaySets = TodaySessionCalculator.getTodaysSets(from: sets)
-            .filter { !$0.isWarmUp && !$0.isBonus }
-        return todaySets.max(by: { $0.weight < $1.weight })?.weight
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Card title
@@ -611,28 +626,25 @@ struct TargetMetricsCard: View {
             HStack(alignment: .top, spacing: 0) {
                 // Left column: Baseline (previous session)
                 VStack(alignment: .leading, spacing: 6) {
-                    // Header with icon
-                    HStack(spacing: 6) {
-                        Image(systemName: "chart.bar.fill")
-                            .font(.caption)
-                            .foregroundStyle(.blue)
-                        Text("Baseline")
-                            .foregroundStyle(.primary)
-                    }
+                    Text("Baseline")
+                        .fontWeight(.bold)
                     Text("(previous session max)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
 
-                    Divider()
-                        .padding(.trailing, 16)
+                    // Horizontal line (centered in column)
+                    Rectangle()
+                        .fill(.black.opacity(0.15))
+                        .frame(height: 1)
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 4)
 
                     if let lastInfo = progressState?.lastCompletedDayInfo {
                         // Weight × Reps
                         HStack(spacing: 4) {
                             Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .monospacedDigit()
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.blue.opacity(0.15))
+                                .cornerRadius(4)
                             badgesView(
                                 isDropSet: lastInfo.isDropSet,
                                 isPauseAtTop: lastInfo.isPauseAtTop,
@@ -645,68 +657,47 @@ struct TargetMetricsCard: View {
                         // Total volume
                         HStack(spacing: 0) {
                             Text("Total: ")
-                                .font(.caption)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.black)
                             Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
-                                .font(.caption)
-                                .foregroundStyle(.black)
-                                .monospacedDigit()
                         }
 
                         // Date
                         Text(Formatters.formatRelativeDate(lastInfo.date))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
-                        // Progress indicator
-                        if let todayMax = todayMaxWeight {
-                            progressIndicator(current: todayMax, target: lastInfo.maxWeight, label: "today")
-                        }
+                            .font(.caption)
+                            .foregroundStyle(.gray)
                     } else {
                         // Empty state
                         VStack(alignment: .leading, spacing: 4) {
                             Text("No baseline yet")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
                             Text("Complete a session to set")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
                         }
                         .padding(.vertical, 4)
                     }
                 }
-                .padding(10)
+                .padding([.top, .bottom, .trailing], 10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.blue.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-
-                Spacer().frame(width: 8)
 
                 // Right column: Upper target (best session)
                 VStack(alignment: .leading, spacing: 6) {
-                    // Header with icon
-                    HStack(spacing: 6) {
-                        Image(systemName: "trophy.fill")
-                            .font(.caption)
-                            .foregroundStyle(.orange)
-                        Text("Upper target")
-                            .foregroundStyle(.primary)
-                    }
+                    Text("Upper target")
+                        .fontWeight(.bold)
                     Text("(best ever session)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
 
-                    Divider()
-                        .padding(.trailing, 16)
+                    // Horizontal line (centered in column)
+                    Rectangle()
+                        .fill(.black.opacity(0.15))
+                        .frame(height: 1)
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 4)
 
                     if let best = bestDayMetrics {
                         // Weight × Reps
                         HStack(spacing: 4) {
                             Text("\(Formatters.formatWeight(best.maxWeight)) kg × \(best.repsAtMaxWeight) reps")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .monospacedDigit()
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.orange.opacity(0.15))
+                                .cornerRadius(4)
                             badgesView(
                                 isDropSet: best.isDropSet,
                                 isPauseAtTop: best.isPauseAtTop,
@@ -719,78 +710,37 @@ struct TargetMetricsCard: View {
                         // Total volume
                         HStack(spacing: 0) {
                             Text("Total: ")
-                                .font(.caption)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.black)
                             Text("\(Formatters.formatVolume(best.totalVolume)) kg")
-                                .font(.caption)
-                                .foregroundStyle(.black)
-                                .monospacedDigit()
                         }
 
                         // Date
                         Text(Formatters.formatRelativeDate(best.date))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
-                        // Progress indicator
-                        if let todayMax = todayMaxWeight {
-                            progressIndicator(current: todayMax, target: best.maxWeight, label: "today")
-                        }
+                            .font(.caption)
+                            .foregroundStyle(.gray)
                     } else {
                         // Empty state
                         VStack(alignment: .leading, spacing: 4) {
                             Text("No record yet")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
                             Text("Complete a session to set")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
                         }
                         .padding(.vertical, 4)
                     }
                 }
-                .padding(10)
+                .padding([.top, .bottom, .leading], 10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.orange.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .overlay {
+                // Centered vertical divider
+                Rectangle()
+                    .fill(.black.opacity(0.15))
+                    .frame(width: 1)
+                    .padding(.vertical, 8)
             }
         }
+        .font(.system(size: 14))
+        .foregroundStyle(.black)
         .padding(.horizontal, 8)
-    }
-
-    // MARK: - Progress Indicator
-
-    @ViewBuilder
-    private func progressIndicator(current: Double, target: Double, label: String) -> some View {
-        let diff = current - target
-        let percentage = target > 0 ? Int((current / target) * 100) : 0
-
-        HStack(spacing: 4) {
-            if diff > 0 {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.green)
-                Text("+\(Formatters.formatWeight(diff)) kg \(label)")
-                    .font(.caption2)
-                    .foregroundStyle(.green)
-            } else if diff < 0 {
-                Image(systemName: "arrow.down.circle.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.orange)
-                Text("\(percentage)% of target")
-                    .font(.caption2)
-                    .foregroundStyle(.orange)
-            } else {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.blue)
-                Text("Target matched")
-                    .font(.caption2)
-                    .foregroundStyle(.blue)
-            }
-        }
-        .padding(.top, 2)
     }
 
     // MARK: - Badge Helper

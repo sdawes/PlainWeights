@@ -24,8 +24,6 @@ struct ExerciseDetailView: View {
     @State private var showingDeleteAlert = false
     @State private var showingNotesSheet = false
 
-    // Metric mode selection
-    @State private var selectedMode: MetricMode = .last
 
     // Cached data for performance
     @State private var todaySets: [ExerciseSet] = []
@@ -67,23 +65,15 @@ struct ExerciseDetailView: View {
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             .padding(.bottom, 0)
 
-            // Target metrics card (Last Max Weight / Best Ever)
+            // Target metrics card (Baseline + Upper Target)
             Section {
                 TargetMetricsCard(
                     exercise: exercise,
-                    sets: sets,
-                    selectedMode: $selectedMode
+                    sets: sets
                 )
                 .padding(16)
                 .background(Color(.systemBackground))
                 .cornerRadius(16)
-            } header: {
-                Text(selectedMode == .last ? "PREVIOUS SESSION" : "BEST EVER")
-                    .font(.footnote)
-                    .fontWeight(.bold)
-                    .textCase(.uppercase)
-                    .foregroundStyle(.black)
-                    .padding(.leading, 16)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -137,9 +127,8 @@ struct ExerciseDetailView: View {
                 } header: {
                     Text("TODAY'S SETS")
                         .font(.footnote)
-                        .fontWeight(.bold)
                         .textCase(.uppercase)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -157,16 +146,16 @@ struct ExerciseDetailView: View {
                     } header: {
                         HStack {
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.black)
+                                .font(.footnote)
+                                .textCase(.uppercase)
+                                .foregroundStyle(.secondary)
 
                             Spacer()
 
                             Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.black)
+                                .font(.footnote)
+                                .textCase(.uppercase)
+                                .foregroundStyle(.secondary)
                         }
                         .padding(.bottom, 4)
                     }

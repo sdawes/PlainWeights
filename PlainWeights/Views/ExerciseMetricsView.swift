@@ -571,13 +571,12 @@ struct MetricViewStats: View {
 
 // MARK: - Card Components
 
-/// Card 2: Target Metrics Only (Last Max Weight / Best Ever)
+/// Card 2: Target Metrics - Combined Baseline (Previous) and Upper Target (Best)
 struct TargetMetricsCard: View {
     let exercise: Exercise
     let sets: [ExerciseSet]
-    @Binding var selectedMode: MetricMode
 
-    // Cached progress state
+    // Cached progress state (for previous session)
     private var progressState: ProgressTracker.ProgressState? {
         ProgressTracker.createProgressState(from: sets)
     }
@@ -594,93 +593,159 @@ struct TargetMetricsCard: View {
         BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
     }
 
-    private func buildTargetMetricsData() -> TargetMetricsData {
-        let summary = formatLastSessionSummary()
-
-        if selectedMode == .best {
-            if let best = bestDayMetrics {
-                return TargetMetricsData(
-                    headerLabel: "BEST EVER",
-                    date: summary.date,
-                    weight: best.maxWeight,
-                    reps: best.repsAtMaxWeight,
-                    totalVolume: best.totalVolume,
-                    isDropSet: best.isDropSet,
-                    isPauseAtTop: best.isPauseAtTop,
-                    isTimedSet: best.isTimedSet,
-                    tempoSeconds: best.tempoSeconds,
-                    isPB: best.isPB
-                )
-            } else {
-                return TargetMetricsData(
-                    headerLabel: "BEST EVER",
-                    date: nil,
-                    weight: 0,
-                    reps: 0,
-                    totalVolume: 0,
-                    isDropSet: false,
-                    isPauseAtTop: false,
-                    isTimedSet: false,
-                    tempoSeconds: 0,
-                    isPB: false
-                )
-            }
-        } else {
-            if let lastInfo = progressState?.lastCompletedDayInfo {
-                return TargetMetricsData(
-                    headerLabel: "LAST MAX WEIGHT",
-                    date: summary.date,
-                    weight: lastInfo.maxWeight,
-                    reps: lastInfo.maxWeightReps,
-                    totalVolume: lastInfo.volume,
-                    isDropSet: lastInfo.isDropSet,
-                    isPauseAtTop: lastInfo.isPauseAtTop,
-                    isTimedSet: lastInfo.isTimedSet,
-                    tempoSeconds: lastInfo.tempoSeconds,
-                    isPB: lastInfo.isPB
-                )
-            } else {
-                return TargetMetricsData(
-                    headerLabel: "LAST MAX WEIGHT",
-                    date: nil,
-                    weight: 0,
-                    reps: 0,
-                    totalVolume: 0,
-                    isDropSet: false,
-                    isPauseAtTop: false,
-                    isTimedSet: false,
-                    tempoSeconds: 0,
-                    isPB: false
-                )
-            }
-        }
-    }
-
-    private func formatLastSessionSummary() -> (text: String, date: Date?) {
-        if selectedMode == .best {
-            if let best = bestDayMetrics {
-                let weight = Formatters.formatWeight(best.maxWeight)
-                let reps = best.repsAtMaxWeight
-                let volume = Formatters.formatVolume(best.totalVolume)
-                return ("Best: \(weight) kg × \(reps) reps · \(volume) kg total", best.date)
-            } else {
-                return ("Best: 0 kg × 0 reps · 0 kg total", nil)
-            }
-        } else {
-            if let lastInfo = progressState?.lastCompletedDayInfo {
-                let weight = Formatters.formatWeight(lastInfo.maxWeight)
-                let reps = lastInfo.maxWeightReps
-                let volume = Formatters.formatVolume(lastInfo.volume)
-                return ("Last: \(weight) kg × \(reps) reps · \(volume) kg total", lastInfo.date)
-            } else {
-                return ("Last: 0 kg × 0 reps · 0 kg total", nil)
-            }
-        }
-    }
-
     var body: some View {
-        TargetMetricsSectionWithPicker(data: buildTargetMetricsData(), selectedMode: $selectedMode)
-            .padding(.horizontal, 8)
+        VStack(alignment: .leading, spacing: 12) {
+            // Card title
+            Text("Exercise targets")
+                .font(.footnote)
+                .fontWeight(.bold)
+                .foregroundStyle(.black)
+
+            HStack(alignment: .top, spacing: 0) {
+            // Left column: Baseline (previous session)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Baseline")
+                    .foregroundStyle(.primary)
+                Text("(previous session max)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                Divider()
+                    .padding(.trailing, 16)
+
+                Spacer().frame(height: 4)
+
+                if let lastInfo = progressState?.lastCompletedDayInfo {
+                    HStack(spacing: 4) {
+                        Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        badgesView(
+                            isDropSet: lastInfo.isDropSet,
+                            isPauseAtTop: lastInfo.isPauseAtTop,
+                            isTimedSet: lastInfo.isTimedSet,
+                            tempoSeconds: lastInfo.tempoSeconds,
+                            isPB: lastInfo.isPB
+                        )
+                    }
+                    Text("Total: \(Formatters.formatVolume(lastInfo.volume)) kg")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("No data")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Divider
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(width: 1)
+                .padding(.vertical, 4)
+
+            // Right column: Upper target (best session)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Upper target")
+                    .foregroundStyle(.primary)
+                Text("(best ever session)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                Divider()
+                    .padding(.trailing, 16)
+
+                Spacer().frame(height: 4)
+
+                if let best = bestDayMetrics {
+                    HStack(spacing: 4) {
+                        Text("\(Formatters.formatWeight(best.maxWeight)) kg × \(best.repsAtMaxWeight) reps")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        badgesView(
+                            isDropSet: best.isDropSet,
+                            isPauseAtTop: best.isPauseAtTop,
+                            isTimedSet: best.isTimedSet,
+                            tempoSeconds: best.tempoSeconds,
+                            isPB: best.isPB
+                        )
+                    }
+                    Text("Total: \(Formatters.formatVolume(best.totalVolume)) kg")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("No data")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, 16)
+            }
+        }
+        .padding(.horizontal, 8)
+    }
+
+    // MARK: - Badge Helper
+
+    @ViewBuilder
+    private func badgesView(isDropSet: Bool, isPauseAtTop: Bool, isTimedSet: Bool, tempoSeconds: Int, isPB: Bool) -> some View {
+        HStack(spacing: 3) {
+            if isDropSet {
+                Circle()
+                    .fill(.teal)
+                    .frame(width: 12, height: 12)
+                    .overlay {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 6))
+                            .foregroundStyle(.white)
+                    }
+            }
+
+            if isPauseAtTop {
+                Circle()
+                    .fill(.pink)
+                    .frame(width: 12, height: 12)
+                    .overlay {
+                        Image(systemName: "pause.fill")
+                            .font(.system(size: 6))
+                            .foregroundStyle(.white)
+                    }
+            }
+
+            if isTimedSet {
+                Circle()
+                    .fill(.black)
+                    .frame(width: 12, height: 12)
+                    .overlay {
+                        if tempoSeconds > 0 {
+                            Text("\(tempoSeconds)")
+                                .font(.system(size: 7))
+                                .italic()
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white)
+                        } else {
+                            Image(systemName: "timer")
+                                .font(.system(size: 6))
+                                .foregroundStyle(.white)
+                        }
+                    }
+            }
+
+            if isPB {
+                Circle()
+                    .fill(.purple)
+                    .frame(width: 12, height: 12)
+                    .overlay {
+                        Text("PB")
+                            .font(.system(size: 5))
+                            .italic()
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
+                    }
+            }
+        }
     }
 }
 
@@ -690,8 +755,15 @@ struct ChartCard: View {
     let sets: [ExerciseSet]
 
     var body: some View {
-        ChartContentView(exercise: exercise, sets: sets)
-            .padding(.horizontal, 8)
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Chart")
+                .font(.footnote)
+                .fontWeight(.bold)
+                .foregroundStyle(.black)
+
+            ChartContentView(exercise: exercise, sets: sets)
+        }
+        .padding(.horizontal, 8)
     }
 }
 

@@ -131,7 +131,7 @@ struct SetRowView: View {
             Text("\(intDelta) \(suffix)")
                 .foregroundStyle(.red)
         } else {
-            Text("=\(suffix)")
+            Text("0 \(suffix)")
                 .foregroundStyle(.secondary)
         }
     }
@@ -145,7 +145,7 @@ struct SetRowView: View {
             Text("\(delta) \(suffix)")
                 .foregroundStyle(.red)
         } else {
-            Text("=\(suffix)")
+            Text("0 \(suffix)")
                 .foregroundStyle(.secondary)
         }
     }

@@ -130,7 +130,7 @@ struct ExerciseDetailView: View {
                             set: set,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            dualComparison: (set.isWarmUp || set.isBonus) ? nil : calculateDualComparison(for: set),
+                            allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
                             showTimer: index == 0  // Only show timer on most recent set
                         )
                     }
@@ -316,30 +316,4 @@ struct ExerciseDetailView: View {
         }
     }
 
-    /// Calculate dual progress comparison data for a today's set (both prev and best)
-    private func calculateDualComparison(for currentSet: ExerciseSet) -> DualProgressComparison? {
-        // Get last session data
-        let lastMaxWeight = LastSessionCalculator.getLastSessionMaxWeight(from: sets)
-        let lastMaxReps = LastSessionCalculator.getLastSessionMaxReps(from: sets)
-
-        // Get best ever data (excluding today)
-        let setsExcludingToday = sets.filter {
-            Calendar.current.startOfDay(for: $0.timestamp) < Calendar.current.startOfDay(for: Date())
-        }
-        let bestMetrics = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
-        let bestMaxWeight = bestMetrics?.maxWeight ?? 0
-        let bestMaxReps = bestMetrics?.repsAtMaxWeight ?? 0
-
-        // Only show comparison if we have some historical data
-        guard LastSessionCalculator.hasLastSession(from: sets) || bestMetrics != nil else {
-            return nil
-        }
-
-        return DualProgressComparison(
-            prevWeightDelta: currentSet.weight - lastMaxWeight,
-            prevRepsDelta: currentSet.reps - lastMaxReps,
-            bestWeightDelta: currentSet.weight - bestMaxWeight,
-            bestRepsDelta: currentSet.reps - bestMaxReps
-        )
-    }
 }

@@ -9,15 +9,6 @@
 
 import SwiftUI
 
-// MARK: - Dual Progress Comparison Data
-
-struct DualProgressComparison {
-    let prevWeightDelta: Double  // Difference from last session max weight
-    let prevRepsDelta: Int       // Difference from last session max reps
-    let bestWeightDelta: Double  // Difference from best ever max weight
-    let bestRepsDelta: Int       // Difference from best ever max reps
-}
-
 // MARK: - Set Row View
 
 struct SetRowView: View {
@@ -25,15 +16,51 @@ struct SetRowView: View {
     let set: ExerciseSet
     let onTap: () -> Void
     let onDelete: () -> Void
-    let dualComparison: DualProgressComparison?  // Optional progress data (both prev & best)
+    let allSets: [ExerciseSet]?  // Pass sets array to calculate comparisons (nil = no comparison row)
     let showTimer: Bool  // Only show timer on most recent set
 
-    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, dualComparison: DualProgressComparison? = nil, showTimer: Bool = false) {
+    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false) {
         self.set = set
         self.onTap = onTap
         self.onDelete = onDelete
-        self.dualComparison = dualComparison
+        self.allSets = allSets
         self.showTimer = showTimer
+    }
+
+    // MARK: - Computed Comparisons (using existing services)
+
+    private var hasComparisonData: Bool {
+        guard let sets = allSets else { return false }
+        return LastSessionCalculator.hasLastSession(from: sets) ||
+               BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday(sets)) != nil
+    }
+
+    private func setsExcludingToday(_ sets: [ExerciseSet]) -> [ExerciseSet] {
+        sets.filter {
+            Calendar.current.startOfDay(for: $0.timestamp) < Calendar.current.startOfDay(for: Date())
+        }
+    }
+
+    private var prevWeightDelta: Double {
+        guard let sets = allSets else { return 0 }
+        return set.weight - LastSessionCalculator.getLastSessionMaxWeight(from: sets)
+    }
+
+    private var prevRepsDelta: Int {
+        guard let sets = allSets else { return 0 }
+        return set.reps - LastSessionCalculator.getLastSessionMaxReps(from: sets)
+    }
+
+    private var bestWeightDelta: Double {
+        guard let sets = allSets else { return 0 }
+        let bestWeight = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday(sets))?.maxWeight ?? 0
+        return set.weight - bestWeight
+    }
+
+    private var bestRepsDelta: Int {
+        guard let sets = allSets else { return 0 }
+        let bestReps = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday(sets))?.repsAtMaxWeight ?? 0
+        return set.reps - bestReps
     }
 
     var body: some View {
@@ -54,14 +81,14 @@ struct SetRowView: View {
                 restTimeView
             }
 
-            // Row 2: Prev and Best comparisons (only when comparison data exists)
-            if let comparison = dualComparison {
+            // Row 2: Prev and Best comparisons (only when we have historical data)
+            if hasComparisonData {
                 HStack(spacing: 4) {
                     // Prev comparison
                     Text("Prev:")
                         .foregroundStyle(.secondary)
-                    deltaText(for: comparison.prevWeightDelta, suffix: "kg")
-                    deltaText(for: comparison.prevRepsDelta, suffix: "reps")
+                    deltaText(for: prevWeightDelta, suffix: "kg")
+                    deltaText(for: prevRepsDelta, suffix: "reps")
 
                     Text("|")
                         .foregroundStyle(.secondary)
@@ -70,8 +97,8 @@ struct SetRowView: View {
                     // Best comparison
                     Text("Best:")
                         .foregroundStyle(.secondary)
-                    deltaText(for: comparison.bestWeightDelta, suffix: "kg")
-                    deltaText(for: comparison.bestRepsDelta, suffix: "reps")
+                    deltaText(for: bestWeightDelta, suffix: "kg")
+                    deltaText(for: bestRepsDelta, suffix: "reps")
                 }
                 .font(.caption)
             }

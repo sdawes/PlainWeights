@@ -126,15 +126,11 @@ struct ExerciseDetailView: View {
                 Section {
                     ForEach(todaySets.indices, id: \.self) { index in
                         let set = todaySets[index]
-                        // Calculate cumulative volume (sum from this set to end, since array is newest-first)
-                        let cumulativeVolume = todaySets.suffix(from: index).reduce(0.0) { total, s in
-                            (s.isWarmUp || s.isBonus) ? total : total + (s.weight * Double(s.reps))
-                        }
                         SetRowView(
                             set: set,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            progressComparison: (set.isWarmUp || set.isBonus) ? nil : calculateProgressComparison(for: set, cumulativeVolume: cumulativeVolume),
+                            dualComparison: (set.isWarmUp || set.isBonus) ? nil : calculateDualComparison(for: set),
                             showTimer: index == 0  // Only show timer on most recent set
                         )
                     }
@@ -320,55 +316,30 @@ struct ExerciseDetailView: View {
         }
     }
 
-    /// Calculate progress comparison data for a today's set
-    private func calculateProgressComparison(for currentSet: ExerciseSet, cumulativeVolume: Double) -> ProgressComparison? {
-        // Get comparison data based on selected mode
-        if selectedMode == .last {
-            // Compare against last session's max weight
-            let progressState = ProgressTracker.createProgressState(from: sets)
-            guard let lastInfo = progressState.lastCompletedDayInfo else {
-                return nil
-            }
+    /// Calculate dual progress comparison data for a today's set (both prev and best)
+    private func calculateDualComparison(for currentSet: ExerciseSet) -> DualProgressComparison? {
+        // Get last session data
+        let lastMaxWeight = LastSessionCalculator.getLastSessionMaxWeight(from: sets)
+        let lastMaxReps = LastSessionCalculator.getLastSessionMaxReps(from: sets)
 
-            let weightDelta = currentSet.weight - lastInfo.maxWeight
-            let repsDelta = currentSet.reps - lastInfo.maxWeightReps
-
-            // Calculate volume progress using cumulative volume at this set
-            let volumeDelta = cumulativeVolume - lastInfo.volume
-            let volumeProgress = lastInfo.volume > 0 ? volumeDelta / lastInfo.volume : 0
-
-            return ProgressComparison(
-                weightDelta: weightDelta,
-                repsDelta: repsDelta,
-                comparisonMode: "(vs Last)",
-                volumeProgress: volumeProgress,
-                cumulativeVolume: cumulativeVolume,
-                comparisonVolume: lastInfo.volume
-            )
-        } else {
-            // Compare against best ever
-            let setsExcludingToday = sets.filter {
-                Calendar.current.startOfDay(for: $0.timestamp) < Calendar.current.startOfDay(for: Date())
-            }
-            guard let bestMetrics = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday) else {
-                return nil
-            }
-
-            let weightDelta = currentSet.weight - bestMetrics.maxWeight
-            let repsDelta = currentSet.reps - bestMetrics.repsAtMaxWeight
-
-            // Calculate volume progress using cumulative volume at this set
-            let volumeDelta = cumulativeVolume - bestMetrics.totalVolume
-            let volumeProgress = bestMetrics.totalVolume > 0 ? volumeDelta / bestMetrics.totalVolume : 0
-
-            return ProgressComparison(
-                weightDelta: weightDelta,
-                repsDelta: repsDelta,
-                comparisonMode: "(vs Best)",
-                volumeProgress: volumeProgress,
-                cumulativeVolume: cumulativeVolume,
-                comparisonVolume: bestMetrics.totalVolume
-            )
+        // Get best ever data (excluding today)
+        let setsExcludingToday = sets.filter {
+            Calendar.current.startOfDay(for: $0.timestamp) < Calendar.current.startOfDay(for: Date())
         }
+        let bestMetrics = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
+        let bestMaxWeight = bestMetrics?.maxWeight ?? 0
+        let bestMaxReps = bestMetrics?.repsAtMaxWeight ?? 0
+
+        // Only show comparison if we have some historical data
+        guard LastSessionCalculator.hasLastSession(from: sets) || bestMetrics != nil else {
+            return nil
+        }
+
+        return DualProgressComparison(
+            prevWeightDelta: currentSet.weight - lastMaxWeight,
+            prevRepsDelta: currentSet.reps - lastMaxReps,
+            bestWeightDelta: currentSet.weight - bestMaxWeight,
+            bestRepsDelta: currentSet.reps - bestMaxReps
+        )
     }
 }

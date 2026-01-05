@@ -9,15 +9,13 @@
 
 import SwiftUI
 
-// MARK: - Progress Comparison Data
+// MARK: - Dual Progress Comparison Data
 
-struct ProgressComparison {
-    let weightDelta: Double  // Difference from comparison weight
-    let repsDelta: Int       // Difference from comparison reps
-    let comparisonMode: String  // "vs Last" or "vs Best"
-    let volumeProgress: Double  // Percentage progress (e.g., 0.5 = 50%, -0.2 = -20%)
-    let cumulativeVolume: Double  // Current cumulative volume in kg
-    let comparisonVolume: Double  // Last/best session volume in kg for comparison
+struct DualProgressComparison {
+    let prevWeightDelta: Double  // Difference from last session max weight
+    let prevRepsDelta: Int       // Difference from last session max reps
+    let bestWeightDelta: Double  // Difference from best ever max weight
+    let bestRepsDelta: Int       // Difference from best ever max reps
 }
 
 // MARK: - Set Row View
@@ -27,105 +25,55 @@ struct SetRowView: View {
     let set: ExerciseSet
     let onTap: () -> Void
     let onDelete: () -> Void
-    let progressComparison: ProgressComparison?  // Optional progress data for first set
+    let dualComparison: DualProgressComparison?  // Optional progress data (both prev & best)
     let showTimer: Bool  // Only show timer on most recent set
 
-    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, progressComparison: ProgressComparison? = nil, showTimer: Bool = false) {
+    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, dualComparison: DualProgressComparison? = nil, showTimer: Bool = false) {
         self.set = set
         self.onTap = onTap
         self.onDelete = onDelete
-        self.progressComparison = progressComparison
+        self.dualComparison = dualComparison
         self.showTimer = showTimer
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if let progress = progressComparison {
-                // Grid layout: 3 rows × 8 columns
-                Grid(alignment: .leading, horizontalSpacing: 4, verticalSpacing: 6) {
-                    // Row 1: Weight | kg | × | Reps | rep(s) | Badge | Badge | PB
-                    GridRow(alignment: .center) {
-                        Text(Formatters.formatWeight(set.weight))
-                            .monospacedDigit()
-                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+        VStack(alignment: .leading, spacing: 4) {
+            // Row 1: Weight × Reps + Badges | Timer
+            HStack {
+                // Weight × Reps
+                Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps) \(set.reps == 1 ? "rep" : "reps")")
+                    .monospacedDigit()
+                    .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
-                        Text("kg")
-                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                // Badges
+                badgesView
 
-                        Text("×")
-                            .foregroundStyle(.secondary)
+                Spacer()
 
-                        Text("\(set.reps)")
-                            .monospacedDigit()
-                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                // Timer (only for today's sets with comparison data or when showTimer is true)
+                restTimeView
+            }
 
-                        Text(set.reps == 1 ? "rep" : "reps")
-                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+            // Row 2: Prev and Best comparisons (only when comparison data exists)
+            if let comparison = dualComparison {
+                HStack(spacing: 4) {
+                    // Prev comparison
+                    Text("Prev:")
+                        .foregroundStyle(.secondary)
+                    deltaText(for: comparison.prevWeightDelta, suffix: "kg")
+                    deltaText(for: comparison.prevRepsDelta, suffix: "reps")
 
-                        // Badges in cols 6-8 (right-aligned within 3-column span)
-                        badgesView
-                            .gridCellColumns(3)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
+                    Text("|")
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 4)
 
-                    // Row 2: Weight delta (col 1) | empty | empty | Reps delta (col 4) | empty cols
-                    GridRow(alignment: .center) {
-                        weightProgressView(for: progress.weightDelta)
-
-                        Color.clear
-                        Color.clear
-
-                        repsProgressView(for: progress.repsDelta)
-
-                        Color.clear
-                            .gridCellColumns(4)
-                    }
-
-                    // Row 3: Total weight (cols 1-6) | Timer (cols 7-8)
-                    GridRow(alignment: .center) {
-                        HStack(spacing: 4) {
-                            Text("Total weight:")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-
-                            Text("\(Formatters.formatVolume(progress.cumulativeVolume)) / \(Formatters.formatVolume(progress.comparisonVolume)) kg")
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.primary)
-                        }
-                        .gridCellColumns(6)
-
-                        restTimeView
-                            .gridCellColumns(2)
-                    }
+                    // Best comparison
+                    Text("Best:")
+                        .foregroundStyle(.secondary)
+                    deltaText(for: comparison.bestWeightDelta, suffix: "kg")
+                    deltaText(for: comparison.bestRepsDelta, suffix: "reps")
                 }
-            } else {
-                // Normal display (no progress data)
-                HStack(alignment: .center, spacing: 0) {
-                    Text(ExerciseSetFormatters.formatSet(set))
-                        .monospacedDigit()
-                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                        .lineLimit(1)
-                        .fixedSize(horizontal: true, vertical: false)
-
-                    // Badges (using shared badgesView)
-                    badgesView
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-
-                    // Show rest time if available, otherwise nothing
-                    if let restSeconds = set.restSeconds {
-                        HStack(spacing: 4) {
-                            Image(systemName: "moon.zzz")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                            Text(Formatters.formatDuration(Double(restSeconds)))
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .monospacedDigit()
-                        }
-                        .padding(.leading, 4)
-                    }
-                }
+                .font(.caption)
             }
         }
         .padding(8)
@@ -141,6 +89,37 @@ struct SetRowView: View {
             } label: {
                 Label("Delete", systemImage: "trash")
             }
+        }
+    }
+
+    // MARK: - Delta Text Helper
+
+    @ViewBuilder
+    private func deltaText(for delta: Double, suffix: String) -> some View {
+        let intDelta = Int(delta)
+        if intDelta > 0 {
+            Text("+\(intDelta) \(suffix)")
+                .foregroundStyle(.green)
+        } else if intDelta < 0 {
+            Text("\(intDelta) \(suffix)")
+                .foregroundStyle(.red)
+        } else {
+            Text("=\(suffix)")
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func deltaText(for delta: Int, suffix: String) -> some View {
+        if delta > 0 {
+            Text("+\(delta) \(suffix)")
+                .foregroundStyle(.green)
+        } else if delta < 0 {
+            Text("\(delta) \(suffix)")
+                .foregroundStyle(.red)
+        } else {
+            Text("=\(suffix)")
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -243,92 +222,6 @@ struct SetRowView: View {
         }
     }
 
-    @ViewBuilder
-    private func weightProgressView(for delta: Double) -> some View {
-        if delta > 0 {
-            HStack(alignment: .lastTextBaseline, spacing: 2) {
-                Image(systemName: "arrowtriangle.up.fill")
-                    .font(.system(size: 10))
-                    .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
-                Text("\(Int(delta))")
-                    .monospacedDigit()
-                    .fontWeight(.bold)
-            }
-            .font(.system(size: 13))
-            .foregroundStyle(Color.green)
-        } else if delta < 0 {
-            HStack(alignment: .lastTextBaseline, spacing: 2) {
-                Image(systemName: "arrowtriangle.down.fill")
-                    .font(.system(size: 10))
-                    .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
-                Text("\(Int(abs(delta)))")
-                    .monospacedDigit()
-                    .fontWeight(.bold)
-            }
-            .font(.system(size: 13))
-            .foregroundStyle(Color.pw_red)
-        } else {
-            Text("SAME")
-                .font(.system(size: 11))
-                .fontWeight(.bold)
-                .foregroundStyle(Color.pw_blue)
-        }
-    }
-
-    @ViewBuilder
-    private func repsProgressView(for delta: Int) -> some View {
-        if delta > 0 {
-            HStack(alignment: .lastTextBaseline, spacing: 2) {
-                Image(systemName: "arrowtriangle.up.fill")
-                    .font(.system(size: 10))
-                    .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
-                Text("\(delta)")
-                    .monospacedDigit()
-                    .fontWeight(.bold)
-            }
-            .font(.system(size: 13))
-            .foregroundStyle(Color.green)
-        } else if delta < 0 {
-            HStack(alignment: .lastTextBaseline, spacing: 2) {
-                Image(systemName: "arrowtriangle.down.fill")
-                    .font(.system(size: 10))
-                    .alignmentGuide(.lastTextBaseline) { d in d[.bottom] }
-                Text("\(abs(delta))")
-                    .monospacedDigit()
-                    .fontWeight(.bold)
-            }
-            .font(.system(size: 13))
-            .foregroundStyle(Color.pw_red)
-        } else {
-            Text("SAME")
-                .font(.system(size: 11))
-                .fontWeight(.bold)
-                .foregroundStyle(Color.pw_blue)
-        }
-    }
-
-    private func formatVolumeProgress(_ progress: Double, comparisonMode: String) -> String {
-        let percentage = Int(progress * 100)
-        let comparisonText = comparisonMode == "(vs Last)" ? "last" : "best"
-
-        if progress > 0 {
-            return "Total Volume +\(percentage)% of \(comparisonText)"
-        } else if progress < 0 {
-            return "Total Volume \(percentage)% of \(comparisonText)"
-        } else {
-            return "Total Volume same as \(comparisonText)"
-        }
-    }
-
-    private func volumeProgressColor(for progress: Double) -> Color {
-        if progress > 0 {
-            return .pw_green
-        } else if progress < 0 {
-            return .pw_red
-        } else {
-            return .pw_blue
-        }
-    }
 
     // MARK: - Rest Time Display
 

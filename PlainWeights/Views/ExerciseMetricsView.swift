@@ -628,6 +628,7 @@ struct TargetMetricsCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Baseline")
+                            .font(.system(size: 16))
                             .fontWeight(.bold)
                         Text("(previous session max)")
                             .font(.caption)
@@ -646,6 +647,8 @@ struct TargetMetricsCard: View {
                         HStack(spacing: 4) {
                             Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
                                 .font(.system(size: 16))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Color.blue.opacity(0.15))
@@ -658,6 +661,8 @@ struct TargetMetricsCard: View {
                                 isPB: lastInfo.isPB
                             )
                         }
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
                         // Total volume
                         HStack(spacing: 0) {
@@ -686,6 +691,7 @@ struct TargetMetricsCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Upper target")
+                            .font(.system(size: 16))
                             .fontWeight(.bold)
                         Text("(best ever session)")
                             .font(.caption)
@@ -704,6 +710,8 @@ struct TargetMetricsCard: View {
                         HStack(spacing: 4) {
                             Text("\(Formatters.formatWeight(best.maxWeight)) kg × \(best.repsAtMaxWeight) reps")
                                 .font(.system(size: 16))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Color.orange.opacity(0.15))
@@ -716,6 +724,8 @@ struct TargetMetricsCard: View {
                                 isPB: best.isPB
                             )
                         }
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
                         // Total volume
                         HStack(spacing: 0) {

@@ -125,7 +125,7 @@ struct ChartContentView: View {
                 // Empty state
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.secondary.opacity(0.1))
-                    .frame(height: 130)
+                    .frame(height: 100)
                     .overlay(
                         Text("No data to display")
                             .font(.callout)
@@ -263,7 +263,7 @@ struct ChartContentView: View {
                     }
                 }
                 .chartYScale(domain: .automatic(includesZero: false))
-                .frame(height: 130)
+                .frame(height: 100)
 
                 // Custom legend below chart (only for multi-point charts)
                 if !hasSingleDataPoint {

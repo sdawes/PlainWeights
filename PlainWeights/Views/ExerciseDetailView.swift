@@ -156,8 +156,7 @@ struct ExerciseDetailView: View {
         .listStyle(.insetGrouped)
         .listSectionSpacing(10)
         .scrollContentBackground(.hidden)
-        // .background(AnimatedGradientBackground())
-        .background(Color(white: 0.96))
+        .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.top, 0, for: .scrollContent)
         .overlay(alignment: .bottomTrailing) {

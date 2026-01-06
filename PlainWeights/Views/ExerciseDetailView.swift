@@ -87,7 +87,7 @@ struct ExerciseDetailView: View {
                 )
                 .padding(16)
                 .background(Color(.systemBackground))
-                .cornerRadius(16)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)

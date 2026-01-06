@@ -626,9 +626,13 @@ struct TargetMetricsCard: View {
             HStack(alignment: .top, spacing: 0) {
                 // Left column: Baseline (previous session)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Baseline")
-                        .fontWeight(.bold)
-                    Text("(previous session max)")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Baseline")
+                            .fontWeight(.bold)
+                        Text("(previous session max)")
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+                    }
 
                     // Horizontal line (centered in column)
                     Rectangle()
@@ -641,6 +645,7 @@ struct TargetMetricsCard: View {
                         // Weight × Reps
                         HStack(spacing: 4) {
                             Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
+                                .font(.system(size: 16))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Color.blue.opacity(0.15))
@@ -679,9 +684,13 @@ struct TargetMetricsCard: View {
 
                 // Right column: Upper target (best session)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Upper target")
-                        .fontWeight(.bold)
-                    Text("(best ever session)")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Upper target")
+                            .fontWeight(.bold)
+                        Text("(best ever session)")
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+                    }
 
                     // Horizontal line (centered in column)
                     Rectangle()
@@ -694,6 +703,7 @@ struct TargetMetricsCard: View {
                         // Weight × Reps
                         HStack(spacing: 4) {
                             Text("\(Formatters.formatWeight(best.maxWeight)) kg × \(best.repsAtMaxWeight) reps")
+                                .font(.system(size: 16))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(Color.orange.opacity(0.15))

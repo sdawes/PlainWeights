@@ -65,38 +65,6 @@ struct ExerciseDetailView: View {
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             .padding(.bottom, 0)
 
-            // Target metrics card (Baseline + Upper Target)
-            Section {
-                TargetMetricsCard(
-                    exercise: exercise,
-                    sets: sets
-                )
-                .padding(16)
-                .background(Color(.systemBackground))
-                .cornerRadius(16)
-            }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
-
-            // This Set metrics card (only when sets added today - moved here for logical grouping)
-            // COMMENTED OUT - Testing new inline progress design
-//            if TodaySessionCalculator.getTodaysSets(from: sets).first(where: { !$0.isWarmUp }) != nil {
-//                Section {
-//                    ThisSetCard(
-//                        exercise: exercise,
-//                        sets: sets,
-//                        selectedMode: selectedMode
-//                    )
-//                    .padding(16)
-//                    .background(Color(.systemBackground))
-//                    .clipShape(RoundedRectangle(cornerRadius: 16))
-//                }
-//                .listRowSeparator(.hidden)
-//                .listRowBackground(Color.clear)
-//                .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-//            }
-
             // Chart card
             Section {
                 ChartCard(
@@ -106,6 +74,20 @@ struct ExerciseDetailView: View {
                 .padding(16)
                 .background(Color(.systemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
+
+            // Target metrics card (Baseline + Upper Target)
+            Section {
+                TargetMetricsCard(
+                    exercise: exercise,
+                    sets: sets
+                )
+                .padding(16)
+                .background(Color(.systemBackground))
+                .cornerRadius(16)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -175,7 +157,7 @@ struct ExerciseDetailView: View {
         .listSectionSpacing(10)
         .scrollContentBackground(.hidden)
         // .background(AnimatedGradientBackground())
-        .background(Color(white: 0.94))
+        .background(Color(white: 0.96))
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.top, 0, for: .scrollContent)
         .overlay(alignment: .bottomTrailing) {

@@ -2,7 +2,7 @@
 //  AnimatedGradientBackground.swift
 //  PlainWeights
 //
-//  Animated multi-gradient background with subtle grey-blue and grey-green tones
+//  Animated multi-gradient background with cool blue-tinted grey tones
 //
 
 import SwiftUI
@@ -12,13 +12,13 @@ struct AnimatedGradientBackground: View {
 
     var body: some View {
         ZStack {
-            // Base with slight blue tint
-            Color(red: 0.93, green: 0.95, blue: 0.97)
+            // Base - light cool grey
+            Color(red: 0.957, green: 0.953, blue: 0.965)  // #F4F3F6
 
-            // Soft blue glow (more saturated)
+            // Subtle cool grey glow (top left)
             RadialGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.60, green: 0.78, blue: 0.98).opacity(0.85),
+                    Color(red: 0.937, green: 0.937, blue: 0.953).opacity(0.8),  // #EFEFF3
                     Color.clear
                 ]),
                 center: .topLeading,
@@ -28,10 +28,10 @@ struct AnimatedGradientBackground: View {
             .blur(radius: 70)
             .offset(x: animate ? -60 : -20, y: animate ? -120 : -60)
 
-            // Soft blue glow (bottom right - secondary)
+            // Subtle cool grey glow (bottom right)
             RadialGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.65, green: 0.80, blue: 0.96).opacity(0.75),
+                    Color(red: 0.937, green: 0.937, blue: 0.953).opacity(0.7),  // #EFEFF3
                     Color.clear
                 ]),
                 center: .bottomTrailing,
@@ -41,10 +41,10 @@ struct AnimatedGradientBackground: View {
             .blur(radius: 70)
             .offset(x: animate ? 120 : 60, y: animate ? 160 : 120)
 
-            // Blue-tinted middle lift
+            // Center lift
             RadialGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.88, green: 0.91, blue: 0.96).opacity(0.55),
+                    Color(red: 0.947, green: 0.945, blue: 0.959).opacity(0.5),  // midpoint
                     Color.clear
                 ]),
                 center: .center,

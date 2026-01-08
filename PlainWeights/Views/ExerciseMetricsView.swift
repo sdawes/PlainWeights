@@ -616,151 +616,101 @@ struct TargetMetricsCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Card title
-            Text("Exercise targets")
-                .font(.footnote)
-                .fontWeight(.bold)
-                .foregroundStyle(.black)
+        // Two cards side by side
+        HStack(alignment: .top, spacing: 8) {
+            // Left card: Previous session
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Previous session")
+                    .font(.system(size: 14))
+                    .fontWeight(.bold)
 
-            HStack(alignment: .top, spacing: 0) {
-                // Left column: Baseline (previous session)
-                VStack(alignment: .leading, spacing: 6) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Baseline")
-                            .font(.system(size: 16))
+                if let lastInfo = progressState?.lastCompletedDayInfo {
+                    // Weight × Reps
+                    HStack(spacing: 4) {
+                        Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps)")
+                            .font(.system(size: 14))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                        badgesView(
+                            isDropSet: lastInfo.isDropSet,
+                            isPauseAtTop: lastInfo.isPauseAtTop,
+                            isTimedSet: lastInfo.isTimedSet,
+                            tempoSeconds: lastInfo.tempoSeconds,
+                            isPB: lastInfo.isPB
+                        )
+                    }
+
+                    // Total volume
+                    HStack(spacing: 0) {
+                        Text("Total: ")
                             .fontWeight(.bold)
-                        Text("(previous session max)")
-                            .font(.caption)
-                            .foregroundStyle(.gray)
+                        Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
                     }
+                    .font(.system(size: 12))
 
-                    // Horizontal line (centered in column)
-                    Rectangle()
-                        .fill(.black.opacity(0.15))
-                        .frame(height: 1)
-                        .padding(.horizontal, 8)
-                        .padding(.bottom, 4)
-
-                    if let lastInfo = progressState?.lastCompletedDayInfo {
-                        // Weight × Reps
-                        HStack(spacing: 4) {
-                            Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps) reps")
-                                .font(.system(size: 16))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.blue.opacity(0.15))
-                                .cornerRadius(4)
-                            badgesView(
-                                isDropSet: lastInfo.isDropSet,
-                                isPauseAtTop: lastInfo.isPauseAtTop,
-                                isTimedSet: lastInfo.isTimedSet,
-                                tempoSeconds: lastInfo.tempoSeconds,
-                                isPB: lastInfo.isPB
-                            )
-                        }
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-
-                        // Total volume
-                        HStack(spacing: 0) {
-                            Text("Total: ")
-                                .fontWeight(.bold)
-                            Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
-                        }
-
-                        // Date
-                        Text(Formatters.formatRelativeDate(lastInfo.date))
-                            .font(.caption)
-                            .foregroundStyle(.gray)
-                    } else {
-                        // Empty state
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("No baseline yet")
-                            Text("Complete a session to set")
-                        }
-                        .padding(.vertical, 4)
-                    }
+                    // Date
+                    Text(Formatters.formatRelativeDate(lastInfo.date))
+                        .font(.caption2)
+                        .foregroundStyle(.gray)
+                } else {
+                    Text("No data yet")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.gray)
                 }
-                .padding([.top, .bottom, .trailing], 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.horizontal, 8)
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
 
-                // Right column: Upper target (best session)
-                VStack(alignment: .leading, spacing: 6) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Upper target")
-                            .font(.system(size: 16))
+            // Right card: Best Ever
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Best Ever")
+                    .font(.system(size: 14))
+                    .fontWeight(.bold)
+
+                if let best = bestDayMetrics {
+                    // Weight × Reps
+                    HStack(spacing: 4) {
+                        Text("\(Formatters.formatWeight(best.maxWeight)) kg × \(best.repsAtMaxWeight)")
+                            .font(.system(size: 14))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                        badgesView(
+                            isDropSet: best.isDropSet,
+                            isPauseAtTop: best.isPauseAtTop,
+                            isTimedSet: best.isTimedSet,
+                            tempoSeconds: best.tempoSeconds,
+                            isPB: best.isPB
+                        )
+                    }
+
+                    // Total volume
+                    HStack(spacing: 0) {
+                        Text("Total: ")
                             .fontWeight(.bold)
-                        Text("(best ever session)")
-                            .font(.caption)
-                            .foregroundStyle(.gray)
+                        Text("\(Formatters.formatVolume(best.totalVolume)) kg")
                     }
+                    .font(.system(size: 12))
 
-                    // Horizontal line (centered in column)
-                    Rectangle()
-                        .fill(.black.opacity(0.15))
-                        .frame(height: 1)
-                        .padding(.horizontal, 8)
-                        .padding(.bottom, 4)
-
-                    if let best = bestDayMetrics {
-                        // Weight × Reps
-                        HStack(spacing: 4) {
-                            Text("\(Formatters.formatWeight(best.maxWeight)) kg × \(best.repsAtMaxWeight) reps")
-                                .font(.system(size: 16))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.orange.opacity(0.15))
-                                .cornerRadius(4)
-                            badgesView(
-                                isDropSet: best.isDropSet,
-                                isPauseAtTop: best.isPauseAtTop,
-                                isTimedSet: best.isTimedSet,
-                                tempoSeconds: best.tempoSeconds,
-                                isPB: best.isPB
-                            )
-                        }
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-
-                        // Total volume
-                        HStack(spacing: 0) {
-                            Text("Total: ")
-                                .fontWeight(.bold)
-                            Text("\(Formatters.formatVolume(best.totalVolume)) kg")
-                        }
-
-                        // Date
-                        Text(Formatters.formatRelativeDate(best.date))
-                            .font(.caption)
-                            .foregroundStyle(.gray)
-                    } else {
-                        // Empty state
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("No record yet")
-                            Text("Complete a session to set")
-                        }
-                        .padding(.vertical, 4)
-                    }
+                    // Date
+                    Text(Formatters.formatRelativeDate(best.date))
+                        .font(.caption2)
+                        .foregroundStyle(.gray)
+                } else {
+                    Text("No data yet")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.gray)
                 }
-                .padding([.top, .bottom, .leading], 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .overlay {
-                // Centered vertical divider
-                Rectangle()
-                    .fill(.black.opacity(0.15))
-                    .frame(width: 1)
-                    .padding(.vertical, 8)
-            }
+            .padding(.horizontal, 8)
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
-        .font(.system(size: 14))
         .foregroundStyle(.black)
-        .padding(.horizontal, 8)
     }
 
     // MARK: - Badge Helper
@@ -831,15 +781,8 @@ struct ChartCard: View {
     let sets: [ExerciseSet]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Chart")
-                .font(.footnote)
-                .fontWeight(.bold)
-                .foregroundStyle(.black)
-
-            ChartContentView(exercise: exercise, sets: sets)
-        }
-        .padding(.horizontal, 8)
+        ChartContentView(exercise: exercise, sets: sets)
+            .padding(.horizontal, 8)
     }
 }
 

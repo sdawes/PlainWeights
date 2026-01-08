@@ -123,15 +123,12 @@ struct ExerciseDetailView: View {
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
 
-            // Target metrics card (Baseline + Upper Target)
+            // Target metrics cards (Previous session + Best Ever)
             Section {
                 TargetMetricsCard(
                     exercise: exercise,
                     sets: sets
                 )
-                .padding(16)
-                .background(Color(.systemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -155,7 +152,7 @@ struct ExerciseDetailView: View {
                         Text("TODAY'S SETS")
                             .font(.footnote)
                             .textCase(.uppercase)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.primary)
 
                         // Running total
                         HStack(spacing: 0) {
@@ -191,14 +188,14 @@ struct ExerciseDetailView: View {
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
                                 .font(.footnote)
                                 .textCase(.uppercase)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.primary)
 
                             Spacer()
 
                             Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
                                 .font(.footnote)
                                 .textCase(.uppercase)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.primary)
                         }
                         .padding(.bottom, 4)
                     }

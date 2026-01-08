@@ -86,7 +86,6 @@ struct SetRowView: View {
                 HStack(spacing: 4) {
                     // Prev comparison
                     Text("Previous:")
-                        .fontWeight(.bold)
                         .foregroundStyle(.secondary)
                     deltaText(for: prevWeightDelta, suffix: "kg")
                     deltaText(for: prevRepsDelta, suffix: "reps")
@@ -97,7 +96,6 @@ struct SetRowView: View {
 
                     // Best comparison
                     Text("Best:")
-                        .fontWeight(.bold)
                         .foregroundStyle(.secondary)
                     deltaText(for: bestWeightDelta, suffix: "kg")
                     deltaText(for: bestRepsDelta, suffix: "reps")
@@ -134,7 +132,7 @@ struct SetRowView: View {
                 .foregroundStyle(.red)
         } else {
             Text("0 \(suffix)")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.blue)
         }
     }
 
@@ -148,7 +146,7 @@ struct SetRowView: View {
                 .foregroundStyle(.red)
         } else {
             Text("0 \(suffix)")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.blue)
         }
     }
 

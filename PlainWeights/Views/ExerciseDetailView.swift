@@ -29,6 +29,50 @@ struct ExerciseDetailView: View {
     @State private var todaySets: [ExerciseSet] = []
     @State private var historicDayGroups: [ExerciseDataGrouper.DayGroup] = []
 
+    // Today's volume for running total
+    private var todaysVolume: Double {
+        TodaySessionCalculator.getTodaysVolume(from: Array(sets))
+    }
+
+    // Last session volume (baseline) - returns 0 if no data
+    private var lastSessionVolume: Double {
+        LastSessionCalculator.getLastSessionVolume(from: Array(sets))
+    }
+
+    // Best ever volume (upper target) - exclude today
+    private var bestSessionVolume: Double {
+        let setsExcludingToday = Array(sets).filter {
+            Calendar.current.startOfDay(for: $0.timestamp) < Calendar.current.startOfDay(for: Date())
+        }
+        return BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)?.totalVolume ?? 0
+    }
+
+    // Percentage of baseline (treat 0 as 1 to always show percentage)
+    private var percentOfBaseline: Int {
+        let divisor = max(lastSessionVolume, 1)
+        return Int(round((todaysVolume / divisor) * 100))
+    }
+
+    // Percentage of upper target (treat 0 as 1 to always show percentage)
+    private var percentOfTarget: Int {
+        let divisor = max(bestSessionVolume, 1)
+        return Int(round((todaysVolume / divisor) * 100))
+    }
+
+    // Color for baseline comparison
+    private var baselineColor: Color {
+        if percentOfBaseline < 100 { return .red }
+        if percentOfBaseline > 100 { return .green }
+        return .blue
+    }
+
+    // Color for target comparison
+    private var targetColor: Color {
+        if percentOfTarget < 100 { return .red }
+        if percentOfTarget > 100 { return .green }
+        return .blue
+    }
+
     init(exercise: Exercise) {
         self.exercise = exercise
         let id = exercise.persistentModelID
@@ -107,10 +151,27 @@ struct ExerciseDetailView: View {
                         )
                     }
                 } header: {
-                    Text("TODAY'S SETS")
-                        .font(.footnote)
-                        .textCase(.uppercase)
-                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("TODAY'S SETS")
+                            .font(.footnote)
+                            .textCase(.uppercase)
+                            .foregroundStyle(.secondary)
+
+                        // Running total
+                        HStack(spacing: 0) {
+                            Text("Total: ")
+                                .fontWeight(.bold)
+                            Text("\(Formatters.formatVolume(todaysVolume)) kg · ")
+                            Text("\(percentOfBaseline)%")
+                                .foregroundStyle(baselineColor)
+                            Text(" baseline · ")
+                            Text("\(percentOfTarget)%")
+                                .foregroundStyle(targetColor)
+                            Text(" target")
+                        }
+                        .font(.caption)
+                    }
+                    .padding(.bottom, 8)
                 }
             }
 

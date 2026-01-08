@@ -25,6 +25,78 @@ enum ExerciseChartType {
     case weightAndReps
 }
 
+// MARK: - Empty Chart Preview
+
+/// Ghost chart preview shown when no data exists yet
+struct EmptyChartPreview: View {
+    // Mock data points for the placeholder chart
+    private let mockWeightData: [(day: Int, value: Double)] = [
+        (0, 0.3), (1, 0.45), (2, 0.5), (3, 0.7), (4, 0.85)
+    ]
+    private let mockRepsData: [(day: Int, value: Double)] = [
+        (0, 0.5), (1, 0.55), (2, 0.6), (3, 0.65), (4, 0.75)
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Chart {
+                // Weight area gradient (matches real chart)
+                ForEach(mockWeightData, id: \.day) { point in
+                    AreaMark(
+                        x: .value("Day", point.day),
+                        y: .value("Weight", point.value)
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.blue.opacity(0.15), .blue.opacity(0.02)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                }
+
+                // Weight line (solid blue)
+                ForEach(mockWeightData, id: \.day) { point in
+                    LineMark(
+                        x: .value("Day", point.day),
+                        y: .value("Weight", point.value)
+                    )
+                    .foregroundStyle(.blue)
+                }
+
+                // Reps line (dotted green)
+                ForEach(mockRepsData, id: \.day) { point in
+                    LineMark(
+                        x: .value("Day", point.day),
+                        y: .value("Reps", point.value),
+                        series: .value("Type", "Reps")
+                    )
+                    .foregroundStyle(.green)
+                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                }
+            }
+            .chartXAxis {
+                AxisMarks { _ in
+                    AxisGridLine()
+                    AxisTick()
+                }
+            }
+            .chartYAxis {
+                AxisMarks { _ in
+                    AxisGridLine()
+                    AxisTick()
+                }
+            }
+            .frame(height: 100)
+
+            // Text below chart
+            Text("Your progress chart will appear here")
+                .font(.body)
+                .foregroundStyle(.primary)
+        }
+    }
+}
+
 // MARK: - Chart Toggle Button
 
 struct ChartToggleButton: View {
@@ -122,19 +194,8 @@ struct ChartContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if chartData.isEmpty {
-                // Empty state
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.secondary.opacity(0.1))
-                    .frame(height: 100)
-                    .overlay(
-                        Text("No data to display")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                    )
+                // Empty state - ghost chart preview
+                EmptyChartPreview()
             } else {
                 // Adaptive chart based on exercise type
                 Chart(chartData) { dataPoint in

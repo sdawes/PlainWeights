@@ -622,7 +622,7 @@ struct TargetMetricsCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Previous session")
                     .font(.system(size: 14))
-                    .fontWeight(.bold)
+                    .fontWeight(.semibold)
 
                 if let lastInfo = progressState?.lastCompletedDayInfo {
                     // Weight × Reps
@@ -643,7 +643,7 @@ struct TargetMetricsCard: View {
                     // Total volume
                     HStack(spacing: 0) {
                         Text("Total: ")
-                            .fontWeight(.bold)
+                            .fontWeight(.medium)
                         Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
                     }
                     .font(.system(size: 12))
@@ -668,7 +668,7 @@ struct TargetMetricsCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Best Ever")
                     .font(.system(size: 14))
-                    .fontWeight(.bold)
+                    .fontWeight(.semibold)
 
                 if let best = bestDayMetrics {
                     // Weight × Reps
@@ -689,7 +689,7 @@ struct TargetMetricsCard: View {
                     // Total volume
                     HStack(spacing: 0) {
                         Text("Total: ")
-                            .fontWeight(.bold)
+                            .fontWeight(.medium)
                         Text("\(Formatters.formatVolume(best.totalVolume)) kg")
                     }
                     .font(.system(size: 12))

@@ -653,7 +653,7 @@ struct TargetMetricsCard: View {
                         .font(.caption2)
                         .foregroundStyle(.gray)
                 } else {
-                    Text("No data yet")
+                    Text("Appears after next session")
                         .font(.system(size: 12))
                         .foregroundStyle(.gray)
                 }
@@ -699,7 +699,7 @@ struct TargetMetricsCard: View {
                         .font(.caption2)
                         .foregroundStyle(.gray)
                 } else {
-                    Text("No data yet")
+                    Text("Appears after next session")
                         .font(.system(size: 12))
                         .foregroundStyle(.gray)
                 }

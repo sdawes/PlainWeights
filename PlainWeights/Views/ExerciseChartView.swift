@@ -38,7 +38,7 @@ struct EmptyChartPreview: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 16) {
             Chart {
                 // Weight area gradient (matches real chart)
                 ForEach(mockWeightData, id: \.day) { point in
@@ -88,11 +88,13 @@ struct EmptyChartPreview: View {
                 }
             }
             .frame(height: 100)
+            .opacity(0.8)
 
             // Text below chart
             Text("Your progress chart will appear here")
-                .font(.body)
-                .foregroundStyle(.primary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
     }
 }

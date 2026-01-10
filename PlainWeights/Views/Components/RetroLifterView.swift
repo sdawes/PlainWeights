@@ -10,7 +10,7 @@ import SwiftUI
 struct RetroLifterView: View {
     var pixelSize: CGFloat = 10
 
-    // Frame 1: Squatting (Barbell on shoulders/upper back) - legs ping OUT
+    // Frame 1: Squatting (Barbell on shoulders) - original leg spread
     private let frame1 = [
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -21,16 +21,16 @@ struct RetroLifterView: View {
         0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0, // Head/face
         0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0, // Shoulders
         0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0, // Torso
-        0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0, // Hips (thin - 1px each)
-        0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0, // Upper thighs (thin, going out)
-        0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0, // Knees bent OUT (ping out!)
-        0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0, // Shins
-        0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0, // Feet FIXED
+        0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0, // Hips/legs together
+        0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0, // Thighs spreading
+        0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0, // Knees spreading more
+        0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0, // Feet (widest)
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     ]
 
-    // Frame 2: Standing (Barbell overhead) - legs straight/narrower
+    // Frame 2: Standing (Barbell overhead) - original straight legs
     private let frame2 = [
         0,0,2,2,0,0,0,0,0,0,0,0,2,2,0,0, // Weights ABOVE bar
         0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0, // Bar with weights
@@ -40,12 +40,12 @@ struct RetroLifterView: View {
         0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0, // Head
         0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0, // Shoulders
         0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0, // Torso
-        0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,
-        0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0, // Hips (thin - 1px each)
-        0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0, // Upper thighs (thin, straighter)
-        0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0, // Legs (narrower than squat)
+        0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0, // Torso
+        0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0, // Hips/legs together
+        0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0, // Upper legs
+        0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0, // Legs
         0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0, // Lower legs
-        0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0, // Feet FIXED
+        0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0, // Feet
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     ]

@@ -11,7 +11,7 @@ import SwiftData
 @Model
 final class Exercise {
     var name: String
-    var category: String
+    var tags: [String]
     var createdDate: Date
     var lastUpdated: Date
     var note: String?
@@ -20,9 +20,9 @@ final class Exercise {
     @Relationship(deleteRule: .cascade, inverse: \ExerciseSet.exercise)
     var sets: [ExerciseSet] = []
 
-    init(name: String, category: String, note: String? = nil, createdDate: Date = .init()) {
+    init(name: String, tags: [String] = [], note: String? = nil, createdDate: Date = .init()) {
         self.name = name
-        self.category = category
+        self.tags = tags
         self.note = note
         self.createdDate = createdDate
         self.lastUpdated = createdDate // Initialize with creation date

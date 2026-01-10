@@ -181,14 +181,13 @@ struct SessionSummaryView: View {
                 }
             }
 
-            // Category, sets, volume
+            // Tags (if any)
+            if !workoutExercise.exercise.tags.isEmpty {
+                TagPillsRow(tags: workoutExercise.exercise.tags)
+            }
+
+            // Sets and volume
             HStack {
-                Text(workoutExercise.exercise.category)
-                    .foregroundStyle(.secondary)
-
-                Text("•")
-                    .foregroundStyle(.tertiary)
-
                 Text("\(workoutExercise.setCount) sets")
                     .foregroundStyle(.secondary)
 

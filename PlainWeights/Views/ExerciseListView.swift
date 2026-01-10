@@ -59,7 +59,7 @@ struct FilteredExerciseListView: View {
             _exercises = Query(
                 filter: #Predicate<Exercise> { exercise in
                     exercise.name.localizedStandardContains(searchText) ||
-                    exercise.category.localizedStandardContains(searchText)
+                    exercise.tags.contains { $0.localizedStandardContains(searchText) }
                 },
                 sort: [SortDescriptor(\.lastUpdated, order: .reverse)]
             )
@@ -75,6 +75,9 @@ struct FilteredExerciseListView: View {
                         searchText: searchText,
                         onAddExercise: { showingAddExercise = true }
                     )
+                    .listRowBackground(
+                        themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
+                    )
                 }
             } else {
                 Section {
@@ -84,9 +87,9 @@ struct FilteredExerciseListView: View {
                                 Text(exercise.name)
                                     .font(.system(.headline, design: .monospaced))
                                     .foregroundStyle(.primary)
-                                Text(exercise.category)
-                                    .font(.system(.subheadline, design: .monospaced))
-                                    .foregroundStyle(.secondary)
+                                if !exercise.tags.isEmpty {
+                                    TagPillsRow(tags: exercise.tags)
+                                }
                                 Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
                                     .font(.system(.caption, design: .monospaced))
                                     .foregroundStyle(.tertiary)
@@ -99,6 +102,12 @@ struct FilteredExerciseListView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
+                        .listRowBackground(
+                            themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
+                        )
+                        .listRowSeparatorTint(
+                            themeManager.currentTheme == .dark ? .white.opacity(0.3) : nil
+                        )
                     }
                 } header: {
                     Text("EXERCISES")

@@ -131,7 +131,7 @@ class TestDataGenerator {
         print("        }")
         print("")
         print("        // Exercise definitions with notes and timestamps")
-        print("        let exerciseData: [(name: String, category: String, note: String?, createdDate: Date, lastUpdated: Date)] = [")
+        print("        let exerciseData: [(name: String, tags: [String], note: String?, createdDate: Date, lastUpdated: Date)] = [")
         for exercise in exercises {
             let calendar = Calendar.current
 
@@ -156,9 +156,11 @@ class TestDataGenerator {
                 let escapedNote = note
                     .replacingOccurrences(of: "\"", with: "\\\"")
                     .replacingOccurrences(of: "\n", with: ", ")
-                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: \"\(escapedNote)\", createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
+                let tagsString = exercise.tags.map { "\"\($0)\"" }.joined(separator: ", ")
+                print("    (name: \"\(exercise.name)\", tags: [\(tagsString)], note: \"\(escapedNote)\", createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
             } else {
-                print("    (name: \"\(exercise.name)\", category: \"\(exercise.category)\", note: nil as String?, createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
+                let tagsString = exercise.tags.map { "\"\($0)\"" }.joined(separator: ", ")
+                print("    (name: \"\(exercise.name)\", tags: [\(tagsString)], note: nil as String?, createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
             }
         }
         print("        ]")
@@ -166,7 +168,7 @@ class TestDataGenerator {
         print("        // Create exercises")
         print("        var exercises: [String: Exercise] = [:]")
         print("        for data in exerciseData {")
-        print("            let exercise = Exercise(name: data.name, category: data.category, note: data.note, createdDate: data.createdDate)")
+        print("            let exercise = Exercise(name: data.name, tags: data.tags, note: data.note, createdDate: data.createdDate)")
         print("            exercise.lastUpdated = data.lastUpdated")
         print("            exercises[data.name] = exercise")
         print("            modelContext.insert(exercise)")

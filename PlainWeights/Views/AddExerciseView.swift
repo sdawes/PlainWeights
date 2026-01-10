@@ -11,9 +11,11 @@ import SwiftData
 struct AddExerciseView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
 
     @State private var name = ""
-    @State private var category = ""
+    @State private var tags: [String] = []
+    @State private var tagInput = ""
 
     // Callback to notify parent when exercise is created
     let onExerciseCreated: ((Exercise) -> Void)?
@@ -25,19 +27,72 @@ struct AddExerciseView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Exercise Name", text: $name)
-                TextField("Category", text: $category)
+                Section {
+                    TextField("Exercise Name", text: $name)
+                        .font(.system(.body, design: .monospaced))
+                        .listRowBackground(
+                            themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
+                        )
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        // Display existing tags as pills
+                        if !tags.isEmpty {
+                            FlowLayout(spacing: 6) {
+                                ForEach(tags, id: \.self) { tag in
+                                    TagPillView(tag: tag) {
+                                        withAnimation {
+                                            tags.removeAll { $0 == tag }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Tag input field
+                        TextField("Add tags (space to add)", text: $tagInput)
+                            .font(.system(.body, design: .monospaced))
+                            .onChange(of: tagInput) { _, newValue in
+                                // When space is typed, convert text to tag
+                                if newValue.hasSuffix(" ") {
+                                    let trimmed = newValue.trimmingCharacters(in: .whitespaces)
+                                    if !trimmed.isEmpty && !tags.contains(trimmed) {
+                                        withAnimation {
+                                            tags.append(trimmed)
+                                        }
+                                    }
+                                    tagInput = ""
+                                }
+                            }
+                    }
+                    .listRowBackground(
+                        themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
+                    )
+                }
             }
             .scrollContentBackground(.hidden)
             .background(AnimatedGradientBackground())
             .navigationTitle("Add Exercise")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Add Exercise")
+                        .font(.system(.headline, design: .monospaced))
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        let newExercise = Exercise(name: name, category: category)
+                        // Include any text still in the input field as a tag
+                        var finalTags = tags
+                        let trimmedInput = tagInput.trimmingCharacters(in: .whitespaces)
+                        if !trimmedInput.isEmpty && !finalTags.contains(trimmedInput) {
+                            finalTags.append(trimmedInput)
+                        }
+
+                        let newExercise = Exercise(name: name, tags: finalTags)
                         modelContext.insert(newExercise)
                         try? modelContext.save()
                         dismiss()
@@ -45,7 +100,7 @@ struct AddExerciseView: View {
                         // Call callback with newly created exercise
                         onExerciseCreated?(newExercise)
                     }
-                    .disabled(name.isEmpty || category.isEmpty)
+                    .disabled(name.isEmpty)
                 }
             }
         }

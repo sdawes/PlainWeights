@@ -29,9 +29,16 @@ struct EmptyExercisesView: View {
                 } label: {
                     Text("Add Exercise")
                         .font(.system(.headline, design: .monospaced))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .overlay(
+                            Rectangle()
+                                .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                                .foregroundStyle(.black)
+                        )
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.plain)
             }
         } else {
             // Search returned no results

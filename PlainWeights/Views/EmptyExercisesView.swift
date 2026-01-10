@@ -16,7 +16,7 @@ struct EmptyExercisesView: View {
             // First-time user experience - no exercises at all
             ContentUnavailableView {
                 VStack(spacing: 12) {
-                    RetroLifterView(pixelSize: 8)
+                    RetroLifterView(pixelSize: 5)
                     Text("No Exercises Yet")
                         .font(.system(.title2, design: .monospaced))
                 }

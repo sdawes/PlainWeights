@@ -37,6 +37,7 @@ struct FilteredExerciseListView: View {
     @Binding var navigationPath: NavigationPath
     let searchText: String
     @State private var showingSummary = false
+    @State private var showingSettings = false
 
     #if DEBUG
     @State private var showingGenerateDataAlert = false
@@ -111,6 +112,12 @@ struct FilteredExerciseListView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button { showingSettings = true } label: {
+                    Image(systemName: "gearshape")
+                        .font(.callout)
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button { showingAddExercise = true } label: {
                     Image(systemName: "plus")
@@ -156,6 +163,9 @@ struct FilteredExerciseListView: View {
         }
         .fullScreenCover(isPresented: $showingSummary) {
             SessionSummaryView()
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
         }
         #if DEBUG
         .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {

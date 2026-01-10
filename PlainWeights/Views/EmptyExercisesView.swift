@@ -7,16 +7,6 @@
 
 import SwiftUI
 
-// MARK: - ASCII Barbell Logo
-
-struct BarbellLogo: View {
-    var body: some View {
-        Text("·|[ ≡≡≡ | ≡≡≡ ]|·")
-            .font(.system(size: 24, design: .monospaced))
-            .foregroundStyle(.black)
-    }
-}
-
 struct EmptyExercisesView: View {
     let searchText: String
     let onAddExercise: () -> Void
@@ -26,7 +16,7 @@ struct EmptyExercisesView: View {
             // First-time user experience - no exercises at all
             ContentUnavailableView {
                 VStack(spacing: 12) {
-                    BarbellLogo()
+                    RetroLifterView(pixelSize: 8)
                     Text("No Exercises Yet")
                         .font(.system(.title2, design: .monospaced))
                 }

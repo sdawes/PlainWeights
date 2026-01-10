@@ -76,12 +76,11 @@ struct SessionSummaryView: View {
     private func headerSection(for day: ExerciseDataGrouper.WorkoutDay) -> some View {
         VStack(spacing: 4) {
             Text(isShowingToday ? "Today's Session" : "Last Session")
-                .font(.headline)
+                .font(.system(.headline, design: .monospaced))
                 .foregroundStyle(.secondary)
 
             Text(day.date, format: .dateTime.weekday(.wide).month(.wide).day())
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.system(.title2, design: .monospaced))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -112,21 +111,18 @@ struct SessionSummaryView: View {
                 VStack(spacing: 2) {
                     HStack(spacing: 4) {
                         Text("\(pbCount)")
-                            .font(.title3)
-                            .fontWeight(.bold)
+                            .font(.system(.title3, design: .monospaced))
                         Circle()
                             .fill(.purple)
                             .frame(width: 18, height: 18)
                             .overlay {
                                 Text("PB")
-                                    .font(.system(size: 8))
-                                    .italic()
-                                    .fontWeight(.bold)
+                                    .font(.system(size: 8, design: .monospaced))
                                     .foregroundStyle(.white)
                             }
                     }
                     Text(pbCount == 1 ? "PB" : "PBs")
-                        .font(.caption)
+                        .font(.system(.caption, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
@@ -141,10 +137,9 @@ struct SessionSummaryView: View {
     private func statItem(value: String, label: String) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.title3)
-                .fontWeight(.bold)
+                .font(.system(.title3, design: .monospaced))
             Text(label)
-                .font(.caption)
+                .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -167,7 +162,7 @@ struct SessionSummaryView: View {
             // Exercise name with PB badge
             HStack {
                 Text(workoutExercise.exercise.name)
-                    .font(.headline)
+                    .font(.system(.headline, design: .monospaced))
 
                 Spacer()
 
@@ -177,9 +172,7 @@ struct SessionSummaryView: View {
                         .frame(width: 24, height: 24)
                         .overlay {
                             Text("PB")
-                                .font(.system(size: 10))
-                                .italic()
-                                .fontWeight(.bold)
+                                .font(.system(size: 10, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -202,7 +195,7 @@ struct SessionSummaryView: View {
                 Text("\(Formatters.formatVolume(workoutExercise.volume)) kg")
                     .foregroundStyle(.secondary)
             }
-            .font(.subheadline)
+            .font(.system(.subheadline, design: .monospaced))
 
             // Max weight × reps
             if let maxSet = workoutExercise.sets.filter({ !$0.isWarmUp && !$0.isBonus }).max(by: { $0.weight < $1.weight }) {
@@ -210,9 +203,8 @@ struct SessionSummaryView: View {
                     Text("Max:")
                         .foregroundStyle(.tertiary)
                     Text("\(Formatters.formatWeight(maxSet.weight)) kg × \(maxSet.reps)")
-                        .fontWeight(.medium)
                 }
-                .font(.subheadline)
+                .font(.system(.subheadline, design: .monospaced))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

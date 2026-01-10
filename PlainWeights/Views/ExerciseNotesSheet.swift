@@ -20,11 +20,11 @@ struct ExerciseNotesSheet: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Add notes about form, target muscles, or any reminders for this exercise.")
-                    .font(.caption)
+                    .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.black)
 
                 TextEditor(text: $noteText)
-                    .font(.body)
+                    .font(.system(.body, design: .monospaced))
                     .frame(height: 220)
                     .padding(8)
                     .background(Color.white)

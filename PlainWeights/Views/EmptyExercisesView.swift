@@ -23,7 +23,7 @@ struct EmptyExercisesView: View {
                     onAddExercise()
                 } label: {
                     Text("Add Exercise")
-                        .font(.headline)
+                        .font(.system(.headline, design: .monospaced))
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)

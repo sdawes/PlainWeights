@@ -80,13 +80,13 @@ struct FilteredExerciseListView: View {
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(exercise.name)
-                                    .font(.headline)
+                                    .font(.system(.headline, design: .monospaced))
                                     .foregroundStyle(.primary)
                                 Text(exercise.category)
-                                    .font(.subheadline)
+                                    .font(.system(.subheadline, design: .monospaced))
                                     .foregroundStyle(.secondary)
                                 Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
-                                    .font(.caption)
+                                    .font(.system(.caption, design: .monospaced))
                                     .foregroundStyle(.tertiary)
                             }
                         }
@@ -100,7 +100,7 @@ struct FilteredExerciseListView: View {
                     }
                 } header: {
                     Text("EXERCISES")
-                        .font(.caption)
+                        .font(.system(.caption, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
             }

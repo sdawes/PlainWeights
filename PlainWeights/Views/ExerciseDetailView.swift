@@ -91,7 +91,7 @@ struct ExerciseDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Title
                     TextField("Title", text: $exerciseName)
-                        .font(.largeTitle.bold())
+                        .font(.system(.largeTitle, design: .monospaced))
                         .textFieldStyle(.plain)
                         .focused($nameFocused)
                         .submitLabel(.done)
@@ -150,14 +150,13 @@ struct ExerciseDetailView: View {
                 } header: {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("TODAY'S SETS")
-                            .font(.footnote)
+                            .font(.system(.footnote, design: .monospaced))
                             .textCase(.uppercase)
                             .foregroundStyle(.primary)
 
                         // Running total
                         HStack(spacing: 0) {
                             Text("Total: ")
-                                .fontWeight(.bold)
                             Text("\(Formatters.formatVolume(todaysVolume)) kg · ")
                             Text("\(percentOfBaseline)%")
                                 .foregroundStyle(baselineColor)
@@ -166,7 +165,7 @@ struct ExerciseDetailView: View {
                                 .foregroundStyle(targetColor)
                             Text(" target")
                         }
-                        .font(.caption)
+                        .font(.system(.caption, design: .monospaced))
                     }
                     .padding(.bottom, 8)
                 }
@@ -186,14 +185,14 @@ struct ExerciseDetailView: View {
                     } header: {
                         HStack {
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                .font(.footnote)
+                                .font(.system(.footnote, design: .monospaced))
                                 .textCase(.uppercase)
                                 .foregroundStyle(.primary)
 
                             Spacer()
 
                             Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
-                                .font(.footnote)
+                                .font(.system(.footnote, design: .monospaced))
                                 .textCase(.uppercase)
                                 .foregroundStyle(.primary)
                         }

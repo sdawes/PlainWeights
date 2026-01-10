@@ -45,8 +45,7 @@ struct HeroMetricView: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(headerLabel)
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.white.opacity(0.7))
                     .textCase(.uppercase)
 
@@ -54,7 +53,7 @@ struct HeroMetricView: View {
 
                 if let date = date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.caption2)
+                        .font(.system(.caption2, design: .monospaced))
                         .foregroundStyle(.white.opacity(0.5))
                 }
             }
@@ -62,21 +61,19 @@ struct HeroMetricView: View {
             // Hero metric: Weight (large) × Reps (smaller, lighter)
             HStack(alignment: .center, spacing: 4) {
                 Text("\(Formatters.formatWeight(weight)) kg")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                    .font(.system(.largeTitle, design: .monospaced))
                     .foregroundStyle(.white)
                 Text("× \(reps) reps")
-                    .font(.title2)
+                    .font(.system(.title2, design: .monospaced))
                     .foregroundStyle(.white.opacity(0.7))
             }
 
             // Total weight (medium, secondary)
             HStack(spacing: 4) {
                 Text("\(Formatters.formatVolume(totalVolume)) kg")
-                    .fontWeight(.bold)
                 Text("total weight")
             }
-            .font(.subheadline)
+            .font(.system(.subheadline, design: .monospaced))
             .foregroundStyle(.white.opacity(0.7))
         }
         .padding(20)
@@ -97,11 +94,11 @@ struct ProgressPillView: View {
         HStack(spacing: 6) {
             Image(systemName: direction == .up ? "arrow.up" :
                              direction == .down ? "arrow.down" : "minus")
-                .font(.caption2)
+                .font(.system(.caption2, design: .monospaced))
                 .foregroundStyle(.white)
 
             Text(text)
-                .font(.caption)
+                .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.white)
         }
         .padding(.horizontal, 12)
@@ -163,8 +160,7 @@ struct TargetMetricsSection: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(data.headerLabel)
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -172,7 +168,7 @@ struct TargetMetricsSection: View {
 
                 if let date = data.date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.caption2)
+                        .font(.system(.caption2, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -180,11 +176,10 @@ struct TargetMetricsSection: View {
             // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.system(size: 38))
-                    .fontWeight(.semibold)
+                    .font(.system(size: 38, design: .monospaced))
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
-                    .font(.title2)
+                    .font(.system(.title2, design: .monospaced))
                     .foregroundStyle(.secondary)
 
                 // Set indicator icons (matching ThisSetSection design)
@@ -194,7 +189,7 @@ struct TargetMetricsSection: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 6))
+                                .font(.system(size: 6, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -205,7 +200,7 @@ struct TargetMetricsSection: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Image(systemName: "pause.fill")
-                                .font(.system(size: 6))
+                                .font(.system(size: 6, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -217,13 +212,11 @@ struct TargetMetricsSection: View {
                         .overlay {
                             if data.tempoSeconds > 0 {
                                 Text("\(data.tempoSeconds)")
-                                    .font(.system(size: 7))
-                                    .italic()
-                                    .fontWeight(.bold)
+                                    .font(.system(size: 7, design: .monospaced))
                                     .foregroundStyle(.white)
                             } else {
                                 Image(systemName: "timer")
-                                    .font(.system(size: 6))
+                                    .font(.system(size: 6, design: .monospaced))
                                     .foregroundStyle(.white)
                             }
                         }
@@ -235,9 +228,7 @@ struct TargetMetricsSection: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Text("PB")
-                                .font(.system(size: 5))
-                                .italic()
-                                .fontWeight(.bold)
+                                .font(.system(size: 5, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -246,10 +237,9 @@ struct TargetMetricsSection: View {
             // Total weight (will have picker added by parent)
             HStack(spacing: 4) {
                 Text("\(Formatters.formatVolume(data.totalVolume)) kg")
-                    .fontWeight(.bold)
                 Text("total weight")
             }
-            .font(.subheadline)
+            .font(.system(.subheadline, design: .monospaced))
             .foregroundStyle(.secondary)
             .padding(.top, 0)
         }
@@ -267,8 +257,7 @@ struct TargetMetricsSectionWithPicker: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(data.headerLabel)
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -276,7 +265,7 @@ struct TargetMetricsSectionWithPicker: View {
 
                 if let date = data.date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.caption2)
+                        .font(.system(.caption2, design: .monospaced))
                         .foregroundStyle(.secondary)
                         .frame(width: 140, alignment: .trailing)  // Match picker width for alignment
                 }
@@ -285,11 +274,10 @@ struct TargetMetricsSectionWithPicker: View {
             // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.system(size: 38))
-                    .fontWeight(.semibold)
+                    .font(.system(size: 38, design: .monospaced))
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
-                    .font(.title2)
+                    .font(.system(.title2, design: .monospaced))
                     .foregroundStyle(.secondary)
 
                 // Set indicator icons
@@ -299,7 +287,7 @@ struct TargetMetricsSectionWithPicker: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 6))
+                                .font(.system(size: 6, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -310,7 +298,7 @@ struct TargetMetricsSectionWithPicker: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Image(systemName: "pause.fill")
-                                .font(.system(size: 6))
+                                .font(.system(size: 6, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -322,13 +310,11 @@ struct TargetMetricsSectionWithPicker: View {
                         .overlay {
                             if data.tempoSeconds > 0 {
                                 Text("\(data.tempoSeconds)")
-                                    .font(.system(size: 7))
-                                    .italic()
-                                    .fontWeight(.bold)
+                                    .font(.system(size: 7, design: .monospaced))
                                     .foregroundStyle(.white)
                             } else {
                                 Image(systemName: "timer")
-                                    .font(.system(size: 6))
+                                    .font(.system(size: 6, design: .monospaced))
                                     .foregroundStyle(.white)
                             }
                         }
@@ -340,9 +326,7 @@ struct TargetMetricsSectionWithPicker: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Text("PB")
-                                .font(.system(size: 5))
-                                .italic()
-                                .fontWeight(.bold)
+                                .font(.system(size: 5, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -352,10 +336,9 @@ struct TargetMetricsSectionWithPicker: View {
             HStack(alignment: .lastTextBaseline) {
                 HStack(spacing: 4) {
                     Text("\(Formatters.formatVolume(data.totalVolume)) kg")
-                        .fontWeight(.bold)
                     Text("total weight")
                 }
-                .font(.subheadline)
+                .font(.system(.subheadline, design: .monospaced))
                 .foregroundStyle(.secondary)
 
                 Spacer()
@@ -388,27 +371,25 @@ struct ThisSetSection: View {
                 // Header row with "THIS SET" and "vs last session"
                 HStack {
                     Text("THIS SET")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+                        .font(.system(.caption, design: .monospaced))
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     Spacer()
 
                     Text(data.comparisonLabel)
-                        .font(.caption2)
+                        .font(.system(.caption2, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
 
                 // Set values
                 HStack(alignment: .center, spacing: 6) {
                     Text("\(data.weight) kg")
-                        .font(.title3)
-                        .fontWeight(.bold)
+                        .font(.system(.title3, design: .monospaced))
                         .foregroundStyle(.primary)
 
                     Text("× \(data.reps) reps")
-                        .font(.callout)
+                        .font(.system(.callout, design: .monospaced))
                         .foregroundStyle(.secondary)
 
                     if data.isDropSet {
@@ -417,7 +398,7 @@ struct ThisSetSection: View {
                             .frame(width: 16, height: 16)
                             .overlay {
                                 Image(systemName: "chevron.down")
-                                    .font(.system(size: 8))
+                                    .font(.system(size: 8, design: .monospaced))
                                     .foregroundStyle(.white)
                             }
                     }
@@ -428,7 +409,7 @@ struct ThisSetSection: View {
                             .frame(width: 16, height: 16)
                             .overlay {
                                 Image(systemName: "pause.fill")
-                                    .font(.system(size: 8))
+                                    .font(.system(size: 8, design: .monospaced))
                                     .foregroundStyle(.white)
                             }
                     }
@@ -440,13 +421,11 @@ struct ThisSetSection: View {
                             .overlay {
                                 if data.tempoSeconds > 0 {
                                     Text("\(data.tempoSeconds)")
-                                        .font(.system(size: 9))
-                                        .italic()
-                                        .fontWeight(.bold)
+                                        .font(.system(size: 9, design: .monospaced))
                                         .foregroundStyle(.white)
                                 } else {
                                     Image(systemName: "timer")
-                                        .font(.system(size: 8))
+                                        .font(.system(size: 8, design: .monospaced))
                                         .foregroundStyle(.white)
                                 }
                             }
@@ -458,9 +437,7 @@ struct ThisSetSection: View {
                             .frame(width: 16, height: 16)
                             .overlay {
                                 Text("PB")
-                                    .font(.system(size: 7))
-                                    .italic()
-                                    .fontWeight(.bold)
+                                    .font(.system(size: 7, design: .monospaced))
                                     .foregroundStyle(.white)
                             }
                     }
@@ -545,7 +522,7 @@ struct ProgressBarSection: View {
 
             // Progress percentage text (right-aligned)
             Text(data.progressText)
-                .font(.caption)
+                .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
         }
     }
@@ -621,14 +598,13 @@ struct TargetMetricsCard: View {
             // Left card: Previous session
             VStack(alignment: .leading, spacing: 6) {
                 Text("Previous session")
-                    .font(.system(size: 14))
-                    .fontWeight(.semibold)
+                    .font(.system(size: 14, design: .monospaced))
 
                 if let lastInfo = progressState?.lastCompletedDayInfo {
                     // Weight × Reps
                     HStack(spacing: 4) {
                         Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps)")
-                            .font(.system(size: 14))
+                            .font(.system(size: 14, design: .monospaced))
                             .lineLimit(1)
                             .minimumScaleFactor(0.6)
                         badgesView(
@@ -643,18 +619,17 @@ struct TargetMetricsCard: View {
                     // Total volume
                     HStack(spacing: 0) {
                         Text("Total: ")
-                            .fontWeight(.medium)
                         Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
                     }
-                    .font(.system(size: 12))
+                    .font(.system(size: 12, design: .monospaced))
 
                     // Date
                     Text(Formatters.formatRelativeDate(lastInfo.date))
-                        .font(.caption2)
+                        .font(.system(.caption2, design: .monospaced))
                         .foregroundStyle(.gray)
                 } else {
                     Text("Appears after next session")
-                        .font(.system(size: 12))
+                        .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(.gray)
                 }
             }
@@ -667,14 +642,13 @@ struct TargetMetricsCard: View {
             // Right card: Best Ever
             VStack(alignment: .leading, spacing: 6) {
                 Text("Best Ever")
-                    .font(.system(size: 14))
-                    .fontWeight(.semibold)
+                    .font(.system(size: 14, design: .monospaced))
 
                 if let best = bestDayMetrics {
                     // Weight × Reps
                     HStack(spacing: 4) {
                         Text("\(Formatters.formatWeight(best.maxWeight)) kg × \(best.repsAtMaxWeight)")
-                            .font(.system(size: 14))
+                            .font(.system(size: 14, design: .monospaced))
                             .lineLimit(1)
                             .minimumScaleFactor(0.6)
                         badgesView(
@@ -689,18 +663,17 @@ struct TargetMetricsCard: View {
                     // Total volume
                     HStack(spacing: 0) {
                         Text("Total: ")
-                            .fontWeight(.medium)
                         Text("\(Formatters.formatVolume(best.totalVolume)) kg")
                     }
-                    .font(.system(size: 12))
+                    .font(.system(size: 12, design: .monospaced))
 
                     // Date
                     Text(Formatters.formatRelativeDate(best.date))
-                        .font(.caption2)
+                        .font(.system(.caption2, design: .monospaced))
                         .foregroundStyle(.gray)
                 } else {
                     Text("Appears after next session")
-                        .font(.system(size: 12))
+                        .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(.gray)
                 }
             }
@@ -724,7 +697,7 @@ struct TargetMetricsCard: View {
                     .frame(width: 12, height: 12)
                     .overlay {
                         Image(systemName: "chevron.down")
-                            .font(.system(size: 6))
+                            .font(.system(size: 6, design: .monospaced))
                             .foregroundStyle(.white)
                     }
             }
@@ -735,7 +708,7 @@ struct TargetMetricsCard: View {
                     .frame(width: 12, height: 12)
                     .overlay {
                         Image(systemName: "pause.fill")
-                            .font(.system(size: 6))
+                            .font(.system(size: 6, design: .monospaced))
                             .foregroundStyle(.white)
                     }
             }
@@ -747,13 +720,11 @@ struct TargetMetricsCard: View {
                     .overlay {
                         if tempoSeconds > 0 {
                             Text("\(tempoSeconds)")
-                                .font(.system(size: 7))
-                                .italic()
-                                .fontWeight(.bold)
+                                .font(.system(size: 7, design: .monospaced))
                                 .foregroundStyle(.white)
                         } else {
                             Image(systemName: "timer")
-                                .font(.system(size: 6))
+                                .font(.system(size: 6, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                     }
@@ -765,9 +736,7 @@ struct TargetMetricsCard: View {
                     .frame(width: 12, height: 12)
                     .overlay {
                         Text("PB")
-                            .font(.system(size: 5))
-                            .italic()
-                            .fontWeight(.bold)
+                            .font(.system(size: 5, design: .monospaced))
                             .foregroundStyle(.white)
                     }
             }

@@ -92,7 +92,7 @@ struct EmptyChartPreview: View {
 
             // Text below chart
             Text("Your progress chart will appear here")
-                .font(.caption)
+                .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
@@ -110,11 +110,11 @@ struct ChartToggleButton: View {
         }) {
             HStack(spacing: 4) {
                 Text("Chart")
-                    .font(.caption)
+                    .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.blue)
 
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(.blue)
             }
             .id(isExpanded)
@@ -305,9 +305,7 @@ struct ChartContentView: View {
                                 .frame(width: 12, height: 12)
                                 .overlay {
                                     Text("PB")
-                                        .font(.system(size: 6))
-                                        .italic()
-                                        .fontWeight(.bold)
+                                        .font(.system(size: 6, design: .monospaced))
                                         .foregroundStyle(.white)
                                 }
                         }
@@ -338,7 +336,7 @@ struct ChartContentView: View {
                                     .fill(.blue)
                                     .frame(width: 8, height: 8)
                                 Text("Weight")
-                                    .font(.system(size: 9))
+                                    .font(.system(size: 9, design: .monospaced))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -349,7 +347,7 @@ struct ChartContentView: View {
                                 .fill(.green)
                                 .frame(width: 8, height: 8)
                             Text("Reps")
-                                .font(.system(size: 9))
+                                .font(.system(size: 9, design: .monospaced))
                                 .foregroundStyle(.secondary)
                         }
                     }

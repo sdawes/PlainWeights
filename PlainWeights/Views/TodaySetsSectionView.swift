@@ -19,7 +19,7 @@ struct TodaySetsSectionView: View {
         ForEach(todaySets, id: \.persistentModelID) { set in
             HStack(alignment: .bottom) {
                 Text(ExerciseSetFormatters.formatSet(set))
-                    .monospacedDigit()
+                    .font(.system(.body, design: .monospaced))
                     .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
                 Spacer()
@@ -30,7 +30,7 @@ struct TodaySetsSectionView: View {
                         .frame(width: 20, height: 20)
                         .overlay {
                             Image(systemName: "flame.fill")
-                                .font(.system(size: 10))
+                                .font(.system(size: 10, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -41,7 +41,7 @@ struct TodaySetsSectionView: View {
                         .frame(width: 20, height: 20)
                         .overlay {
                             Image(systemName: "star.fill")
-                                .font(.system(size: 10))
+                                .font(.system(size: 10, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -52,7 +52,7 @@ struct TodaySetsSectionView: View {
                         .frame(width: 20, height: 20)
                         .overlay {
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 10))
+                                .font(.system(size: 10, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -63,7 +63,7 @@ struct TodaySetsSectionView: View {
                         .frame(width: 20, height: 20)
                         .overlay {
                             Image(systemName: "pause.fill")
-                                .font(.system(size: 10))
+                                .font(.system(size: 10, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -75,13 +75,11 @@ struct TodaySetsSectionView: View {
                         .overlay {
                             if set.tempoSeconds > 0 {
                                 Text("\(set.tempoSeconds)")
-                                    .font(.system(size: 11))
-                                    .italic()
-                                    .fontWeight(.bold)
+                                    .font(.system(size: 11, design: .monospaced))
                                     .foregroundStyle(.white)
                             } else {
                                 Image(systemName: "timer")
-                                    .font(.system(size: 10))
+                                    .font(.system(size: 10, design: .monospaced))
                                     .foregroundStyle(.white)
                             }
                         }
@@ -93,15 +91,13 @@ struct TodaySetsSectionView: View {
                         .frame(width: 20, height: 20)
                         .overlay {
                             Text("PB")
-                                .font(.system(size: 9))
-                                .italic()
-                                .fontWeight(.bold)
+                                .font(.system(size: 9, design: .monospaced))
                                 .foregroundStyle(.white)
                         }
                 }
 
                 Text(Formatters.formatTimeHM(set.timestamp))
-                .font(.caption)
+                .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())

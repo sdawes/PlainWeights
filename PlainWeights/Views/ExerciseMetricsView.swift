@@ -572,6 +572,7 @@ struct MetricViewStats: View {
 
 /// Card 2: Target Metrics - Combined Baseline (Previous) and Upper Target (Best)
 struct TargetMetricsCard: View {
+    @Environment(ThemeManager.self) private var themeManager
     let exercise: Exercise
     let sets: [ExerciseSet]
 
@@ -636,7 +637,7 @@ struct TargetMetricsCard: View {
             .padding(.horizontal, 8)
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.systemBackground))
+            .background(themeManager.currentTheme.cardBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 16))
 
             // Right card: Best Ever
@@ -680,10 +681,10 @@ struct TargetMetricsCard: View {
             .padding(.horizontal, 8)
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.systemBackground))
+            .background(themeManager.currentTheme.cardBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
-        .foregroundStyle(.black)
+        .foregroundStyle(themeManager.currentTheme.textColor)
     }
 
     // MARK: - Badge Helper

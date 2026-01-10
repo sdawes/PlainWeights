@@ -32,6 +32,7 @@ struct ExerciseListView: View {
 
 struct FilteredExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(ThemeManager.self) private var themeManager
     @Query private var exercises: [Exercise]
     @Binding var showingAddExercise: Bool
     @Binding var navigationPath: NavigationPath
@@ -116,7 +117,7 @@ struct FilteredExerciseListView: View {
                 Button { showingSettings = true } label: {
                     Image(systemName: "gearshape.fill")
                         .font(.callout)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(themeManager.currentTheme.textColor)
                 }
             }
             ToolbarItem(placement: .primaryAction) {
@@ -143,7 +144,7 @@ struct FilteredExerciseListView: View {
                 } label: {
                     Image(systemName: "hammer.fill")
                         .font(.callout)
-                        .foregroundColor(.black)
+                        .foregroundStyle(themeManager.currentTheme.textColor)
                 }
             }
             #endif

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct RetroLifterView: View {
+    @Environment(ThemeManager.self) private var themeManager
     var pixelSize: CGFloat = 10
 
     // Frame 1: Squatting (Barbell on shoulders) - original leg spread
@@ -70,8 +71,8 @@ struct RetroLifterView: View {
 
     private func colorForPixel(_ value: Int) -> Color {
         switch value {
-        case 1: return .black  // Man
-        case 2: return .black  // Barbell
+        case 1: return themeManager.currentTheme.textColor  // Man
+        case 2: return themeManager.currentTheme.textColor  // Barbell
         default: return .clear // Background
         }
     }
@@ -84,4 +85,5 @@ struct RetroLifterView: View {
     }
     .padding()
     .background(.white)
+    .environment(ThemeManager())
 }

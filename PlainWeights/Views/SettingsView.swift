@@ -9,13 +9,36 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
+    @State private var showingThemePicker = false
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Text("Settings coming soon")
-                        .font(.system(.body, design: .monospaced))
+                    Button {
+                        showingThemePicker = true
+                    } label: {
+                        HStack {
+                            Text("Theme")
+                                .font(.system(.body, design: .monospaced))
+                                .foregroundStyle(.primary)
+
+                            Spacer()
+
+                            Text(themeManager.currentTheme.displayName)
+                                .font(.system(.body, design: .monospaced))
+                                .foregroundStyle(.secondary)
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                } header: {
+                    Text("APPEARANCE")
+                        .font(.system(.caption, design: .monospaced))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -29,8 +52,9 @@ struct SettingsView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingThemePicker) {
+                ThemePickerSheet()
+            }
         }
     }
 }
-
-

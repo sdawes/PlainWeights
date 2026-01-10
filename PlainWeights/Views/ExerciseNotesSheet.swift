@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ExerciseNotesSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
     let exercise: Exercise
     @Binding var noteText: String
     @FocusState private var isFocused: Bool
@@ -21,16 +22,16 @@ struct ExerciseNotesSheet: View {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Add notes about form, target muscles, or any reminders for this exercise.")
                     .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(themeManager.currentTheme.textColor)
 
                 TextEditor(text: $noteText)
                     .font(.system(.body, design: .monospaced))
                     .frame(height: 220)
                     .padding(8)
-                    .background(Color.white)
+                    .background(themeManager.currentTheme.cardBackgroundColor)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.black, lineWidth: 1)
+                            .stroke(themeManager.currentTheme.textColor, lineWidth: 1)
                     )
                     .focused($isFocused)
                     .onChange(of: noteText) { oldValue, newValue in
@@ -43,7 +44,7 @@ struct ExerciseNotesSheet: View {
                 Spacer()
             }
             .padding()
-            .background(Color.white)
+            .background(themeManager.currentTheme.backgroundColor)
             .navigationTitle("Exercise Notes")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -10,8 +10,14 @@ import SwiftData
 
 @main
 struct PlainWeightsApp: App {
+    @State private var themeManager = ThemeManager()
+
     var body: some Scene {
-        WindowGroup { ContentView() }
-            .modelContainer(for: [Exercise.self, ExerciseSet.self])
+        WindowGroup {
+            ContentView()
+                .environment(themeManager)
+                .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        }
+        .modelContainer(for: [Exercise.self, ExerciseSet.self])
     }
 }

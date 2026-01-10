@@ -13,6 +13,7 @@ import SwiftData
 struct ExerciseDetailView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
     let exercise: Exercise
     @Query private var sets: [ExerciseSet]
     @State private var addSetConfig: AddSetConfig?
@@ -116,7 +117,7 @@ struct ExerciseDetailView: View {
                     sets: sets
                 )
                 .padding(16)
-                .background(Color(.systemBackground))
+                .background(themeManager.currentTheme.cardBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             .listRowSeparator(.hidden)

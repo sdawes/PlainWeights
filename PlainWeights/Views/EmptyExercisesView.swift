@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct EmptyExercisesView: View {
+    @Environment(ThemeManager.self) private var themeManager
     let searchText: String
     let onAddExercise: () -> Void
 
@@ -29,13 +30,13 @@ struct EmptyExercisesView: View {
                 } label: {
                     Text("Add Exercise")
                         .font(.system(.headline, design: .monospaced))
-                        .foregroundStyle(.black)
+                        .foregroundStyle(themeManager.currentTheme.textColor)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 12)
                         .overlay(
                             Rectangle()
                                 .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
-                                .foregroundStyle(.black)
+                                .foregroundStyle(themeManager.currentTheme.textColor)
                         )
                 }
                 .buttonStyle(.plain)
@@ -57,4 +58,5 @@ struct EmptyExercisesView: View {
         EmptyExercisesView(searchText: "Bench Press", onAddExercise: {})
             .padding()
     }
+    .environment(ThemeManager())
 }

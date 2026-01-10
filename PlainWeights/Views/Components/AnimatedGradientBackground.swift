@@ -2,14 +2,16 @@
 //  AnimatedGradientBackground.swift
 //  PlainWeights
 //
-//  Animated multi-gradient background with cool blue-tinted grey tones
+//  Theme-aware background
 //
 
 import SwiftUI
 
 struct AnimatedGradientBackground: View {
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
-        Color.white
+        themeManager.currentTheme.backgroundColor
             .ignoresSafeArea()
     }
 }

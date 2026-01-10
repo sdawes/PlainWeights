@@ -13,6 +13,7 @@ import SwiftUI
 
 struct SetRowView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(ThemeManager.self) private var themeManager
     let set: ExerciseSet
     let onTap: () -> Void
     let onDelete: () -> Void
@@ -108,7 +109,7 @@ struct SetRowView: View {
         .onTapGesture {
             onTap()
         }
-        .listRowBackground(Color(.systemBackground))
+        .listRowBackground(themeManager.currentTheme.cardBackgroundColor)
         .listRowSeparator(.automatic)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {

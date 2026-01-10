@@ -10,6 +10,7 @@ import SwiftData
 
 struct SessionSummaryView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
     @Query private var allSets: [ExerciseSet]
 
     var body: some View {
@@ -131,7 +132,7 @@ struct SessionSummaryView: View {
             }
         }
         .padding(.vertical, 12)
-        .background(Color(.systemBackground).opacity(0.8))
+        .background(themeManager.currentTheme.cardBackgroundColor.opacity(0.8))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
@@ -211,7 +212,7 @@ struct SessionSummaryView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.systemBackground))
+        .background(themeManager.currentTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

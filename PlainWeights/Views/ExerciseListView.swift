@@ -114,8 +114,9 @@ struct FilteredExerciseListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button { showingSettings = true } label: {
-                    Image(systemName: "gearshape")
+                    Image(systemName: "gearshape.fill")
                         .font(.callout)
+                        .foregroundStyle(.black)
                 }
             }
             ToolbarItem(placement: .primaryAction) {

@@ -275,6 +275,7 @@ struct ExerciseDetailView: View {
                 initialReps: config.initialReps,
                 setToEdit: config.setToEdit
             )
+            .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .sheet(isPresented: $showingNotesSheet) {
             ExerciseNotesSheet(
@@ -282,6 +283,7 @@ struct ExerciseDetailView: View {
                 noteText: $noteText,
                 onSave: updateNote
             )
+            .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .onAppear {
             updateCachedData()

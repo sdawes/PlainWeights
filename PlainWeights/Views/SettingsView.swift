@@ -54,6 +54,7 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingThemePicker) {
                 ThemePickerSheet()
+                    .preferredColorScheme(themeManager.currentTheme.colorScheme)
             }
         }
     }

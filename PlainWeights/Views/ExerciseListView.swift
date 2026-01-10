@@ -162,12 +162,15 @@ struct FilteredExerciseListView: View {
                 // Navigate to the newly created exercise after sheet dismisses
                 navigationPath.append(newExercise)
             }
+            .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .fullScreenCover(isPresented: $showingSummary) {
             SessionSummaryView()
+                .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+                .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         #if DEBUG
         .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {

@@ -31,13 +31,17 @@ struct SessionSummaryView: View {
                         .padding()
                     }
                 } else {
-                    ContentUnavailableView {
-                        Label("No Workouts Yet", systemImage: "figure.strengthtraining.traditional")
+                    VStack(spacing: 12) {
+                        RetroLifterView(pixelSize: 5)
+
+                        Text("No Workouts Yet")
                             .font(.system(.title2, design: .monospaced))
-                    } description: {
+
                         Text("Complete your first workout to see a summary here.")
                             .font(.system(.subheadline, design: .monospaced))
+                            .foregroundStyle(.secondary)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .navigationTitle("Session Summary")

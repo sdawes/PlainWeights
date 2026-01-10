@@ -10,32 +10,40 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeManager.self) private var themeManager
-    @State private var showingThemePicker = false
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Button {
-                        showingThemePicker = true
-                    } label: {
-                        HStack {
-                            Text("Theme")
-                                .font(.system(.body, design: .monospaced))
-                                .foregroundStyle(.primary)
+                    HStack {
+                        Text("Theme")
+                            .font(.system(.body, design: .monospaced))
 
-                            Spacer()
+                        Spacer()
 
-                            Text(themeManager.currentTheme.displayName)
-                                .font(.system(.body, design: .monospaced))
-                                .foregroundStyle(.secondary)
-
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
+                        Menu {
+                            ForEach(AppTheme.allCases, id: \.self) { theme in
+                                Button {
+                                    themeManager.currentTheme = theme
+                                } label: {
+                                    HStack {
+                                        Text(theme.displayName)
+                                        if theme == themeManager.currentTheme {
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text(themeManager.currentTheme.displayName)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption2)
+                            }
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundStyle(.secondary)
                         }
                     }
-                    .buttonStyle(.plain)
                 } header: {
                     Text("APPEARANCE")
                         .font(.system(.caption, design: .monospaced))
@@ -51,10 +59,6 @@ struct SettingsView: View {
                         dismiss()
                     }
                 }
-            }
-            .sheet(isPresented: $showingThemePicker) {
-                ThemePickerSheet()
-                    .preferredColorScheme(themeManager.currentTheme.colorScheme)
             }
         }
     }

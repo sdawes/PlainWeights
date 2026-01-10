@@ -30,13 +30,13 @@ struct RetroLifterView: View {
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     ]
 
-    // Frame 2: Standing (Barbell overhead) - original straight legs
+    // Frame 2: Standing (Barbell overhead) - arms wide, original straight legs
     private let frame2 = [
         0,0,2,2,0,0,0,0,0,0,0,0,2,2,0,0, // Weights ABOVE bar
         0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0, // Bar with weights
-        0,0,2,2,0,1,0,0,0,0,1,0,2,2,0,0, // Weights + Arms up
-        0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0, // Arms
-        0,0,0,0,0,1,0,1,1,0,1,0,0,0,0,0, // Arms + Head
+        0,0,2,2,1,0,0,0,0,0,0,1,2,2,0,0, // Weights + Arms wide at top
+        0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0, // Arms wide
+        0,0,0,0,0,1,0,1,1,0,1,0,0,0,0,0, // Arms angling in + Head
         0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0, // Head
         0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0, // Shoulders
         0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0, // Torso

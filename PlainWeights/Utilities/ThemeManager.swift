@@ -18,7 +18,7 @@ final class ThemeManager {
     }
 
     init() {
-        let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.light.rawValue
-        self.currentTheme = AppTheme(rawValue: savedTheme) ?? .light
+        let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.dark.rawValue
+        self.currentTheme = AppTheme(rawValue: savedTheme) ?? .dark
     }
 }

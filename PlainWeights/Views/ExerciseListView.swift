@@ -75,9 +75,7 @@ struct FilteredExerciseListView: View {
                         searchText: searchText,
                         onAddExercise: { showingAddExercise = true }
                     )
-                    .listRowBackground(
-                        themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
-                    )
+                    .listRowBackground(Color.clear)
                 }
             } else {
                 Section {
@@ -92,7 +90,7 @@ struct FilteredExerciseListView: View {
                                 }
                                 Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
                                     .font(.system(.caption, design: .monospaced))
-                                    .foregroundStyle(.tertiary)
+                                    .foregroundStyle(themeManager.currentTheme.tertiaryTextColor)
                             }
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -102,9 +100,7 @@ struct FilteredExerciseListView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
-                        .listRowBackground(
-                            themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
-                        )
+                        .listRowBackground(Color.clear)
                         .listRowSeparatorTint(
                             themeManager.currentTheme == .dark ? .white.opacity(0.3) : nil
                         )
@@ -112,7 +108,7 @@ struct FilteredExerciseListView: View {
                 } header: {
                     Text("EXERCISES")
                         .font(.system(.caption, design: .monospaced))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(themeManager.currentTheme.secondaryTextColor)
                 }
             }
         }

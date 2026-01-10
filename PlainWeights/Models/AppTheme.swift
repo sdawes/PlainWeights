@@ -18,7 +18,7 @@ enum AppTheme: String, CaseIterable {
     var backgroundColor: Color {
         switch self {
         case .light:
-            return Color.white
+            return Color(red: 0.96, green: 0.96, blue: 0.94) // Off-white
         case .dark:
             return Color(red: 0.141, green: 0.161, blue: 0.2) // #242933
         }
@@ -36,7 +36,7 @@ enum AppTheme: String, CaseIterable {
     var secondaryTextColor: Color {
         switch self {
         case .light:
-            return Color(.secondaryLabel)
+            return Color(red: 0.4, green: 0.4, blue: 0.4) // Dark gray
         case .dark:
             return Color.white.opacity(0.7)
         }
@@ -45,7 +45,7 @@ enum AppTheme: String, CaseIterable {
     var tertiaryTextColor: Color {
         switch self {
         case .light:
-            return Color(.tertiaryLabel)
+            return Color(red: 0.5, green: 0.5, blue: 0.5) // Medium gray
         case .dark:
             return Color.white.opacity(0.5)
         }

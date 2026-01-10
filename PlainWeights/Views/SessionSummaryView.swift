@@ -30,11 +30,13 @@ struct SessionSummaryView: View {
                         .padding()
                     }
                 } else {
-                    ContentUnavailableView(
-                        "No Workouts Yet",
-                        systemImage: "figure.strengthtraining.traditional",
-                        description: Text("Complete your first workout to see a summary here.")
-                    )
+                    ContentUnavailableView {
+                        Label("No Workouts Yet", systemImage: "figure.strengthtraining.traditional")
+                            .font(.system(.title2, design: .monospaced))
+                    } description: {
+                        Text("Complete your first workout to see a summary here.")
+                            .font(.system(.subheadline, design: .monospaced))
+                    }
                 }
             }
             .navigationTitle("Session Summary")

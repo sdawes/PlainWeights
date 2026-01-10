@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+// MARK: - ASCII Barbell Logo
+
+struct BarbellLogo: View {
+    var body: some View {
+        Text("·|[ ≡≡≡ | ≡≡≡ ]|·")
+            .font(.system(size: 24, design: .monospaced))
+            .foregroundStyle(.black)
+    }
+}
+
 struct EmptyExercisesView: View {
     let searchText: String
     let onAddExercise: () -> Void
@@ -15,9 +25,14 @@ struct EmptyExercisesView: View {
         if searchText.isEmpty {
             // First-time user experience - no exercises at all
             ContentUnavailableView {
-                Label("No Exercises Yet", systemImage: "figure.strengthtraining.traditional")
+                VStack(spacing: 12) {
+                    BarbellLogo()
+                    Text("No Exercises Yet")
+                        .font(.system(.title2, design: .monospaced))
+                }
             } description: {
                 Text("Start tracking your workouts by adding your first exercise")
+                    .font(.system(.subheadline, design: .monospaced))
             } actions: {
                 Button {
                     onAddExercise()

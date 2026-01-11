@@ -21,27 +21,28 @@ struct SettingsView: View {
 
                         Spacer()
 
-                        Menu {
-                            ForEach(AppTheme.allCases, id: \.self) { theme in
-                                Button {
-                                    themeManager.currentTheme = theme
-                                } label: {
-                                    HStack {
-                                        Text(theme.displayName)
-                                        if theme == themeManager.currentTheme {
-                                            Image(systemName: "checkmark")
-                                        }
-                                    }
-                                }
+                        HStack(spacing: 8) {
+                            // Light button
+                            Button {
+                                themeManager.currentTheme = .light
+                            } label: {
+                                Label("Light", systemImage: "sun.max.fill")
+                                    .font(.system(.caption, design: .monospaced))
                             }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text(themeManager.currentTheme.displayName)
-                                Image(systemName: "chevron.up.chevron.down")
-                                    .font(.caption2)
+                            .buttonStyle(.bordered)
+                            .tint(themeManager.currentTheme == .light ? .primary : .secondary)
+                            .opacity(themeManager.currentTheme == .light ? 1.0 : 0.5)
+
+                            // Dark button
+                            Button {
+                                themeManager.currentTheme = .dark
+                            } label: {
+                                Label("Dark", systemImage: "moon.fill")
+                                    .font(.system(.caption, design: .monospaced))
                             }
-                            .font(.system(.body, design: .monospaced))
-                            .foregroundStyle(.secondary)
+                            .buttonStyle(.bordered)
+                            .tint(themeManager.currentTheme == .dark ? .primary : .secondary)
+                            .opacity(themeManager.currentTheme == .dark ? 1.0 : 0.5)
                         }
                     }
                 } header: {

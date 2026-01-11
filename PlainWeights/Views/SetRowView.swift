@@ -109,7 +109,11 @@ struct SetRowView: View {
         .onTapGesture {
             onTap()
         }
-        .listRowBackground(themeManager.currentTheme.cardBackgroundColor)
+        .overlay(
+            RoundedRectangle(cornerRadius: 4)
+                .strokeBorder(Color.purple, lineWidth: 2)
+        )
+        .listRowBackground(Color.clear)
         .listRowSeparator(.automatic)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {

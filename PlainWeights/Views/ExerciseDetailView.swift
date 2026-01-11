@@ -117,8 +117,6 @@ struct ExerciseDetailView: View {
                     sets: sets
                 )
                 .padding(16)
-                .background(themeManager.currentTheme.cardBackgroundColor)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -169,6 +167,10 @@ struct ExerciseDetailView: View {
                         .font(.system(.caption, design: .monospaced))
                     }
                     .padding(.bottom, 8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .strokeBorder(Color.yellow, lineWidth: 2)
+                    )
                 }
             }
 
@@ -198,8 +200,16 @@ struct ExerciseDetailView: View {
                                 .foregroundStyle(.primary)
                         }
                         .padding(.bottom, 4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .strokeBorder(Color.green, lineWidth: 2)
+                        )
                     }
                 }
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.orange, lineWidth: 2)
+                )
             }
 
             // Empty state (only when no sets at all)

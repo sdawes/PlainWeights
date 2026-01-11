@@ -209,7 +209,7 @@ struct ExerciseDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .listSectionSpacing(10)
+        .listSectionSpacing(0)
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)

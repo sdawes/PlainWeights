@@ -103,7 +103,7 @@ struct ExerciseDetailView: View {
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
                 }
-                .padding(.horizontal, 8)
+                .padding(0)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -116,11 +116,10 @@ struct ExerciseDetailView: View {
                     exercise: exercise,
                     sets: sets
                 )
-                .padding(16)
+                .padding(0)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
 
             // Target metrics cards (Previous session + Best Ever)
             Section {
@@ -131,7 +130,6 @@ struct ExerciseDetailView: View {
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 8, trailing: 0))
 
             // Today's sets section
             if !todaySets.isEmpty {
@@ -166,11 +164,7 @@ struct ExerciseDetailView: View {
                         }
                         .font(.system(.caption, design: .monospaced))
                     }
-                    .padding(.bottom, 8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .strokeBorder(Color.yellow, lineWidth: 2)
-                    )
+                    .padding(0)
                 }
             }
 
@@ -199,17 +193,9 @@ struct ExerciseDetailView: View {
                                 .textCase(.uppercase)
                                 .foregroundStyle(.primary)
                         }
-                        .padding(.bottom, 4)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .strokeBorder(Color.green, lineWidth: 2)
-                        )
+                        .padding(0)
                     }
                 }
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(Color.orange, lineWidth: 2)
-                )
             }
 
             // Empty state (only when no sets at all)

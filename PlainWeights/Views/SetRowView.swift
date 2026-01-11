@@ -104,15 +104,11 @@ struct SetRowView: View {
                 .font(.system(.caption, design: .monospaced))
             }
         }
-        .padding(8)
+        .padding(0)
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
         }
-        .overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(Color.purple, lineWidth: 2)
-        )
         .listRowBackground(Color.clear)
         .listRowSeparator(.automatic)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {

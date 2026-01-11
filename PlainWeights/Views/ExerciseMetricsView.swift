@@ -634,13 +634,8 @@ struct TargetMetricsCard: View {
                         .foregroundStyle(.gray)
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(16)
+            .padding(0)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color.red, lineWidth: 2)
-            )
 
             // Right card: Best Ever
             VStack(alignment: .leading, spacing: 6) {
@@ -680,13 +675,8 @@ struct TargetMetricsCard: View {
                         .foregroundStyle(.gray)
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(16)
+            .padding(0)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color.blue, lineWidth: 2)
-            )
         }
         .foregroundStyle(themeManager.currentTheme.textColor)
     }

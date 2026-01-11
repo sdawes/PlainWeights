@@ -128,6 +128,12 @@ struct ExerciseDetailView: View {
                     exercise: exercise,
                     sets: sets
                 )
+                .padding(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5, 3]))
+                        .foregroundStyle(.white)
+                )
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)

@@ -600,21 +600,26 @@ struct TargetMetricsCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Previous session")
                     .font(.system(size: 14, design: .monospaced))
+                    .fontWeight(.semibold)
 
                 if let lastInfo = progressState?.lastCompletedDayInfo {
                     // Weight × Reps
-                    HStack(spacing: 4) {
-                        Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg × \(lastInfo.maxWeightReps)")
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg")
+                                .font(.system(size: 28, design: .monospaced))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                            badgesView(
+                                isDropSet: lastInfo.isDropSet,
+                                isPauseAtTop: lastInfo.isPauseAtTop,
+                                isTimedSet: lastInfo.isTimedSet,
+                                tempoSeconds: lastInfo.tempoSeconds,
+                                isPB: lastInfo.isPB
+                            )
+                        }
+                        Text("× \(lastInfo.maxWeightReps) reps")
                             .font(.system(size: 14, design: .monospaced))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                        badgesView(
-                            isDropSet: lastInfo.isDropSet,
-                            isPauseAtTop: lastInfo.isPauseAtTop,
-                            isTimedSet: lastInfo.isTimedSet,
-                            tempoSeconds: lastInfo.tempoSeconds,
-                            isPB: lastInfo.isPB
-                        )
                     }
 
                     // Total volume
@@ -641,21 +646,26 @@ struct TargetMetricsCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Best Ever")
                     .font(.system(size: 14, design: .monospaced))
+                    .fontWeight(.semibold)
 
                 if let best = bestDayMetrics {
                     // Weight × Reps
-                    HStack(spacing: 4) {
-                        Text("\(Formatters.formatWeight(best.maxWeight)) kg × \(best.repsAtMaxWeight)")
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            Text("\(Formatters.formatWeight(best.maxWeight)) kg")
+                                .font(.system(size: 28, design: .monospaced))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                            badgesView(
+                                isDropSet: best.isDropSet,
+                                isPauseAtTop: best.isPauseAtTop,
+                                isTimedSet: best.isTimedSet,
+                                tempoSeconds: best.tempoSeconds,
+                                isPB: best.isPB
+                            )
+                        }
+                        Text("× \(best.repsAtMaxWeight) reps")
                             .font(.system(size: 14, design: .monospaced))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                        badgesView(
-                            isDropSet: best.isDropSet,
-                            isPauseAtTop: best.isPauseAtTop,
-                            isTimedSet: best.isTimedSet,
-                            tempoSeconds: best.tempoSeconds,
-                            isPB: best.isPB
-                        )
                     }
 
                     // Total volume

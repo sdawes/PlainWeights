@@ -68,6 +68,7 @@ struct EmptyChartPreview: View {
                         y: .value("Weight", point.value)
                     )
                     .foregroundStyle(chartColor)
+                    .lineStyle(StrokeStyle(lineWidth: 1))
                 }
 
                 // Reps line (dotted)
@@ -78,7 +79,7 @@ struct EmptyChartPreview: View {
                         series: .value("Type", "Reps")
                     )
                     .foregroundStyle(chartColor)
-                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 3]))
                 }
             }
             .chartXAxis {
@@ -241,6 +242,7 @@ struct ChartContentView: View {
                                 y: .value("Reps", dataPoint.reps)
                             )
                             .foregroundStyle(chartColor)
+                            .lineStyle(StrokeStyle(lineWidth: 1))
                         }
                     } else {
                         // Weight and reps: show both series
@@ -284,6 +286,7 @@ struct ChartContentView: View {
                                 series: .value("Type", "Weight")
                             )
                             .foregroundStyle(chartColor)
+                            .lineStyle(StrokeStyle(lineWidth: 1))
 
                             // Reps line (dotted)
                             LineMark(
@@ -292,7 +295,7 @@ struct ChartContentView: View {
                                 series: .value("Type", "Reps")
                             )
                             .foregroundStyle(chartColor)
-                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                            .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 3]))
                         }
                     }
 

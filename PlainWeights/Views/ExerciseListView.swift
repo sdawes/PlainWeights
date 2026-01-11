@@ -84,6 +84,7 @@ struct FilteredExerciseListView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(exercise.name)
                                     .font(.system(.headline, design: .monospaced))
+                                    .fontWeight(.bold)
                                     .foregroundStyle(.primary)
                                 if !exercise.tags.isEmpty {
                                     TagPillsRow(tags: exercise.tags)

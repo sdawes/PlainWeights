@@ -29,6 +29,12 @@ enum ExerciseChartType {
 
 /// Ghost chart preview shown when no data exists yet
 struct EmptyChartPreview: View {
+    @Environment(ThemeManager.self) private var themeManager
+
+    private var chartColor: Color {
+        themeManager.currentTheme == .dark ? .white : .black
+    }
+
     // Mock data points for the placeholder chart
     private let mockWeightData: [(day: Int, value: Double)] = [
         (0, 0.3), (1, 0.45), (2, 0.5), (3, 0.7), (4, 0.85)
@@ -48,30 +54,30 @@ struct EmptyChartPreview: View {
                     )
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [.blue.opacity(0.15), .blue.opacity(0.02)],
+                            colors: [chartColor.opacity(0.15), chartColor.opacity(0.02)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
                 }
 
-                // Weight line (solid blue)
+                // Weight line
                 ForEach(mockWeightData, id: \.day) { point in
                     LineMark(
                         x: .value("Day", point.day),
                         y: .value("Weight", point.value)
                     )
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(chartColor)
                 }
 
-                // Reps line (dotted green)
+                // Reps line (dotted)
                 ForEach(mockRepsData, id: \.day) { point in
                     LineMark(
                         x: .value("Day", point.day),
                         y: .value("Reps", point.value),
                         series: .value("Type", "Reps")
                     )
-                    .foregroundStyle(.green)
+                    .foregroundStyle(chartColor)
                     .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
                 }
             }
@@ -127,8 +133,13 @@ struct ChartToggleButton: View {
 // MARK: - Chart Content
 
 struct ChartContentView: View {
+    @Environment(ThemeManager.self) private var themeManager
     let exercise: Exercise
     let sets: [ExerciseSet]
+
+    private var chartColor: Color {
+        themeManager.currentTheme == .dark ? .white : .black
+    }
 
     // Determine exercise chart type based on weight data
     private var exerciseChartType: ExerciseChartType {
@@ -203,15 +214,15 @@ struct ChartContentView: View {
                 Chart(chartData) { dataPoint in
                     if exerciseChartType == .repsOnly {
                         if hasSingleDataPoint {
-                            // Single data point: show small green dot only
+                            // Single data point: show small dot only
                             PointMark(
                                 x: .value("Date", dataPoint.date),
                                 y: .value("Reps", dataPoint.reps)
                             )
-                            .foregroundStyle(.green)
+                            .foregroundStyle(chartColor)
                             .symbolSize(20)  // Smaller dot
                         } else {
-                            // Multiple points: show green line with gradient
+                            // Multiple points: show line with gradient
                             // Subtle gradient under reps line
                             AreaMark(
                                 x: .value("Date", dataPoint.date),
@@ -219,7 +230,7 @@ struct ChartContentView: View {
                             )
                             .foregroundStyle(
                                 LinearGradient(
-                                    colors: [.green.opacity(0.15), .green.opacity(0.02)],
+                                    colors: [chartColor.opacity(0.15), chartColor.opacity(0.02)],
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
@@ -229,25 +240,25 @@ struct ChartContentView: View {
                                 x: .value("Date", dataPoint.date),
                                 y: .value("Reps", dataPoint.reps)
                             )
-                            .foregroundStyle(.green)
+                            .foregroundStyle(chartColor)
                         }
                     } else {
                         // Weight and reps: show both series
                         if hasSingleDataPoint {
-                            // Single data point: show blue dot for weight (use actual value, not normalized)
+                            // Single data point: show dot for weight (use actual value, not normalized)
                             PointMark(
                                 x: .value("Date", dataPoint.date),
                                 y: .value("Weight", dataPoint.weight)
                             )
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(chartColor)
                             .symbolSize(20)  // Smaller dot
 
-                            // Single data point: show green dot for reps (use actual value, not normalized)
+                            // Single data point: show dot for reps (use actual value, not normalized)
                             PointMark(
                                 x: .value("Date", dataPoint.date),
                                 y: .value("Reps", dataPoint.reps)
                             )
-                            .foregroundStyle(.green)
+                            .foregroundStyle(chartColor)
                             .symbolSize(20)  // Smaller dot
                         } else {
                             // Multiple points: show lines with gradient
@@ -260,27 +271,27 @@ struct ChartContentView: View {
                             )
                             .foregroundStyle(
                                 LinearGradient(
-                                    colors: [.blue.opacity(0.15), .blue.opacity(0.02)],
+                                    colors: [chartColor.opacity(0.15), chartColor.opacity(0.02)],
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
                             )
 
-                            // Weight line (solid blue)
+                            // Weight line (solid)
                             LineMark(
                                 x: .value("Date", dataPoint.date),
                                 y: .value("Weight", dataPoint.weight / weightMax),
                                 series: .value("Type", "Weight")
                             )
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(chartColor)
 
-                            // Reps line (dotted green)
+                            // Reps line (dotted)
                             LineMark(
                                 x: .value("Date", dataPoint.date),
                                 y: .value("Reps", Double(dataPoint.reps) / repsMax),
                                 series: .value("Type", "Reps")
                             )
-                            .foregroundStyle(.green)
+                            .foregroundStyle(chartColor)
                             .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
                         }
                     }
@@ -333,7 +344,7 @@ struct ChartContentView: View {
                             // Weight legend item
                             HStack(spacing: 4) {
                                 Circle()
-                                    .fill(.blue)
+                                    .fill(chartColor)
                                     .frame(width: 8, height: 8)
                                 Text("Weight")
                                     .font(.system(size: 9, design: .monospaced))
@@ -344,7 +355,7 @@ struct ChartContentView: View {
                         // Reps legend item
                         HStack(spacing: 4) {
                             Circle()
-                                .fill(.green)
+                                .fill(chartColor)
                                 .frame(width: 8, height: 8)
                             Text("Reps")
                                 .font(.system(size: 9, design: .monospaced))

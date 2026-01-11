@@ -93,6 +93,7 @@ struct ExerciseDetailView: View {
                     // Title
                     TextField("Title", text: $exerciseName)
                         .font(.system(.largeTitle, design: .monospaced))
+                        .fontWeight(.bold)
                         .textFieldStyle(.plain)
                         .focused($nameFocused)
                         .submitLabel(.done)

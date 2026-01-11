@@ -746,7 +746,6 @@ struct ChartCard: View {
 
     var body: some View {
         ChartContentView(exercise: exercise, sets: sets)
-            .padding(.horizontal, 8)
     }
 }
 

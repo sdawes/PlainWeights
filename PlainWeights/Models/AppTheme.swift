@@ -56,7 +56,16 @@ enum AppTheme: String, CaseIterable {
         case .light:
             return Color(.systemBackground)
         case .dark:
-            return Color(red: 0.1, green: 0.12, blue: 0.14) // Slightly lighter than bg
+            return Color(red: 0.07, green: 0.09, blue: 0.11) // #12171D
+        }
+    }
+
+    var borderColor: Color {
+        switch self {
+        case .light:
+            return Color(red: 0.85, green: 0.85, blue: 0.85) // Light gray
+        case .dark:
+            return Color(red: 0.12, green: 0.14, blue: 0.16) // #1E2329
         }
     }
 

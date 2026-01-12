@@ -40,6 +40,10 @@ extension Color {
     /// Dark grey for primary text and strong contrast
     static let pw_greyDark = Color(red: 0.35, green: 0.35, blue: 0.37)
 
+    // Accent colors
+    /// Cyan/turquoise for app branding
+    static let pw_cyan = Color(red: 0.36, green: 0.88, blue: 0.90) // #5CE1E6
+
     // Progress indicators
     /// Red for negative progress indicators
     static let pw_red = Color.red

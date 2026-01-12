@@ -68,6 +68,19 @@ struct FilteredExerciseListView: View {
 
     var body: some View {
         List {
+            // App title
+            Section {
+                HStack {
+                    Text(">_ Plainweights")
+                        .font(.jetBrainsMono(.title2, weight: .bold))
+                        .foregroundStyle(Color.pw_cyan)
+                    Spacer()
+                    RetroLifterView(pixelSize: 1.4, color: .pw_cyan)
+                }
+            }
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+
             // Exercises section
             if exercises.isEmpty {
                 Section {
@@ -107,8 +120,8 @@ struct FilteredExerciseListView: View {
                     }
                 } header: {
                     Text("EXERCISES")
-                        .font(.jetBrainsMono(.caption))
-                        .foregroundStyle(themeManager.currentTheme.secondaryTextColor)
+                        .font(.jetBrainsMono(.headline, weight: .bold))
+                        .foregroundStyle(.white)
                 }
             }
         }

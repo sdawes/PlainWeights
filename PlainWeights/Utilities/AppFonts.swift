@@ -2,21 +2,15 @@
 //  AppFonts.swift
 //  PlainWeights
 //
-//  JetBrains Mono font extension for consistent typography
+//  Centralized font configuration using JetBrains Mono
 //
 
 import SwiftUI
 
 extension Font {
+    /// Font weight options for JetBrains Mono
     enum JetBrainsWeight {
-        case thin
-        case extraLight
-        case light
-        case regular
-        case medium
-        case semiBold
-        case bold
-        case extraBold
+        case thin, extraLight, light, regular, medium, semiBold, bold, extraBold
 
         var fontName: String {
             switch self {
@@ -32,20 +26,19 @@ extension Font {
         }
     }
 
-    /// JetBrains Mono with custom size and weight
+    /// Create JetBrains Mono font with specific size
     static func jetBrainsMono(size: CGFloat, weight: JetBrainsWeight = .regular) -> Font {
         .custom(weight.fontName, size: size)
     }
 
-    /// JetBrains Mono mapped from SwiftUI TextStyle
+    /// Create JetBrains Mono font with text style (dynamic type support)
     static func jetBrainsMono(_ style: Font.TextStyle, weight: JetBrainsWeight = .regular) -> Font {
         .custom(weight.fontName, size: style.size, relativeTo: style)
     }
 }
 
-// MARK: - TextStyle Size Mapping
-
 extension Font.TextStyle {
+    /// Default sizes for each text style
     var size: CGFloat {
         switch self {
         case .largeTitle: return 34

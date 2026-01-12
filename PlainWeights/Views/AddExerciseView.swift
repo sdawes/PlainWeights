@@ -54,7 +54,7 @@ struct AddExerciseView: View {
                             .onChange(of: tagInput) { _, newValue in
                                 // When space is typed, convert text to tag
                                 if newValue.hasSuffix(" ") {
-                                    let trimmed = newValue.trimmingCharacters(in: .whitespaces)
+                                    let trimmed = newValue.trimmingCharacters(in: .whitespaces).lowercased()
                                     if !trimmed.isEmpty && !tags.contains(trimmed) {
                                         withAnimation {
                                             tags.append(trimmed)
@@ -87,7 +87,7 @@ struct AddExerciseView: View {
                     Button("Save") {
                         // Include any text still in the input field as a tag
                         var finalTags = tags
-                        let trimmedInput = tagInput.trimmingCharacters(in: .whitespaces)
+                        let trimmedInput = tagInput.trimmingCharacters(in: .whitespaces).lowercased()
                         if !trimmedInput.isEmpty && !finalTags.contains(trimmedInput) {
                             finalTags.append(trimmedInput)
                         }

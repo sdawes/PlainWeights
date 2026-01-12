@@ -56,7 +56,7 @@ enum AppTheme: String, CaseIterable {
         case .light:
             return Color(.systemBackground)
         case .dark:
-            return Color(red: 0.07, green: 0.09, blue: 0.11) // #12171D
+            return Color(red: 0.125, green: 0.145, blue: 0.188) // #202530 - RGB(32, 37, 48)
         }
     }
 
@@ -65,7 +65,7 @@ enum AppTheme: String, CaseIterable {
         case .light:
             return Color(red: 0.85, green: 0.85, blue: 0.85) // Light gray
         case .dark:
-            return Color(red: 0.12, green: 0.14, blue: 0.16) // #1E2329
+            return Color(red: 0.15, green: 0.165, blue: 0.21) // #262A36 - RGB(38, 42, 54)
         }
     }
 

@@ -70,13 +70,9 @@ struct FilteredExerciseListView: View {
         List {
             // App title
             Section {
-                HStack {
-                    Text(">_ Plainweights")
-                        .font(.jetBrainsMono(.title2, weight: .bold))
-                        .foregroundStyle(Color.pw_cyan)
-                    Spacer()
-                    RetroLifterView(pixelSize: 1.4, color: .pw_cyan)
-                }
+                Text(">_ Plainweights")
+                    .font(.jetBrainsMono(.title3, weight: .bold))
+                    .foregroundStyle(Color.pw_cyan)
             }
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
@@ -113,19 +109,17 @@ struct FilteredExerciseListView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparatorTint(
-                            themeManager.currentTheme == .dark ? .white.opacity(0.3) : nil
-                        )
+                        .listRowBackground(themeManager.currentTheme.cardBackgroundColor)
+                        .listRowSeparatorTint(themeManager.currentTheme.borderColor)
                     }
                 } header: {
                     Text("EXERCISES")
-                        .font(.jetBrainsMono(.headline, weight: .bold))
+                        .font(.jetBrainsMono(.subheadline))
                         .foregroundStyle(.white)
                 }
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())

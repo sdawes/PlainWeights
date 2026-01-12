@@ -85,30 +85,35 @@ struct ExerciseDetailView: View {
         _noteText = State(initialValue: exercise.note ?? "")
     }
 
+    // MARK: - Extracted Views
+
+    private var titleSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                TextField("Title", text: $exerciseName)
+                    .font(.jetBrainsMono(.title, weight: .semiBold))
+                    .foregroundStyle(Color.pw_cyan)
+                    .textFieldStyle(.plain)
+                    .focused($nameFocused)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        nameFocused = false
+                        updateExerciseName()
+                    }
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+            }
+            .padding(0)
+        }
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        .padding(.bottom, 0)
+    }
+
     var body: some View {
         List {
-            // Title and notes section (no card background)
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    // Title
-                    TextField("Title", text: $exerciseName)
-                        .font(.jetBrainsMono(.largeTitle, weight: .bold))
-                        .textFieldStyle(.plain)
-                        .focused($nameFocused)
-                        .submitLabel(.done)
-                        .onSubmit {
-                            nameFocused = false
-                            updateExerciseName()
-                        }
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(1)
-                }
-                .padding(0)
-            }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .padding(.bottom, 0)
+            titleSection
 
             // Target metrics cards (Previous session + Best Ever)
             Section {

@@ -20,7 +20,7 @@ struct WeightRepsInputContainer: View {
             // Weight input box
             VStack(alignment: .leading, spacing: 6) {
                 Text("Weight (kg)")
-                    .font(.system(.subheadline, design: .monospaced))
+                    .font(.jetBrainsMono(.subheadline))
                     .foregroundStyle(.secondary)
 
                 TextField("Enter weight (optional)", text: $weightText)
@@ -42,7 +42,7 @@ struct WeightRepsInputContainer: View {
             // Reps input box
             VStack(alignment: .leading, spacing: 6) {
                 Text("Reps")
-                    .font(.system(.subheadline, design: .monospaced))
+                    .font(.jetBrainsMono(.subheadline))
                     .foregroundStyle(.secondary)
 
                 TextField("Enter reps (optional)", text: $repsText)
@@ -136,9 +136,9 @@ struct SetOptionsToggles: View {
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.system(size: 12, design: .monospaced))
+                    .font(.jetBrainsMono(size: 12))
                 Text(text)
-                    .font(.system(.subheadline, design: .monospaced))
+                    .font(.jetBrainsMono(.subheadline))
                 Spacer()
             }
             .padding(.horizontal, 12)
@@ -187,9 +187,9 @@ struct AddSetButton: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: iconName)
-                    .font(.system(.body, design: .monospaced))
+                    .font(.jetBrainsMono(.body))
                 Text(title)
-                    .font(.system(.body, design: .monospaced))
+                    .font(.jetBrainsMono(.body))
             }
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)

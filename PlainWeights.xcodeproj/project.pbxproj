@@ -22,9 +22,22 @@
 		A1B2C3D4E5F60123456789AB /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1F36B10B2F1584400019B8FE /* Exceptions for "PlainWeights" folder in "PlainWeights" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1FB1C5052E50DA530053C668 /* PlainWeights */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		1FB1C5082E50DA530053C668 /* PlainWeights */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1F36B10B2F1584400019B8FE /* Exceptions for "PlainWeights" folder in "PlainWeights" target */,
+			);
 			path = PlainWeights;
 			sourceTree = "<group>";
 		};

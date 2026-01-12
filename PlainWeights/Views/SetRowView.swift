@@ -70,7 +70,7 @@ struct SetRowView: View {
             HStack {
                 // Weight × Reps
                 Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps) \(set.reps == 1 ? "rep" : "reps")")
-                    .font(.system(.body, design: .monospaced))
+                    .font(.jetBrainsMono(.body))
                     .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
                 // Badges
@@ -101,7 +101,7 @@ struct SetRowView: View {
                     deltaText(for: bestWeightDelta, suffix: "kg")
                     deltaText(for: bestRepsDelta, suffix: "reps")
                 }
-                .font(.system(.caption, design: .monospaced))
+                .font(.jetBrainsMono(.caption))
             }
         }
         .padding(0)
@@ -170,7 +170,7 @@ struct SetRowView: View {
                     .frame(width: 20, height: 20)
                     .overlay {
                         Text("PB")
-                            .font(.system(size: 9, design: .monospaced))
+                            .font(.jetBrainsMono(size: 9))
                             .foregroundStyle(.white)
                     }
             }
@@ -196,7 +196,7 @@ struct SetRowView: View {
                 .frame(width: 20, height: 20)
                 .overlay {
                     Image(systemName: "flame.fill")
-                        .font(.system(size: 10, design: .monospaced))
+                        .font(.jetBrainsMono(size: 10))
                         .foregroundStyle(.white)
                 }
         case "bonus":
@@ -205,7 +205,7 @@ struct SetRowView: View {
                 .frame(width: 20, height: 20)
                 .overlay {
                     Image(systemName: "star.fill")
-                        .font(.system(size: 10, design: .monospaced))
+                        .font(.jetBrainsMono(size: 10))
                         .foregroundStyle(.white)
                 }
         case "dropset":
@@ -214,7 +214,7 @@ struct SetRowView: View {
                 .frame(width: 20, height: 20)
                 .overlay {
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 10, design: .monospaced))
+                        .font(.jetBrainsMono(size: 10))
                         .foregroundStyle(.white)
                 }
         case "pause":
@@ -223,7 +223,7 @@ struct SetRowView: View {
                 .frame(width: 20, height: 20)
                 .overlay {
                     Image(systemName: "pause.fill")
-                        .font(.system(size: 10, design: .monospaced))
+                        .font(.jetBrainsMono(size: 10))
                         .foregroundStyle(.white)
                 }
         case "timed":
@@ -233,11 +233,11 @@ struct SetRowView: View {
                 .overlay {
                     if set.tempoSeconds > 0 {
                         Text("\(set.tempoSeconds)")
-                            .font(.system(size: 11, design: .monospaced))
+                            .font(.jetBrainsMono(size: 11))
                             .foregroundStyle(.white)
                     } else {
                         Image(systemName: "timer")
-                            .font(.system(size: 10, design: .monospaced))
+                            .font(.jetBrainsMono(size: 10))
                             .foregroundStyle(.white)
                     }
                 }
@@ -266,11 +266,11 @@ struct SetRowView: View {
     private func staticRestTimeView(seconds: Int) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "moon.zzz")
-                .font(.system(.caption2, design: .monospaced))
+                .font(.jetBrainsMono(.caption2))
                 .foregroundStyle(.secondary)
 
             Text(Formatters.formatDuration(Double(seconds)))
-                .font(.system(.caption2, design: .monospaced))
+                .font(.jetBrainsMono(.caption2))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         }
@@ -288,12 +288,12 @@ struct SetRowView: View {
 
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.jetBrainsMono(.caption2))
                         .foregroundStyle(color)
 
                     if elapsed >= 180 {
                         Text("> 3 mins")
-                            .font(.system(.caption2, design: .monospaced))
+                            .font(.jetBrainsMono(.caption2))
                             .foregroundStyle(color)
                             .onAppear {
                                 // Capture the expiry when timer hits 180s
@@ -301,7 +301,7 @@ struct SetRowView: View {
                             }
                     } else {
                         Text(Formatters.formatDuration(elapsed))
-                            .font(.system(.caption2, design: .monospaced))
+                            .font(.jetBrainsMono(.caption2))
                             .foregroundStyle(color)
                             .monospacedDigit()
                     }

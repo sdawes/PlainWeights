@@ -22,7 +22,7 @@ struct ExerciseListView: View {
                 navigationPath: $navigationPath
             )
             // Note: iOS 26+ automatically applies Liquid Glass styling to .searchable()
-            .searchable(text: $searchText, prompt: "Search by name or category")
+            .searchable(text: $searchText, prompt: "Search by name or tags")
             .navigationDestination(for: Exercise.self) { exercise in
                 ExerciseDetailView(exercise: exercise)
             }
@@ -83,14 +83,13 @@ struct FilteredExerciseListView: View {
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(exercise.name)
-                                    .font(.system(.headline, design: .monospaced))
-                                    .fontWeight(.bold)
+                                    .font(.jetBrainsMono(.headline, weight: .bold))
                                     .foregroundStyle(.primary)
                                 if !exercise.tags.isEmpty {
                                     TagPillsRow(tags: exercise.tags)
                                 }
                                 Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
-                                    .font(.system(.caption, design: .monospaced))
+                                    .font(.jetBrainsMono(.caption))
                                     .foregroundStyle(themeManager.currentTheme.tertiaryTextColor)
                             }
                         }
@@ -108,7 +107,7 @@ struct FilteredExerciseListView: View {
                     }
                 } header: {
                     Text("EXERCISES")
-                        .font(.system(.caption, design: .monospaced))
+                        .font(.jetBrainsMono(.caption))
                         .foregroundStyle(themeManager.currentTheme.secondaryTextColor)
                 }
             }

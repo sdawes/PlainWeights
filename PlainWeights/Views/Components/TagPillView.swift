@@ -32,7 +32,7 @@ struct TagPillView: View {
     var body: some View {
         HStack(spacing: 4) {
             Text(displayTag)
-                .font(.system(.caption, design: .monospaced))
+                .font(.jetBrainsMono(.caption))
                 .foregroundStyle(highlightText)
 
             if let onRemove = onRemove {

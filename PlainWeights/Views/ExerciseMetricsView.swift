@@ -45,7 +45,7 @@ struct HeroMetricView: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(headerLabel)
-                    .font(.system(.caption, design: .monospaced))
+                    .font(.jetBrainsMono(.caption))
                     .foregroundStyle(.white.opacity(0.7))
                     .textCase(.uppercase)
 
@@ -53,7 +53,7 @@ struct HeroMetricView: View {
 
                 if let date = date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.jetBrainsMono(.caption2))
                         .foregroundStyle(.white.opacity(0.5))
                 }
             }
@@ -61,10 +61,10 @@ struct HeroMetricView: View {
             // Hero metric: Weight (large) × Reps (smaller, lighter)
             HStack(alignment: .center, spacing: 4) {
                 Text("\(Formatters.formatWeight(weight)) kg")
-                    .font(.system(.largeTitle, design: .monospaced))
+                    .font(.jetBrainsMono(.largeTitle))
                     .foregroundStyle(.white)
                 Text("× \(reps) reps")
-                    .font(.system(.title2, design: .monospaced))
+                    .font(.jetBrainsMono(.title2))
                     .foregroundStyle(.white.opacity(0.7))
             }
 
@@ -73,7 +73,7 @@ struct HeroMetricView: View {
                 Text("\(Formatters.formatVolume(totalVolume)) kg")
                 Text("total weight")
             }
-            .font(.system(.subheadline, design: .monospaced))
+            .font(.jetBrainsMono(.subheadline))
             .foregroundStyle(.white.opacity(0.7))
         }
         .padding(20)
@@ -94,11 +94,11 @@ struct ProgressPillView: View {
         HStack(spacing: 6) {
             Image(systemName: direction == .up ? "arrow.up" :
                              direction == .down ? "arrow.down" : "minus")
-                .font(.system(.caption2, design: .monospaced))
+                .font(.jetBrainsMono(.caption2))
                 .foregroundStyle(.white)
 
             Text(text)
-                .font(.system(.caption, design: .monospaced))
+                .font(.jetBrainsMono(.caption))
                 .foregroundStyle(.white)
         }
         .padding(.horizontal, 12)
@@ -160,7 +160,7 @@ struct TargetMetricsSection: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(data.headerLabel)
-                    .font(.system(.caption, design: .monospaced))
+                    .font(.jetBrainsMono(.caption))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -168,7 +168,7 @@ struct TargetMetricsSection: View {
 
                 if let date = data.date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.jetBrainsMono(.caption2))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -176,10 +176,10 @@ struct TargetMetricsSection: View {
             // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.system(size: 38, design: .monospaced))
+                    .font(.jetBrainsMono(size: 38))
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
-                    .font(.system(.title2, design: .monospaced))
+                    .font(.jetBrainsMono(.title2))
                     .foregroundStyle(.secondary)
 
                 // Set indicator icons (matching ThisSetSection design)
@@ -189,7 +189,7 @@ struct TargetMetricsSection: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 6, design: .monospaced))
+                                .font(.jetBrainsMono(size: 6))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -200,7 +200,7 @@ struct TargetMetricsSection: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Image(systemName: "pause.fill")
-                                .font(.system(size: 6, design: .monospaced))
+                                .font(.jetBrainsMono(size: 6))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -212,11 +212,11 @@ struct TargetMetricsSection: View {
                         .overlay {
                             if data.tempoSeconds > 0 {
                                 Text("\(data.tempoSeconds)")
-                                    .font(.system(size: 7, design: .monospaced))
+                                    .font(.jetBrainsMono(size: 7))
                                     .foregroundStyle(.white)
                             } else {
                                 Image(systemName: "timer")
-                                    .font(.system(size: 6, design: .monospaced))
+                                    .font(.jetBrainsMono(size: 6))
                                     .foregroundStyle(.white)
                             }
                         }
@@ -228,7 +228,7 @@ struct TargetMetricsSection: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Text("PB")
-                                .font(.system(size: 5, design: .monospaced))
+                                .font(.jetBrainsMono(size: 5))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -239,7 +239,7 @@ struct TargetMetricsSection: View {
                 Text("\(Formatters.formatVolume(data.totalVolume)) kg")
                 Text("total weight")
             }
-            .font(.system(.subheadline, design: .monospaced))
+            .font(.jetBrainsMono(.subheadline))
             .foregroundStyle(.secondary)
             .padding(.top, 0)
         }
@@ -257,7 +257,7 @@ struct TargetMetricsSectionWithPicker: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(data.headerLabel)
-                    .font(.system(.caption, design: .monospaced))
+                    .font(.jetBrainsMono(.caption))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -265,7 +265,7 @@ struct TargetMetricsSectionWithPicker: View {
 
                 if let date = data.date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.jetBrainsMono(.caption2))
                         .foregroundStyle(.secondary)
                         .frame(width: 140, alignment: .trailing)  // Match picker width for alignment
                 }
@@ -274,10 +274,10 @@ struct TargetMetricsSectionWithPicker: View {
             // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.system(size: 38, design: .monospaced))
+                    .font(.jetBrainsMono(size: 38))
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
-                    .font(.system(.title2, design: .monospaced))
+                    .font(.jetBrainsMono(.title2))
                     .foregroundStyle(.secondary)
 
                 // Set indicator icons
@@ -287,7 +287,7 @@ struct TargetMetricsSectionWithPicker: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Image(systemName: "chevron.down")
-                                .font(.system(size: 6, design: .monospaced))
+                                .font(.jetBrainsMono(size: 6))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -298,7 +298,7 @@ struct TargetMetricsSectionWithPicker: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Image(systemName: "pause.fill")
-                                .font(.system(size: 6, design: .monospaced))
+                                .font(.jetBrainsMono(size: 6))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -310,11 +310,11 @@ struct TargetMetricsSectionWithPicker: View {
                         .overlay {
                             if data.tempoSeconds > 0 {
                                 Text("\(data.tempoSeconds)")
-                                    .font(.system(size: 7, design: .monospaced))
+                                    .font(.jetBrainsMono(size: 7))
                                     .foregroundStyle(.white)
                             } else {
                                 Image(systemName: "timer")
-                                    .font(.system(size: 6, design: .monospaced))
+                                    .font(.jetBrainsMono(size: 6))
                                     .foregroundStyle(.white)
                             }
                         }
@@ -326,7 +326,7 @@ struct TargetMetricsSectionWithPicker: View {
                         .frame(width: 12, height: 12)
                         .overlay {
                             Text("PB")
-                                .font(.system(size: 5, design: .monospaced))
+                                .font(.jetBrainsMono(size: 5))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -338,7 +338,7 @@ struct TargetMetricsSectionWithPicker: View {
                     Text("\(Formatters.formatVolume(data.totalVolume)) kg")
                     Text("total weight")
                 }
-                .font(.system(.subheadline, design: .monospaced))
+                .font(.jetBrainsMono(.subheadline))
                 .foregroundStyle(.secondary)
 
                 Spacer()
@@ -371,25 +371,25 @@ struct ThisSetSection: View {
                 // Header row with "THIS SET" and "vs last session"
                 HStack {
                     Text("THIS SET")
-                        .font(.system(.caption, design: .monospaced))
+                        .font(.jetBrainsMono(.caption))
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     Spacer()
 
                     Text(data.comparisonLabel)
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.jetBrainsMono(.caption2))
                         .foregroundStyle(.secondary)
                 }
 
                 // Set values
                 HStack(alignment: .center, spacing: 6) {
                     Text("\(data.weight) kg")
-                        .font(.system(.title3, design: .monospaced))
+                        .font(.jetBrainsMono(.title3))
                         .foregroundStyle(.primary)
 
                     Text("× \(data.reps) reps")
-                        .font(.system(.callout, design: .monospaced))
+                        .font(.jetBrainsMono(.callout))
                         .foregroundStyle(.secondary)
 
                     if data.isDropSet {
@@ -398,7 +398,7 @@ struct ThisSetSection: View {
                             .frame(width: 16, height: 16)
                             .overlay {
                                 Image(systemName: "chevron.down")
-                                    .font(.system(size: 8, design: .monospaced))
+                                    .font(.jetBrainsMono(size: 8))
                                     .foregroundStyle(.white)
                             }
                     }
@@ -409,7 +409,7 @@ struct ThisSetSection: View {
                             .frame(width: 16, height: 16)
                             .overlay {
                                 Image(systemName: "pause.fill")
-                                    .font(.system(size: 8, design: .monospaced))
+                                    .font(.jetBrainsMono(size: 8))
                                     .foregroundStyle(.white)
                             }
                     }
@@ -421,11 +421,11 @@ struct ThisSetSection: View {
                             .overlay {
                                 if data.tempoSeconds > 0 {
                                     Text("\(data.tempoSeconds)")
-                                        .font(.system(size: 9, design: .monospaced))
+                                        .font(.jetBrainsMono(size: 9))
                                         .foregroundStyle(.white)
                                 } else {
                                     Image(systemName: "timer")
-                                        .font(.system(size: 8, design: .monospaced))
+                                        .font(.jetBrainsMono(size: 8))
                                         .foregroundStyle(.white)
                                 }
                             }
@@ -437,7 +437,7 @@ struct ThisSetSection: View {
                             .frame(width: 16, height: 16)
                             .overlay {
                                 Text("PB")
-                                    .font(.system(size: 7, design: .monospaced))
+                                    .font(.jetBrainsMono(size: 7))
                                     .foregroundStyle(.white)
                             }
                     }
@@ -522,7 +522,7 @@ struct ProgressBarSection: View {
 
             // Progress percentage text (right-aligned)
             Text(data.progressText)
-                .font(.system(.caption, design: .monospaced))
+                .font(.jetBrainsMono(.caption))
                 .foregroundStyle(.secondary)
         }
     }
@@ -601,32 +601,32 @@ struct TargetMetricsCard: View {
                 // Header with date on right
                 HStack {
                     Text("Previous session")
-                        .font(.system(size: 14, design: .monospaced))
+                        .font(.jetBrainsMono(size: 14))
                         .fontWeight(.semibold)
                     Spacer()
                     if let lastInfo = progressState?.lastCompletedDayInfo {
                         Text(Formatters.formatRelativeDate(lastInfo.date))
-                            .font(.system(.caption2, design: .monospaced))
+                            .font(.jetBrainsMono(.caption2))
                             .foregroundStyle(.secondary)
                     }
                 }
 
                 if let lastInfo = progressState?.lastCompletedDayInfo {
                     Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg")
-                        .font(.system(size: 36, design: .monospaced))
+                        .font(.jetBrainsMono(size: 36))
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
 
                     Text("× \(lastInfo.maxWeightReps) reps")
-                        .font(.system(size: 14, design: .monospaced))
+                        .font(.jetBrainsMono(size: 14))
                         .foregroundStyle(.secondary)
 
                     Text("Total: \(Formatters.formatVolume(lastInfo.volume)) kg")
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.jetBrainsMono(size: 12))
                         .foregroundStyle(.secondary)
                 } else {
                     Text("Appears after next session")
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.jetBrainsMono(size: 12))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -636,12 +636,12 @@ struct TargetMetricsCard: View {
                 // Header with date on right
                 HStack {
                     Text("Best ever")
-                        .font(.system(size: 14, design: .monospaced))
+                        .font(.jetBrainsMono(size: 14))
                         .fontWeight(.semibold)
                     Spacer()
                     if let best = bestDayMetrics {
                         Text(Formatters.formatRelativeDate(best.date))
-                            .font(.system(.caption2, design: .monospaced))
+                            .font(.jetBrainsMono(.caption2))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -649,7 +649,7 @@ struct TargetMetricsCard: View {
                 if let best = bestDayMetrics {
                     HStack(spacing: 6) {
                         Text("\(Formatters.formatWeight(best.maxWeight)) kg")
-                            .font(.system(size: 36, design: .monospaced))
+                            .font(.jetBrainsMono(size: 36))
                             .lineLimit(1)
                             .minimumScaleFactor(0.6)
 
@@ -660,22 +660,22 @@ struct TargetMetricsCard: View {
                                 .frame(width: 16, height: 16)
                                 .overlay {
                                     Text("PB")
-                                        .font(.system(size: 7, design: .monospaced))
+                                        .font(.jetBrainsMono(size: 7))
                                         .foregroundStyle(.white)
                                 }
                         }
                     }
 
                     Text("× \(best.repsAtMaxWeight) reps")
-                        .font(.system(size: 14, design: .monospaced))
+                        .font(.jetBrainsMono(size: 14))
                         .foregroundStyle(.secondary)
 
                     Text("Total: \(Formatters.formatVolume(best.totalVolume)) kg")
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.jetBrainsMono(size: 12))
                         .foregroundStyle(.secondary)
                 } else {
                     Text("Appears after next session")
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.jetBrainsMono(size: 12))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -694,7 +694,7 @@ struct TargetMetricsCard: View {
                     .frame(width: 12, height: 12)
                     .overlay {
                         Image(systemName: "chevron.down")
-                            .font(.system(size: 6, design: .monospaced))
+                            .font(.jetBrainsMono(size: 6))
                             .foregroundStyle(.white)
                     }
             }
@@ -705,7 +705,7 @@ struct TargetMetricsCard: View {
                     .frame(width: 12, height: 12)
                     .overlay {
                         Image(systemName: "pause.fill")
-                            .font(.system(size: 6, design: .monospaced))
+                            .font(.jetBrainsMono(size: 6))
                             .foregroundStyle(.white)
                     }
             }
@@ -717,11 +717,11 @@ struct TargetMetricsCard: View {
                     .overlay {
                         if tempoSeconds > 0 {
                             Text("\(tempoSeconds)")
-                                .font(.system(size: 7, design: .monospaced))
+                                .font(.jetBrainsMono(size: 7))
                                 .foregroundStyle(.white)
                         } else {
                             Image(systemName: "timer")
-                                .font(.system(size: 6, design: .monospaced))
+                                .font(.jetBrainsMono(size: 6))
                                 .foregroundStyle(.white)
                         }
                     }
@@ -733,7 +733,7 @@ struct TargetMetricsCard: View {
                     .frame(width: 12, height: 12)
                     .overlay {
                         Text("PB")
-                            .font(.system(size: 5, design: .monospaced))
+                            .font(.jetBrainsMono(size: 5))
                             .foregroundStyle(.white)
                     }
             }

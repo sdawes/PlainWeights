@@ -99,7 +99,7 @@ struct EmptyChartPreview: View {
 
             // Text below chart
             Text("Your progress chart will appear here")
-                .font(.system(.caption, design: .monospaced))
+                .font(.jetBrainsMono(.caption))
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
@@ -117,11 +117,11 @@ struct ChartToggleButton: View {
         }) {
             HStack(spacing: 4) {
                 Text("Chart")
-                    .font(.system(.caption, design: .monospaced))
+                    .font(.jetBrainsMono(.caption))
                     .foregroundStyle(.blue)
 
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 10, design: .monospaced))
+                    .font(.jetBrainsMono(size: 10))
                     .foregroundStyle(.blue)
             }
             .id(isExpanded)
@@ -319,7 +319,7 @@ struct ChartContentView: View {
                                 .frame(width: 12, height: 12)
                                 .overlay {
                                     Text("PB")
-                                        .font(.system(size: 6, design: .monospaced))
+                                        .font(.jetBrainsMono(size: 6))
                                         .foregroundStyle(.white)
                                 }
                         }
@@ -350,7 +350,7 @@ struct ChartContentView: View {
                                     .fill(chartColor)
                                     .frame(width: 8, height: 8)
                                 Text("Weight")
-                                    .font(.system(size: 9, design: .monospaced))
+                                    .font(.jetBrainsMono(size: 9))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -361,7 +361,7 @@ struct ChartContentView: View {
                                 .fill(chartColor)
                                 .frame(width: 8, height: 8)
                             Text("Reps")
-                                .font(.system(size: 9, design: .monospaced))
+                                .font(.jetBrainsMono(size: 9))
                                 .foregroundStyle(.secondary)
                         }
                     }

@@ -92,8 +92,7 @@ struct ExerciseDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Title
                     TextField("Title", text: $exerciseName)
-                        .font(.system(.largeTitle, design: .monospaced))
-                        .fontWeight(.bold)
+                        .font(.jetBrainsMono(.largeTitle, weight: .bold))
                         .textFieldStyle(.plain)
                         .focused($nameFocused)
                         .submitLabel(.done)
@@ -137,7 +136,7 @@ struct ExerciseDetailView: View {
                 } header: {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("TODAY'S SETS")
-                            .font(.system(.footnote, design: .monospaced))
+                            .font(.jetBrainsMono(.footnote))
                             .textCase(.uppercase)
                             .foregroundStyle(.primary)
 
@@ -152,7 +151,7 @@ struct ExerciseDetailView: View {
                                 .foregroundStyle(targetColor)
                             Text(" target")
                         }
-                        .font(.system(.caption, design: .monospaced))
+                        .font(.jetBrainsMono(.caption))
                     }
                     .padding(0)
                 }
@@ -172,14 +171,14 @@ struct ExerciseDetailView: View {
                     } header: {
                         HStack {
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                .font(.system(.footnote, design: .monospaced))
+                                .font(.jetBrainsMono(.footnote))
                                 .textCase(.uppercase)
                                 .foregroundStyle(.primary)
 
                             Spacer()
 
                             Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
-                                .font(.system(.footnote, design: .monospaced))
+                                .font(.jetBrainsMono(.footnote))
                                 .textCase(.uppercase)
                                 .foregroundStyle(.primary)
                         }

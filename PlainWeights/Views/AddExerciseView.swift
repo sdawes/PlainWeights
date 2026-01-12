@@ -29,7 +29,7 @@ struct AddExerciseView: View {
             Form {
                 Section {
                     TextField("Exercise Name", text: $name)
-                        .font(.system(.body, design: .monospaced))
+                        .font(.jetBrainsMono(.body))
                         .listRowBackground(
                             themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
                         )
@@ -50,7 +50,7 @@ struct AddExerciseView: View {
 
                         // Tag input field
                         TextField("Add tags (space to add)", text: $tagInput)
-                            .font(.system(.body, design: .monospaced))
+                            .font(.jetBrainsMono(.body))
                             .onChange(of: tagInput) { _, newValue in
                                 // When space is typed, convert text to tag
                                 if newValue.hasSuffix(" ") {
@@ -76,7 +76,7 @@ struct AddExerciseView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Add Exercise")
-                        .font(.system(.headline, design: .monospaced))
+                        .font(.jetBrainsMono(.headline))
                 }
             }
             .toolbar {

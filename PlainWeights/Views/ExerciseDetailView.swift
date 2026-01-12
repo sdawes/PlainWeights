@@ -111,28 +111,11 @@ struct ExerciseDetailView: View {
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             .padding(.bottom, 0)
 
-            // Chart card
-            Section {
-                ChartCard(
-                    exercise: exercise,
-                    sets: sets
-                )
-                .padding(0)
-            }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-
             // Target metrics cards (Previous session + Best Ever)
             Section {
                 TargetMetricsCard(
                     exercise: exercise,
                     sets: sets
-                )
-                .padding(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5, 3]))
-                        .foregroundStyle(.white)
                 )
             }
             .listRowSeparator(.hidden)
@@ -241,6 +224,16 @@ struct ExerciseDetailView: View {
             .padding(.bottom, 20)
         }
         .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink {
+                    ExerciseChartDetailView(exercise: exercise, sets: Array(sets))
+                } label: {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.callout)
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingNotesSheet = true }) {
                     Image(systemName: "note.text")

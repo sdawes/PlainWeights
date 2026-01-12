@@ -594,99 +594,91 @@ struct TargetMetricsCard: View {
     }
 
     var body: some View {
-        // Two cards side by side
-        HStack(alignment: .top, spacing: 8) {
-            // Left card: Previous session
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Previous session")
-                    .font(.system(size: 14, design: .monospaced))
-                    .fontWeight(.semibold)
+        // Stacked vertical layout
+        VStack(alignment: .leading, spacing: 20) {
+            // Previous session
+            VStack(alignment: .leading, spacing: 4) {
+                // Header with date on right
+                HStack {
+                    Text("Previous session")
+                        .font(.system(size: 14, design: .monospaced))
+                        .fontWeight(.semibold)
+                    Spacer()
+                    if let lastInfo = progressState?.lastCompletedDayInfo {
+                        Text(Formatters.formatRelativeDate(lastInfo.date))
+                            .font(.system(.caption2, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
                 if let lastInfo = progressState?.lastCompletedDayInfo {
-                    // Weight × Reps
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 4) {
-                            Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg")
-                                .font(.system(size: 28, design: .monospaced))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.6)
-                            badgesView(
-                                isDropSet: lastInfo.isDropSet,
-                                isPauseAtTop: lastInfo.isPauseAtTop,
-                                isTimedSet: lastInfo.isTimedSet,
-                                tempoSeconds: lastInfo.tempoSeconds,
-                                isPB: lastInfo.isPB
-                            )
-                        }
-                        Text("× \(lastInfo.maxWeightReps) reps")
-                            .font(.system(size: 14, design: .monospaced))
-                    }
+                    Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg")
+                        .font(.system(size: 36, design: .monospaced))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
 
-                    // Total volume
-                    HStack(spacing: 0) {
-                        Text("Total: ")
-                        Text("\(Formatters.formatVolume(lastInfo.volume)) kg")
-                    }
-                    .font(.system(size: 12, design: .monospaced))
+                    Text("× \(lastInfo.maxWeightReps) reps")
+                        .font(.system(size: 14, design: .monospaced))
+                        .foregroundStyle(.secondary)
 
-                    // Date
-                    Text(Formatters.formatRelativeDate(lastInfo.date))
-                        .font(.system(.caption2, design: .monospaced))
-                        .foregroundStyle(.gray)
+                    Text("Total: \(Formatters.formatVolume(lastInfo.volume)) kg")
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundStyle(.secondary)
                 } else {
                     Text("Appears after next session")
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .padding(0)
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Right card: Best Ever
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Best Ever")
-                    .font(.system(size: 14, design: .monospaced))
-                    .fontWeight(.semibold)
+            // Best ever
+            VStack(alignment: .leading, spacing: 4) {
+                // Header with date on right
+                HStack {
+                    Text("Best ever")
+                        .font(.system(size: 14, design: .monospaced))
+                        .fontWeight(.semibold)
+                    Spacer()
+                    if let best = bestDayMetrics {
+                        Text(Formatters.formatRelativeDate(best.date))
+                            .font(.system(.caption2, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
                 if let best = bestDayMetrics {
-                    // Weight × Reps
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 4) {
-                            Text("\(Formatters.formatWeight(best.maxWeight)) kg")
-                                .font(.system(size: 28, design: .monospaced))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.6)
-                            badgesView(
-                                isDropSet: best.isDropSet,
-                                isPauseAtTop: best.isPauseAtTop,
-                                isTimedSet: best.isTimedSet,
-                                tempoSeconds: best.tempoSeconds,
-                                isPB: best.isPB
-                            )
+                    HStack(spacing: 6) {
+                        Text("\(Formatters.formatWeight(best.maxWeight)) kg")
+                            .font(.system(size: 36, design: .monospaced))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+
+                        // PB badge only
+                        if best.isPB {
+                            Circle()
+                                .fill(.purple)
+                                .frame(width: 16, height: 16)
+                                .overlay {
+                                    Text("PB")
+                                        .font(.system(size: 7, design: .monospaced))
+                                        .foregroundStyle(.white)
+                                }
                         }
-                        Text("× \(best.repsAtMaxWeight) reps")
-                            .font(.system(size: 14, design: .monospaced))
                     }
 
-                    // Total volume
-                    HStack(spacing: 0) {
-                        Text("Total: ")
-                        Text("\(Formatters.formatVolume(best.totalVolume)) kg")
-                    }
-                    .font(.system(size: 12, design: .monospaced))
+                    Text("× \(best.repsAtMaxWeight) reps")
+                        .font(.system(size: 14, design: .monospaced))
+                        .foregroundStyle(.secondary)
 
-                    // Date
-                    Text(Formatters.formatRelativeDate(best.date))
-                        .font(.system(.caption2, design: .monospaced))
-                        .foregroundStyle(.gray)
+                    Text("Total: \(Formatters.formatVolume(best.totalVolume)) kg")
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundStyle(.secondary)
                 } else {
                     Text("Appears after next session")
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .padding(0)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .foregroundStyle(themeManager.currentTheme.textColor)
     }

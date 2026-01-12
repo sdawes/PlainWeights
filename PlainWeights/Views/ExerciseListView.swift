@@ -120,6 +120,7 @@ struct FilteredExerciseListView: View {
             }
         }
         .listStyle(.plain)
+        .scrollIndicators(.hidden)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())

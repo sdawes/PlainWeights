@@ -19,11 +19,10 @@ struct ExerciseDetailView: View {
     @State private var addSetConfig: AddSetConfig?
 
     // Form state
-    @State private var exerciseName: String = ""
     @State private var noteText: String = ""
-    @FocusState private var nameFocused: Bool
     @State private var showingDeleteAlert = false
     @State private var showingNotesSheet = false
+    @State private var showingEditSheet = false
 
 
     // Cached data for performance
@@ -81,7 +80,6 @@ struct ExerciseDetailView: View {
             filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
             sort: [SortDescriptor(\.timestamp, order: .reverse)]
         )
-        _exerciseName = State(initialValue: exercise.name)
         _noteText = State(initialValue: exercise.note ?? "")
     }
 
@@ -89,21 +87,11 @@ struct ExerciseDetailView: View {
 
     private var titleSection: some View {
         Section {
-            VStack(alignment: .leading, spacing: 8) {
-                TextField("Title", text: $exerciseName)
-                    .font(.jetBrainsMono(.title, weight: .semiBold))
-                    .foregroundStyle(Color.pw_cyan)
-                    .textFieldStyle(.plain)
-                    .focused($nameFocused)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        nameFocused = false
-                        updateExerciseName()
-                    }
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-            }
-            .padding(0)
+            Text(exercise.name)
+                .font(.jetBrainsMono(.title, weight: .semiBold))
+                .foregroundStyle(Color.pw_cyan)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
         }
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
@@ -247,15 +235,16 @@ struct ExerciseDetailView: View {
                 .contentShape(Rectangle())
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                if nameFocused {
-                    Button("Done") {
-                        nameFocused = false
-                        updateExerciseName()
-                    }
-                } else {
-                    IconComponents.deleteIcon {
-                        showingDeleteAlert = true
-                    }
+                Button(action: { showingEditSheet = true }) {
+                    Image(systemName: "pencil")
+                        .font(.callout)
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                IconComponents.deleteIcon {
+                    showingDeleteAlert = true
                 }
             }
         }
@@ -285,6 +274,10 @@ struct ExerciseDetailView: View {
             )
             .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
+        .sheet(isPresented: $showingEditSheet) {
+            AddExerciseView(exerciseToEdit: exercise)
+                .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        }
         .onAppear {
             updateCachedData()
         }
@@ -307,20 +300,6 @@ struct ExerciseDetailView: View {
             try ExerciseSetService.deleteSet(set, context: context)
         } catch {
             print("Error deleting set: \(error)")
-        }
-    }
-
-    private func updateExerciseName() {
-        let trimmed = exerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, trimmed != exercise.name else { return }
-
-        exercise.name = trimmed
-        exercise.bumpUpdated()
-
-        do {
-            try context.save()
-        } catch {
-            print("Error updating exercise name: \(error)")
         }
     }
 

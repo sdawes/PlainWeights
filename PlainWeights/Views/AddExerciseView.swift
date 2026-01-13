@@ -18,11 +18,24 @@ struct AddExerciseView: View {
     @State private var tagInput = ""
     @FocusState private var tagFieldFocused: Bool
 
-    // Callback to notify parent when exercise is created
+    // Optional exercise for edit mode
+    let exerciseToEdit: Exercise?
+
+    // Callback to notify parent when exercise is created (only used in create mode)
     let onExerciseCreated: ((Exercise) -> Void)?
 
-    init(onExerciseCreated: ((Exercise) -> Void)? = nil) {
+    private var isEditMode: Bool { exerciseToEdit != nil }
+    private var navigationTitle: String { isEditMode ? "Edit Exercise" : "Add Exercise" }
+
+    init(exerciseToEdit: Exercise? = nil, onExerciseCreated: ((Exercise) -> Void)? = nil) {
+        self.exerciseToEdit = exerciseToEdit
         self.onExerciseCreated = onExerciseCreated
+
+        // Initialize state from exercise if editing
+        if let exercise = exerciseToEdit {
+            _name = State(initialValue: exercise.name)
+            _tags = State(initialValue: exercise.tags)
+        }
     }
 
     var body: some View {
@@ -85,11 +98,11 @@ struct AddExerciseView: View {
             }
             .scrollContentBackground(.hidden)
             .background(AnimatedGradientBackground())
-            .navigationTitle("Add Exercise")
+            .navigationTitle(navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Add Exercise")
+                    Text(navigationTitle)
                         .font(.jetBrainsMono(.headline))
                 }
             }
@@ -106,13 +119,20 @@ struct AddExerciseView: View {
                             finalTags.append(trimmedInput)
                         }
 
-                        let newExercise = Exercise(name: name, tags: finalTags)
-                        modelContext.insert(newExercise)
+                        if let exercise = exerciseToEdit {
+                            // Edit mode: update existing exercise
+                            exercise.name = name
+                            exercise.setTags(finalTags)
+                            exercise.bumpUpdated()
+                        } else {
+                            // Create mode: insert new exercise
+                            let newExercise = Exercise(name: name, tags: finalTags)
+                            modelContext.insert(newExercise)
+                            onExerciseCreated?(newExercise)
+                        }
+
                         try? modelContext.save()
                         dismiss()
-
-                        // Call callback with newly created exercise
-                        onExerciseCreated?(newExercise)
                     }
                     .disabled(name.isEmpty)
                 }

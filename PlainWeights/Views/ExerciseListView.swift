@@ -59,7 +59,7 @@ struct FilteredExerciseListView: View {
             _exercises = Query(
                 filter: #Predicate<Exercise> { exercise in
                     exercise.name.localizedStandardContains(searchText) ||
-                    exercise.tags.contains { $0.localizedStandardContains(searchText) }
+                    exercise.tagsSearchable.localizedStandardContains(searchText)
                 },
                 sort: [SortDescriptor(\.lastUpdated, order: .reverse)]
             )

@@ -16,6 +16,7 @@ struct AddExerciseView: View {
     @State private var name = ""
     @State private var tags: [String] = []
     @State private var tagInput = ""
+    @FocusState private var tagFieldFocused: Bool
 
     // Callback to notify parent when exercise is created
     let onExerciseCreated: ((Exercise) -> Void)?
@@ -49,8 +50,9 @@ struct AddExerciseView: View {
                         }
 
                         // Tag input field
-                        TextField("Add tags (space to add)", text: $tagInput)
+                        TextField("Add tags (space or enter to add)", text: $tagInput)
                             .font(.jetBrainsMono(.body))
+                            .focused($tagFieldFocused)
                             .onChange(of: tagInput) { _, newValue in
                                 // When space is typed, convert text to tag
                                 if newValue.hasSuffix(" ") {
@@ -62,6 +64,18 @@ struct AddExerciseView: View {
                                     }
                                     tagInput = ""
                                 }
+                            }
+                            .onSubmit {
+                                // When enter is pressed, convert text to tag
+                                let trimmed = tagInput.trimmingCharacters(in: .whitespaces).lowercased()
+                                if !trimmed.isEmpty && !tags.contains(trimmed) {
+                                    withAnimation {
+                                        tags.append(trimmed)
+                                    }
+                                }
+                                tagInput = ""
+                                // Keep focus on tag field for continuous entry
+                                tagFieldFocused = true
                             }
                     }
                     .listRowBackground(

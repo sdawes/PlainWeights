@@ -21,12 +21,13 @@ struct TagPillView: View {
         themeManager.currentTheme == .dark ? .black : .white
     }
 
-    // Truncate very long tags
+    // Truncate very long tags and ensure lowercase
     private var displayTag: String {
-        if tag.count > 20 {
-            return String(tag.prefix(17)) + "..."
+        let lowercased = tag.lowercased()
+        if lowercased.count > 20 {
+            return String(lowercased.prefix(17)) + "..."
         }
-        return tag
+        return lowercased
     }
 
     var body: some View {

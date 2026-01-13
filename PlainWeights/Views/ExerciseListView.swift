@@ -102,16 +102,18 @@ struct FilteredExerciseListView: View {
                 Section {
                     ForEach(exercises, id: \.persistentModelID) { exercise in
                         NavigationLink(value: exercise) {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
-                                    .font(.jetBrainsMono(.headline, weight: .bold))
+                                    .font(.jetBrainsMono(.headline, weight: .semiBold))
                                     .foregroundStyle(.primary)
                                 if !exercise.tags.isEmpty {
                                     TagPillsRow(tags: exercise.tags)
+                                        .padding(.top, 6)
                                 }
                                 Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
                                     .font(.jetBrainsMono(.caption))
                                     .foregroundStyle(themeManager.currentTheme.tertiaryTextColor)
+                                    .padding(.top, 10)
                             }
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -125,7 +127,7 @@ struct FilteredExerciseListView: View {
                             isVeryStale(exercise)
                                 ? Color(red: 16/255, green: 18/255, blue: 24/255)  // #101218 - black equivalent
                                 : isStale(exercise)
-                                    ? Color(red: 48/255, green: 32/255, blue: 37/255)  // #302025 - red equivalent
+                                    ? Color(red: 45/255, green: 25/255, blue: 30/255)  // #2d191e
                                     : themeManager.currentTheme.cardBackgroundColor
                         )
                         .listRowSeparatorTint(themeManager.currentTheme.borderColor)

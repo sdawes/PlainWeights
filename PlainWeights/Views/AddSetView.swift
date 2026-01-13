@@ -11,6 +11,7 @@ import SwiftData
 // MARK: - Weight and Reps Input Container
 
 struct WeightRepsInputContainer: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Binding var weightText: String
     @Binding var repsText: String
     @FocusState.Binding var focusedField: AddSetView.Field?
@@ -24,6 +25,7 @@ struct WeightRepsInputContainer: View {
                     .foregroundStyle(.secondary)
 
                 TextField("Enter weight (optional)", text: $weightText)
+                    .font(.jetBrainsMono(.body))
                     .keyboardType(.decimalPad)
                     .focused($focusedField, equals: .weight)
                     .submitLabel(.next)
@@ -31,10 +33,10 @@ struct WeightRepsInputContainer: View {
                         focusedField = .reps
                     }
                     .padding(16)
-                    .background(Color.white)
+                    .background(themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(focusedField == .weight ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .weight ? 2 : 1)
+                            .stroke(focusedField == .weight ? Color.blue : themeManager.currentTheme.borderColor, lineWidth: focusedField == .weight ? 2 : 1)
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -46,6 +48,7 @@ struct WeightRepsInputContainer: View {
                     .foregroundStyle(.secondary)
 
                 TextField("Enter reps (optional)", text: $repsText)
+                    .font(.jetBrainsMono(.body))
                     .keyboardType(.numberPad)
                     .focused($focusedField, equals: .reps)
                     .submitLabel(.done)
@@ -53,23 +56,28 @@ struct WeightRepsInputContainer: View {
                         focusedField = nil
                     }
                     .padding(16)
-                    .background(Color.white)
+                    .background(themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(focusedField == .reps ? Color.blue : Color.gray.opacity(0.3), lineWidth: focusedField == .reps ? 2 : 1)
+                            .stroke(focusedField == .reps ? Color.blue : themeManager.currentTheme.borderColor, lineWidth: focusedField == .reps ? 2 : 1)
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
         .padding(16)
-        .background(Color(.systemGray6))
+        .background(themeManager.currentTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
     }
 }
 
 // MARK: - Set Options Chips
 
 struct SetOptionsToggles: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Binding var isWarmUpSet: Bool
     @Binding var isBonusSet: Bool
     @Binding var isDropSet: Bool
@@ -117,8 +125,12 @@ struct SetOptionsToggles: View {
             Color.clear // Empty cell
         }
         .padding(12)
-        .background(Color(.systemGray6))
+        .background(themeManager.currentTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
         .alert("Maximum 2 options", isPresented: $showMaxWarning) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -144,7 +156,7 @@ struct SetOptionsToggles: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
-            .background(isSelected ? activeColor : Color(.systemGray5))
+            .background(isSelected ? activeColor : themeManager.currentTheme.borderColor)
             .foregroundStyle(isSelected ? .white : .secondary)
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
@@ -171,6 +183,7 @@ struct SetOptionsToggles: View {
 // MARK: - Add Set Button
 
 struct AddSetButton: View {
+    @Environment(ThemeManager.self) private var themeManager
     let action: () -> Void
     let isEnabled: Bool
     let title: String
@@ -187,15 +200,18 @@ struct AddSetButton: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: iconName)
-                    .font(.jetBrainsMono(.body))
+                    .font(.jetBrainsMono(.headline))
                 Text(title)
-                    .font(.jetBrainsMono(.body))
+                    .font(.jetBrainsMono(.headline))
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(isEnabled ? themeManager.currentTheme.textColor : .gray)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(isEnabled ? Color.blue : Color.gray)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.vertical, 12)
+            .overlay(
+                Rectangle()
+                    .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                    .foregroundStyle(isEnabled ? themeManager.currentTheme.textColor : .gray)
+            )
         }
         .buttonStyle(.plain)
         .contentShape(Rectangle())
@@ -280,7 +296,7 @@ struct AddSetView: View {
                 Spacer()
             }
             .padding(16)
-            .background(Color.white)
+            .background(AnimatedGradientBackground())
             .navigationTitle(setToEdit == nil ? "Add Set" : "Edit Set")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

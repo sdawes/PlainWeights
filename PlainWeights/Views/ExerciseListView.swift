@@ -66,6 +66,18 @@ struct FilteredExerciseListView: View {
         }
     }
 
+    /// Check if exercise hasn't been done in over a month
+    private func isStale(_ exercise: Exercise) -> Bool {
+        let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+        return exercise.lastUpdated < oneMonthAgo
+    }
+
+    /// Check if exercise hasn't been done in over two months
+    private func isVeryStale(_ exercise: Exercise) -> Bool {
+        let twoMonthsAgo = Calendar.current.date(byAdding: .month, value: -2, to: Date()) ?? Date()
+        return exercise.lastUpdated < twoMonthsAgo
+    }
+
     var body: some View {
         List {
             // App title
@@ -109,7 +121,13 @@ struct FilteredExerciseListView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
-                        .listRowBackground(themeManager.currentTheme.cardBackgroundColor)
+                        .listRowBackground(
+                            isVeryStale(exercise)
+                                ? Color(red: 16/255, green: 18/255, blue: 24/255)  // #101218 - black equivalent
+                                : isStale(exercise)
+                                    ? Color(red: 48/255, green: 32/255, blue: 37/255)  // #302025 - red equivalent
+                                    : themeManager.currentTheme.cardBackgroundColor
+                        )
                         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
                     }
                 } header: {

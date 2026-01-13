@@ -95,8 +95,6 @@ struct ExerciseDetailView: View {
         }
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
-        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-        .padding(.bottom, 0)
     }
 
     var body: some View {
@@ -109,6 +107,7 @@ struct ExerciseDetailView: View {
                     exercise: exercise,
                     sets: sets
                 )
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(16)
                 .background(themeManager.currentTheme.cardBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -202,7 +201,6 @@ struct ExerciseDetailView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.top, 0, for: .scrollContent)
-        .contentMargins(.horizontal, 16, for: .scrollContent)
         .overlay(alignment: .bottomTrailing) {
             Button(action: {
                 let lastWorkingSet = sets.first(where: { !$0.isWarmUp && !$0.isBonus })

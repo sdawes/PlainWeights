@@ -50,5 +50,8 @@ extension Color {
     /// Green for positive progress indicators (slightly darker than system green)
     static let pw_green = Color(red: 0.2, green: 0.78, blue: 0.35)
     /// Amber/gold for overflow/bonus progress beyond 100%
-    static let pw_amber = Color(red: 0.95, green: 0.66, blue: 0.11) // #f2a81d
+    static let pw_amber = Color(red: 237/255, green: 181/255, blue: 84/255) // RGB(237, 181, 84)
+
+    /// Bright green for reps display
+    static let pw_brightGreen = Color(red: 114/255, green: 224/255, blue: 129/255) // RGB(114, 224, 129)
 }

@@ -70,7 +70,7 @@ struct SetRowView: View {
             HStack {
                 // Weight × Reps
                 Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps) \(set.reps == 1 ? "rep" : "reps")")
-                    .font(.jetBrainsMono(.body))
+                    .font(.jetBrainsMono(.headline, weight: .semiBold))
                     .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
                 // Badges
@@ -109,8 +109,8 @@ struct SetRowView: View {
         .onTapGesture {
             onTap()
         }
-        .listRowBackground(Color.clear)
-        .listRowSeparator(.automatic)
+        .listRowBackground(themeManager.currentTheme.cardBackgroundColor)
+        .listRowSeparatorTint(themeManager.currentTheme.borderColor)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 onDelete()

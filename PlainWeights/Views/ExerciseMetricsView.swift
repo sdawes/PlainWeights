@@ -598,49 +598,122 @@ struct TargetMetricsCard: View {
         VStack(alignment: .leading, spacing: 20) {
             // Previous session
             VStack(alignment: .leading, spacing: 8) {
-                // Header with trophy icon
-                HStack(spacing: 6) {
-                    Image(systemName: "trophy.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Text("PREVIOUS SESSION")
-                        .font(.jetBrainsMono(.subheadline))
-                        .foregroundStyle(.secondary)
-                }
-
-                // Large weight value (hero metric)
-                if let lastInfo = progressState?.lastCompletedDayInfo {
-                    HStack(alignment: .lastTextBaseline, spacing: 0) {
-                        Text(Formatters.formatWeight(lastInfo.maxWeight))
-                            .font(.jetBrainsMono(size: 32))
-                            .fontWeight(.bold)
-                            .foregroundStyle(Color.pw_cyan)
-                        Text("kg")
-                            .font(.jetBrainsMono(size: 14))
+                // Header with trophy icon and date
+                HStack {
+                    HStack(spacing: 6) {
+                        Image(systemName: "trophy.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text("PREVIOUS SESSION")
+                            .font(.jetBrainsMono(.subheadline))
                             .foregroundStyle(.secondary)
                     }
 
-                    // Secondary details below
-                    Text("× \(lastInfo.maxWeightReps) reps")
-                        .font(.jetBrainsMono(size: 14))
-                        .foregroundStyle(.secondary)
+                    Spacer()
 
-                    Text("Total: \(Formatters.formatVolume(lastInfo.volume)) kg")
-                        .font(.jetBrainsMono(size: 12))
-                        .foregroundStyle(.secondary)
+                    if let lastInfo = progressState?.lastCompletedDayInfo {
+                        Text(Formatters.formatRelativeDate(lastInfo.date))
+                            .font(.jetBrainsMono(.subheadline))
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
-                    Text(Formatters.formatRelativeDate(lastInfo.date))
-                        .font(.jetBrainsMono(.caption2))
-                        .foregroundStyle(.secondary)
+                // Large weight, reps and total values (hero metrics)
+                if let lastInfo = progressState?.lastCompletedDayInfo {
+                    HStack(alignment: .lastTextBaseline) {
+                        // Weight
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text(Formatters.formatWeight(lastInfo.maxWeight))
+                                .font(.jetBrainsMono(size: 32))
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.pw_cyan)
+                                .lineLimit(1)
+                            Text("kg")
+                                .font(.jetBrainsMono(size: 14))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+
+                        Spacer()
+
+                        // Reps
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("\(lastInfo.maxWeightReps)")
+                                .font(.jetBrainsMono(size: 32))
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.pw_brightGreen)
+                                .lineLimit(1)
+                            Text("reps")
+                                .font(.jetBrainsMono(size: 14))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+
+                        Spacer()
+
+                        // Total
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text(Formatters.formatVolume(lastInfo.volume))
+                                .font(.jetBrainsMono(size: 32))
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.pw_amber)
+                                .lineLimit(1)
+                            Text("total kg")
+                                .font(.jetBrainsMono(size: 14))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+                    }
                 } else {
-                    HStack(alignment: .lastTextBaseline, spacing: 0) {
-                        Text("--")
-                            .font(.jetBrainsMono(size: 32))
-                            .fontWeight(.bold)
-                            .foregroundStyle(.secondary)
-                        Text("kg")
-                            .font(.jetBrainsMono(size: 14))
-                            .foregroundStyle(.secondary)
+                    HStack(alignment: .lastTextBaseline) {
+                        // Weight
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("--")
+                                .font(.jetBrainsMono(size: 32))
+                                .fontWeight(.bold)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                            Text("kg")
+                                .font(.jetBrainsMono(size: 14))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+
+                        Spacer()
+
+                        // Reps
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("--")
+                                .font(.jetBrainsMono(size: 32))
+                                .fontWeight(.bold)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                            Text("reps")
+                                .font(.jetBrainsMono(size: 14))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+
+                        Spacer()
+
+                        // Total
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text("--")
+                                .font(.jetBrainsMono(size: 32))
+                                .fontWeight(.bold)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                            Text("total kg")
+                                .font(.jetBrainsMono(size: 14))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
                     }
 
                     Text("Appears after next session")

@@ -196,12 +196,13 @@ struct ExerciseDetailView: View {
                 .listRowSeparator(.hidden)
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .listSectionSpacing(0)
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.top, 0, for: .scrollContent)
+        .contentMargins(.horizontal, 16, for: .scrollContent)
         .overlay(alignment: .bottomTrailing) {
             Button(action: {
                 let lastWorkingSet = sets.first(where: { !$0.isWarmUp && !$0.isBonus })

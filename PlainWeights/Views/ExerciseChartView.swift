@@ -94,7 +94,7 @@ struct EmptyChartPreview: View {
                     AxisTick()
                 }
             }
-            .frame(height: 100)
+            .frame(height: 200)
             .opacity(0.8)
 
             // Text below chart
@@ -338,7 +338,7 @@ struct ChartContentView: View {
                     }
                 }
                 .chartYScale(domain: .automatic(includesZero: false))
-                .frame(height: 100)
+                .frame(height: 200)
 
                 // Custom legend below chart (only for multi-point charts)
                 if !hasSingleDataPoint {

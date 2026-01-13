@@ -597,26 +597,30 @@ struct TargetMetricsCard: View {
         // Stacked vertical layout
         VStack(alignment: .leading, spacing: 20) {
             // Previous session
-            VStack(alignment: .leading, spacing: 4) {
-                // Header with date on right
-                HStack {
-                    Text("Previous session")
-                        .font(.jetBrainsMono(size: 14))
-                        .fontWeight(.semibold)
-                    Spacer()
-                    if let lastInfo = progressState?.lastCompletedDayInfo {
-                        Text(Formatters.formatRelativeDate(lastInfo.date))
-                            .font(.jetBrainsMono(.caption2))
-                            .foregroundStyle(.secondary)
-                    }
+            VStack(alignment: .leading, spacing: 8) {
+                // Header with trophy icon
+                HStack(spacing: 6) {
+                    Image(systemName: "trophy.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text("PREVIOUS SESSION")
+                        .font(.jetBrainsMono(.subheadline))
+                        .foregroundStyle(.secondary)
                 }
 
+                // Large weight value (hero metric)
                 if let lastInfo = progressState?.lastCompletedDayInfo {
-                    Text("\(Formatters.formatWeight(lastInfo.maxWeight)) kg")
-                        .font(.jetBrainsMono(size: 36))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
+                    HStack(alignment: .lastTextBaseline, spacing: 0) {
+                        Text(Formatters.formatWeight(lastInfo.maxWeight))
+                            .font(.jetBrainsMono(size: 32))
+                            .fontWeight(.bold)
+                            .foregroundStyle(Color.pw_cyan)
+                        Text("kg")
+                            .font(.jetBrainsMono(size: 14))
+                            .foregroundStyle(.secondary)
+                    }
 
+                    // Secondary details below
                     Text("× \(lastInfo.maxWeightReps) reps")
                         .font(.jetBrainsMono(size: 14))
                         .foregroundStyle(.secondary)
@@ -624,61 +628,29 @@ struct TargetMetricsCard: View {
                     Text("Total: \(Formatters.formatVolume(lastInfo.volume)) kg")
                         .font(.jetBrainsMono(size: 12))
                         .foregroundStyle(.secondary)
-                } else {
-                    Text("Appears after next session")
-                        .font(.jetBrainsMono(size: 12))
-                        .foregroundStyle(.secondary)
-                }
-            }
 
-            // Best ever
-            VStack(alignment: .leading, spacing: 4) {
-                // Header with date on right
-                HStack {
-                    Text("Best ever")
-                        .font(.jetBrainsMono(size: 14))
-                        .fontWeight(.semibold)
-                    Spacer()
-                    if let best = bestDayMetrics {
-                        Text(Formatters.formatRelativeDate(best.date))
-                            .font(.jetBrainsMono(.caption2))
+                    Text(Formatters.formatRelativeDate(lastInfo.date))
+                        .font(.jetBrainsMono(.caption2))
+                        .foregroundStyle(.secondary)
+                } else {
+                    HStack(alignment: .lastTextBaseline, spacing: 0) {
+                        Text("--")
+                            .font(.jetBrainsMono(size: 32))
+                            .fontWeight(.bold)
+                            .foregroundStyle(.secondary)
+                        Text("kg")
+                            .font(.jetBrainsMono(size: 14))
                             .foregroundStyle(.secondary)
                     }
-                }
 
-                if let best = bestDayMetrics {
-                    HStack(spacing: 6) {
-                        Text("\(Formatters.formatWeight(best.maxWeight)) kg")
-                            .font(.jetBrainsMono(size: 36))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-
-                        // PB badge only
-                        if best.isPB {
-                            Circle()
-                                .fill(.purple)
-                                .frame(width: 16, height: 16)
-                                .overlay {
-                                    Text("PB")
-                                        .font(.jetBrainsMono(size: 7))
-                                        .foregroundStyle(.white)
-                                }
-                        }
-                    }
-
-                    Text("× \(best.repsAtMaxWeight) reps")
-                        .font(.jetBrainsMono(size: 14))
-                        .foregroundStyle(.secondary)
-
-                    Text("Total: \(Formatters.formatVolume(best.totalVolume)) kg")
-                        .font(.jetBrainsMono(size: 12))
-                        .foregroundStyle(.secondary)
-                } else {
                     Text("Appears after next session")
                         .font(.jetBrainsMono(size: 12))
                         .foregroundStyle(.secondary)
                 }
             }
+
+            // Best ever - hidden for now, will be toggled in future
+            // Logic preserved in bestDayMetrics computed property
         }
         .foregroundStyle(themeManager.currentTheme.textColor)
     }

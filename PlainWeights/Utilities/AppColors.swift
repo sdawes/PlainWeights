@@ -42,7 +42,7 @@ extension Color {
 
     // Accent colors
     /// Cyan/turquoise for app branding
-    static let pw_cyan = Color(red: 0.36, green: 0.88, blue: 0.90) // #5CE1E6
+    static let pw_cyan = Color(red: 103/255, green: 222/255, blue: 251/255) // RGB(103, 222, 251)
 
     // Progress indicators
     /// Red for negative progress indicators

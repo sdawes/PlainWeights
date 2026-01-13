@@ -109,6 +109,13 @@ struct ExerciseDetailView: View {
                     exercise: exercise,
                     sets: sets
                 )
+                .padding(16)
+                .background(themeManager.currentTheme.cardBackgroundColor)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                )
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)

@@ -126,6 +126,7 @@ struct ExerciseDetailView: View {
                         let set = todaySets[index]
                         SetRowView(
                             set: set,
+                            setNumber: todaySets.count - index,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
                             allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
@@ -133,24 +134,18 @@ struct ExerciseDetailView: View {
                         )
                     }
                 } header: {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("TODAY'S SETS")
+                    HStack(spacing: 8) {
+                        Text("—")
+                            .foregroundStyle(.secondary)
+                        Text("TODAY")
                             .font(.jetBrainsMono(.footnote))
                             .textCase(.uppercase)
                             .foregroundStyle(.primary)
-
-                        // Running total
-                        HStack(spacing: 0) {
-                            Text("Total: ")
-                            Text("\(Formatters.formatVolume(todaysVolume)) kg · ")
-                            Text("\(percentOfBaseline)%")
-                                .foregroundStyle(baselineColor)
-                            Text(" baseline · ")
-                            Text("\(percentOfTarget)%")
-                                .foregroundStyle(targetColor)
-                            Text(" target")
-                        }
-                        .font(.jetBrainsMono(.caption))
+                        Text("|")
+                            .foregroundStyle(.secondary)
+                        Text(Date().formatted(.dateTime.weekday().day().month(.abbreviated)))
+                            .font(.jetBrainsMono(.footnote))
+                            .foregroundStyle(.primary)
                     }
                     .padding(0)
                 }
@@ -160,23 +155,20 @@ struct ExerciseDetailView: View {
             if !historicDayGroups.isEmpty {
                 ForEach(historicDayGroups, id: \.date) { dayGroup in
                     Section {
-                        ForEach(dayGroup.sets, id: \.persistentModelID) { set in
+                        ForEach(dayGroup.sets.indices, id: \.self) { index in
+                            let set = dayGroup.sets[index]
                             SetRowView(
                                 set: set,
+                                setNumber: dayGroup.sets.count - index,
                                 onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                                 onDelete: { deleteSet(set) }
                             )
                         }
                     } header: {
-                        HStack {
+                        HStack(spacing: 8) {
+                            Text("—")
+                                .foregroundStyle(.secondary)
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                .font(.jetBrainsMono(.footnote))
-                                .textCase(.uppercase)
-                                .foregroundStyle(.primary)
-
-                            Spacer()
-
-                            Text("\(Formatters.formatVolume(dayGroup.volume)) kg")
                                 .font(.jetBrainsMono(.footnote))
                                 .textCase(.uppercase)
                                 .foregroundStyle(.primary)

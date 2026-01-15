@@ -15,13 +15,15 @@ struct SetRowView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     let set: ExerciseSet
+    let setNumber: Int
     let onTap: () -> Void
     let onDelete: () -> Void
     let allSets: [ExerciseSet]?  // Pass sets array to calculate comparisons (nil = no comparison row)
     let showTimer: Bool  // Only show timer on most recent set
 
-    init(set: ExerciseSet, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false) {
+    init(set: ExerciseSet, setNumber: Int, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false) {
         self.set = set
+        self.setNumber = setNumber
         self.onTap = onTap
         self.onDelete = onDelete
         self.allSets = allSets
@@ -65,44 +67,27 @@ struct SetRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            // Row 1: Weight × Reps + Badges | Timer
-            HStack {
-                // Weight × Reps
-                Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps) \(set.reps == 1 ? "rep" : "reps")")
-                    .font(.jetBrainsMono(.headline, weight: .semiBold))
-                    .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+        HStack {
+            // Set number (01, 02, etc.)
+            Text(String(format: "%02d", setNumber))
+                .font(.jetBrainsMono(.headline))
+                .foregroundStyle(.secondary)
+                .frame(width: 28, alignment: .leading)
 
-                // Badges
-                badgesView
+            // Badges inline after number
+            badgesView
 
-                Spacer()
+            // Weight × Reps
+            Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
+                .font(.jetBrainsMono(.headline, weight: .semiBold))
+                .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
-                // Timer (only for today's sets with comparison data or when showTimer is true)
-                restTimeView
-            }
+            Spacer()
 
-            // Row 2: Prev and Best comparisons (only when we have historical data)
-            if hasComparisonData {
-                HStack(spacing: 4) {
-                    // Prev comparison
-                    Text("Previous:")
-                        .foregroundStyle(.secondary)
-                    deltaText(for: prevWeightDelta, suffix: "kg")
-                    deltaText(for: prevRepsDelta, suffix: "reps")
-
-                    Text("|")
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 4)
-
-                    // Best comparison
-                    Text("Best:")
-                        .foregroundStyle(.secondary)
-                    deltaText(for: bestWeightDelta, suffix: "kg")
-                    deltaText(for: bestRepsDelta, suffix: "reps")
-                }
-                .font(.jetBrainsMono(.caption))
-            }
+            // Timestamp (HH:mm)
+            Text(Formatters.formatTimeHM(set.timestamp))
+                .font(.jetBrainsMono(.headline))
+                .foregroundStyle(.secondary)
         }
         .padding(0)
         .contentShape(Rectangle())

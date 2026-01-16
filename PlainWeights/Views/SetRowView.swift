@@ -16,14 +16,18 @@ struct SetRowView: View {
     @Environment(ThemeManager.self) private var themeManager
     let set: ExerciseSet
     let setNumber: Int
+    let isFirst: Bool
+    let isLast: Bool
     let onTap: () -> Void
     let onDelete: () -> Void
     let allSets: [ExerciseSet]?  // Pass sets array to calculate comparisons (nil = no comparison row)
     let showTimer: Bool  // Only show timer on most recent set
 
-    init(set: ExerciseSet, setNumber: Int, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false) {
+    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false) {
         self.set = set
         self.setNumber = setNumber
+        self.isFirst = isFirst
+        self.isLast = isLast
         self.onTap = onTap
         self.onDelete = onDelete
         self.allSets = allSets
@@ -67,35 +71,47 @@ struct SetRowView: View {
     }
 
     var body: some View {
-        HStack {
-            // Set number (01, 02, etc.)
-            Text(String(format: "%02d", setNumber))
-                .font(.jetBrainsMono(.headline))
-                .foregroundStyle(.secondary)
-                .frame(width: 28, alignment: .leading)
+        HStack(spacing: 0) {
+            // Vertical line with top/bottom caps
+            Rectangle()
+                .fill(Color.secondary.opacity(0.3))
+                .frame(width: 1)
+                .padding(.top, isFirst ? 12 : 0)
+                .padding(.bottom, isLast ? 12 : 0)
 
-            // Badges inline after number
-            badgesView
+            // Content with vertical padding
+            HStack(spacing: 12) {
+                // Set number (01, 02, etc.)
+                Text(String(format: "%02d", setNumber))
+                    .font(.jetBrainsMono(.subheadline))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 28, alignment: .leading)
 
-            // Weight × Reps
-            Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
-                .font(.jetBrainsMono(.headline, weight: .semiBold))
-                .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                // Badges inline after number
+                badgesView
 
-            Spacer()
+                // Weight × Reps
+                Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
+                    .font(.jetBrainsMono(.headline, weight: .regular))
+                    .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
-            // Timestamp (HH:mm)
-            Text(Formatters.formatTimeHM(set.timestamp))
-                .font(.jetBrainsMono(.headline))
-                .foregroundStyle(.secondary)
+                Spacer()
+
+                // Timestamp (HH:mm)
+                Text(Formatters.formatTimeHM(set.timestamp))
+                    .font(.jetBrainsMono(.headline))
+                    .foregroundStyle(.primary)
+            }
+            .padding(.vertical, 12)
+            .padding(.leading, 8)
         }
-        .padding(0)
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
         }
-        .listRowBackground(themeManager.currentTheme.cardBackgroundColor)
-        .listRowSeparatorTint(themeManager.currentTheme.borderColor)
+        .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 16))
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 onDelete()

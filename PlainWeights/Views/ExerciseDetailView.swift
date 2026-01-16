@@ -127,6 +127,8 @@ struct ExerciseDetailView: View {
                         SetRowView(
                             set: set,
                             setNumber: todaySets.count - index,
+                            isFirst: index == 0,
+                            isLast: index == todaySets.count - 1,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
                             allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
@@ -135,17 +137,20 @@ struct ExerciseDetailView: View {
                     }
                 } header: {
                     HStack(spacing: 8) {
+                        Image(systemName: "chevron.down")
+                            .font(.caption)
+                            .foregroundStyle(Color.pw_cyan)
                         Text("—")
                             .foregroundStyle(.secondary)
                         Text("TODAY")
                             .font(.jetBrainsMono(.footnote))
                             .textCase(.uppercase)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.white)
                         Text("|")
                             .foregroundStyle(.secondary)
-                        Text(Date().formatted(.dateTime.weekday().day().month(.abbreviated)))
+                        Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
                             .font(.jetBrainsMono(.footnote))
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.white)
                     }
                     .padding(0)
                 }
@@ -153,25 +158,38 @@ struct ExerciseDetailView: View {
 
             // Historic sets: one section per day group
             if !historicDayGroups.isEmpty {
-                ForEach(historicDayGroups, id: \.date) { dayGroup in
+                ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
+                    let dayGroup = historicDayGroups[groupIndex]
                     Section {
                         ForEach(dayGroup.sets.indices, id: \.self) { index in
                             let set = dayGroup.sets[index]
                             SetRowView(
                                 set: set,
                                 setNumber: dayGroup.sets.count - index,
+                                isFirst: index == 0,
+                                isLast: index == dayGroup.sets.count - 1,
                                 onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                                 onDelete: { deleteSet(set) }
                             )
                         }
                     } header: {
                         HStack(spacing: 8) {
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                                .foregroundStyle(Color.pw_cyan)
                             Text("—")
                                 .foregroundStyle(.secondary)
+                            if groupIndex == 0 {
+                                Text("PREVIOUS")
+                                    .font(.jetBrainsMono(.footnote))
+                                    .textCase(.uppercase)
+                                    .foregroundStyle(.white)
+                                Text("|")
+                                    .foregroundStyle(.secondary)
+                            }
                             Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
                                 .font(.jetBrainsMono(.footnote))
-                                .textCase(.uppercase)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(.white)
                         }
                         .padding(0)
                     }

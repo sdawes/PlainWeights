@@ -72,44 +72,82 @@ struct SetRowView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Vertical line with top/bottom caps
+            // Col 1: Vertical line with top/bottom caps
             Rectangle()
                 .fill(Color.secondary.opacity(0.3))
                 .frame(width: 1)
                 .padding(.top, isFirst ? 12 : 0)
                 .padding(.bottom, isLast ? 12 : 0)
 
-            // Content with vertical padding
-            HStack(spacing: 12) {
-                // Set number (01, 02, etc.)
+            // Content columns
+            HStack(spacing: 0) {
+                // Col 2: Set number
                 Text(String(format: "%02d", setNumber))
                     .font(.jetBrainsMono(.subheadline))
                     .foregroundStyle(.secondary)
                     .frame(width: 28, alignment: .leading)
+                    .padding(.leading, 12)
 
-                // Badges inline after number
+                // Col 3: Badges (fixed width for up to 2 badges)
                 badgesView
+                    .frame(width: 50, alignment: .leading)
 
-                // Weight × Reps
-                Text("\(Formatters.formatWeight(set.weight)) kg × \(set.reps)")
+                // Col 4: Weight value
+                Text(Formatters.formatWeight(set.weight))
                     .font(.jetBrainsMono(.headline, weight: .regular))
                     .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                    .frame(width: 45, alignment: .trailing)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+
+                // Col 5: "kg ×" separator
+                Text(" kg × ")
+                    .font(.jetBrainsMono(.headline, weight: .regular))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+
+                // Col 6: Reps
+                Text("\(set.reps)")
+                    .font(.jetBrainsMono(.headline, weight: .regular))
+                    .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                    .frame(width: 25, alignment: .leading)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
                 Spacer()
 
-                // Timestamp (HH:mm)
+                // Col 7: Weight progression
+                if hasComparisonData {
+                    deltaText(for: prevWeightDelta, suffix: "kg")
+                        .font(.jetBrainsMono(.caption))
+                        .frame(width: 50, alignment: .trailing)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+
+                // Col 8: Reps progression
+                if hasComparisonData {
+                    deltaText(for: prevRepsDelta, suffix: "")
+                        .font(.jetBrainsMono(.caption))
+                        .frame(width: 35, alignment: .trailing)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+
+                // Col 9: Timestamp
                 Text(Formatters.formatTimeHM(set.timestamp))
                     .font(.jetBrainsMono(.headline))
                     .foregroundStyle(.primary)
+                    .frame(width: 55, alignment: .trailing)
+                    .lineLimit(1)
             }
             .padding(.vertical, 12)
-            .padding(.leading, 8)
         }
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
         }
-        .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 16))
+        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
         .listRowBackground(Color.clear)
         .listRowSeparator(.hidden)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {

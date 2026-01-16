@@ -19,7 +19,6 @@
 /* Begin PBXFileReference section */
 		1FB1C5062E50DA530053C668 /* PlainWeights.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlainWeights.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FB1C5142E50DA540053C668 /* PlainWeightsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlainWeightsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1B2C3D4E5F60123456789AB /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -64,7 +63,6 @@
 		1FB1C4FD2E50DA530053C668 = {
 			isa = PBXGroup;
 			children = (
-				A1B2C3D4E5F60123456789AB /* AGENTS.md */,
 				1FB1C5082E50DA530053C668 /* PlainWeights */,
 				1FB1C5072E50DA530053C668 /* Products */,
 			);

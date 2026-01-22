@@ -88,11 +88,7 @@ struct SetRowView: View {
                     .frame(width: 28, alignment: .leading)
                     .padding(.leading, 12)
 
-                // Col 3: Badges (fixed width for up to 2 badges)
-                badgesView
-                    .frame(width: 50, alignment: .leading)
-
-                // Col 4-6: Weight × Reps (baseline aligned)
+                // Col 3: Weight × Reps (baseline aligned)
                 HStack(alignment: .lastTextBaseline, spacing: 0) {
                     Text(Formatters.formatWeight(set.weight))
                         .font(.jetBrainsMono(.headline, weight: .regular))
@@ -101,7 +97,7 @@ struct SetRowView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
 
-                    Text("kg × ")
+                    Text(" kg × ")
                         .font(.jetBrainsMono(.caption))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -113,6 +109,7 @@ struct SetRowView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
+                .padding(.leading, 12)
 
                 Spacer()
 
@@ -133,6 +130,10 @@ struct SetRowView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
+
+                // Badges (immediately left of timestamp)
+                badgesView
+                    .frame(width: 50, alignment: .trailing)
 
                 // Col 9: Timestamp
                 Text(Formatters.formatTimeHM(set.timestamp))
@@ -169,10 +170,10 @@ struct SetRowView: View {
                 .foregroundStyle(.green)
         } else if intDelta < 0 {
             Text("\(intDelta) \(suffix)")
-                .foregroundStyle(.red)
+                .foregroundStyle(.pink)
         } else {
             Text("0 \(suffix)")
-                .foregroundStyle(.blue)
+                .foregroundStyle(.cyan)
         }
     }
 
@@ -183,10 +184,10 @@ struct SetRowView: View {
                 .foregroundStyle(.green)
         } else if delta < 0 {
             Text("\(delta) \(suffix)")
-                .foregroundStyle(.red)
+                .foregroundStyle(.pink)
         } else {
             Text("0 \(suffix)")
-                .foregroundStyle(.blue)
+                .foregroundStyle(.cyan)
         }
     }
 

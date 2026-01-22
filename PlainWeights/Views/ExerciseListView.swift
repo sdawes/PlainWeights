@@ -123,13 +123,7 @@ struct FilteredExerciseListView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
-                        .listRowBackground(
-                            isVeryStale(exercise)
-                                ? Color(red: 16/255, green: 18/255, blue: 24/255)  // #101218 - black equivalent
-                                : isStale(exercise)
-                                    ? Color(red: 45/255, green: 25/255, blue: 30/255)  // #2d191e
-                                    : themeManager.currentTheme.cardBackgroundColor
-                        )
+                        .listRowBackground(Color.clear)
                         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
                     }
                 } header: {

@@ -143,7 +143,7 @@ struct ExerciseDetailView: View {
                         Text("—")
                             .foregroundStyle(.secondary)
                         Text("TODAY")
-                            .font(.jetBrainsMono(.footnote))
+                            .font(.jetBrainsMono(.footnote, weight: .semiBold))
                             .textCase(.uppercase)
                             .foregroundStyle(.white)
                         Text("|")
@@ -181,7 +181,7 @@ struct ExerciseDetailView: View {
                                 .foregroundStyle(.secondary)
                             if groupIndex == 0 {
                                 Text("PREVIOUS")
-                                    .font(.jetBrainsMono(.footnote))
+                                    .font(.jetBrainsMono(.footnote, weight: .semiBold))
                                     .textCase(.uppercase)
                                     .foregroundStyle(.white)
                                 Text("|")

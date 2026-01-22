@@ -621,32 +621,25 @@ struct TargetMetricsCard: View {
                 // Large weight, reps and total values (hero metrics)
                 if let lastInfo = progressState?.lastCompletedDayInfo {
                     HStack(alignment: .lastTextBaseline) {
-                        // Weight
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                        // Weight × Reps
+                        HStack(alignment: .lastTextBaseline, spacing: 0) {
                             Text(Formatters.formatWeight(lastInfo.maxWeight))
                                 .font(.jetBrainsMono(size: 32))
                                 .fontWeight(.bold)
-                                .foregroundStyle(Color.pw_cyan)
+                                .foregroundStyle(.white)
                                 .lineLimit(1)
                             Text("kg")
                                 .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.white)
                                 .lineLimit(1)
-                        }
-                        .fixedSize(horizontal: true, vertical: false)
-
-                        Spacer()
-
-                        // Reps
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text(" × ")
+                                .font(.jetBrainsMono(size: 14))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
                             Text("\(lastInfo.maxWeightReps)")
                                 .font(.jetBrainsMono(size: 32))
                                 .fontWeight(.bold)
-                                .foregroundStyle(Color.pw_brightGreen)
-                                .lineLimit(1)
-                            Text("reps")
-                                .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.white)
                                 .lineLimit(1)
                         }
                         .fixedSize(horizontal: true, vertical: false)
@@ -658,7 +651,7 @@ struct TargetMetricsCard: View {
                             Text(Formatters.formatVolume(lastInfo.volume))
                                 .font(.jetBrainsMono(size: 32))
                                 .fontWeight(.bold)
-                                .foregroundStyle(Color.pw_amber)
+                                .foregroundStyle(.white)
                                 .lineLimit(1)
                             Text("total kg")
                                 .font(.jetBrainsMono(size: 14))
@@ -669,8 +662,8 @@ struct TargetMetricsCard: View {
                     }
                 } else {
                     HStack(alignment: .lastTextBaseline) {
-                        // Weight
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                        // Weight × Reps
+                        HStack(alignment: .lastTextBaseline, spacing: 0) {
                             Text("--")
                                 .font(.jetBrainsMono(size: 32))
                                 .fontWeight(.bold)
@@ -680,20 +673,13 @@ struct TargetMetricsCard: View {
                                 .font(.jetBrainsMono(size: 14))
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
-                        }
-                        .fixedSize(horizontal: true, vertical: false)
-
-                        Spacer()
-
-                        // Reps
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text(" × ")
+                                .font(.jetBrainsMono(size: 14))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
                             Text("--")
                                 .font(.jetBrainsMono(size: 32))
                                 .fontWeight(.bold)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Text("reps")
-                                .font(.jetBrainsMono(size: 14))
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }

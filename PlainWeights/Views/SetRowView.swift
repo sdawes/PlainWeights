@@ -92,27 +92,27 @@ struct SetRowView: View {
                 badgesView
                     .frame(width: 50, alignment: .leading)
 
-                // Col 4: Weight value
-                Text(Formatters.formatWeight(set.weight))
-                    .font(.jetBrainsMono(.headline, weight: .regular))
-                    .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                    .frame(width: 45, alignment: .trailing)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                // Col 4-6: Weight × Reps (baseline aligned)
+                HStack(alignment: .lastTextBaseline, spacing: 0) {
+                    Text(Formatters.formatWeight(set.weight))
+                        .font(.jetBrainsMono(.headline, weight: .regular))
+                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                        .frame(width: 45, alignment: .trailing)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
-                // Col 5: "kg ×" separator
-                Text(" kg × ")
-                    .font(.jetBrainsMono(.headline, weight: .regular))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                    Text("kg × ")
+                        .font(.jetBrainsMono(.caption))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
 
-                // Col 6: Reps
-                Text("\(set.reps)")
-                    .font(.jetBrainsMono(.headline, weight: .regular))
-                    .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                    .frame(width: 25, alignment: .leading)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    Text("\(set.reps)")
+                        .font(.jetBrainsMono(.headline, weight: .regular))
+                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                        .frame(width: 25, alignment: .leading)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
 
                 Spacer()
 
@@ -136,8 +136,8 @@ struct SetRowView: View {
 
                 // Col 9: Timestamp
                 Text(Formatters.formatTimeHM(set.timestamp))
-                    .font(.jetBrainsMono(.headline))
-                    .foregroundStyle(.primary)
+                    .font(.jetBrainsMono(.caption))
+                    .foregroundStyle(.secondary)
                     .frame(width: 55, alignment: .trailing)
                     .lineLimit(1)
             }

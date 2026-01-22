@@ -78,17 +78,22 @@ struct FilteredExerciseListView: View {
         return exercise.lastUpdated < twoMonthsAgo
     }
 
+    /// Get name opacity based on staleness
+    private func nameOpacity(for exercise: Exercise) -> Double {
+        if isVeryStale(exercise) { return 0.4 }
+        if isStale(exercise) { return 0.6 }
+        return 1.0
+    }
+
+    /// Get timestamp color based on staleness
+    private func timestampColor(for exercise: Exercise) -> Color {
+        if isVeryStale(exercise) { return .red }
+        if isStale(exercise) { return .orange }
+        return themeManager.currentTheme.tertiaryTextColor
+    }
+
     var body: some View {
         List {
-            // App title
-            Section {
-                Text(">_ Plainweights")
-                    .font(.jetBrainsMono(.title3, weight: .bold))
-                    .foregroundStyle(Color.pw_cyan)
-            }
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-
             // Exercises section
             if exercises.isEmpty {
                 Section {
@@ -98,21 +103,30 @@ struct FilteredExerciseListView: View {
                     )
                     .listRowBackground(Color.clear)
                 }
+                .listRowSeparator(.hidden)
             } else {
+                // App title (only shown when exercises exist)
+                Section {
+                    Text(">_ plainweights")
+                        .font(.jetBrainsMono(.title3, weight: .bold))
+                        .foregroundStyle(Color.pw_cyan)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
                 Section {
                     ForEach(exercises, id: \.persistentModelID) { exercise in
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
                                     .font(.jetBrainsMono(.headline, weight: .semiBold))
-                                    .foregroundStyle(.primary)
+                                    .opacity(nameOpacity(for: exercise))
                                 if !exercise.tags.isEmpty {
                                     TagPillsRow(tags: exercise.tags)
                                         .padding(.top, 6)
                                 }
                                 Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
                                     .font(.jetBrainsMono(.caption))
-                                    .foregroundStyle(themeManager.currentTheme.tertiaryTextColor)
+                                    .foregroundStyle(timestampColor(for: exercise))
                                     .padding(.top, 10)
                             }
                         }

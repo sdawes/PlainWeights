@@ -40,7 +40,9 @@ struct EmptyExercisesView: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .padding(.top, 24)
             }
+            .padding(.top, 40)
         } else {
             // Search returned no results
             ContentUnavailableView.search(text: searchText)

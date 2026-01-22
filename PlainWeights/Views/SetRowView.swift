@@ -204,14 +204,9 @@ struct SetRowView: View {
 
             // PB badge always rightmost when present
             if set.isPB {
-                Circle()
-                    .fill(.purple)
-                    .frame(width: 20, height: 20)
-                    .overlay {
-                        Text("PB")
-                            .font(.jetBrainsMono(size: 9))
-                            .foregroundStyle(.white)
-                    }
+                Image(systemName: "trophy.fill")
+                    .font(.jetBrainsMono(size: 14))
+                    .foregroundStyle(Color.pw_amber)
             }
         }
     }
@@ -230,56 +225,31 @@ struct SetRowView: View {
     private func badgeCircle(for badge: String) -> some View {
         switch badge {
         case "warmup":
-            Circle()
-                .fill(.orange)
-                .frame(width: 20, height: 20)
-                .overlay {
-                    Image(systemName: "flame.fill")
-                        .font(.jetBrainsMono(size: 10))
-                        .foregroundStyle(.white)
-                }
+            Image(systemName: "flame.fill")
+                .font(.jetBrainsMono(size: 14))
+                .foregroundStyle(.orange)
         case "bonus":
-            Circle()
-                .fill(.yellow)
-                .frame(width: 20, height: 20)
-                .overlay {
-                    Image(systemName: "star.fill")
-                        .font(.jetBrainsMono(size: 10))
-                        .foregroundStyle(.white)
-                }
+            Image(systemName: "star.fill")
+                .font(.jetBrainsMono(size: 14))
+                .foregroundStyle(.yellow)
         case "dropset":
-            Circle()
-                .fill(.teal)
-                .frame(width: 20, height: 20)
-                .overlay {
-                    Image(systemName: "chevron.down")
-                        .font(.jetBrainsMono(size: 10))
-                        .foregroundStyle(.white)
-                }
+            Image(systemName: "chevron.down.2")
+                .font(.jetBrainsMono(size: 14, weight: .bold))
+                .foregroundStyle(.cyan)
         case "pause":
-            Circle()
-                .fill(.pink)
-                .frame(width: 20, height: 20)
-                .overlay {
-                    Image(systemName: "pause.fill")
-                        .font(.jetBrainsMono(size: 10))
-                        .foregroundStyle(.white)
-                }
+            Image(systemName: "pause.fill")
+                .font(.jetBrainsMono(size: 14))
+                .foregroundStyle(.pink)
         case "timed":
-            Circle()
-                .fill(.black)
-                .frame(width: 20, height: 20)
-                .overlay {
-                    if set.tempoSeconds > 0 {
-                        Text("\(set.tempoSeconds)")
-                            .font(.jetBrainsMono(size: 11))
-                            .foregroundStyle(.white)
-                    } else {
-                        Image(systemName: "timer")
-                            .font(.jetBrainsMono(size: 10))
-                            .foregroundStyle(.white)
-                    }
-                }
+            if set.tempoSeconds > 0 {
+                Text("\(set.tempoSeconds)")
+                    .font(.jetBrainsMono(size: 14))
+                    .foregroundStyle(.secondary)
+            } else {
+                Image(systemName: "timer")
+                    .font(.jetBrainsMono(size: 14))
+                    .foregroundStyle(.secondary)
+            }
         default:
             EmptyView()
         }

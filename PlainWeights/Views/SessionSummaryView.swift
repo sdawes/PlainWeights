@@ -114,19 +114,14 @@ struct SessionSummaryView: View {
                 Divider()
                     .frame(height: 30)
 
-                // PB stat with purple styling
+                // PB stat with gold trophy
                 VStack(spacing: 2) {
                     HStack(spacing: 4) {
                         Text("\(pbCount)")
                             .font(.jetBrainsMono(.title3))
-                        Circle()
-                            .fill(.purple)
-                            .frame(width: 18, height: 18)
-                            .overlay {
-                                Text("PB")
-                                    .font(.jetBrainsMono(size: 8))
-                                    .foregroundStyle(.white)
-                            }
+                        Image(systemName: "trophy.fill")
+                            .font(.jetBrainsMono(size: 14))
+                            .foregroundStyle(Color.pw_amber)
                     }
                     Text(pbCount == 1 ? "PB" : "PBs")
                         .font(.jetBrainsMono(.caption))
@@ -174,14 +169,9 @@ struct SessionSummaryView: View {
                 Spacer()
 
                 if hasPB {
-                    Circle()
-                        .fill(.purple)
-                        .frame(width: 24, height: 24)
-                        .overlay {
-                            Text("PB")
-                                .font(.jetBrainsMono(size: 10))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "trophy.fill")
+                        .font(.jetBrainsMono(size: 14))
+                        .foregroundStyle(Color.pw_amber)
                 }
             }
 

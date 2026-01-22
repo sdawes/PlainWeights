@@ -184,53 +184,33 @@ struct TargetMetricsSection: View {
 
                 // Set indicator icons (matching ThisSetSection design)
                 if data.isDropSet {
-                    Circle()
-                        .fill(.teal)
-                        .frame(width: 12, height: 12)
-                        .overlay {
-                            Image(systemName: "chevron.down")
-                                .font(.jetBrainsMono(size: 6))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "chevron.down.2")
+                        .font(.jetBrainsMono(size: 10, weight: .bold))
+                        .foregroundStyle(.cyan)
                 }
 
                 if data.isPauseAtTop {
-                    Circle()
-                        .fill(.pink)
-                        .frame(width: 12, height: 12)
-                        .overlay {
-                            Image(systemName: "pause.fill")
-                                .font(.jetBrainsMono(size: 6))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "pause.fill")
+                        .font(.jetBrainsMono(size: 10))
+                        .foregroundStyle(.pink)
                 }
 
                 if data.isTimedSet {
-                    Circle()
-                        .fill(.black)
-                        .frame(width: 12, height: 12)
-                        .overlay {
-                            if data.tempoSeconds > 0 {
-                                Text("\(data.tempoSeconds)")
-                                    .font(.jetBrainsMono(size: 7))
-                                    .foregroundStyle(.white)
-                            } else {
-                                Image(systemName: "timer")
-                                    .font(.jetBrainsMono(size: 6))
-                                    .foregroundStyle(.white)
-                            }
-                        }
+                    if data.tempoSeconds > 0 {
+                        Text("\(data.tempoSeconds)")
+                            .font(.jetBrainsMono(size: 10))
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Image(systemName: "timer")
+                            .font(.jetBrainsMono(size: 10))
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 if data.isPB {
-                    Circle()
-                        .fill(.purple)
-                        .frame(width: 12, height: 12)
-                        .overlay {
-                            Text("PB")
-                                .font(.jetBrainsMono(size: 5))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "trophy.fill")
+                        .font(.jetBrainsMono(size: 10))
+                        .foregroundStyle(Color.pw_amber)
                 }
             }
 
@@ -282,53 +262,33 @@ struct TargetMetricsSectionWithPicker: View {
 
                 // Set indicator icons
                 if data.isDropSet {
-                    Circle()
-                        .fill(.teal)
-                        .frame(width: 12, height: 12)
-                        .overlay {
-                            Image(systemName: "chevron.down")
-                                .font(.jetBrainsMono(size: 6))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "chevron.down.2")
+                        .font(.jetBrainsMono(size: 10, weight: .bold))
+                        .foregroundStyle(.cyan)
                 }
 
                 if data.isPauseAtTop {
-                    Circle()
-                        .fill(.pink)
-                        .frame(width: 12, height: 12)
-                        .overlay {
-                            Image(systemName: "pause.fill")
-                                .font(.jetBrainsMono(size: 6))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "pause.fill")
+                        .font(.jetBrainsMono(size: 10))
+                        .foregroundStyle(.pink)
                 }
 
                 if data.isTimedSet {
-                    Circle()
-                        .fill(.black)
-                        .frame(width: 12, height: 12)
-                        .overlay {
-                            if data.tempoSeconds > 0 {
-                                Text("\(data.tempoSeconds)")
-                                    .font(.jetBrainsMono(size: 7))
-                                    .foregroundStyle(.white)
-                            } else {
-                                Image(systemName: "timer")
-                                    .font(.jetBrainsMono(size: 6))
-                                    .foregroundStyle(.white)
-                            }
-                        }
+                    if data.tempoSeconds > 0 {
+                        Text("\(data.tempoSeconds)")
+                            .font(.jetBrainsMono(size: 10))
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Image(systemName: "timer")
+                            .font(.jetBrainsMono(size: 10))
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 if data.isPB {
-                    Circle()
-                        .fill(.purple)
-                        .frame(width: 12, height: 12)
-                        .overlay {
-                            Text("PB")
-                                .font(.jetBrainsMono(size: 5))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "trophy.fill")
+                        .font(.jetBrainsMono(size: 10))
+                        .foregroundStyle(Color.pw_amber)
                 }
             }
 
@@ -393,53 +353,33 @@ struct ThisSetSection: View {
                         .foregroundStyle(.secondary)
 
                     if data.isDropSet {
-                        Circle()
-                            .fill(.teal)
-                            .frame(width: 16, height: 16)
-                            .overlay {
-                                Image(systemName: "chevron.down")
-                                    .font(.jetBrainsMono(size: 8))
-                                    .foregroundStyle(.white)
-                            }
+                        Image(systemName: "chevron.down.2")
+                            .font(.jetBrainsMono(size: 12, weight: .bold))
+                            .foregroundStyle(.cyan)
                     }
 
                     if data.isPauseAtTop {
-                        Circle()
-                            .fill(.pink)
-                            .frame(width: 16, height: 16)
-                            .overlay {
-                                Image(systemName: "pause.fill")
-                                    .font(.jetBrainsMono(size: 8))
-                                    .foregroundStyle(.white)
-                            }
+                        Image(systemName: "pause.fill")
+                            .font(.jetBrainsMono(size: 12))
+                            .foregroundStyle(.pink)
                     }
 
                     if data.isTimedSet {
-                        Circle()
-                            .fill(.black)
-                            .frame(width: 16, height: 16)
-                            .overlay {
-                                if data.tempoSeconds > 0 {
-                                    Text("\(data.tempoSeconds)")
-                                        .font(.jetBrainsMono(size: 9))
-                                        .foregroundStyle(.white)
-                                } else {
-                                    Image(systemName: "timer")
-                                        .font(.jetBrainsMono(size: 8))
-                                        .foregroundStyle(.white)
-                                }
-                            }
+                        if data.tempoSeconds > 0 {
+                            Text("\(data.tempoSeconds)")
+                                .font(.jetBrainsMono(size: 12))
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Image(systemName: "timer")
+                                .font(.jetBrainsMono(size: 12))
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
                     if data.isPB {
-                        Circle()
-                            .fill(.purple)
-                            .frame(width: 16, height: 16)
-                            .overlay {
-                                Text("PB")
-                                    .font(.jetBrainsMono(size: 7))
-                                    .foregroundStyle(.white)
-                            }
+                        Image(systemName: "trophy.fill")
+                            .font(.jetBrainsMono(size: 12))
+                            .foregroundStyle(Color.pw_amber)
                     }
                 }
             }
@@ -720,53 +660,33 @@ struct TargetMetricsCard: View {
     private func badgesView(isDropSet: Bool, isPauseAtTop: Bool, isTimedSet: Bool, tempoSeconds: Int, isPB: Bool) -> some View {
         HStack(spacing: 3) {
             if isDropSet {
-                Circle()
-                    .fill(.teal)
-                    .frame(width: 12, height: 12)
-                    .overlay {
-                        Image(systemName: "chevron.down")
-                            .font(.jetBrainsMono(size: 6))
-                            .foregroundStyle(.white)
-                    }
+                Image(systemName: "chevron.down.2")
+                    .font(.jetBrainsMono(size: 10, weight: .bold))
+                    .foregroundStyle(.cyan)
             }
 
             if isPauseAtTop {
-                Circle()
-                    .fill(.pink)
-                    .frame(width: 12, height: 12)
-                    .overlay {
-                        Image(systemName: "pause.fill")
-                            .font(.jetBrainsMono(size: 6))
-                            .foregroundStyle(.white)
-                    }
+                Image(systemName: "pause.fill")
+                    .font(.jetBrainsMono(size: 10))
+                    .foregroundStyle(.pink)
             }
 
             if isTimedSet {
-                Circle()
-                    .fill(.black)
-                    .frame(width: 12, height: 12)
-                    .overlay {
-                        if tempoSeconds > 0 {
-                            Text("\(tempoSeconds)")
-                                .font(.jetBrainsMono(size: 7))
-                                .foregroundStyle(.white)
-                        } else {
-                            Image(systemName: "timer")
-                                .font(.jetBrainsMono(size: 6))
-                                .foregroundStyle(.white)
-                        }
-                    }
+                if tempoSeconds > 0 {
+                    Text("\(tempoSeconds)")
+                        .font(.jetBrainsMono(size: 10))
+                        .foregroundStyle(.secondary)
+                } else {
+                    Image(systemName: "timer")
+                        .font(.jetBrainsMono(size: 10))
+                        .foregroundStyle(.secondary)
+                }
             }
 
             if isPB {
-                Circle()
-                    .fill(.purple)
-                    .frame(width: 12, height: 12)
-                    .overlay {
-                        Text("PB")
-                            .font(.jetBrainsMono(size: 5))
-                            .foregroundStyle(.white)
-                    }
+                Text("PB")
+                    .font(.jetBrainsMono(size: 10, weight: .bold))
+                    .foregroundStyle(.pink)
             }
         }
     }

@@ -136,23 +136,21 @@ struct ExerciseDetailView: View {
                         )
                     }
                 } header: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "chevron.down")
-                            .font(.caption)
-                            .foregroundStyle(Color.pw_cyan)
-                        Text("—")
-                            .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("TODAY")
-                            .font(.jetBrainsMono(.footnote, weight: .semiBold))
-                            .textCase(.uppercase)
+                            .font(.jetBrainsMono(.subheadline, weight: .semiBold))
                             .foregroundStyle(.white)
-                        Text("|")
-                            .foregroundStyle(.secondary)
-                        Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
-                            .font(.jetBrainsMono(.footnote))
-                            .foregroundStyle(.white)
+                        HStack(spacing: 8) {
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                                .foregroundStyle(Color.pw_cyan)
+                            Text("—")
+                                .foregroundStyle(.secondary)
+                            Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
+                                .font(.jetBrainsMono(.footnote))
+                                .foregroundStyle(.white)
+                        }
                     }
-                    .padding(0)
                 }
             }
 
@@ -173,25 +171,23 @@ struct ExerciseDetailView: View {
                             )
                         }
                     } header: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "chevron.down")
-                                .font(.caption)
-                                .foregroundStyle(Color.pw_cyan)
-                            Text("—")
-                                .foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 4) {
                             if groupIndex == 0 {
                                 Text("PREVIOUS")
-                                    .font(.jetBrainsMono(.footnote, weight: .semiBold))
-                                    .textCase(.uppercase)
+                                    .font(.jetBrainsMono(.subheadline, weight: .semiBold))
                                     .foregroundStyle(.white)
-                                Text("|")
-                                    .foregroundStyle(.secondary)
                             }
-                            Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                .font(.jetBrainsMono(.footnote))
-                                .foregroundStyle(.white)
+                            HStack(spacing: 8) {
+                                Image(systemName: "chevron.down")
+                                    .font(.caption)
+                                    .foregroundStyle(Color.pw_cyan)
+                                Text("—")
+                                    .foregroundStyle(.secondary)
+                                Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
+                                    .font(.jetBrainsMono(.footnote))
+                                    .foregroundStyle(.white)
+                            }
                         }
-                        .padding(0)
                     }
                 }
             }

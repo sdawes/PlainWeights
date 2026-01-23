@@ -15,59 +15,78 @@ enum AppTheme: String, CaseIterable {
         rawValue
     }
 
-    var backgroundColor: Color {
-        switch self {
-        case .light:
-            return Color(red: 0.96, green: 0.96, blue: 0.94) // Off-white
-        case .dark:
-            return Color(red: 0.05, green: 0.07, blue: 0.09) // Very dark navy
-        }
-    }
+    // MARK: - Text Colors
 
-    var textColor: Color {
+    var primaryText: Color {
         switch self {
         case .light:
             return .black
         case .dark:
-            return Color.white.opacity(0.87)
+            return Color.white.opacity(0.90)
         }
     }
 
-    var secondaryTextColor: Color {
+    var secondaryText: Color {
         switch self {
         case .light:
-            return Color(red: 0.4, green: 0.4, blue: 0.4) // Dark gray
+            return Color(red: 0.4, green: 0.4, blue: 0.4)
         case .dark:
             return Color.white.opacity(0.7)
         }
     }
 
-    var tertiaryTextColor: Color {
+    var tertiaryText: Color {
         switch self {
         case .light:
-            return Color(red: 0.5, green: 0.5, blue: 0.5) // Medium gray
+            return Color(red: 0.5, green: 0.5, blue: 0.5)
         case .dark:
             return Color.white.opacity(0.5)
         }
     }
 
-    var cardBackgroundColor: Color {
+    // MARK: - Background Colors
+
+    var background1: Color {
         switch self {
         case .light:
-            return Color(.systemBackground)
+            return Color(red: 0.97, green: 0.97, blue: 0.97)  // Neutral off-white
         case .dark:
-            return Color(red: 0.125, green: 0.145, blue: 0.188) // #202530 - RGB(32, 37, 48)
+            return Color(red: 0.05, green: 0.07, blue: 0.09)  // Dark navy
         }
     }
 
-    var borderColor: Color {
+    var background2: Color {
         switch self {
         case .light:
-            return Color(red: 0.85, green: 0.85, blue: 0.85) // Light gray
+            return .white
         case .dark:
-            return Color(red: 0.216, green: 0.235, blue: 0.294) // #373C4B - RGB(55, 60, 75)
+            return Color(red: 0.125, green: 0.145, blue: 0.188)  // Card navy (#202530)
         }
     }
+
+    // MARK: - Border Colors
+
+    var border: Color {
+        switch self {
+        case .light:
+            return Color(red: 0.85, green: 0.85, blue: 0.85)
+        case .dark:
+            return Color(red: 0.216, green: 0.235, blue: 0.294)  // #373C4B
+        }
+    }
+
+    // MARK: - Accent Colors
+
+    var accentCyan: Color {
+        switch self {
+        case .light:
+            return Color(red: 0.0, green: 0.5, blue: 0.6)  // Darker teal for light backgrounds
+        case .dark:
+            return Color(red: 103/255, green: 222/255, blue: 251/255)  // Bright cyan (#67DEFB)
+        }
+    }
+
+    // MARK: - Color Scheme
 
     var colorScheme: ColorScheme {
         switch self {
@@ -77,4 +96,13 @@ enum AppTheme: String, CaseIterable {
             return .dark
         }
     }
+
+    // MARK: - Legacy Compatibility (to be removed after migration)
+
+    var backgroundColor: Color { background1 }
+    var cardBackgroundColor: Color { background2 }
+    var textColor: Color { primaryText }
+    var secondaryTextColor: Color { secondaryText }
+    var tertiaryTextColor: Color { tertiaryText }
+    var borderColor: Color { border }
 }

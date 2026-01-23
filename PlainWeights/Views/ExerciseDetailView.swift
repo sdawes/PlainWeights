@@ -89,7 +89,7 @@ struct ExerciseDetailView: View {
         Section {
             Text(exercise.name)
                 .font(.jetBrainsMono(.title, weight: .semiBold))
-                .foregroundStyle(Color.pw_cyan)
+                .foregroundStyle(themeManager.currentTheme.accentCyan)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
         }
@@ -136,14 +136,14 @@ struct ExerciseDetailView: View {
                         )
                     }
                 } header: {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 10) {
                         Text("TODAY")
                             .font(.jetBrainsMono(.subheadline, weight: .semiBold))
                             .foregroundStyle(.white)
                         HStack(spacing: 8) {
                             Image(systemName: "chevron.down")
                                 .font(.caption)
-                                .foregroundStyle(Color.pw_cyan)
+                                .foregroundStyle(themeManager.currentTheme.accentCyan)
                             Text("—")
                                 .foregroundStyle(.secondary)
                             Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
@@ -171,7 +171,7 @@ struct ExerciseDetailView: View {
                             )
                         }
                     } header: {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 10) {
                             if groupIndex == 0 {
                                 Text("PREVIOUS")
                                     .font(.jetBrainsMono(.subheadline, weight: .semiBold))
@@ -180,7 +180,7 @@ struct ExerciseDetailView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "chevron.down")
                                     .font(.caption)
-                                    .foregroundStyle(Color.pw_cyan)
+                                    .foregroundStyle(themeManager.currentTheme.accentCyan)
                                 Text("—")
                                     .foregroundStyle(.secondary)
                                 Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))

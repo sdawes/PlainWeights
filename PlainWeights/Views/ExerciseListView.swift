@@ -109,7 +109,7 @@ struct FilteredExerciseListView: View {
                 Section {
                     Text(">_ plainweights")
                         .font(.jetBrainsMono(.title3, weight: .bold))
-                        .foregroundStyle(Color.pw_cyan)
+                        .foregroundStyle(themeManager.currentTheme.accentCyan)
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -119,6 +119,7 @@ struct FilteredExerciseListView: View {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
                                     .font(.jetBrainsMono(.headline, weight: .semiBold))
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
                                     .opacity(nameOpacity(for: exercise))
                                 if !exercise.tags.isEmpty {
                                     TagPillsRow(tags: exercise.tags)
@@ -140,10 +141,6 @@ struct FilteredExerciseListView: View {
                         .listRowBackground(Color.clear)
                         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
                     }
-                } header: {
-                    Text("EXERCISES")
-                        .font(.jetBrainsMono(.subheadline))
-                        .foregroundStyle(.white)
                 }
             }
         }

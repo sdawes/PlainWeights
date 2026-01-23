@@ -12,9 +12,9 @@ struct TagPillView: View {
     let tag: String
     var onRemove: (() -> Void)?
 
-    // Inverted colors: text is opposite of background
+    // Inverted colors: background uses theme primary, text is opposite
     private var highlightBackground: Color {
-        themeManager.currentTheme == .dark ? .white : .black
+        themeManager.currentTheme.primaryText
     }
 
     private var highlightText: Color {

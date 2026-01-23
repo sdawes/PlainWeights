@@ -77,7 +77,7 @@ enum AppTheme: String, CaseIterable {
 
     // MARK: - Accent Colors
 
-    var accentCyan: Color {
+    var accent: Color {
         switch self {
         case .light:
             return Color(red: 0.0, green: 0.5, blue: 0.6)  // Darker teal for light backgrounds

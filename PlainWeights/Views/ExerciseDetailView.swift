@@ -89,7 +89,7 @@ struct ExerciseDetailView: View {
         Section {
             Text(exercise.name)
                 .font(.jetBrainsMono(.title, weight: .semiBold))
-                .foregroundStyle(themeManager.currentTheme.accentCyan)
+                .foregroundStyle(themeManager.currentTheme.accent)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
         }
@@ -143,7 +143,7 @@ struct ExerciseDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "chevron.down")
                                 .font(.caption)
-                                .foregroundStyle(themeManager.currentTheme.accentCyan)
+                                .foregroundStyle(themeManager.currentTheme.accent)
                             Text("—")
                                 .foregroundStyle(.secondary)
                             Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
@@ -180,7 +180,7 @@ struct ExerciseDetailView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "chevron.down")
                                     .font(.caption)
-                                    .foregroundStyle(themeManager.currentTheme.accentCyan)
+                                    .foregroundStyle(themeManager.currentTheme.accent)
                                 Text("—")
                                     .foregroundStyle(.secondary)
                                 Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))

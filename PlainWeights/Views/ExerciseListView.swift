@@ -109,7 +109,7 @@ struct FilteredExerciseListView: View {
                 Section {
                     Text(">_ plainweights")
                         .font(.jetBrainsMono(.title3, weight: .bold))
-                        .foregroundStyle(themeManager.currentTheme.accentCyan)
+                        .foregroundStyle(themeManager.currentTheme.accent)
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)

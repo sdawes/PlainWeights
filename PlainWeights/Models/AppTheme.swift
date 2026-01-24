@@ -80,7 +80,7 @@ enum AppTheme: String, CaseIterable {
     var accent: Color {
         switch self {
         case .light:
-            return Color(red: 16/255, green: 61/255, blue: 176/255)  // #103DB0
+            return Color(red: 19/255, green: 133/255, blue: 236/255)  // #1385EC
         case .dark:
             return Color(red: 103/255, green: 222/255, blue: 251/255)  // Bright cyan (#67DEFB)
         }

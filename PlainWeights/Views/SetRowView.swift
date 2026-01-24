@@ -138,7 +138,7 @@ struct SetRowView: View {
                 // Col 9: Timestamp
                 Text(Formatters.formatTimeHM(set.timestamp))
                     .font(.jetBrainsMono(.caption))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(themeManager.currentTheme.tertiaryText)
                     .frame(width: 55, alignment: .trailing)
                     .lineLimit(1)
             }

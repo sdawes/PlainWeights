@@ -196,9 +196,18 @@ struct ExerciseDetailView: View {
             if sets.isEmpty {
                 Section {
                     Text("No sets yet")
+                        .font(.jetBrainsMono(.subheadline))
                         .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                                .foregroundStyle(themeManager.currentTheme.borderColor)
+                        )
                 }
                 .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
         }
         .listStyle(.plain)

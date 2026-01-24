@@ -33,13 +33,15 @@ struct EmptyExercisesView: View {
                         .foregroundStyle(themeManager.currentTheme.textColor)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 12)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                         .overlay(
-                            Rectangle()
-                                .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
                                 .foregroundStyle(themeManager.currentTheme.textColor)
                         )
                 }
                 .buttonStyle(.plain)
+                .contentShape(RoundedRectangle(cornerRadius: 10))
                 .padding(.top, 24)
             }
             .padding(.top, 40)

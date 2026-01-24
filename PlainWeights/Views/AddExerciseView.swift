@@ -44,6 +44,7 @@ struct AddExerciseView: View {
                 Section {
                     TextField("Exercise Name", text: $name)
                         .font(.jetBrainsMono(.body))
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
                         .listRowBackground(
                             themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
                         )
@@ -65,6 +66,7 @@ struct AddExerciseView: View {
                         // Tag input field
                         TextField("Add tags (space or enter to add)", text: $tagInput)
                             .font(.jetBrainsMono(.body))
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
                             .focused($tagFieldFocused)
                             .onChange(of: tagInput) { _, newValue in
                                 // When space is typed, convert text to tag

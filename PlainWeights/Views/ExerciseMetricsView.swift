@@ -538,28 +538,21 @@ struct TargetMetricsCard: View {
         VStack(alignment: .leading, spacing: 20) {
             // Previous session
             VStack(alignment: .leading, spacing: 8) {
-                // Header with trophy icon and date
-                HStack {
-                    HStack(spacing: 6) {
-                        Image(systemName: "trophy.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                if let lastInfo = progressState?.lastCompletedDayInfo {
+                    // Header with date
+                    HStack {
                         Text("PREVIOUS SESSION")
                             .font(.jetBrainsMono(.subheadline))
                             .foregroundStyle(.secondary)
-                    }
 
-                    Spacer()
+                        Spacer()
 
-                    if let lastInfo = progressState?.lastCompletedDayInfo {
                         Text(Formatters.formatRelativeDate(lastInfo.date))
-                            .font(.jetBrainsMono(.subheadline))
-                            .foregroundStyle(.secondary)
+                            .font(.jetBrainsMono(.caption))
+                            .foregroundStyle(themeManager.currentTheme.tertiaryText)
                     }
-                }
 
-                // Large weight, reps and total values (hero metrics)
-                if let lastInfo = progressState?.lastCompletedDayInfo {
+                    // Large weight, reps and total values (hero metrics)
                     HStack(alignment: .lastTextBaseline) {
                         // Weight × Reps
                         HStack(alignment: .lastTextBaseline, spacing: 0) {
@@ -570,14 +563,14 @@ struct TargetMetricsCard: View {
                                 .lineLimit(1)
                             Text(" kg")
                                 .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(themeManager.currentTheme.primaryText)
+                                .foregroundStyle(.secondary)
                                 .lineLimit(1)
                             Text(" × ")
                                 .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(themeManager.currentTheme.primaryText)
+                                .foregroundStyle(.secondary)
                                 .lineLimit(1)
                             Text("\(lastInfo.maxWeightReps)")
-                                .font(.jetBrainsMono(size: 32))
+                                .font(.jetBrainsMono(size: 20))
                                 .fontWeight(.bold)
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                                 .lineLimit(1)
@@ -589,62 +582,24 @@ struct TargetMetricsCard: View {
                         // Total
                         HStack(alignment: .lastTextBaseline, spacing: 4) {
                             Text(Formatters.formatVolume(lastInfo.volume))
-                                .font(.jetBrainsMono(size: 32))
+                                .font(.jetBrainsMono(size: 20))
                                 .fontWeight(.bold)
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                                 .lineLimit(1)
                             Text("total kg")
-                                .font(.jetBrainsMono(size: 14))
+                                .font(.jetBrainsMono(size: 12))
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }
                         .fixedSize(horizontal: true, vertical: false)
                     }
                 } else {
-                    HStack(alignment: .lastTextBaseline) {
-                        // Weight × Reps
-                        HStack(alignment: .lastTextBaseline, spacing: 0) {
-                            Text("--")
-                                .font(.jetBrainsMono(size: 32))
-                                .fontWeight(.bold)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Text(" kg")
-                                .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Text(" × ")
-                                .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Text("--")
-                                .font(.jetBrainsMono(size: 32))
-                                .fontWeight(.bold)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                        .fixedSize(horizontal: true, vertical: false)
-
-                        Spacer()
-
-                        // Total
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("--")
-                                .font(.jetBrainsMono(size: 32))
-                                .fontWeight(.bold)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Text("total kg")
-                                .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                        .fixedSize(horizontal: true, vertical: false)
-                    }
-
-                    Text("Appears after next session")
-                        .font(.jetBrainsMono(size: 12))
+                    Text("Previous session metrics will appear tomorrow")
+                        .font(.jetBrainsMono(.subheadline))
                         .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
                 }
             }
 

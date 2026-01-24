@@ -156,9 +156,14 @@ struct SetOptionsToggles: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
-            .background(isSelected ? activeColor : themeManager.currentTheme.borderColor)
+            .background(isSelected ? activeColor : Color.clear)
             .foregroundStyle(isSelected ? .white : .secondary)
             .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                    .foregroundStyle(isSelected ? Color.clear : themeManager.currentTheme.borderColor)
+            )
         }
         .buttonStyle(.plain)
         .contentShape(RoundedRectangle(cornerRadius: 10))
@@ -207,14 +212,15 @@ struct AddSetButton: View {
             .foregroundStyle(isEnabled ? themeManager.currentTheme.textColor : .gray)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(
-                Rectangle()
-                    .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                RoundedRectangle(cornerRadius: 10)
+                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
                     .foregroundStyle(isEnabled ? themeManager.currentTheme.textColor : .gray)
             )
         }
         .buttonStyle(.plain)
-        .contentShape(Rectangle())
+        .contentShape(RoundedRectangle(cornerRadius: 10))
         .disabled(!isEnabled)
         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }

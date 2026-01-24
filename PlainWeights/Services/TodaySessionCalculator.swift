@@ -59,4 +59,33 @@ enum TodaySessionCalculator {
         let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
         return workingSets.map { $0.reps }.max() ?? 0
     }
+
+    // MARK: - Session Duration
+
+    /// Get session start time (timestamp of first/oldest set today)
+    static func getSessionStartTime(from sets: [ExerciseSet]) -> Date? {
+        let todaySets = getTodaysSets(from: sets)
+        return todaySets.last?.timestamp  // Sets sorted newest first, .last is oldest
+    }
+
+    /// Get session end time (3 minutes after most recent set)
+    static func getSessionEndTime(from sets: [ExerciseSet]) -> Date? {
+        let todaySets = getTodaysSets(from: sets)
+        guard let lastSetTime = todaySets.first?.timestamp else { return nil }
+        return lastSetTime.addingTimeInterval(3 * 60)  // +3 minutes
+    }
+
+    /// Get session duration in minutes
+    static func getSessionDurationMinutes(from sets: [ExerciseSet]) -> Int? {
+        guard let start = getSessionStartTime(from: sets),
+              let end = getSessionEndTime(from: sets) else { return nil }
+        let duration = end.timeIntervalSince(start)
+        return max(0, Int(duration / 60))
+    }
+
+    /// Get today's total reps (sum of all sets)
+    static func getTodaysTotalReps(from sets: [ExerciseSet]) -> Int {
+        let todaySets = getTodaysSets(from: sets)
+        return todaySets.reduce(0) { $0 + $1.reps }
+    }
 }

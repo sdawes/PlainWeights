@@ -34,6 +34,16 @@ struct ExerciseDetailView: View {
         TodaySessionCalculator.getTodaysVolume(from: Array(sets))
     }
 
+    // Today's cumulative reps (sum of all sets today)
+    private var todaysTotalReps: Int {
+        TodaySessionCalculator.getTodaysTotalReps(from: Array(sets))
+    }
+
+    // Session duration in minutes
+    private var sessionDurationMinutes: Int? {
+        TodaySessionCalculator.getSessionDurationMinutes(from: Array(sets))
+    }
+
     // Last session volume (baseline) - returns 0 if no data
     private var lastSessionVolume: Double {
         LastSessionCalculator.getLastSessionVolume(from: Array(sets))
@@ -156,6 +166,20 @@ struct ExerciseDetailView: View {
                             Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
                                 .font(.appFont(.footnote))
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
+                            Spacer()
+                            HStack(spacing: 8) {
+                                Text("\(todaysTotalReps) reps")
+                                    .font(.appFont(.footnote))
+                                    .foregroundStyle(.secondary)
+                                if let mins = sessionDurationMinutes {
+                                    Text("|")
+                                        .font(.appFont(.footnote))
+                                        .foregroundStyle(.secondary)
+                                    Text("\(mins) min")
+                                        .font(.appFont(.footnote))
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     }
                 }

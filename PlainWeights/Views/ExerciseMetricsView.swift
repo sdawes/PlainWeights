@@ -586,7 +586,7 @@ struct TargetMetricsCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if let lastInfo = progressState?.lastCompletedDayInfo {
-                // Row 1: Header with date
+                // Row 1: Header (outside Grid for simplicity)
                 HStack {
                     Text("PREVIOUS SESSION")
                         .font(.appFont(.subheadline))
@@ -597,10 +597,11 @@ struct TargetMetricsCard: View {
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
 
-                // Row 2 & 3: Main values with progress stacked below (VStacks for column alignment)
-                HStack(alignment: .bottom, spacing: 0) {
-                    // Weight column (value + progress right-aligned)
-                    VStack(alignment: .trailing, spacing: 4) {
+                // Grid for values (ensures column alignment)
+                Grid(alignment: .leading, horizontalSpacing: 4, verticalSpacing: 4) {
+                    // Row 2: Main values
+                    GridRow(alignment: .lastTextBaseline) {
+                        // Col 1: Weight
                         HStack(alignment: .firstTextBaseline, spacing: 0) {
                             Text(Formatters.formatWeight(lastInfo.maxWeight))
                                 .font(.appFont(size: 32))
@@ -611,50 +612,58 @@ struct TargetMetricsCard: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        // Weight progress
-                        HStack(alignment: .firstTextBaseline, spacing: 0) {
-                            Text(weightDelta.map { $0 > 0 ? "+\(Int($0))" : "\(Int($0))" } ?? " ")
-                                .font(.appFont(size: 14))
-                                .fontWeight(.semibold)
-                                .foregroundStyle(weightProgressColor)
-                            Text("kg")
-                                .font(.appFont(size: 14))
-                                .foregroundStyle(weightProgressColor)
-                        }
-                        .opacity(weightDelta != nil ? 1 : 0)
-                    }
+                        // Col 2: ×
+                        Text("×")
+                            .font(.appFont(size: 14))
+                            .foregroundStyle(.secondary)
 
-                    // Multiply sign (aligned with main value baseline)
-                    Text(" × ")
-                        .font(.appFont(size: 14))
-                        .foregroundStyle(.secondary)
-
-                    // Reps column (value + progress right-aligned)
-                    VStack(alignment: .trailing, spacing: 4) {
+                        // Col 3: Reps
                         Text("\(lastInfo.maxWeightReps)")
                             .font(.appFont(size: 20))
                             .fontWeight(.bold)
                             .foregroundStyle(themeManager.currentTheme.primaryText)
 
-                        // Reps progress
-                        Text(repsDelta.map { $0 > 0 ? "+\($0)" : "\($0)" } ?? " ")
-                            .font(.appFont(size: 14))
-                            .fontWeight(.semibold)
-                            .foregroundStyle(repsProgressColor)
-                            .opacity(repsDelta != nil ? 1 : 0)
+                        // Col 4: Total (right-aligned)
+                        HStack(alignment: .firstTextBaseline, spacing: 0) {
+                            Spacer()
+                            Text(Formatters.formatVolume(lastInfo.volume))
+                                .font(.appFont(size: 12))
+                                .fontWeight(.bold)
+                                .foregroundStyle(themeManager.currentTheme.primaryText)
+                            Text(" total kg")
+                                .font(.appFont(size: 12))
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
-                    Spacer()
+                    // Row 3: Progress values (only if data exists)
+                    if weightDelta != nil || repsDelta != nil {
+                        GridRow(alignment: .firstTextBaseline) {
+                            // Col 1: Weight progress
+                            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                                Text(weightDelta.map { $0 > 0 ? "+\(Int($0))" : "\(Int($0))" } ?? "")
+                                    .font(.appFont(size: 14))
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(weightProgressColor)
+                                Text("kg")
+                                    .font(.appFont(size: 14))
+                                    .foregroundStyle(weightProgressColor)
+                            }
 
-                    // Total volume (aligned with main value baseline)
-                    HStack(alignment: .firstTextBaseline, spacing: 0) {
-                        Text(Formatters.formatVolume(lastInfo.volume))
-                            .font(.appFont(size: 12))
-                            .fontWeight(.bold)
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
-                        Text(" total kg")
-                            .font(.appFont(size: 12))
-                            .foregroundStyle(.secondary)
+                            // Col 2: × (invisible, maintains column)
+                            Text("×")
+                                .font(.appFont(size: 14))
+                                .foregroundStyle(.clear)
+
+                            // Col 3: Reps progress
+                            Text(repsDelta.map { $0 > 0 ? "+\($0)" : "\($0)" } ?? "")
+                                .font(.appFont(size: 14))
+                                .fontWeight(.semibold)
+                                .foregroundStyle(repsProgressColor)
+
+                            // Col 4: Empty
+                            Color.clear
+                        }
                     }
                 }
             } else {

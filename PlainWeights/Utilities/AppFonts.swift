@@ -47,9 +47,9 @@ extension Font {
         .custom(weight.fontName(for: AppFontFamily.primary), size: size)
     }
 
-    /// Create app font with text style (dynamic type support)
+    /// Create app font with text style (fixed size, ignores iOS Dynamic Type)
     static func appFont(_ style: Font.TextStyle, weight: AppFontWeight = .regular) -> Font {
-        .custom(weight.fontName(for: AppFontFamily.primary), size: style.size, relativeTo: style)
+        .custom(weight.fontName(for: AppFontFamily.primary), fixedSize: style.size)
     }
 }
 

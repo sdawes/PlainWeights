@@ -9,6 +9,17 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Custom Alignment for Target Metrics
+
+extension VerticalAlignment {
+    private struct MainValueBaseline: AlignmentID {
+        static func defaultValue(in context: ViewDimensions) -> CGFloat {
+            context[.firstTextBaseline]
+        }
+    }
+    static let mainValueBaseline = VerticalAlignment(MainValueBaseline.self)
+}
+
 // MARK: - Dashed Line Shapes
 
 /// Horizontal dashed line shape
@@ -573,96 +584,96 @@ struct TargetMetricsCard: View {
     }
 
     var body: some View {
-        // Stacked vertical layout
-        VStack(alignment: .leading, spacing: 20) {
-            // Previous session
-            VStack(alignment: .leading, spacing: 8) {
-                if let lastInfo = progressState?.lastCompletedDayInfo {
-                    // Header with date
-                    HStack {
-                        Text("PREVIOUS SESSION")
-                            .font(.appFont(.subheadline))
-                            .foregroundStyle(.secondary)
-
-                        Spacer()
-
-                        Text(Formatters.formatRelativeDate(lastInfo.date))
-                            .font(.appFont(.caption))
-                            .foregroundStyle(themeManager.currentTheme.tertiaryText)
-                    }
-
-                    // Large weight, reps and total values (hero metrics)
-                    HStack(alignment: .top) {
-                        // Weight × Reps with progress below
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(alignment: .lastTextBaseline, spacing: 0) {
-                                Text(Formatters.formatWeight(lastInfo.maxWeight))
-                                    .font(.appFont(size: 32))
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                                    .lineLimit(1)
-                                Text("kg")
-                                    .font(.appFont(size: 14))
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                Text(" × ")
-                                    .font(.appFont(size: 14))
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                Text("\(lastInfo.maxWeightReps)")
-                                    .font(.appFont(size: 20))
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                                    .lineLimit(1)
-                            }
-                            .fixedSize(horizontal: true, vertical: false)
-
-                            // Progress values below (only if today has sets)
-                            if let wDelta = weightDelta, let rDelta = repsDelta {
-                                HStack(spacing: 12) {
-                                    // Weight progress
-                                    Text(wDelta > 0 ? "+\(Int(wDelta))kg" : "\(Int(wDelta))kg")
-                                        .font(.appFont(.caption))
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(weightProgressColor)
-
-                                    // Reps progress
-                                    Text(rDelta > 0 ? "+\(rDelta)" : "\(rDelta)")
-                                        .font(.appFont(.caption))
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(repsProgressColor)
-                                }
-                            }
-                        }
-
-                        Spacer()
-
-                        // Total
-                        HStack(alignment: .lastTextBaseline, spacing: 0) {
-                            Text(Formatters.formatVolume(lastInfo.volume))
-                                .font(.appFont(size: 12))
-                                .fontWeight(.bold)
-                                .foregroundStyle(themeManager.currentTheme.primaryText)
-                                .lineLimit(1)
-                            Text(" total kg")
-                                .font(.appFont(size: 12))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                        .fixedSize(horizontal: true, vertical: false)
-                    }
-                } else {
-                    Text("Previous session metrics will appear tomorrow")
+        VStack(alignment: .leading, spacing: 12) {
+            if let lastInfo = progressState?.lastCompletedDayInfo {
+                // Row 1: Header with date
+                HStack {
+                    Text("PREVIOUS SESSION")
                         .font(.appFont(.subheadline))
                         .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                    Spacer()
+                    Text(Formatters.formatRelativeDate(lastInfo.date))
+                        .font(.appFont(.caption))
+                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
-            }
 
-            // Best ever - hidden for now, will be toggled in future
-            // Logic preserved in bestDayMetrics computed property
+                // Row 2: Main values using custom baseline alignment
+                HStack(alignment: .mainValueBaseline, spacing: 0) {
+                    // Weight value
+                    HStack(alignment: .firstTextBaseline, spacing: 0) {
+                        Text(Formatters.formatWeight(lastInfo.maxWeight))
+                            .font(.appFont(size: 32))
+                            .fontWeight(.bold)
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                        Text("kg")
+                            .font(.appFont(size: 14))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    // Multiply sign
+                    Text(" × ")
+                        .font(.appFont(size: 14))
+                        .foregroundStyle(.secondary)
+                        .alignmentGuide(.mainValueBaseline) { d in d[VerticalAlignment.center] + 4 }
+
+                    // Reps value
+                    Text("\(lastInfo.maxWeightReps)")
+                        .font(.appFont(size: 20))
+                        .fontWeight(.bold)
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                        .alignmentGuide(.mainValueBaseline) { d in d[.firstTextBaseline] }
+
+                    Spacer()
+
+                    // Total volume
+                    HStack(alignment: .firstTextBaseline, spacing: 0) {
+                        Text(Formatters.formatVolume(lastInfo.volume))
+                            .font(.appFont(size: 12))
+                            .fontWeight(.bold)
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                        Text(" total kg")
+                            .font(.appFont(size: 12))
+                            .foregroundStyle(.secondary)
+                    }
+                    .alignmentGuide(.mainValueBaseline) { d in d[.firstTextBaseline] }
+                }
+
+                // Row 3: Progress values (separate row, aligned under their columns)
+                HStack(spacing: 0) {
+                    // Weight progress - split into number + kg suffix (kg matches size 14 above)
+                    HStack(alignment: .firstTextBaseline, spacing: 0) {
+                        Text(weightDelta.map { $0 > 0 ? "+\(Int($0))" : "\(Int($0))" } ?? " ")
+                            .font(.appFont(.caption))
+                            .fontWeight(.semibold)
+                            .foregroundStyle(weightProgressColor)
+                        Text("kg")
+                            .font(.appFont(size: 14))
+                            .foregroundStyle(weightProgressColor)
+                    }
+                    .opacity(weightDelta != nil ? 1 : 0)
+
+                    // Spacer to push reps progress into position (approximate width of " × ")
+                    Text(" × ")
+                        .font(.appFont(size: 14))
+                        .foregroundStyle(.clear)
+
+                    // Reps progress - right aligned under reps value
+                    Text(repsDelta.map { $0 > 0 ? "+\($0)" : "\($0)" } ?? " ")
+                        .font(.appFont(.caption))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(repsProgressColor)
+                        .opacity(repsDelta != nil ? 1 : 0)
+
+                    Spacer()
+                }
+            } else {
+                Text("Previous session metrics will appear tomorrow")
+                    .font(.appFont(.subheadline))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
         }
         .foregroundStyle(themeManager.currentTheme.textColor)
     }

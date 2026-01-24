@@ -139,7 +139,7 @@ struct ExerciseDetailView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("TODAY")
                             .font(.jetBrainsMono(.subheadline, weight: .semiBold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
                         HStack(spacing: 8) {
                             Image(systemName: "chevron.down")
                                 .font(.caption)
@@ -148,7 +148,7 @@ struct ExerciseDetailView: View {
                                 .foregroundStyle(.secondary)
                             Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
                                 .font(.jetBrainsMono(.footnote))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(themeManager.currentTheme.primaryText)
                         }
                     }
                 }
@@ -175,7 +175,7 @@ struct ExerciseDetailView: View {
                             if groupIndex == 0 {
                                 Text("PREVIOUS")
                                     .font(.jetBrainsMono(.subheadline, weight: .semiBold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                             HStack(spacing: 8) {
                                 Image(systemName: "chevron.down")
@@ -185,7 +185,7 @@ struct ExerciseDetailView: View {
                                     .foregroundStyle(.secondary)
                                 Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
                                     .font(.jetBrainsMono(.footnote))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                         }
                     }

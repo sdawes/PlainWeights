@@ -99,7 +99,7 @@ struct EmptyChartPreview: View {
 
             // Text below chart
             Text("Your progress chart will appear here")
-                .font(.jetBrainsMono(.caption))
+                .font(.appFont(.caption))
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
@@ -117,11 +117,11 @@ struct ChartToggleButton: View {
         }) {
             HStack(spacing: 4) {
                 Text("Chart")
-                    .font(.jetBrainsMono(.caption))
+                    .font(.appFont(.caption))
                     .foregroundStyle(.blue)
 
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .font(.jetBrainsMono(size: 10))
+                    .font(.appFont(size: 10))
                     .foregroundStyle(.blue)
             }
             .id(isExpanded)
@@ -207,6 +207,11 @@ struct ChartContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Chart title
+            Text("Progress Chart")
+                .font(.appFont(.subheadline, weight: .semiBold))
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+
             if chartData.isEmpty {
                 // Empty state - ghost chart preview
                 EmptyChartPreview()
@@ -299,14 +304,14 @@ struct ChartContentView: View {
                         }
                     }
 
-                    // PB indicator: vertical line from top to bottom with badge at top
+                    // PB indicator: vertical line from top to bottom with trophy at top
                     if dataPoint.isPB {
                         // Vertical line extending from top to bottom of chart
                         RuleMark(x: .value("PB Date", dataPoint.date))
-                            .foregroundStyle(.purple.opacity(0.3))
+                            .foregroundStyle(Color.pw_amber.opacity(0.5))
                             .lineStyle(StrokeStyle(lineWidth: 1))
 
-                        // PB badge at top (positioned using invisible point)
+                        // Trophy icon at top (positioned using invisible point)
                         PointMark(
                             x: .value("Date", dataPoint.date),
                             y: .value("PB", exerciseChartType == .repsOnly ? Double(dataPoint.reps) :
@@ -314,14 +319,9 @@ struct ChartContentView: View {
                         )
                         .opacity(0)  // Invisible point, just for annotation positioning
                         .annotation(position: .top, spacing: 4) {
-                            Circle()
-                                .fill(.purple)
-                                .frame(width: 12, height: 12)
-                                .overlay {
-                                    Text("PB")
-                                        .font(.jetBrainsMono(size: 6))
-                                        .foregroundStyle(.white)
-                                }
+                            Image(systemName: "trophy.fill")
+                                .font(.system(size: 12))
+                                .foregroundStyle(Color.pw_amber)
                         }
                     }
                 }
@@ -350,7 +350,7 @@ struct ChartContentView: View {
                                     .fill(chartColor)
                                     .frame(width: 8, height: 8)
                                 Text("Weight")
-                                    .font(.jetBrainsMono(size: 9))
+                                    .font(.appFont(size: 9))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -361,7 +361,7 @@ struct ChartContentView: View {
                                 .fill(chartColor)
                                 .frame(width: 8, height: 8)
                             Text("Reps")
-                                .font(.jetBrainsMono(size: 9))
+                                .font(.appFont(size: 9))
                                 .foregroundStyle(.secondary)
                         }
                     }

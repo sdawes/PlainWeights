@@ -83,7 +83,7 @@ struct SetRowView: View {
             HStack(spacing: 0) {
                 // Col 2: Set number
                 Text(String(format: "%02d", setNumber))
-                    .font(.jetBrainsMono(.subheadline))
+                    .font(.appFont(.subheadline))
                     .foregroundStyle(.secondary)
                     .frame(width: 28, alignment: .leading)
                     .padding(.leading, 12)
@@ -91,19 +91,19 @@ struct SetRowView: View {
                 // Col 3: Weight × Reps (baseline aligned)
                 HStack(alignment: .lastTextBaseline, spacing: 0) {
                     Text(Formatters.formatWeight(set.weight))
-                        .font(.jetBrainsMono(.headline, weight: .regular))
+                        .font(.appFont(.headline, weight: .regular))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .frame(width: 45, alignment: .trailing)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
 
-                    Text(" kg × ")
-                        .font(.jetBrainsMono(.caption))
+                    Text("kg × ")
+                        .font(.appFont(.caption))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
 
                     Text("\(set.reps)")
-                        .font(.jetBrainsMono(.headline, weight: .regular))
+                        .font(.appFont(.headline, weight: .regular))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .frame(width: 25, alignment: .leading)
                         .lineLimit(1)
@@ -116,7 +116,7 @@ struct SetRowView: View {
                 // Col 7: Weight progression
                 if hasComparisonData {
                     deltaText(for: prevWeightDelta, suffix: "kg")
-                        .font(.jetBrainsMono(.caption))
+                        .font(.appFont(.caption))
                         .frame(width: 50, alignment: .trailing)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -125,20 +125,18 @@ struct SetRowView: View {
                 // Col 8: Reps progression
                 if hasComparisonData {
                     deltaText(for: prevRepsDelta, suffix: "")
-                        .font(.jetBrainsMono(.caption))
+                        .font(.appFont(.caption))
                         .frame(width: 35, alignment: .trailing)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
 
-                // Badges (immediately left of timestamp)
+                // Badges (immediately left of timer/timestamp)
                 badgesView
                     .frame(width: 50, alignment: .trailing)
 
-                // Col 9: Timestamp
-                Text(Formatters.formatTimeHM(set.timestamp))
-                    .font(.jetBrainsMono(.caption))
-                    .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                // Col 9: Timer or Timestamp
+                restTimeView
                     .frame(width: 55, alignment: .trailing)
                     .lineLimit(1)
             }
@@ -149,7 +147,7 @@ struct SetRowView: View {
             onTap()
         }
         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-        .listRowBackground(Color.clear)
+        .listRowBackground(set.isWarmUp ? Color.orange.opacity(0.08) : Color.clear)
         .listRowSeparator(.hidden)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
@@ -166,28 +164,34 @@ struct SetRowView: View {
     private func deltaText(for delta: Double, suffix: String) -> some View {
         let intDelta = Int(delta)
         if intDelta > 0 {
-            Text("+\(intDelta) \(suffix)")
-                .foregroundStyle(.green)
+            Text("+\(intDelta)\(suffix)")
+                .fontWeight(.semibold)
+                .foregroundStyle(themeManager.currentTheme.progressUp)
         } else if intDelta < 0 {
-            Text("\(intDelta) \(suffix)")
-                .foregroundStyle(.pink)
+            Text("\(intDelta)\(suffix)")
+                .fontWeight(.semibold)
+                .foregroundStyle(themeManager.currentTheme.progressDown)
         } else {
-            Text("0 \(suffix)")
-                .foregroundStyle(.cyan)
+            Text("0\(suffix)")
+                .fontWeight(.semibold)
+                .foregroundStyle(themeManager.currentTheme.progressSame)
         }
     }
 
     @ViewBuilder
     private func deltaText(for delta: Int, suffix: String) -> some View {
         if delta > 0 {
-            Text("+\(delta) \(suffix)")
-                .foregroundStyle(.green)
+            Text("+\(delta)\(suffix)")
+                .fontWeight(.semibold)
+                .foregroundStyle(themeManager.currentTheme.progressUp)
         } else if delta < 0 {
-            Text("\(delta) \(suffix)")
-                .foregroundStyle(.pink)
+            Text("\(delta)\(suffix)")
+                .fontWeight(.semibold)
+                .foregroundStyle(themeManager.currentTheme.progressDown)
         } else {
-            Text("0 \(suffix)")
-                .foregroundStyle(.cyan)
+            Text("0\(suffix)")
+                .fontWeight(.semibold)
+                .foregroundStyle(themeManager.currentTheme.progressSame)
         }
     }
 
@@ -206,7 +210,7 @@ struct SetRowView: View {
             // PB badge always rightmost when present
             if set.isPB {
                 Image(systemName: "trophy.fill")
-                    .font(.jetBrainsMono(size: 14))
+                    .font(.appFont(size: 14))
                     .foregroundStyle(Color.pw_amber)
             }
         }
@@ -227,28 +231,28 @@ struct SetRowView: View {
         switch badge {
         case "warmup":
             Image(systemName: "flame.fill")
-                .font(.jetBrainsMono(size: 14))
+                .font(.appFont(size: 14))
                 .foregroundStyle(.orange)
         case "bonus":
             Image(systemName: "star.fill")
-                .font(.jetBrainsMono(size: 14))
+                .font(.appFont(size: 14))
                 .foregroundStyle(.yellow)
         case "dropset":
             Image(systemName: "chevron.down.2")
-                .font(.jetBrainsMono(size: 14, weight: .bold))
+                .font(.appFont(size: 14, weight: .bold))
                 .foregroundStyle(.cyan)
         case "pause":
             Image(systemName: "pause.fill")
-                .font(.jetBrainsMono(size: 14))
+                .font(.appFont(size: 14))
                 .foregroundStyle(.pink)
         case "timed":
             if set.tempoSeconds > 0 {
                 Text("\(set.tempoSeconds)")
-                    .font(.jetBrainsMono(size: 14))
+                    .font(.appFont(size: 14))
                     .foregroundStyle(.secondary)
             } else {
                 Image(systemName: "timer")
-                    .font(.jetBrainsMono(size: 14))
+                    .font(.appFont(size: 14))
                     .foregroundStyle(.secondary)
             }
         default:
@@ -261,27 +265,32 @@ struct SetRowView: View {
 
     @ViewBuilder
     private var restTimeView: some View {
-        // Priority 1: Show captured rest time (static display)
-        if let restSeconds = set.restSeconds {
-            staticRestTimeView(seconds: restSeconds)
-        }
-        // Priority 2: Show live timer only for most recent set (no captured rest time yet)
-        else if showTimer {
+        // Priority 1: Show live timer for most recent set (no captured rest time yet)
+        if showTimer && set.restSeconds == nil {
             liveTimerView
         }
-        // Priority 3: First set of session - show nothing
+        // Priority 2: Show captured rest time (static display)
+        else if let restSeconds = set.restSeconds {
+            staticRestTimeView(seconds: restSeconds)
+        }
+        // Priority 3: Default - show timestamp
+        else {
+            Text(Formatters.formatTimeHM(set.timestamp))
+                .font(.appFont(.caption))
+                .foregroundStyle(themeManager.currentTheme.tertiaryText)
+        }
     }
 
     @ViewBuilder
     private func staticRestTimeView(seconds: Int) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "moon.zzz")
-                .font(.jetBrainsMono(.caption2))
-                .foregroundStyle(.secondary)
+                .font(.appFont(.caption))
+                .foregroundStyle(themeManager.currentTheme.tertiaryText)
 
             Text(Formatters.formatDuration(Double(seconds)))
-                .font(.jetBrainsMono(.caption2))
-                .foregroundStyle(.secondary)
+                .font(.appFont(.caption))
+                .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 .monospacedDigit()
         }
     }
@@ -298,12 +307,14 @@ struct SetRowView: View {
 
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
-                        .font(.jetBrainsMono(.caption2))
+                        .font(.appFont(.caption))
+                        .fontWeight(.bold)
                         .foregroundStyle(color)
 
                     if elapsed >= 180 {
-                        Text("> 3 mins")
-                            .font(.jetBrainsMono(.caption2))
+                        Text("> 3m")
+                            .font(.appFont(.caption))
+                            .fontWeight(.bold)
                             .foregroundStyle(color)
                             .onAppear {
                                 // Capture the expiry when timer hits 180s
@@ -311,7 +322,8 @@ struct SetRowView: View {
                             }
                     } else {
                         Text(Formatters.formatDuration(elapsed))
-                            .font(.jetBrainsMono(.caption2))
+                            .font(.appFont(.caption))
+                            .fontWeight(.bold)
                             .foregroundStyle(color)
                             .monospacedDigit()
                     }
@@ -322,11 +334,13 @@ struct SetRowView: View {
 
     private func restTimeColor(for seconds: Int) -> Color {
         if seconds < 60 {
-            return .black
+            return themeManager.currentTheme.primaryText
         } else if seconds < 120 {
-            return .orange
+            return themeManager.currentTheme == .light
+                ? Color(red: 0.85, green: 0.5, blue: 0.0)  // Darker orange for light theme
+                : .orange
         } else {
-            return .pw_red
+            return themeManager.currentTheme.progressDown
         }
     }
 

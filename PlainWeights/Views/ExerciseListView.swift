@@ -108,7 +108,7 @@ struct FilteredExerciseListView: View {
                 // App title (only shown when exercises exist)
                 Section {
                     Text(">_ plainweights")
-                        .font(.jetBrainsMono(.title3, weight: .bold))
+                        .font(.appFont(.title3, weight: .bold))
                         .foregroundStyle(themeManager.currentTheme.accent)
                 }
                 .listRowBackground(Color.clear)
@@ -118,7 +118,7 @@ struct FilteredExerciseListView: View {
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
-                                    .font(.jetBrainsMono(.headline, weight: .semiBold))
+                                    .font(.appFont(.headline, weight: .semiBold))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                                     .opacity(nameOpacity(for: exercise))
                                 if !exercise.tags.isEmpty {
@@ -126,7 +126,7 @@ struct FilteredExerciseListView: View {
                                         .padding(.top, 6)
                                 }
                                 Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
-                                    .font(.jetBrainsMono(.caption))
+                                    .font(.appFont(.caption))
                                     .foregroundStyle(timestampColor(for: exercise))
                                     .padding(.top, 10)
                             }

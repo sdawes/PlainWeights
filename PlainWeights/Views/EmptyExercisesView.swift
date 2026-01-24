@@ -19,17 +19,17 @@ struct EmptyExercisesView: View {
                 VStack(spacing: 12) {
                     RetroLifterView(pixelSize: 5)
                     Text("No Exercises Yet")
-                        .font(.jetBrainsMono(.title2))
+                        .font(.appFont(.title2))
                 }
             } description: {
                 Text("Start tracking your workouts by adding your first exercise")
-                    .font(.jetBrainsMono(.subheadline))
+                    .font(.appFont(.subheadline))
             } actions: {
                 Button {
                     onAddExercise()
                 } label: {
                     Text("Add Exercise")
-                        .font(.jetBrainsMono(.headline))
+                        .font(.appFont(.headline))
                         .foregroundStyle(themeManager.currentTheme.textColor)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 12)

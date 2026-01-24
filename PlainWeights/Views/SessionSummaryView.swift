@@ -35,10 +35,10 @@ struct SessionSummaryView: View {
                         RetroLifterView(pixelSize: 5)
 
                         Text("No Workouts Yet")
-                            .font(.jetBrainsMono(.title2))
+                            .font(.appFont(.title2))
 
                         Text("Complete your first workout to see a summary here.")
-                            .font(.jetBrainsMono(.subheadline))
+                            .font(.appFont(.subheadline))
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -83,11 +83,11 @@ struct SessionSummaryView: View {
     private func headerSection(for day: ExerciseDataGrouper.WorkoutDay) -> some View {
         VStack(spacing: 4) {
             Text(isShowingToday ? "Today's Session" : "Last Session")
-                .font(.jetBrainsMono(.headline))
+                .font(.appFont(.headline))
                 .foregroundStyle(.secondary)
 
             Text(day.date, format: .dateTime.weekday(.wide).month(.wide).day())
-                .font(.jetBrainsMono(.title2))
+                .font(.appFont(.title2))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -118,13 +118,13 @@ struct SessionSummaryView: View {
                 VStack(spacing: 2) {
                     HStack(spacing: 4) {
                         Text("\(pbCount)")
-                            .font(.jetBrainsMono(.title3))
+                            .font(.appFont(.title3))
                         Image(systemName: "trophy.fill")
-                            .font(.jetBrainsMono(size: 14))
+                            .font(.appFont(size: 14))
                             .foregroundStyle(Color.pw_amber)
                     }
                     Text(pbCount == 1 ? "PB" : "PBs")
-                        .font(.jetBrainsMono(.caption))
+                        .font(.appFont(.caption))
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
@@ -139,9 +139,9 @@ struct SessionSummaryView: View {
     private func statItem(value: String, label: String) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.jetBrainsMono(.title3))
+                .font(.appFont(.title3))
             Text(label)
-                .font(.jetBrainsMono(.caption))
+                .font(.appFont(.caption))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -164,13 +164,13 @@ struct SessionSummaryView: View {
             // Exercise name with PB badge
             HStack {
                 Text(workoutExercise.exercise.name)
-                    .font(.jetBrainsMono(.headline))
+                    .font(.appFont(.headline))
 
                 Spacer()
 
                 if hasPB {
                     Image(systemName: "trophy.fill")
-                        .font(.jetBrainsMono(size: 14))
+                        .font(.appFont(size: 14))
                         .foregroundStyle(Color.pw_amber)
                 }
             }
@@ -191,7 +191,7 @@ struct SessionSummaryView: View {
                 Text("\(Formatters.formatVolume(workoutExercise.volume)) kg")
                     .foregroundStyle(.secondary)
             }
-            .font(.jetBrainsMono(.subheadline))
+            .font(.appFont(.subheadline))
 
             // Max weight × reps
             if let maxSet = workoutExercise.sets.filter({ !$0.isWarmUp && !$0.isBonus }).max(by: { $0.weight < $1.weight }) {
@@ -200,7 +200,7 @@ struct SessionSummaryView: View {
                         .foregroundStyle(.tertiary)
                     Text("\(Formatters.formatWeight(maxSet.weight)) kg × \(maxSet.reps)")
                 }
-                .font(.jetBrainsMono(.subheadline))
+                .font(.appFont(.subheadline))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

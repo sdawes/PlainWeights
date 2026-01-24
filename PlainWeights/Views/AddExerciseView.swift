@@ -43,7 +43,7 @@ struct AddExerciseView: View {
             Form {
                 Section {
                     TextField("Exercise Name", text: $name)
-                        .font(.jetBrainsMono(.body))
+                        .font(.appFont(.body))
                         .foregroundStyle(themeManager.currentTheme.primaryText)
                         .listRowBackground(
                             themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground)
@@ -65,7 +65,7 @@ struct AddExerciseView: View {
 
                         // Tag input field
                         TextField("Add tags (space or enter to add)", text: $tagInput)
-                            .font(.jetBrainsMono(.body))
+                            .font(.appFont(.body))
                             .foregroundStyle(themeManager.currentTheme.primaryText)
                             .focused($tagFieldFocused)
                             .onChange(of: tagInput) { _, newValue in
@@ -105,7 +105,7 @@ struct AddExerciseView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text(navigationTitle)
-                        .font(.jetBrainsMono(.headline))
+                        .font(.appFont(.headline))
                 }
             }
             .toolbar {

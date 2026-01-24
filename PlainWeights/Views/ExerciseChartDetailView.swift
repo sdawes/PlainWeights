@@ -22,7 +22,6 @@ struct ExerciseChartDetailView: View {
         }
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
-        .navigationTitle("Progress")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

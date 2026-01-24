@@ -80,9 +80,38 @@ enum AppTheme: String, CaseIterable {
     var accent: Color {
         switch self {
         case .light:
-            return Color(red: 19/255, green: 133/255, blue: 236/255)  // #1385EC
+            return Color(red: 52/255, green: 152/255, blue: 168/255)  // #3498A8
         case .dark:
             return Color(red: 103/255, green: 222/255, blue: 251/255)  // Bright cyan (#67DEFB)
+        }
+    }
+
+    // MARK: - Progress Colors
+
+    var progressUp: Color {
+        switch self {
+        case .light:
+            return Color(red: 0.15, green: 0.75, blue: 0.3)  // Vibrant green
+        case .dark:
+            return .green
+        }
+    }
+
+    var progressDown: Color {
+        switch self {
+        case .light:
+            return Color(red: 0.9, green: 0.2, blue: 0.25)  // Vibrant red
+        case .dark:
+            return .pink
+        }
+    }
+
+    var progressSame: Color {
+        switch self {
+        case .light:
+            return Color(red: 0.2, green: 0.5, blue: 0.95)  // Vibrant blue
+        case .dark:
+            return .cyan
         }
     }
 

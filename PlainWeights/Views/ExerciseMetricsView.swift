@@ -45,7 +45,7 @@ struct HeroMetricView: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(headerLabel)
-                    .font(.jetBrainsMono(.caption))
+                    .font(.appFont(.caption))
                     .foregroundStyle(.white.opacity(0.7))
                     .textCase(.uppercase)
 
@@ -53,7 +53,7 @@ struct HeroMetricView: View {
 
                 if let date = date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.jetBrainsMono(.caption2))
+                        .font(.appFont(.caption2))
                         .foregroundStyle(.white.opacity(0.5))
                 }
             }
@@ -61,10 +61,10 @@ struct HeroMetricView: View {
             // Hero metric: Weight (large) × Reps (smaller, lighter)
             HStack(alignment: .center, spacing: 4) {
                 Text("\(Formatters.formatWeight(weight)) kg")
-                    .font(.jetBrainsMono(.largeTitle))
+                    .font(.appFont(.largeTitle))
                     .foregroundStyle(.white)
                 Text("× \(reps) reps")
-                    .font(.jetBrainsMono(.title2))
+                    .font(.appFont(.title2))
                     .foregroundStyle(.white.opacity(0.7))
             }
 
@@ -73,7 +73,7 @@ struct HeroMetricView: View {
                 Text("\(Formatters.formatVolume(totalVolume)) kg")
                 Text("total weight")
             }
-            .font(.jetBrainsMono(.subheadline))
+            .font(.appFont(.subheadline))
             .foregroundStyle(.white.opacity(0.7))
         }
         .padding(20)
@@ -94,11 +94,11 @@ struct ProgressPillView: View {
         HStack(spacing: 6) {
             Image(systemName: direction == .up ? "arrow.up" :
                              direction == .down ? "arrow.down" : "minus")
-                .font(.jetBrainsMono(.caption2))
+                .font(.appFont(.caption2))
                 .foregroundStyle(.white)
 
             Text(text)
-                .font(.jetBrainsMono(.caption))
+                .font(.appFont(.caption))
                 .foregroundStyle(.white)
         }
         .padding(.horizontal, 12)
@@ -160,7 +160,7 @@ struct TargetMetricsSection: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(data.headerLabel)
-                    .font(.jetBrainsMono(.caption))
+                    .font(.appFont(.caption))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -168,7 +168,7 @@ struct TargetMetricsSection: View {
 
                 if let date = data.date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.jetBrainsMono(.caption2))
+                        .font(.appFont(.caption2))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -176,40 +176,40 @@ struct TargetMetricsSection: View {
             // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.jetBrainsMono(size: 38))
+                    .font(.appFont(size: 38))
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
-                    .font(.jetBrainsMono(.title2))
+                    .font(.appFont(.title2))
                     .foregroundStyle(.secondary)
 
                 // Set indicator icons (matching ThisSetSection design)
                 if data.isDropSet {
                     Image(systemName: "chevron.down.2")
-                        .font(.jetBrainsMono(size: 10, weight: .bold))
+                        .font(.appFont(size: 10, weight: .bold))
                         .foregroundStyle(.cyan)
                 }
 
                 if data.isPauseAtTop {
                     Image(systemName: "pause.fill")
-                        .font(.jetBrainsMono(size: 10))
+                        .font(.appFont(size: 10))
                         .foregroundStyle(.pink)
                 }
 
                 if data.isTimedSet {
                     if data.tempoSeconds > 0 {
                         Text("\(data.tempoSeconds)")
-                            .font(.jetBrainsMono(size: 10))
+                            .font(.appFont(size: 10))
                             .foregroundStyle(.secondary)
                     } else {
                         Image(systemName: "timer")
-                            .font(.jetBrainsMono(size: 10))
+                            .font(.appFont(size: 10))
                             .foregroundStyle(.secondary)
                     }
                 }
 
                 if data.isPB {
                     Image(systemName: "trophy.fill")
-                        .font(.jetBrainsMono(size: 10))
+                        .font(.appFont(size: 10))
                         .foregroundStyle(Color.pw_amber)
                 }
             }
@@ -219,7 +219,7 @@ struct TargetMetricsSection: View {
                 Text("\(Formatters.formatVolume(data.totalVolume)) kg")
                 Text("total weight")
             }
-            .font(.jetBrainsMono(.subheadline))
+            .font(.appFont(.subheadline))
             .foregroundStyle(.secondary)
             .padding(.top, 0)
         }
@@ -237,7 +237,7 @@ struct TargetMetricsSectionWithPicker: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(data.headerLabel)
-                    .font(.jetBrainsMono(.caption))
+                    .font(.appFont(.caption))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -245,7 +245,7 @@ struct TargetMetricsSectionWithPicker: View {
 
                 if let date = data.date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.jetBrainsMono(.caption2))
+                        .font(.appFont(.caption2))
                         .foregroundStyle(.secondary)
                         .frame(width: 140, alignment: .trailing)  // Match picker width for alignment
                 }
@@ -254,40 +254,40 @@ struct TargetMetricsSectionWithPicker: View {
             // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.jetBrainsMono(size: 38))
+                    .font(.appFont(size: 38))
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
-                    .font(.jetBrainsMono(.title2))
+                    .font(.appFont(.title2))
                     .foregroundStyle(.secondary)
 
                 // Set indicator icons
                 if data.isDropSet {
                     Image(systemName: "chevron.down.2")
-                        .font(.jetBrainsMono(size: 10, weight: .bold))
+                        .font(.appFont(size: 10, weight: .bold))
                         .foregroundStyle(.cyan)
                 }
 
                 if data.isPauseAtTop {
                     Image(systemName: "pause.fill")
-                        .font(.jetBrainsMono(size: 10))
+                        .font(.appFont(size: 10))
                         .foregroundStyle(.pink)
                 }
 
                 if data.isTimedSet {
                     if data.tempoSeconds > 0 {
                         Text("\(data.tempoSeconds)")
-                            .font(.jetBrainsMono(size: 10))
+                            .font(.appFont(size: 10))
                             .foregroundStyle(.secondary)
                     } else {
                         Image(systemName: "timer")
-                            .font(.jetBrainsMono(size: 10))
+                            .font(.appFont(size: 10))
                             .foregroundStyle(.secondary)
                     }
                 }
 
                 if data.isPB {
                     Image(systemName: "trophy.fill")
-                        .font(.jetBrainsMono(size: 10))
+                        .font(.appFont(size: 10))
                         .foregroundStyle(Color.pw_amber)
                 }
             }
@@ -298,7 +298,7 @@ struct TargetMetricsSectionWithPicker: View {
                     Text("\(Formatters.formatVolume(data.totalVolume)) kg")
                     Text("total weight")
                 }
-                .font(.jetBrainsMono(.subheadline))
+                .font(.appFont(.subheadline))
                 .foregroundStyle(.secondary)
 
                 Spacer()
@@ -331,54 +331,54 @@ struct ThisSetSection: View {
                 // Header row with "THIS SET" and "vs last session"
                 HStack {
                     Text("THIS SET")
-                        .font(.jetBrainsMono(.caption))
+                        .font(.appFont(.caption))
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     Spacer()
 
                     Text(data.comparisonLabel)
-                        .font(.jetBrainsMono(.caption2))
+                        .font(.appFont(.caption2))
                         .foregroundStyle(.secondary)
                 }
 
                 // Set values
                 HStack(alignment: .center, spacing: 6) {
                     Text("\(data.weight) kg")
-                        .font(.jetBrainsMono(.title3))
+                        .font(.appFont(.title3))
                         .foregroundStyle(.primary)
 
                     Text("× \(data.reps) reps")
-                        .font(.jetBrainsMono(.callout))
+                        .font(.appFont(.callout))
                         .foregroundStyle(.secondary)
 
                     if data.isDropSet {
                         Image(systemName: "chevron.down.2")
-                            .font(.jetBrainsMono(size: 12, weight: .bold))
+                            .font(.appFont(size: 12, weight: .bold))
                             .foregroundStyle(.cyan)
                     }
 
                     if data.isPauseAtTop {
                         Image(systemName: "pause.fill")
-                            .font(.jetBrainsMono(size: 12))
+                            .font(.appFont(size: 12))
                             .foregroundStyle(.pink)
                     }
 
                     if data.isTimedSet {
                         if data.tempoSeconds > 0 {
                             Text("\(data.tempoSeconds)")
-                                .font(.jetBrainsMono(size: 12))
+                                .font(.appFont(size: 12))
                                 .foregroundStyle(.secondary)
                         } else {
                             Image(systemName: "timer")
-                                .font(.jetBrainsMono(size: 12))
+                                .font(.appFont(size: 12))
                                 .foregroundStyle(.secondary)
                         }
                     }
 
                     if data.isPB {
                         Image(systemName: "trophy.fill")
-                            .font(.jetBrainsMono(size: 12))
+                            .font(.appFont(size: 12))
                             .foregroundStyle(Color.pw_amber)
                     }
                 }
@@ -462,7 +462,7 @@ struct ProgressBarSection: View {
 
             // Progress percentage text (right-aligned)
             Text(data.progressText)
-                .font(.jetBrainsMono(.caption))
+                .font(.appFont(.caption))
                 .foregroundStyle(.secondary)
         }
     }
@@ -533,6 +533,45 @@ struct TargetMetricsCard: View {
         BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
     }
 
+    // Today's most recent working set
+    private var todaysLastWorkingSet: ExerciseSet? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return sets.first { set in
+            calendar.startOfDay(for: set.timestamp) == today && !set.isWarmUp && !set.isBonus
+        }
+    }
+
+    // Weight delta (today's last set vs previous session)
+    private var weightDelta: Double? {
+        guard let todaySet = todaysLastWorkingSet,
+              let lastInfo = progressState?.lastCompletedDayInfo else { return nil }
+        return todaySet.weight - lastInfo.maxWeight
+    }
+
+    // Reps delta (today's last set vs previous session)
+    private var repsDelta: Int? {
+        guard let todaySet = todaysLastWorkingSet,
+              let lastInfo = progressState?.lastCompletedDayInfo else { return nil }
+        return todaySet.reps - lastInfo.maxWeightReps
+    }
+
+    // Progress color for weight
+    private var weightProgressColor: Color {
+        guard let delta = weightDelta else { return .clear }
+        if delta > 0 { return themeManager.currentTheme.progressUp }
+        if delta < 0 { return themeManager.currentTheme.progressDown }
+        return themeManager.currentTheme.progressSame
+    }
+
+    // Progress color for reps
+    private var repsProgressColor: Color {
+        guard let delta = repsDelta else { return .clear }
+        if delta > 0 { return themeManager.currentTheme.progressUp }
+        if delta < 0 { return themeManager.currentTheme.progressDown }
+        return themeManager.currentTheme.progressSame
+    }
+
     var body: some View {
         // Stacked vertical layout
         VStack(alignment: .leading, spacing: 20) {
@@ -542,52 +581,71 @@ struct TargetMetricsCard: View {
                     // Header with date
                     HStack {
                         Text("PREVIOUS SESSION")
-                            .font(.jetBrainsMono(.subheadline))
+                            .font(.appFont(.subheadline))
                             .foregroundStyle(.secondary)
 
                         Spacer()
 
                         Text(Formatters.formatRelativeDate(lastInfo.date))
-                            .font(.jetBrainsMono(.caption))
+                            .font(.appFont(.caption))
                             .foregroundStyle(themeManager.currentTheme.tertiaryText)
                     }
 
                     // Large weight, reps and total values (hero metrics)
-                    HStack(alignment: .lastTextBaseline) {
-                        // Weight × Reps
-                        HStack(alignment: .lastTextBaseline, spacing: 0) {
-                            Text(Formatters.formatWeight(lastInfo.maxWeight))
-                                .font(.jetBrainsMono(size: 32))
-                                .fontWeight(.bold)
-                                .foregroundStyle(themeManager.currentTheme.primaryText)
-                                .lineLimit(1)
-                            Text(" kg")
-                                .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Text(" × ")
-                                .font(.jetBrainsMono(size: 14))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Text("\(lastInfo.maxWeightReps)")
-                                .font(.jetBrainsMono(size: 20))
-                                .fontWeight(.bold)
-                                .foregroundStyle(themeManager.currentTheme.primaryText)
-                                .lineLimit(1)
+                    HStack(alignment: .top) {
+                        // Weight × Reps with progress below
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(alignment: .lastTextBaseline, spacing: 0) {
+                                Text(Formatters.formatWeight(lastInfo.maxWeight))
+                                    .font(.appFont(size: 32))
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                                    .lineLimit(1)
+                                Text("kg")
+                                    .font(.appFont(size: 14))
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                Text(" × ")
+                                    .font(.appFont(size: 14))
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                Text("\(lastInfo.maxWeightReps)")
+                                    .font(.appFont(size: 20))
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                                    .lineLimit(1)
+                            }
+                            .fixedSize(horizontal: true, vertical: false)
+
+                            // Progress values below (only if today has sets)
+                            if let wDelta = weightDelta, let rDelta = repsDelta {
+                                HStack(spacing: 12) {
+                                    // Weight progress
+                                    Text(wDelta > 0 ? "+\(Int(wDelta))kg" : "\(Int(wDelta))kg")
+                                        .font(.appFont(.caption))
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(weightProgressColor)
+
+                                    // Reps progress
+                                    Text(rDelta > 0 ? "+\(rDelta)" : "\(rDelta)")
+                                        .font(.appFont(.caption))
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(repsProgressColor)
+                                }
+                            }
                         }
-                        .fixedSize(horizontal: true, vertical: false)
 
                         Spacer()
 
                         // Total
-                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                        HStack(alignment: .lastTextBaseline, spacing: 0) {
                             Text(Formatters.formatVolume(lastInfo.volume))
-                                .font(.jetBrainsMono(size: 20))
+                                .font(.appFont(size: 12))
                                 .fontWeight(.bold)
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                                 .lineLimit(1)
-                            Text("total kg")
-                                .font(.jetBrainsMono(size: 12))
+                            Text(" total kg")
+                                .font(.appFont(size: 12))
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }
@@ -595,7 +653,7 @@ struct TargetMetricsCard: View {
                     }
                 } else {
                     Text("Previous session metrics will appear tomorrow")
-                        .font(.jetBrainsMono(.subheadline))
+                        .font(.appFont(.subheadline))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
@@ -616,31 +674,31 @@ struct TargetMetricsCard: View {
         HStack(spacing: 3) {
             if isDropSet {
                 Image(systemName: "chevron.down.2")
-                    .font(.jetBrainsMono(size: 10, weight: .bold))
+                    .font(.appFont(size: 10, weight: .bold))
                     .foregroundStyle(.cyan)
             }
 
             if isPauseAtTop {
                 Image(systemName: "pause.fill")
-                    .font(.jetBrainsMono(size: 10))
+                    .font(.appFont(size: 10))
                     .foregroundStyle(.pink)
             }
 
             if isTimedSet {
                 if tempoSeconds > 0 {
                     Text("\(tempoSeconds)")
-                        .font(.jetBrainsMono(size: 10))
+                        .font(.appFont(size: 10))
                         .foregroundStyle(.secondary)
                 } else {
                     Image(systemName: "timer")
-                        .font(.jetBrainsMono(size: 10))
+                        .font(.appFont(size: 10))
                         .foregroundStyle(.secondary)
                 }
             }
 
             if isPB {
                 Text("PB")
-                    .font(.jetBrainsMono(size: 10, weight: .bold))
+                    .font(.appFont(size: 10, weight: .bold))
                     .foregroundStyle(.pink)
             }
         }

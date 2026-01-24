@@ -21,11 +21,11 @@ struct WeightRepsInputContainer: View {
             // Weight input box
             VStack(alignment: .leading, spacing: 6) {
                 Text("Weight (kg)")
-                    .font(.jetBrainsMono(.subheadline))
+                    .font(.appFont(.subheadline))
                     .foregroundStyle(.secondary)
 
                 TextField("Enter weight (optional)", text: $weightText)
-                    .font(.jetBrainsMono(.body))
+                    .font(.appFont(.body))
                     .keyboardType(.decimalPad)
                     .focused($focusedField, equals: .weight)
                     .submitLabel(.next)
@@ -44,11 +44,11 @@ struct WeightRepsInputContainer: View {
             // Reps input box
             VStack(alignment: .leading, spacing: 6) {
                 Text("Reps")
-                    .font(.jetBrainsMono(.subheadline))
+                    .font(.appFont(.subheadline))
                     .foregroundStyle(.secondary)
 
                 TextField("Enter reps (optional)", text: $repsText)
-                    .font(.jetBrainsMono(.body))
+                    .font(.appFont(.body))
                     .keyboardType(.numberPad)
                     .focused($focusedField, equals: .reps)
                     .submitLabel(.done)
@@ -148,9 +148,9 @@ struct SetOptionsToggles: View {
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.jetBrainsMono(size: 12))
+                    .font(.appFont(size: 12))
                 Text(text)
-                    .font(.jetBrainsMono(.subheadline))
+                    .font(.appFont(.subheadline))
                 Spacer()
             }
             .padding(.horizontal, 12)
@@ -205,9 +205,9 @@ struct AddSetButton: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: iconName)
-                    .font(.jetBrainsMono(.headline))
+                    .font(.appFont(.headline))
                 Text(title)
-                    .font(.jetBrainsMono(.headline))
+                    .font(.appFont(.headline))
             }
             .foregroundStyle(isEnabled ? themeManager.currentTheme.textColor : .gray)
             .frame(maxWidth: .infinity)

@@ -88,7 +88,7 @@ struct ExerciseDetailView: View {
     private var titleSection: some View {
         Section {
             Text(exercise.name)
-                .font(.jetBrainsMono(.title, weight: .semiBold))
+                .font(.appFont(.title, weight: .semiBold))
                 .foregroundStyle(themeManager.currentTheme.accent)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
@@ -113,7 +113,8 @@ struct ExerciseDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                        .stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                        .foregroundStyle(themeManager.currentTheme.borderColor)
                 )
             }
             .listRowSeparator(.hidden)
@@ -138,7 +139,7 @@ struct ExerciseDetailView: View {
                 } header: {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("TODAY")
-                            .font(.jetBrainsMono(.subheadline, weight: .semiBold))
+                            .font(.appFont(.subheadline, weight: .semiBold))
                             .foregroundStyle(themeManager.currentTheme.primaryText)
                         HStack(spacing: 8) {
                             Image(systemName: "chevron.down")
@@ -147,7 +148,7 @@ struct ExerciseDetailView: View {
                             Text("—")
                                 .foregroundStyle(.secondary)
                             Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
-                                .font(.jetBrainsMono(.footnote))
+                                .font(.appFont(.footnote))
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                         }
                     }
@@ -174,7 +175,7 @@ struct ExerciseDetailView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             if groupIndex == 0 {
                                 Text("PREVIOUS")
-                                    .font(.jetBrainsMono(.subheadline, weight: .semiBold))
+                                    .font(.appFont(.subheadline, weight: .semiBold))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                             HStack(spacing: 8) {
@@ -184,7 +185,7 @@ struct ExerciseDetailView: View {
                                 Text("—")
                                     .foregroundStyle(.secondary)
                                 Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                    .font(.jetBrainsMono(.footnote))
+                                    .font(.appFont(.footnote))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                         }
@@ -196,7 +197,7 @@ struct ExerciseDetailView: View {
             if sets.isEmpty {
                 Section {
                     Text("No sets yet")
-                        .font(.jetBrainsMono(.subheadline))
+                        .font(.appFont(.subheadline))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)

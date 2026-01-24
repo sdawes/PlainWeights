@@ -17,7 +17,7 @@ struct SettingsView: View {
                 Section {
                     HStack {
                         Text("Theme")
-                            .font(.jetBrainsMono(.body))
+                            .font(.appFont(.body))
 
                         Spacer()
 
@@ -27,7 +27,7 @@ struct SettingsView: View {
                                 themeManager.currentTheme = .light
                             } label: {
                                 Label("Light", systemImage: "sun.max.fill")
-                                    .font(.jetBrainsMono(.caption))
+                                    .font(.appFont(.caption))
                             }
                             .buttonStyle(.bordered)
                             .tint(themeManager.currentTheme == .light ? .primary : .secondary)
@@ -38,7 +38,7 @@ struct SettingsView: View {
                                 themeManager.currentTheme = .dark
                             } label: {
                                 Label("Dark", systemImage: "moon.fill")
-                                    .font(.jetBrainsMono(.caption))
+                                    .font(.appFont(.caption))
                             }
                             .buttonStyle(.bordered)
                             .tint(themeManager.currentTheme == .dark ? .primary : .secondary)
@@ -47,7 +47,7 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("APPEARANCE")
-                        .font(.jetBrainsMono(.caption))
+                        .font(.appFont(.caption))
                         .foregroundStyle(.secondary)
                 }
             }

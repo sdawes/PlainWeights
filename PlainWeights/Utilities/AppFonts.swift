@@ -2,40 +2,58 @@
 //  AppFonts.swift
 //  PlainWeights
 //
-//  Centralized font configuration using JetBrains Mono
+//  Centralized font configuration - change fonts in ONE place
 //
 
 import SwiftUI
 
-extension Font {
-    /// Font weight options for JetBrains Mono
-    enum JetBrainsWeight {
-        case thin, extraLight, light, regular, medium, semiBold, bold, extraBold
+// MARK: - Font Configuration (CHANGE FONTS HERE)
 
-        var fontName: String {
-            switch self {
-            case .thin: return "JetBrainsMono-Thin"
-            case .extraLight: return "JetBrainsMono-ExtraLight"
-            case .light: return "JetBrainsMono-Light"
-            case .regular: return "JetBrainsMono-Regular"
-            case .medium: return "JetBrainsMono-Medium"
-            case .semiBold: return "JetBrainsMono-SemiBold"
-            case .bold: return "JetBrainsMono-Bold"
-            case .extraBold: return "JetBrainsMono-ExtraBold"
-            }
+enum AppFontFamily {
+    /// Primary app font - change this value to swap fonts app-wide
+    static let primary = "RobotoMono"
+
+    // Future use:
+    // static let secondary = "AnotherFont"
+}
+
+// MARK: - Font Weights
+
+enum AppFontWeight {
+    case thin, light, regular, medium, semiBold, bold
+
+    /// Constructs the full font name for a given family
+    func fontName(for family: String) -> String {
+        "\(family)-\(rawName)"
+    }
+
+    private var rawName: String {
+        switch self {
+        case .thin: return "Thin"
+        case .light: return "Light"
+        case .regular: return "Regular"
+        case .medium: return "Medium"
+        case .semiBold: return "SemiBold"
+        case .bold: return "Bold"
         }
     }
+}
 
-    /// Create JetBrains Mono font with specific size
-    static func jetBrainsMono(size: CGFloat, weight: JetBrainsWeight = .regular) -> Font {
-        .custom(weight.fontName, size: size)
+// MARK: - Font API
+
+extension Font {
+    /// Create app font with specific size
+    static func appFont(size: CGFloat, weight: AppFontWeight = .regular) -> Font {
+        .custom(weight.fontName(for: AppFontFamily.primary), size: size)
     }
 
-    /// Create JetBrains Mono font with text style (dynamic type support)
-    static func jetBrainsMono(_ style: Font.TextStyle, weight: JetBrainsWeight = .regular) -> Font {
-        .custom(weight.fontName, size: style.size, relativeTo: style)
+    /// Create app font with text style (dynamic type support)
+    static func appFont(_ style: Font.TextStyle, weight: AppFontWeight = .regular) -> Font {
+        .custom(weight.fontName(for: AppFontFamily.primary), size: style.size, relativeTo: style)
     }
 }
+
+// MARK: - Text Style Sizes
 
 extension Font.TextStyle {
     /// Default sizes for each text style

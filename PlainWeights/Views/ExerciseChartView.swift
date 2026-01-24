@@ -206,10 +206,10 @@ struct ChartContentView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 16) {
             // Chart title
             Text("Progress Chart")
-                .font(.appFont(.subheadline, weight: .semiBold))
+                .font(.appFont(.subheadline, weight: .medium))
                 .foregroundStyle(themeManager.currentTheme.primaryText)
 
             if chartData.isEmpty {
@@ -361,6 +361,16 @@ struct ChartContentView: View {
                                 .fill(chartColor)
                                 .frame(width: 8, height: 8)
                             Text("Reps")
+                                .font(.appFont(size: 9))
+                                .foregroundStyle(.secondary)
+                        }
+
+                        // PB legend item
+                        HStack(spacing: 4) {
+                            Image(systemName: "trophy.fill")
+                                .font(.system(size: 8))
+                                .foregroundStyle(Color.pw_amber)
+                            Text("PB")
                                 .font(.appFont(size: 9))
                                 .foregroundStyle(.secondary)
                         }

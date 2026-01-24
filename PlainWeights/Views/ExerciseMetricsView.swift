@@ -597,35 +597,56 @@ struct TargetMetricsCard: View {
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
 
-                // Row 2: Main values using custom baseline alignment
-                HStack(alignment: .mainValueBaseline, spacing: 0) {
-                    // Weight value
-                    HStack(alignment: .firstTextBaseline, spacing: 0) {
-                        Text(Formatters.formatWeight(lastInfo.maxWeight))
-                            .font(.appFont(size: 32))
-                            .fontWeight(.bold)
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
-                        Text("kg")
-                            .font(.appFont(size: 14))
-                            .foregroundStyle(.secondary)
+                // Row 2 & 3: Main values with progress stacked below (VStacks for column alignment)
+                HStack(alignment: .bottom, spacing: 0) {
+                    // Weight column (value + progress right-aligned)
+                    VStack(alignment: .trailing, spacing: 4) {
+                        HStack(alignment: .firstTextBaseline, spacing: 0) {
+                            Text(Formatters.formatWeight(lastInfo.maxWeight))
+                                .font(.appFont(size: 32))
+                                .fontWeight(.bold)
+                                .foregroundStyle(themeManager.currentTheme.primaryText)
+                            Text("kg")
+                                .font(.appFont(size: 14))
+                                .foregroundStyle(.secondary)
+                        }
+
+                        // Weight progress
+                        HStack(alignment: .firstTextBaseline, spacing: 0) {
+                            Text(weightDelta.map { $0 > 0 ? "+\(Int($0))" : "\(Int($0))" } ?? " ")
+                                .font(.appFont(size: 14))
+                                .fontWeight(.semibold)
+                                .foregroundStyle(weightProgressColor)
+                            Text("kg")
+                                .font(.appFont(size: 14))
+                                .foregroundStyle(weightProgressColor)
+                        }
+                        .opacity(weightDelta != nil ? 1 : 0)
                     }
 
-                    // Multiply sign
+                    // Multiply sign (aligned with main value baseline)
                     Text(" × ")
                         .font(.appFont(size: 14))
                         .foregroundStyle(.secondary)
-                        .alignmentGuide(.mainValueBaseline) { d in d[VerticalAlignment.center] + 4 }
 
-                    // Reps value
-                    Text("\(lastInfo.maxWeightReps)")
-                        .font(.appFont(size: 20))
-                        .fontWeight(.bold)
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
-                        .alignmentGuide(.mainValueBaseline) { d in d[.firstTextBaseline] }
+                    // Reps column (value + progress right-aligned)
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text("\(lastInfo.maxWeightReps)")
+                            .font(.appFont(size: 20))
+                            .fontWeight(.bold)
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+
+                        // Reps progress
+                        Text(repsDelta.map { $0 > 0 ? "+\($0)" : "\($0)" } ?? " ")
+                            .font(.appFont(size: 14))
+                            .fontWeight(.semibold)
+                            .foregroundStyle(repsProgressColor)
+                            .opacity(repsDelta != nil ? 1 : 0)
+                    }
 
                     Spacer()
 
-                    // Total volume
+                    // Total volume (aligned with main value baseline)
                     HStack(alignment: .firstTextBaseline, spacing: 0) {
                         Text(Formatters.formatVolume(lastInfo.volume))
                             .font(.appFont(size: 12))
@@ -635,36 +656,6 @@ struct TargetMetricsCard: View {
                             .font(.appFont(size: 12))
                             .foregroundStyle(.secondary)
                     }
-                    .alignmentGuide(.mainValueBaseline) { d in d[.firstTextBaseline] }
-                }
-
-                // Row 3: Progress values (separate row, aligned under their columns)
-                HStack(spacing: 0) {
-                    // Weight progress - split into number + kg suffix (kg matches size 14 above)
-                    HStack(alignment: .firstTextBaseline, spacing: 0) {
-                        Text(weightDelta.map { $0 > 0 ? "+\(Int($0))" : "\(Int($0))" } ?? " ")
-                            .font(.appFont(.caption))
-                            .fontWeight(.semibold)
-                            .foregroundStyle(weightProgressColor)
-                        Text("kg")
-                            .font(.appFont(size: 14))
-                            .foregroundStyle(weightProgressColor)
-                    }
-                    .opacity(weightDelta != nil ? 1 : 0)
-
-                    // Spacer to push reps progress into position (approximate width of " × ")
-                    Text(" × ")
-                        .font(.appFont(size: 14))
-                        .foregroundStyle(.clear)
-
-                    // Reps progress - right aligned under reps value
-                    Text(repsDelta.map { $0 > 0 ? "+\($0)" : "\($0)" } ?? " ")
-                        .font(.appFont(.caption))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(repsProgressColor)
-                        .opacity(repsDelta != nil ? 1 : 0)
-
-                    Spacer()
                 }
             } else {
                 Text("Previous session metrics will appear tomorrow")

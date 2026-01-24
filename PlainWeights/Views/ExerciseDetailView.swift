@@ -87,11 +87,17 @@ struct ExerciseDetailView: View {
 
     private var titleSection: some View {
         Section {
-            Text(exercise.name)
-                .font(.appFont(.title, weight: .semiBold))
-                .foregroundStyle(themeManager.currentTheme.accent)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(exercise.name)
+                    .font(.appFont(.title, weight: .semiBold))
+                    .foregroundStyle(themeManager.currentTheme.accent)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                if !exercise.tags.isEmpty {
+                    TagPillsRow(tags: exercise.tags)
+                        .padding(.top, 6)
+                }
+            }
         }
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)

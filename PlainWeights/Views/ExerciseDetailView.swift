@@ -284,61 +284,97 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
-            // Today's sets section
-            if !todaySets.isEmpty {
-                Section {
-                    ForEach(todaySets.indices, id: \.self) { index in
-                        let set = todaySets[index]
-                        SetRowView(
-                            set: set,
-                            setNumber: todaySets.count - index,
-                            isFirst: index == 0,
-                            isLast: index == todaySets.count - 1,
-                            onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
-                            onDelete: { deleteSet(set) },
-                            allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
-                            showTimer: index == 0  // Only show timer on most recent set
-                        )
-                    }
-                } header: {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("TODAY")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
-                        HStack(spacing: 8) {
-                            Image(systemName: "chevron.down")
-                                .font(.caption)
-                                .foregroundStyle(themeManager.currentTheme.accent)
-                            Text("—")
-                                .foregroundStyle(.secondary)
-                            Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
-                                .font(.footnote)
+            // Today's Sets Card (matches Make design)
+            Section {
+                VStack(spacing: 0) {
+                    // Card Header
+                    VStack(spacing: 0) {
+                        HStack {
+                            Text("Today's Sets")
+                                .font(.headline)
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                             Spacer()
-                            HStack(spacing: 8) {
-                                // Show volume for weighted exercises, reps for bodyweight
-                                if isWeightedExercise {
-                                    Text("\(Formatters.formatVolume(todaysVolume)) kg")
-                                        .font(.footnote)
-                                        .foregroundStyle(.secondary)
-                                } else {
-                                    Text("\(todaysTotalReps) reps")
-                                        .font(.footnote)
-                                        .foregroundStyle(.secondary)
-                                }
-                                if let mins = sessionDurationMinutes {
-                                    Text("|")
-                                        .font(.footnote)
-                                        .foregroundStyle(.secondary)
-                                    Text("\(mins) min")
-                                        .font(.footnote)
-                                        .foregroundStyle(.secondary)
-                                }
+                            if !todaySets.isEmpty {
+                                Text("\(todaySets.count) \(todaySets.count == 1 ? "set" : "sets")")
+                                    .font(.subheadline)
+                                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+
+                        // Volume info (only when has sets)
+                        if !todaySets.isEmpty {
+                            Divider()
+                                .background(themeManager.currentTheme.borderColor)
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Total Volume")
+                                        .font(.caption)
+                                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                                    Text(isWeightedExercise ? "\(Formatters.formatVolume(todaysVolume)) kg" : "\(todaysTotalReps) reps")
+                                        .font(.title2)
+                                        .fontDesign(.monospaced)
+                                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                                }
+                                Spacer()
+                                if let mins = sessionDurationMinutes {
+                                    VStack(alignment: .trailing, spacing: 2) {
+                                        Text("Duration")
+                                            .font(.caption)
+                                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                                        Text("\(mins) min")
+                                            .font(.title3)
+                                            .fontDesign(.monospaced)
+                                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                        }
+                    }
+
+                    Divider()
+                        .background(themeManager.currentTheme.borderColor)
+
+                    // Card Content
+                    if todaySets.isEmpty {
+                        // Empty state
+                        Text("No sets logged yet")
+                            .font(.subheadline)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 32)
+                    } else {
+                        // Sets list
+                        VStack(spacing: 0) {
+                            ForEach(todaySets.indices, id: \.self) { index in
+                                let set = todaySets[index]
+                                SetRowView(
+                                    set: set,
+                                    setNumber: todaySets.count - index,
+                                    isFirst: index == 0,
+                                    isLast: index == todaySets.count - 1,
+                                    onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
+                                    onDelete: { deleteSet(set) },
+                                    allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
+                                    showTimer: index == 0
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 16)
                     }
                 }
+                .background(themeManager.currentTheme.cardBackgroundColor)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                )
             }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
 
             // Historic sets: one section per day group
             if !historicDayGroups.isEmpty {
@@ -378,23 +414,6 @@ struct ExerciseDetailView: View {
                 }
             }
 
-            // Empty state (only when no sets at all)
-            if sets.isEmpty {
-                Section {
-                    Text("No sets yet")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                                .foregroundStyle(themeManager.currentTheme.borderColor)
-                        )
-                }
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-            }
         }
         .listStyle(.plain)
         .listSectionSpacing(0)

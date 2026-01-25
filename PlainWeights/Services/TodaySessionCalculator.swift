@@ -68,19 +68,39 @@ enum TodaySessionCalculator {
         return todaySets.last?.timestamp  // Sets sorted newest first, .last is oldest
     }
 
-    /// Get session end time (3 minutes after most recent set)
-    static func getSessionEndTime(from sets: [ExerciseSet]) -> Date? {
+    /// Get most recent set time
+    static func getMostRecentSetTime(from sets: [ExerciseSet]) -> Date? {
         let todaySets = getTodaysSets(from: sets)
-        guard let lastSetTime = todaySets.first?.timestamp else { return nil }
-        return lastSetTime.addingTimeInterval(3 * 60)  // +3 minutes
+        return todaySets.first?.timestamp  // Sets sorted newest first
     }
 
     /// Get session duration in minutes
+    /// Logic:
+    /// - 1 set, < 3 min elapsed: return nil (don't show)
+    /// - 1 set, >= 3 min elapsed: return elapsed time since that set
+    /// - 2+ sets: return time from first set to most recent set
     static func getSessionDurationMinutes(from sets: [ExerciseSet]) -> Int? {
-        guard let start = getSessionStartTime(from: sets),
-              let end = getSessionEndTime(from: sets) else { return nil }
-        let duration = end.timeIntervalSince(start)
-        return max(0, Int(duration / 60))
+        let todaySets = getTodaysSets(from: sets)
+        guard !todaySets.isEmpty else { return nil }
+
+        let firstSetTime = todaySets.last?.timestamp   // Oldest set (sorted newest first)
+        let lastSetTime = todaySets.first?.timestamp   // Most recent set
+
+        guard let start = firstSetTime, let end = lastSetTime else { return nil }
+
+        if todaySets.count == 1 {
+            // Only 1 set - check if 3+ minutes have elapsed
+            let elapsed = Date().timeIntervalSince(start)
+            let elapsedMinutes = Int(elapsed / 60)
+            if elapsedMinutes < 3 {
+                return nil  // Don't show duration yet
+            }
+            return elapsedMinutes  // Show elapsed time since first set
+        } else {
+            // 2+ sets - duration from first to most recent set
+            let duration = end.timeIntervalSince(start)
+            return max(0, Int(duration / 60))
+        }
     }
 
     /// Get today's total reps (sum of all sets)

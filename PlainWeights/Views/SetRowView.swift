@@ -72,21 +72,13 @@ struct SetRowView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Col 1: Vertical line with top/bottom caps
-            Rectangle()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(width: 1)
-                .padding(.top, isFirst ? 12 : 0)
-                .padding(.bottom, isLast ? 12 : 0)
-
             // Content columns
             HStack(spacing: 0) {
-                // Col 2: Set number
+                // Col 1: Set number (left-aligned)
                 Text(String(format: "%02d", setNumber))
                     .font(.system(size: 14))
                     .foregroundStyle(.secondary)
                     .frame(width: 24, alignment: .leading)
-                    .padding(.leading, 8)
 
                 // Col 2.5: PB indicator (between set number and weight)
                 if set.isPB {

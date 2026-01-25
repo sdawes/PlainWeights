@@ -99,7 +99,7 @@ struct EmptyChartPreview: View {
 
             // Text below chart
             Text("Your progress chart will appear here")
-                .font(.appFont(.caption))
+                .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
@@ -117,12 +117,12 @@ struct ChartToggleButton: View {
         }) {
             HStack(spacing: 4) {
                 Text("Chart")
-                    .font(.appFont(.caption))
-                    .foregroundStyle(.blue)
+                    .font(.caption)
+                    .foregroundStyle(.primary)
 
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .font(.appFont(size: 10))
-                    .foregroundStyle(.blue)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.primary)
             }
             .id(isExpanded)
         }
@@ -209,7 +209,7 @@ struct ChartContentView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Chart title
             Text("Progress Chart")
-                .font(.appFont(.subheadline, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(themeManager.currentTheme.primaryText)
 
             if chartData.isEmpty {
@@ -308,7 +308,7 @@ struct ChartContentView: View {
                     if dataPoint.isPB {
                         // Vertical line extending from top to bottom of chart
                         RuleMark(x: .value("PB Date", dataPoint.date))
-                            .foregroundStyle(Color.pw_amber.opacity(0.5))
+                            .foregroundStyle(chartColor.opacity(0.5))
                             .lineStyle(StrokeStyle(lineWidth: 1))
 
                         // Trophy icon at top (positioned using invisible point)
@@ -321,7 +321,7 @@ struct ChartContentView: View {
                         .annotation(position: .top, spacing: 4) {
                             Image(systemName: "trophy.fill")
                                 .font(.system(size: 12))
-                                .foregroundStyle(Color.pw_amber)
+                                .foregroundStyle(chartColor)
                         }
                     }
                 }
@@ -350,7 +350,7 @@ struct ChartContentView: View {
                                     .fill(chartColor)
                                     .frame(width: 8, height: 8)
                                 Text("Weight")
-                                    .font(.appFont(size: 9))
+                                    .font(.system(size: 9))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -361,7 +361,7 @@ struct ChartContentView: View {
                                 .fill(chartColor)
                                 .frame(width: 8, height: 8)
                             Text("Reps")
-                                .font(.appFont(size: 9))
+                                .font(.system(size: 9))
                                 .foregroundStyle(.secondary)
                         }
 
@@ -369,9 +369,9 @@ struct ChartContentView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "trophy.fill")
                                 .font(.system(size: 8))
-                                .foregroundStyle(Color.pw_amber)
+                                .foregroundStyle(chartColor)
                             Text("PB")
-                                .font(.appFont(size: 9))
+                                .font(.system(size: 9))
                                 .foregroundStyle(.secondary)
                         }
                     }

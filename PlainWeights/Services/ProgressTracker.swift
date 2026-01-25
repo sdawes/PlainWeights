@@ -12,23 +12,15 @@ import SwiftUI
 enum ProgressTracker {
     
     // MARK: - Color Logic
-    
-    /// Determine the fill color for progress bar based on achievement percentage
+
+    /// Determine the fill color for progress bar (uses primary color for black/white theme)
     static func barFillColor(percentOfLast: Int) -> Color {
-        if percentOfLast > 100 {
-            return .green  // Standard green when past target
-        } else if percentOfLast == 100 {
-            return .blue  // Blue when equal to target
-        } else {
-            return Color(red: 0.7, green: 0.1, blue: 0.1)  // Red when under target (matches arrows)
-        }
+        .primary
     }
 
-    /// Determine color for gains display based on performance
+    /// Determine color for gains display (uses primary color for black/white theme)
     static func gainsColor(gainsPercent: Int) -> Color {
-        if gainsPercent > 0 { return .green }
-        if gainsPercent < 0 { return Color(red: 0.7, green: 0.1, blue: 0.1) }
-        return .secondary
+        .primary
     }
 
     /// Determine direction and color for volume/reps comparison
@@ -56,11 +48,7 @@ enum ProgressTracker {
         }
 
         var color: Color {
-            switch self {
-            case .up: return .green  // Standard green for improvements
-            case .down: return Color(red: 0.7, green: 0.1, blue: 0.1)  // Darker red for decreases
-            case .same: return .blue                                 // Blue for no change
-            }
+            .primary  // Black/white theme uses primary color
         }
     }
 

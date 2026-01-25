@@ -21,11 +21,11 @@ struct WeightRepsInputContainer: View {
             // Weight input box
             VStack(alignment: .leading, spacing: 6) {
                 Text("Weight (kg)")
-                    .font(.appFont(.subheadline))
-                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+                    .foregroundStyle(themeManager.currentTheme.secondaryText)
 
                 TextField("Enter weight (optional)", text: $weightText)
-                    .font(.appFont(.body))
+                    .font(.body)
                     .keyboardType(.decimalPad)
                     .focused($focusedField, equals: .weight)
                     .submitLabel(.next)
@@ -33,10 +33,10 @@ struct WeightRepsInputContainer: View {
                         focusedField = .reps
                     }
                     .padding(16)
-                    .background(themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground))
+                    .background(themeManager.currentTheme.background)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(focusedField == .weight ? Color.blue : themeManager.currentTheme.borderColor, lineWidth: focusedField == .weight ? 2 : 1)
+                            .stroke(themeManager.currentTheme.primary.opacity(focusedField == .weight ? 1 : 0.2), lineWidth: focusedField == .weight ? 2 : 1)
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -44,11 +44,11 @@ struct WeightRepsInputContainer: View {
             // Reps input box
             VStack(alignment: .leading, spacing: 6) {
                 Text("Reps")
-                    .font(.appFont(.subheadline))
-                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+                    .foregroundStyle(themeManager.currentTheme.secondaryText)
 
                 TextField("Enter reps (optional)", text: $repsText)
-                    .font(.appFont(.body))
+                    .font(.body)
                     .keyboardType(.numberPad)
                     .focused($focusedField, equals: .reps)
                     .submitLabel(.done)
@@ -56,20 +56,20 @@ struct WeightRepsInputContainer: View {
                         focusedField = nil
                     }
                     .padding(16)
-                    .background(themeManager.currentTheme == .dark ? Color.clear : Color(.systemBackground))
+                    .background(themeManager.currentTheme.background)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(focusedField == .reps ? Color.blue : themeManager.currentTheme.borderColor, lineWidth: focusedField == .reps ? 2 : 1)
+                            .stroke(themeManager.currentTheme.primary.opacity(focusedField == .reps ? 1 : 0.2), lineWidth: focusedField == .reps ? 2 : 1)
                     )
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
         .padding(16)
-        .background(themeManager.currentTheme.cardBackgroundColor)
+        .background(themeManager.currentTheme.background)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                .strokeBorder(themeManager.currentTheme.border, lineWidth: 1)
         )
     }
 }
@@ -92,64 +92,60 @@ struct SetOptionsToggles: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 10) {
             // Row 1
-            chipButton(icon: "flame.fill", text: "Warm-up",
-                       isSelected: isWarmUpSet, activeColor: .orange) {
+            chipButton(icon: "flame.fill", text: "Warm-up", isSelected: isWarmUpSet) {
                 selectOption(.warmUp)
             }
-            chipButton(icon: "chevron.down", text: "Drop set",
-                       isSelected: isDropSet, activeColor: .teal) {
+            chipButton(icon: "chevron.down", text: "Drop set", isSelected: isDropSet) {
                 selectOption(.dropSet)
             }
             // Row 2
-            chipButton(icon: "pause.fill", text: "Pause",
-                       isSelected: isPauseAtTop, activeColor: .pink) {
+            chipButton(icon: "pause.fill", text: "Pause", isSelected: isPauseAtTop) {
                 selectOption(.pause)
             }
-            chipButton(icon: "timer", text: "Timed",
-                       isSelected: isTimedSet, activeColor: .black) {
+            chipButton(icon: "timer", text: "Timed", isSelected: isTimedSet) {
                 selectOption(.timed)
             }
             // Row 3
-            chipButton(icon: "star.fill", text: "Bonus",
-                       isSelected: isBonusSet, activeColor: .yellow) {
+            chipButton(icon: "star.fill", text: "Bonus", isSelected: isBonusSet) {
                 selectOption(.bonus)
             }
             Color.clear // Empty cell
         }
         .padding(12)
-        .background(themeManager.currentTheme.cardBackgroundColor)
+        .background(themeManager.currentTheme.background)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                .strokeBorder(themeManager.currentTheme.border, lineWidth: 1)
         )
     }
 
     // MARK: - Helper Views
 
     @ViewBuilder
-    private func chipButton(icon: String, text: String, isSelected: Bool,
-                            activeColor: Color, action: @escaping () -> Void) -> some View {
+    private func chipButton(icon: String, text: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        let primary = themeManager.currentTheme.primary
+        let background = themeManager.currentTheme.background
         Button {
             action()
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.appFont(size: 12))
+                    .font(.system(size: 12))
                 Text(text)
-                    .font(.appFont(.subheadline))
+                    .font(.subheadline)
                 Spacer()
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
-            .background(isSelected ? activeColor : Color.clear)
-            .foregroundStyle(isSelected ? .white : .secondary)
+            .background(isSelected ? primary : Color.clear)
+            .foregroundStyle(isSelected ? background : primary.opacity(0.6))
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                    .foregroundStyle(isSelected ? Color.clear : themeManager.currentTheme.borderColor)
+                    .foregroundStyle(isSelected ? Color.clear : themeManager.currentTheme.border)
             )
         }
         .buttonStyle(.plain)
@@ -233,9 +229,9 @@ struct AddSetButton: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: iconName)
-                    .font(.appFont(.headline))
+                    .font(.headline)
                 Text(title)
-                    .font(.appFont(.headline))
+                    .font(.headline)
             }
             .foregroundStyle(isEnabled ? themeManager.currentTheme.textColor : .gray)
             .frame(maxWidth: .infinity)

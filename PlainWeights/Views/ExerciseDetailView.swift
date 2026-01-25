@@ -77,16 +77,12 @@ struct ExerciseDetailView: View {
 
     // Color for baseline comparison
     private var baselineColor: Color {
-        if percentOfBaseline < 100 { return .red }
-        if percentOfBaseline > 100 { return .green }
-        return .blue
+        .primary
     }
 
     // Color for target comparison
     private var targetColor: Color {
-        if percentOfTarget < 100 { return .red }
-        if percentOfTarget > 100 { return .green }
-        return .blue
+        .primary
     }
 
     init(exercise: Exercise) {
@@ -105,7 +101,7 @@ struct ExerciseDetailView: View {
         Section {
             VStack(alignment: .leading, spacing: 0) {
                 Text(exercise.name)
-                    .font(.appFont(.title, weight: .semiBold))
+                    .font(.title.weight(.semibold))
                     .foregroundStyle(themeManager.currentTheme.accent)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
@@ -161,7 +157,7 @@ struct ExerciseDetailView: View {
                 } header: {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("TODAY")
-                            .font(.appFont(.subheadline, weight: .semiBold))
+                            .font(.subheadline.weight(.semibold))
                             .foregroundStyle(themeManager.currentTheme.primaryText)
                         HStack(spacing: 8) {
                             Image(systemName: "chevron.down")
@@ -170,26 +166,26 @@ struct ExerciseDetailView: View {
                             Text("—")
                                 .foregroundStyle(.secondary)
                             Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
-                                .font(.appFont(.footnote))
+                                .font(.footnote)
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                             Spacer()
                             HStack(spacing: 8) {
                                 // Show volume for weighted exercises, reps for bodyweight
                                 if isWeightedExercise {
                                     Text("\(Formatters.formatVolume(todaysVolume)) kg")
-                                        .font(.appFont(.footnote))
+                                        .font(.footnote)
                                         .foregroundStyle(.secondary)
                                 } else {
                                     Text("\(todaysTotalReps) reps")
-                                        .font(.appFont(.footnote))
+                                        .font(.footnote)
                                         .foregroundStyle(.secondary)
                                 }
                                 if let mins = sessionDurationMinutes {
                                     Text("|")
-                                        .font(.appFont(.footnote))
+                                        .font(.footnote)
                                         .foregroundStyle(.secondary)
                                     Text("\(mins) min")
-                                        .font(.appFont(.footnote))
+                                        .font(.footnote)
                                         .foregroundStyle(.secondary)
                                 }
                             }
@@ -218,7 +214,7 @@ struct ExerciseDetailView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             if groupIndex == 0 {
                                 Text("PREVIOUS")
-                                    .font(.appFont(.subheadline, weight: .semiBold))
+                                    .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                             HStack(spacing: 8) {
@@ -228,7 +224,7 @@ struct ExerciseDetailView: View {
                                 Text("—")
                                     .foregroundStyle(.secondary)
                                 Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                    .font(.appFont(.footnote))
+                                    .font(.footnote)
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                         }
@@ -240,7 +236,7 @@ struct ExerciseDetailView: View {
             if sets.isEmpty {
                 Section {
                     Text("No sets yet")
-                        .font(.appFont(.subheadline))
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
@@ -271,12 +267,12 @@ struct ExerciseDetailView: View {
             }) {
                 Image(systemName: "plus")
                     .font(.title2)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(themeManager.currentTheme.background)
             }
             .frame(width: 48, height: 48)
-            .background(.blue)
+            .background(themeManager.currentTheme.primary)
             .clipShape(Circle())
-            .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 4)
+            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
             .padding(.trailing, 20)
             .padding(.bottom, 20)
         }

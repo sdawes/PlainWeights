@@ -83,7 +83,7 @@ struct SetRowView: View {
             HStack(spacing: 0) {
                 // Col 2: Set number
                 Text(String(format: "%02d", setNumber))
-                    .font(.appFont(size: 14))
+                    .font(.system(size: 14))
                     .foregroundStyle(.secondary)
                     .frame(width: 24, alignment: .leading)
                     .padding(.leading, 8)
@@ -91,8 +91,8 @@ struct SetRowView: View {
                 // Col 2.5: PB indicator (between set number and weight)
                 if set.isPB {
                     Text("PB")
-                        .font(.appFont(size: 12, weight: .semiBold))
-                        .foregroundStyle(Color.pw_amber)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
                         .frame(width: 20, alignment: .center)
                 } else {
                     Spacer()
@@ -102,19 +102,19 @@ struct SetRowView: View {
                 // Col 3: Weight × Reps (baseline aligned)
                 HStack(alignment: .lastTextBaseline, spacing: 0) {
                     Text(Formatters.formatWeight(set.weight))
-                        .font(.appFont(.headline, weight: .regular))
+                        .font(.headline.weight(.regular))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .frame(width: 45, alignment: .trailing)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
 
                     Text(" kg × ")
-                        .font(.appFont(.caption))
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
 
                     Text("\(set.reps)")
-                        .font(.appFont(.headline, weight: .regular))
+                        .font(.headline.weight(.regular))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .frame(width: 25, alignment: .leading)
                         .lineLimit(1)
@@ -128,7 +128,7 @@ struct SetRowView: View {
                 Group {
                     if hasComparisonData {
                         deltaText(for: prevWeightDelta, suffix: "kg")
-                            .font(.appFont(size: 14))
+                            .font(.system(size: 14))
                     } else {
                         Color.clear
                     }
@@ -141,7 +141,7 @@ struct SetRowView: View {
                 Group {
                     if hasComparisonData {
                         deltaText(for: prevRepsDelta, suffix: "")
-                            .font(.appFont(size: 14))
+                            .font(.system(size: 14))
                     } else {
                         Color.clear
                     }
@@ -167,7 +167,7 @@ struct SetRowView: View {
             onTap()
         }
         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-        .listRowBackground(set.isWarmUp ? Color.orange.opacity(0.08) : Color.clear)
+        .listRowBackground(set.isWarmUp ? themeManager.currentTheme.primary.opacity(0.05) : Color.clear)
         .listRowSeparator(.hidden)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
@@ -241,32 +241,33 @@ struct SetRowView: View {
 
     @ViewBuilder
     private func badgeCircle(for badge: String) -> some View {
+        let color = themeManager.currentTheme.primaryText
         switch badge {
         case "warmup":
             Image(systemName: "flame.fill")
-                .font(.appFont(size: 14))
-                .foregroundStyle(.orange)
+                .font(.system(size: 14))
+                .foregroundStyle(color)
         case "bonus":
             Image(systemName: "trophy.fill")
-                .font(.appFont(size: 14))
-                .foregroundStyle(.yellow)
+                .font(.system(size: 14))
+                .foregroundStyle(color)
         case "dropset":
             Image(systemName: "chevron.down.2")
-                .font(.appFont(size: 14, weight: .bold))
-                .foregroundStyle(.cyan)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(color)
         case "pause":
             Image(systemName: "pause.fill")
-                .font(.appFont(size: 14))
-                .foregroundStyle(.pink)
+                .font(.system(size: 14))
+                .foregroundStyle(color)
         case "timed":
             if set.tempoSeconds > 0 {
                 Text("\(set.tempoSeconds)")
-                    .font(.appFont(size: 14))
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                    .font(.system(size: 14))
+                    .foregroundStyle(color)
             } else {
                 Image(systemName: "timer")
-                    .font(.appFont(size: 14))
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                    .font(.system(size: 14))
+                    .foregroundStyle(color)
             }
         default:
             EmptyView()
@@ -289,7 +290,7 @@ struct SetRowView: View {
         // Priority 3: Default - show timestamp
         else {
             Text(Formatters.formatTimeHM(set.timestamp))
-                .font(.appFont(.caption))
+                .font(.caption)
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
         }
     }
@@ -298,11 +299,11 @@ struct SetRowView: View {
     private func staticRestTimeView(seconds: Int) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "moon.zzz")
-                .font(.appFont(.caption))
+                .font(.caption)
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
 
             Text(Formatters.formatDuration(Double(seconds)))
-                .font(.appFont(.caption))
+                .font(.caption)
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 .monospacedDigit()
         }
@@ -320,13 +321,13 @@ struct SetRowView: View {
 
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
-                        .font(.appFont(.caption))
+                        .font(.caption)
                         .fontWeight(.bold)
                         .foregroundStyle(color)
 
                     if elapsed >= 180 {
                         Text("> 3m")
-                            .font(.appFont(.caption))
+                            .font(.caption)
                             .fontWeight(.bold)
                             .foregroundStyle(color)
                             .onAppear {
@@ -335,7 +336,7 @@ struct SetRowView: View {
                             }
                     } else {
                         Text(Formatters.formatDuration(elapsed))
-                            .font(.appFont(.caption))
+                            .font(.caption)
                             .fontWeight(.bold)
                             .foregroundStyle(color)
                             .monospacedDigit()
@@ -346,25 +347,7 @@ struct SetRowView: View {
     }
 
     private func restTimeColor(for seconds: Int) -> Color {
-        if seconds < 60 {
-            // 0-60s: default text color
-            return themeManager.currentTheme.primaryText
-        } else if seconds < 90 {
-            // 60-90s: yellow/gold
-            return themeManager.currentTheme == .light
-                ? Color(red: 0.75, green: 0.6, blue: 0.0)  // Dark gold for light theme
-                : .yellow
-        } else if seconds < 120 {
-            // 90-120s: orange
-            return themeManager.currentTheme == .light
-                ? Color(red: 0.85, green: 0.45, blue: 0.0)  // Dark orange for light theme
-                : .orange
-        } else {
-            // 120s+: red
-            return themeManager.currentTheme == .light
-                ? Color(red: 0.8, green: 0.2, blue: 0.2)  // Dark red for light theme
-                : .red
-        }
+        themeManager.currentTheme.primaryText
     }
 
     private func captureRestTimeExpiry() {

@@ -35,10 +35,10 @@ struct SessionSummaryView: View {
                         RetroLifterView(pixelSize: 5)
 
                         Text("No Workouts Yet")
-                            .font(.appFont(.title2))
+                            .font(.title2)
 
                         Text("Complete your first workout to see a summary here.")
-                            .font(.appFont(.subheadline))
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -83,11 +83,11 @@ struct SessionSummaryView: View {
     private func headerSection(for day: ExerciseDataGrouper.WorkoutDay) -> some View {
         VStack(spacing: 4) {
             Text(isShowingToday ? "Today's Session" : "Last Session")
-                .font(.appFont(.headline))
+                .font(.headline)
                 .foregroundStyle(.secondary)
 
             Text(day.date, format: .dateTime.weekday(.wide).month(.wide).day())
-                .font(.appFont(.title2))
+                .font(.title2)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -114,24 +114,24 @@ struct SessionSummaryView: View {
                 Divider()
                     .frame(height: 30)
 
-                // PB stat with gold trophy
+                // PB stat with trophy
                 VStack(spacing: 2) {
                     HStack(spacing: 4) {
                         Text("\(pbCount)")
-                            .font(.appFont(.title3))
+                            .font(.title3)
                         Image(systemName: "trophy.fill")
-                            .font(.appFont(size: 14))
-                            .foregroundStyle(Color.pw_amber)
+                            .font(.system(size: 14))
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
                     }
                     Text(pbCount == 1 ? "PB" : "PBs")
-                        .font(.appFont(.caption))
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
             }
         }
         .padding(.vertical, 12)
-        .background(themeManager.currentTheme.cardBackgroundColor.opacity(0.8))
+        .background(themeManager.currentTheme.background)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
@@ -139,9 +139,9 @@ struct SessionSummaryView: View {
     private func statItem(value: String, label: String) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.appFont(.title3))
+                .font(.title3)
             Text(label)
-                .font(.appFont(.caption))
+                .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -164,14 +164,14 @@ struct SessionSummaryView: View {
             // Exercise name with PB badge
             HStack {
                 Text(workoutExercise.exercise.name)
-                    .font(.appFont(.headline))
+                    .font(.headline)
 
                 Spacer()
 
                 if hasPB {
                     Image(systemName: "trophy.fill")
-                        .font(.appFont(size: 14))
-                        .foregroundStyle(Color.pw_amber)
+                        .font(.system(size: 14))
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
                 }
             }
 
@@ -191,7 +191,7 @@ struct SessionSummaryView: View {
                 Text("\(Formatters.formatVolume(workoutExercise.volume)) kg")
                     .foregroundStyle(.secondary)
             }
-            .font(.appFont(.subheadline))
+            .font(.subheadline)
 
             // Max weight × reps
             if let maxSet = workoutExercise.sets.filter({ !$0.isWarmUp && !$0.isBonus }).max(by: { $0.weight < $1.weight }) {
@@ -200,7 +200,7 @@ struct SessionSummaryView: View {
                         .foregroundStyle(.tertiary)
                     Text("\(Formatters.formatWeight(maxSet.weight)) kg × \(maxSet.reps)")
                 }
-                .font(.appFont(.subheadline))
+                .font(.subheadline)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -3,6 +3,8 @@
 //  PlainWeights
 //
 //  Theme definitions for the app
+//  Light: white background, black everything
+//  Dark: black background, white everything
 //
 
 import SwiftUI
@@ -15,121 +17,72 @@ enum AppTheme: String, CaseIterable {
         rawValue
     }
 
+    // MARK: - Primary Color (used for text, symbols, progress)
+
+    var primary: Color {
+        switch self {
+        case .light: return .black
+        case .dark: return .white
+        }
+    }
+
     // MARK: - Text Colors
 
     var primaryText: Color {
-        switch self {
-        case .light:
-            return .black
-        case .dark:
-            return Color.white.opacity(0.90)
-        }
+        primary
     }
 
     var secondaryText: Color {
-        switch self {
-        case .light:
-            return Color(red: 0.4, green: 0.4, blue: 0.4)
-        case .dark:
-            return Color.white.opacity(0.7)
-        }
+        primary.opacity(0.6)
     }
 
     var tertiaryText: Color {
+        primary.opacity(0.4)
+    }
+
+    // MARK: - Background Color (single background)
+
+    var background: Color {
         switch self {
-        case .light:
-            return Color(red: 0.5, green: 0.5, blue: 0.5)
-        case .dark:
-            return Color.white.opacity(0.5)
+        case .light: return .white
+        case .dark: return .black
         }
     }
 
-    // MARK: - Background Colors
+    var background1: Color { background }
+    var background2: Color { background }
 
-    var background1: Color {
-        switch self {
-        case .light:
-            return Color(red: 254/255, green: 254/255, blue: 254/255)  // #FEFEFE
-        case .dark:
-            return Color(red: 0.05, green: 0.07, blue: 0.09)  // Dark navy
-        }
-    }
-
-    var background2: Color {
-        switch self {
-        case .light:
-            return Color(red: 248/255, green: 246/255, blue: 243/255)  // #F8F6F3 (creamy off-white)
-        case .dark:
-            return Color(red: 0.125, green: 0.145, blue: 0.188)  // Card navy (#202530)
-        }
-    }
-
-    // MARK: - Border Colors
+    // MARK: - Border Color
 
     var border: Color {
-        switch self {
-        case .light:
-            return Color(red: 0.85, green: 0.85, blue: 0.85)
-        case .dark:
-            return Color(red: 0.216, green: 0.235, blue: 0.294)  // #373C4B
-        }
+        primary.opacity(0.2)
     }
 
-    // MARK: - Accent Colors
+    // MARK: - Accent Color
 
     var accent: Color {
-        switch self {
-        case .light:
-            return Color(red: 20/255, green: 40/255, blue: 80/255)  // #142850 (dark navy)
-        case .dark:
-            return Color(red: 103/255, green: 222/255, blue: 251/255)  // Bright cyan (#67DEFB)
-        }
+        primary
     }
 
-    // MARK: - Progress Colors
+    // MARK: - Progress Colors (all use primary)
 
-    var progressUp: Color {
-        switch self {
-        case .light:
-            return Color(red: 0.15, green: 0.75, blue: 0.3)  // Vibrant green
-        case .dark:
-            return .green
-        }
-    }
-
-    var progressDown: Color {
-        switch self {
-        case .light:
-            return Color(red: 0.9, green: 0.2, blue: 0.25)  // Vibrant red
-        case .dark:
-            return .pink
-        }
-    }
-
-    var progressSame: Color {
-        switch self {
-        case .light:
-            return Color(red: 0.2, green: 0.5, blue: 0.95)  // Vibrant blue
-        case .dark:
-            return .cyan
-        }
-    }
+    var progressUp: Color { primary }
+    var progressDown: Color { primary }
+    var progressSame: Color { primary }
 
     // MARK: - Color Scheme
 
     var colorScheme: ColorScheme {
         switch self {
-        case .light:
-            return .light
-        case .dark:
-            return .dark
+        case .light: return .light
+        case .dark: return .dark
         }
     }
 
-    // MARK: - Legacy Compatibility (to be removed after migration)
+    // MARK: - Legacy Compatibility
 
-    var backgroundColor: Color { background1 }
-    var cardBackgroundColor: Color { background2 }
+    var backgroundColor: Color { background }
+    var cardBackgroundColor: Color { background }
     var textColor: Color { primaryText }
     var secondaryTextColor: Color { secondaryText }
     var tertiaryTextColor: Color { tertiaryText }

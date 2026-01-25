@@ -17,6 +17,7 @@ struct PlainWeightsApp: App {
             ContentView()
                 .environment(themeManager)
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
+                .dynamicTypeSize(.large)
         }
         .modelContainer(for: [Exercise.self, ExerciseSet.self])
     }

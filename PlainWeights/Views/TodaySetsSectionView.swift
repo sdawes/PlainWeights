@@ -19,85 +19,55 @@ struct TodaySetsSectionView: View {
         ForEach(todaySets, id: \.persistentModelID) { set in
             HStack(alignment: .bottom) {
                 Text(ExerciseSetFormatters.formatSet(set))
-                    .font(.appFont(.body))
+                    .font(.body)
                     .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
                 Spacer()
 
                 if set.isWarmUp {
-                    Circle()
-                        .fill(.orange)
-                        .frame(width: 20, height: 20)
-                        .overlay {
-                            Image(systemName: "flame.fill")
-                                .font(.appFont(size: 10))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.primary)
                 }
 
                 if set.isBonus {
-                    Circle()
-                        .fill(.yellow)
-                        .frame(width: 20, height: 20)
-                        .overlay {
-                            Image(systemName: "star.fill")
-                                .font(.appFont(size: 10))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.primary)
                 }
 
                 if set.isDropSet {
-                    Circle()
-                        .fill(.teal)
-                        .frame(width: 20, height: 20)
-                        .overlay {
-                            Image(systemName: "chevron.down")
-                                .font(.appFont(size: 10))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "chevron.down.2")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.primary)
                 }
 
                 if set.isPauseAtTop {
-                    Circle()
-                        .fill(.pink)
-                        .frame(width: 20, height: 20)
-                        .overlay {
-                            Image(systemName: "pause.fill")
-                                .font(.appFont(size: 10))
-                                .foregroundStyle(.white)
-                        }
+                    Image(systemName: "pause.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.primary)
                 }
 
                 if set.isTimedSet {
-                    Circle()
-                        .fill(.black)
-                        .frame(width: 20, height: 20)
-                        .overlay {
-                            if set.tempoSeconds > 0 {
-                                Text("\(set.tempoSeconds)")
-                                    .font(.appFont(size: 11))
-                                    .foregroundStyle(.white)
-                            } else {
-                                Image(systemName: "timer")
-                                    .font(.appFont(size: 10))
-                                    .foregroundStyle(.white)
-                            }
-                        }
+                    if set.tempoSeconds > 0 {
+                        Text("\(set.tempoSeconds)")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.primary)
+                    } else {
+                        Image(systemName: "timer")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.primary)
+                    }
                 }
 
                 if set.isPB {
-                    Circle()
-                        .fill(.purple)
-                        .frame(width: 20, height: 20)
-                        .overlay {
-                            Text("PB")
-                                .font(.appFont(size: 9))
-                                .foregroundStyle(.white)
-                        }
+                    Text("PB")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.primary)
                 }
 
                 Text(Formatters.formatTimeHM(set.timestamp))
-                .font(.appFont(.caption))
+                .font(.caption)
                 .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())

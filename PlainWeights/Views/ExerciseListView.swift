@@ -85,11 +85,9 @@ struct FilteredExerciseListView: View {
         return 1.0
     }
 
-    /// Get timestamp color based on staleness
+    /// Get timestamp color
     private func timestampColor(for exercise: Exercise) -> Color {
-        if isVeryStale(exercise) { return .red }
-        if isStale(exercise) { return .orange }
-        return themeManager.currentTheme.tertiaryTextColor
+        themeManager.currentTheme.tertiaryText
     }
 
     var body: some View {
@@ -108,7 +106,7 @@ struct FilteredExerciseListView: View {
                 // App title (only shown when exercises exist)
                 Section {
                     Text(">_ plainweights")
-                        .font(.appFont(.title3, weight: .bold))
+                        .font(.title3.weight(.bold))
                         .foregroundStyle(themeManager.currentTheme.accent)
                 }
                 .listRowBackground(Color.clear)
@@ -118,7 +116,7 @@ struct FilteredExerciseListView: View {
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
-                                    .font(.appFont(.headline, weight: .semiBold))
+                                    .font(.headline.weight(.semibold))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                                     .opacity(nameOpacity(for: exercise))
                                 if !exercise.tags.isEmpty {
@@ -126,7 +124,7 @@ struct FilteredExerciseListView: View {
                                         .padding(.top, 6)
                                 }
                                 Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
-                                    .font(.appFont(.caption))
+                                    .font(.caption)
                                     .foregroundStyle(timestampColor(for: exercise))
                                     .padding(.top, 10)
                             }

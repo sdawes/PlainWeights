@@ -52,48 +52,24 @@ The whole point of PlainWeights is to strip away all unnecessary complexity and 
 - **Clean and elegant**: Every element must earn its place
 - **Functional simplicity**: If it doesn't help the user record or track, remove it
 
-### Typography - SF Mono Throughout
-**CRITICAL: The entire app uses SF Mono (monospaced) font exclusively.**
+### Typography - System Font (SF Pro)
+**The app uses the default iOS system font (SF Pro) for clean, native appearance.**
 
 ```swift
-// Standard text patterns - ALWAYS use .monospaced design
-.font(.system(.body, design: .monospaced))      // Body text
-.font(.system(.headline, design: .monospaced))  // Headlines
-.font(.system(.subheadline, design: .monospaced)) // Subheadlines
-.font(.system(.caption, design: .monospaced))   // Captions
-.font(.system(.title2, design: .monospaced))    // Titles
-.font(.system(size: 24, design: .monospaced))   // Custom sizes
+// Standard text patterns - use default system font
+.font(.body)                    // Body text
+.font(.headline)                // Headlines
+.font(.subheadline)             // Subheadlines
+.font(.caption)                 // Captions
+.font(.title2)                  // Titles
+.font(.system(size: 24))        // Custom sizes
 ```
 
-**Why SF Mono:**
-- Creates a retro, technical aesthetic
-- Perfect alignment for numbers and data
-- Consistent character width aids readability
-- Reinforces the "plain" philosophy
-
-### ASCII Art & Unicode Symbols
-For logos and decorative elements, use Unicode/ASCII symbols rendered as text rather than images:
-
-```swift
-// Example: Barbell logo using Unicode
-Text("·|[ ≡≡≡ | ≡≡≡ ]|·")
-    .font(.system(size: 24, design: .monospaced))
-    .foregroundStyle(.black)
-```
-
-**Useful characters:**
-- `·` `•` - Dots for end caps
-- `|` `│` - Vertical bars
-- `[` `]` - Brackets for structure
-- `≡` `═` `─` - Horizontal lines
-- `─────` - Dividers
-
-### Pixel Art Components
-For animated icons, use `LazyVGrid` with `Rectangle()` shapes to create retro pixel art:
-- 16x16 grids for sprite-style animations
-- Black pixels on white/transparent background
-- `TimelineView` for frame animation
-- Configurable `pixelSize` parameter for scaling
+**Why SF Pro (System Default):**
+- Native iOS appearance
+- Optimized for readability on Apple devices
+- Automatic support for Dynamic Type accessibility
+- Clean, modern aesthetic
 
 ### What to Avoid
 - Fancy gradients or decorative backgrounds
@@ -101,16 +77,13 @@ For animated icons, use `LazyVGrid` with `Rectangle()` shapes to create retro pi
 - Excessive padding or whitespace
 - Complex nested cards or containers
 - Color for color's sake
-- **Non-monospaced fonts** - Never use SF Pro or other proportional fonts
 
 ### What to Embrace
-- Clear typography hierarchy (all in SF Mono)
+- Clear typography hierarchy using system fonts
 - Simple divider lines
-- Monospaced numbers for alignment
 - Subtle color hints for meaning (green = up, red = down)
 - White space that serves readability
-- ASCII/Unicode art for logos and icons
-- Pure white backgrounds
+- Clean, minimal backgrounds
 
 ## Core Requirements
 

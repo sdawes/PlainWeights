@@ -103,16 +103,8 @@ struct FilteredExerciseListView: View {
                 }
                 .listRowSeparator(.hidden)
             } else {
-                // App title (only shown when exercises exist)
                 Section {
-                    Text(">_ plainweights")
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(themeManager.currentTheme.accent)
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                Section {
-                    ForEach(exercises, id: \.persistentModelID) { exercise in
+                    ForEach(Array(exercises.enumerated()), id: \.element.persistentModelID) { index, exercise in
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
@@ -137,6 +129,7 @@ struct FilteredExerciseListView: View {
                             }
                         }
                         .listRowBackground(Color.clear)
+                        .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
                         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
                     }
                 }
@@ -148,15 +141,27 @@ struct FilteredExerciseListView: View {
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
+        .navigationTitle("PlainWeights")
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            VStack(spacing: 0) {
+                Spacer()
+                    .frame(height: 12)
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(height: 1)
+                    .frame(maxWidth: .infinity)
+            }
+        }
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showingSettings = true } label: {
                     Image(systemName: "gearshape.fill")
                         .font(.callout)
                         .foregroundStyle(themeManager.currentTheme.textColor)
                 }
             }
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showingAddExercise = true } label: {
                     Image(systemName: "plus")
                         .font(.callout)

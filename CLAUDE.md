@@ -205,3 +205,50 @@ xcodebuild -scheme PlainWeights clean
 - Show progress gradually rather than delivering complete solutions
 - Each code change should be functional and runnable
 - Wait for feedback before proceeding to next step
+
+## Figma MCP Integration
+
+### Figma Make File Access
+The design source of truth is in Figma Make. To access Make files via MCP:
+
+**File Key:** `SIRV3FHiHxGFMgg6jnp1aO`
+**URL:** https://www.figma.com/make/SIRV3FHiHxGFMgg6jnp1aO/Gym-Workout-Tracker
+
+### How to Access Make Files
+
+1. **Get file listing** - Use `mcp__figma__get_design_context` with `nodeId: "0:1"`:
+   ```
+   mcp__figma__get_design_context(fileKey: "SIRV3FHiHxGFMgg6jnp1aO", nodeId: "0:1")
+   ```
+   This returns a list of all source files with their resource URIs.
+
+2. **Read individual files** - Use `ReadMcpResourceTool` with the resource URI:
+   ```
+   ReadMcpResourceTool(server: "figma", uri: "file://figma/make/source/SIRV3FHiHxGFMgg6jnp1aO/src/app/components/ExerciseList.tsx")
+   ```
+
+### Key Design Files
+- `src/app/components/ExerciseList.tsx` - Exercise list item styling
+- `src/app/screens/ExerciseDetailScreen.tsx` - Exercise detail view
+- `src/styles/theme.css` - Typography and color variables
+
+### Typography Specs (from theme.css)
+| Element | Size | Weight |
+|---------|------|--------|
+| h1 | 1.5rem (24px) | 500 (medium) |
+| h2 | 1.25rem (20px) | 500 (medium) |
+| h3 | 1.125rem (18px) | 500 (medium) |
+| h4 | 1rem (16px) | 500 (medium) |
+| body | 1rem (16px) | 400 (normal) |
+
+### SwiftUI Equivalents
+```swift
+// h3 equivalent (18px, medium) - for exercise titles
+.font(.system(size: 18, weight: .medium))
+
+// h4 equivalent (16px, medium)
+.font(.system(size: 16, weight: .medium))
+
+// body equivalent (16px, normal)
+.font(.system(size: 16, weight: .regular))
+```

@@ -108,7 +108,7 @@ struct FilteredExerciseListView: View {
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
-                                    .font(.headline.weight(.semibold))
+                                    .font(.system(size: 18, weight: .medium))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                                     .opacity(nameOpacity(for: exercise))
                                 if !exercise.tags.isEmpty {

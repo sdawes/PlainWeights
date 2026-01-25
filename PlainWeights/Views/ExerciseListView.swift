@@ -141,23 +141,25 @@ struct FilteredExerciseListView: View {
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle("PlainWeights")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(themeManager.currentTheme.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .safeAreaInset(edge: .top, spacing: 0) {
-            VStack(spacing: 0) {
-                Spacer()
-                    .frame(height: 12)
-                Rectangle()
-                    .fill(themeManager.currentTheme.borderColor)
-                    .frame(height: 1)
-                    .frame(maxWidth: .infinity)
-            }
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 0.5)
         }
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("PlainWeights")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showingSettings = true } label: {
-                    Image(systemName: "gearshape.fill")
+                    Image(systemName: "gearshape")
                         .font(.callout)
+                        .fontWeight(.medium)
                         .foregroundStyle(themeManager.currentTheme.textColor)
                 }
             }
@@ -165,6 +167,7 @@ struct FilteredExerciseListView: View {
                 Button { showingAddExercise = true } label: {
                     Image(systemName: "plus")
                         .font(.callout)
+                        .fontWeight(.medium)
                 }
             }
             #if DEBUG
@@ -183,8 +186,9 @@ struct FilteredExerciseListView: View {
                         showingClearDataAlert = true
                     }
                 } label: {
-                    Image(systemName: "hammer.fill")
+                    Image(systemName: "hammer")
                         .font(.callout)
+                        .fontWeight(.medium)
                         .foregroundStyle(themeManager.currentTheme.textColor)
                 }
             }
@@ -195,6 +199,7 @@ struct FilteredExerciseListView: View {
                 } label: {
                     Image(systemName: "chart.bar.doc.horizontal")
                         .font(.callout)
+                        .fontWeight(.medium)
                 }
             }
         }

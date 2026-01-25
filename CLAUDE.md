@@ -94,6 +94,17 @@ The whole point of PlainWeights is to strip away all unnecessary complexity and 
 - **Swift Charts**: For data visualization
 - **Minimum iOS Target**: iOS 17+ (to use latest SwiftData and SwiftUI features)
 
+### UIKit Policy - CRITICAL
+**NEVER use UIKit unless there is absolutely no SwiftUI alternative to achieve the desired result.**
+
+- Always prefer SwiftUI modifiers and APIs over UIKit appearance customization
+- If tempted to use `UINavigationBarAppearance`, `UITableView.appearance()`, or similar UIKit APIs, first research SwiftUI alternatives
+- Examples of SwiftUI alternatives:
+  - Navigation bar background: `.toolbarBackground(_:for:)` instead of `UINavigationBarAppearance`
+  - Custom title styling: `ToolbarItem(placement: .principal)` with custom `Text` view
+  - List styling: `.listStyle()`, `.listRowBackground()` instead of `UITableView.appearance()`
+- Only use UIKit as a last resort when SwiftUI genuinely cannot achieve the requirement
+
 ### PlainWeights Color Theme
 
 The app uses a consistent iPhone 17-inspired color palette with `pw_` prefix:

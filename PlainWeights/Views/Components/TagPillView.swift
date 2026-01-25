@@ -24,7 +24,7 @@ struct TagPillView: View {
     var body: some View {
         HStack(spacing: 4) {
             Text(displayTag)
-                .font(.caption)
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
             if let onRemove = onRemove {
@@ -38,7 +38,7 @@ struct TagPillView: View {
             }
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 2)
+        .padding(.vertical, 3)
         .background(themeManager.currentTheme.muted)
         .clipShape(RoundedRectangle(cornerRadius: 4))
     }

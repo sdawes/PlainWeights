@@ -66,28 +66,28 @@ struct FilteredExerciseListView: View {
         }
     }
 
-    /// Check if exercise hasn't been done in over a month
+    /// Check if exercise hasn't been done in over 2 weeks (orange)
     private func isStale(_ exercise: Exercise) -> Bool {
-        let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
-        return exercise.lastUpdated < oneMonthAgo
+        let twoWeeksAgo = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
+        return exercise.lastUpdated < twoWeeksAgo
     }
 
-    /// Check if exercise hasn't been done in over two months
+    /// Check if exercise hasn't been done in over 1 month (red)
     private func isVeryStale(_ exercise: Exercise) -> Bool {
-        let twoMonthsAgo = Calendar.current.date(byAdding: .month, value: -2, to: Date()) ?? Date()
-        return exercise.lastUpdated < twoMonthsAgo
-    }
-
-    /// Get name opacity based on staleness
-    private func nameOpacity(for exercise: Exercise) -> Double {
-        if isVeryStale(exercise) { return 0.4 }
-        if isStale(exercise) { return 0.6 }
-        return 1.0
+        let oneMonthAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        return exercise.lastUpdated < oneMonthAgo
     }
 
     /// Get timestamp color
     private func timestampColor(for exercise: Exercise) -> Color {
         themeManager.currentTheme.tertiaryText
+    }
+
+    /// Get staleness color (red for 30+ days, orange for 14+ days, nil for recent)
+    private func stalenessColor(for exercise: Exercise) -> Color? {
+        if isVeryStale(exercise) { return .red }
+        if isStale(exercise) { return .orange }
+        return nil
     }
 
     var body: some View {
@@ -110,16 +110,23 @@ struct FilteredExerciseListView: View {
                                 Text(exercise.name)
                                     .font(.system(size: 18, weight: .medium))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
-                                    .opacity(nameOpacity(for: exercise))
                                 if !exercise.tags.isEmpty {
                                     TagPillsRow(tags: exercise.tags)
                                         .padding(.top, 6)
                                 }
-                                Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
-                                    .font(.caption)
-                                    .foregroundStyle(timestampColor(for: exercise))
-                                    .padding(.top, 10)
+                                HStack(spacing: 4) {
+                                    if let color = stalenessColor(for: exercise) {
+                                        Image(systemName: "exclamationmark.circle")
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(color)
+                                    }
+                                    Text("Last: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+                                }
+                                .padding(.top, 6)
                             }
+                            .padding(.leading, 16)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
@@ -128,9 +135,21 @@ struct FilteredExerciseListView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
-                        .listRowBackground(Color.clear)
+                        .listRowBackground(
+                            HStack(spacing: 0) {
+                                Color.clear.frame(width: 16)  // Match list leading inset
+                                if let color = stalenessColor(for: exercise) {
+                                    Rectangle()
+                                        .fill(color)
+                                        .frame(width: 2)
+                                }
+                                Rectangle()
+                                    .fill(stalenessColor(for: exercise)?.opacity(0.05) ?? Color.clear)
+                            }
+                        )
                         .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
                         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
+                        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
                     }
                 }
             }

@@ -44,6 +44,12 @@ struct ExerciseDetailView: View {
         TodaySessionCalculator.getSessionDurationMinutes(from: Array(sets))
     }
 
+    // Check if this is a weighted exercise (any working set has weight > 0)
+    private var isWeightedExercise: Bool {
+        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        return workingSets.contains { $0.weight > 0 }
+    }
+
     // Last session volume (baseline) - returns 0 if no data
     private var lastSessionVolume: Double {
         LastSessionCalculator.getLastSessionVolume(from: Array(sets))
@@ -168,9 +174,16 @@ struct ExerciseDetailView: View {
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                             Spacer()
                             HStack(spacing: 8) {
-                                Text("\(todaysTotalReps) reps")
-                                    .font(.appFont(.footnote))
-                                    .foregroundStyle(.secondary)
+                                // Show volume for weighted exercises, reps for bodyweight
+                                if isWeightedExercise {
+                                    Text("\(Formatters.formatVolume(todaysVolume)) kg")
+                                        .font(.appFont(.footnote))
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    Text("\(todaysTotalReps) reps")
+                                        .font(.appFont(.footnote))
+                                        .foregroundStyle(.secondary)
+                                }
                                 if let mins = sessionDurationMinutes {
                                     Text("|")
                                         .font(.appFont(.footnote))

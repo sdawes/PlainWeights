@@ -83,10 +83,24 @@ struct SetRowView: View {
             HStack(spacing: 0) {
                 // Col 2: Set number
                 Text(String(format: "%02d", setNumber))
-                    .font(.appFont(.subheadline))
+                    .font(.appFont(size: 14))
                     .foregroundStyle(.secondary)
-                    .frame(width: 28, alignment: .leading)
-                    .padding(.leading, 12)
+                    .frame(width: 24, alignment: .leading)
+                    .padding(.leading, 8)
+                    .border(Color.red, width: 1)
+
+                // Col 2.5: PB indicator (between set number and weight)
+                if set.isPB {
+                    Text("PB")
+                        .font(.appFont(size: 12, weight: .semiBold))
+                        .foregroundStyle(Color.pw_amber)
+                        .frame(width: 20, alignment: .center)
+                        .border(Color.orange, width: 1)
+                } else {
+                    Spacer()
+                        .frame(width: 20)
+                        .border(Color.orange, width: 1)
+                }
 
                 // Col 3: Weight × Reps (baseline aligned)
                 HStack(alignment: .lastTextBaseline, spacing: 0) {
@@ -96,11 +110,13 @@ struct SetRowView: View {
                         .frame(width: 45, alignment: .trailing)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
+                        .border(Color.yellow, width: 1)
 
-                    Text("kg × ")
+                    Text(" kg × ")
                         .font(.appFont(.caption))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                        .border(Color.mint, width: 1)
 
                     Text("\(set.reps)")
                         .font(.appFont(.headline, weight: .regular))
@@ -108,37 +124,53 @@ struct SetRowView: View {
                         .frame(width: 25, alignment: .leading)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
+                        .border(Color.teal, width: 1)
                 }
-                .padding(.leading, 12)
+                .padding(.leading, 8)
+                .border(Color.green, width: 1)
 
                 Spacer()
+                    .border(Color.gray, width: 1)
 
-                // Col 7: Weight progression
-                if hasComparisonData {
-                    deltaText(for: prevWeightDelta, suffix: "kg")
-                        .font(.appFont(.caption))
-                        .frame(width: 50, alignment: .trailing)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                // Col 7: Weight progression (always reserve space)
+                Group {
+                    if hasComparisonData {
+                        deltaText(for: prevWeightDelta, suffix: "kg")
+                            .font(.appFont(size: 14))
+                    } else {
+                        Color.clear
+                    }
                 }
+                .frame(width: 45, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .border(Color.blue, width: 1)
 
-                // Col 8: Reps progression
-                if hasComparisonData {
-                    deltaText(for: prevRepsDelta, suffix: "")
-                        .font(.appFont(.caption))
-                        .frame(width: 35, alignment: .trailing)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                // Col 8: Reps progression (always reserve space)
+                Group {
+                    if hasComparisonData {
+                        deltaText(for: prevRepsDelta, suffix: "")
+                            .font(.appFont(size: 14))
+                    } else {
+                        Color.clear
+                    }
                 }
+                .frame(width: 30, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .border(Color.purple, width: 1)
 
                 // Badges (immediately left of timer/timestamp)
                 badgesView
-                    .frame(width: 50, alignment: .trailing)
+                    .frame(width: 55, alignment: .trailing)
+                    .padding(.trailing, 4)
+                    .border(Color.cyan, width: 1)
 
                 // Col 9: Timer or Timestamp
                 restTimeView
                     .frame(width: 55, alignment: .trailing)
                     .lineLimit(1)
+                    .border(Color.pink, width: 1)
             }
             .padding(.vertical, 12)
         }
@@ -197,22 +229,15 @@ struct SetRowView: View {
 
     // MARK: - Helper Methods
 
-    // Badges view: PB always in rightmost position, user badges fill from right
+    // Badges view: user badges only (PB is shown separately after set number)
     @ViewBuilder
     private var badgesView: some View {
-        HStack(spacing: 5) {
-            // User badges (max 2, displayed left of PB)
-            // Order: warm-up → bonus → drop → pause → timed
-            ForEach(userBadges.prefix(2), id: \.self) { badge in
-                badgeCircle(for: badge)
-            }
-
-            // PB badge always rightmost when present
-            if set.isPB {
-                Image(systemName: "trophy.fill")
-                    .font(.appFont(size: 14))
-                    .foregroundStyle(Color.pw_amber)
-            }
+        // Only show first badge to keep row clean
+        // Priority order: warm-up → bonus → drop → pause → timed
+        if let firstBadge = userBadges.first {
+            badgeCircle(for: firstBadge)
+        } else {
+            Color.clear
         }
     }
 
@@ -234,7 +259,7 @@ struct SetRowView: View {
                 .font(.appFont(size: 14))
                 .foregroundStyle(.orange)
         case "bonus":
-            Image(systemName: "star.fill")
+            Image(systemName: "trophy.fill")
                 .font(.appFont(size: 14))
                 .foregroundStyle(.yellow)
         case "dropset":
@@ -249,11 +274,11 @@ struct SetRowView: View {
             if set.tempoSeconds > 0 {
                 Text("\(set.tempoSeconds)")
                     .font(.appFont(size: 14))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
             } else {
                 Image(systemName: "timer")
                     .font(.appFont(size: 14))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
             }
         default:
             EmptyView()
@@ -334,13 +359,23 @@ struct SetRowView: View {
 
     private func restTimeColor(for seconds: Int) -> Color {
         if seconds < 60 {
+            // 0-60s: default text color
             return themeManager.currentTheme.primaryText
-        } else if seconds < 120 {
+        } else if seconds < 90 {
+            // 60-90s: yellow/gold
             return themeManager.currentTheme == .light
-                ? Color(red: 0.85, green: 0.5, blue: 0.0)  // Darker orange for light theme
+                ? Color(red: 0.75, green: 0.6, blue: 0.0)  // Dark gold for light theme
+                : .yellow
+        } else if seconds < 120 {
+            // 90-120s: orange
+            return themeManager.currentTheme == .light
+                ? Color(red: 0.85, green: 0.45, blue: 0.0)  // Dark orange for light theme
                 : .orange
         } else {
-            return themeManager.currentTheme.progressDown
+            // 120s+: red
+            return themeManager.currentTheme == .light
+                ? Color(red: 0.8, green: 0.2, blue: 0.2)  // Dark red for light theme
+                : .red
         }
     }
 

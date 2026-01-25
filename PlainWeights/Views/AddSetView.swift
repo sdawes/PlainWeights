@@ -84,43 +84,35 @@ struct SetOptionsToggles: View {
     @Binding var isPauseAtTop: Bool
     @Binding var isTimedSet: Bool
 
-    @State private var showMaxWarning = false
-
     private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-
-    // Count of currently selected options (max 2 allowed)
-    private var selectedCount: Int {
-        [isWarmUpSet, isBonusSet, isDropSet, isPauseAtTop, isTimedSet]
-            .filter { $0 }.count
-    }
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 10) {
             // Row 1
             chipButton(icon: "flame.fill", text: "Warm-up",
                        isSelected: isWarmUpSet, activeColor: .orange) {
-                toggleOption(&isWarmUpSet)
+                selectOption(.warmUp)
             }
             chipButton(icon: "chevron.down", text: "Drop set",
                        isSelected: isDropSet, activeColor: .teal) {
-                toggleOption(&isDropSet)
+                selectOption(.dropSet)
             }
             // Row 2
             chipButton(icon: "pause.fill", text: "Pause",
                        isSelected: isPauseAtTop, activeColor: .pink) {
-                toggleOption(&isPauseAtTop)
+                selectOption(.pause)
             }
             chipButton(icon: "timer", text: "Timed",
                        isSelected: isTimedSet, activeColor: .black) {
-                toggleOption(&isTimedSet)
+                selectOption(.timed)
             }
             // Row 3
             chipButton(icon: "star.fill", text: "Bonus",
                        isSelected: isBonusSet, activeColor: .yellow) {
-                toggleOption(&isBonusSet)
+                selectOption(.bonus)
             }
             Color.clear // Empty cell
         }
@@ -131,11 +123,6 @@ struct SetOptionsToggles: View {
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
         )
-        .alert("Maximum 2 options", isPresented: $showMaxWarning) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("Please deselect an option before adding another.")
-        }
     }
 
     // MARK: - Helper Views
@@ -171,17 +158,58 @@ struct SetOptionsToggles: View {
 
     // MARK: - Selection Logic
 
-    private func toggleOption(_ option: inout Bool) {
-        if option {
-            // Always allow deselecting
-            option = false
-        } else if selectedCount < 2 {
-            // Allow selecting if under limit
-            option = true
-        } else {
-            // Show warning for 3rd selection attempt
-            showMaxWarning = true
+    private enum SetOption {
+        case warmUp, bonus, dropSet, pause, timed
+    }
+
+    private func selectOption(_ option: SetOption) {
+        // If already selected, deselect it
+        // Otherwise, select it and deselect all others (mutually exclusive)
+        switch option {
+        case .warmUp:
+            if isWarmUpSet {
+                isWarmUpSet = false
+            } else {
+                clearAll()
+                isWarmUpSet = true
+            }
+        case .bonus:
+            if isBonusSet {
+                isBonusSet = false
+            } else {
+                clearAll()
+                isBonusSet = true
+            }
+        case .dropSet:
+            if isDropSet {
+                isDropSet = false
+            } else {
+                clearAll()
+                isDropSet = true
+            }
+        case .pause:
+            if isPauseAtTop {
+                isPauseAtTop = false
+            } else {
+                clearAll()
+                isPauseAtTop = true
+            }
+        case .timed:
+            if isTimedSet {
+                isTimedSet = false
+            } else {
+                clearAll()
+                isTimedSet = true
+            }
         }
+    }
+
+    private func clearAll() {
+        isWarmUpSet = false
+        isBonusSet = false
+        isDropSet = false
+        isPauseAtTop = false
+        isTimedSet = false
     }
 }
 

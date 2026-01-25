@@ -607,7 +607,7 @@ struct TargetMetricsCard: View {
                                 .font(.appFont(size: 32))
                                 .fontWeight(.bold)
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
-                            Text("kg")
+                            Text(" kg")
                                 .font(.appFont(size: 14))
                                 .foregroundStyle(.secondary)
                         }

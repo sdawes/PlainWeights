@@ -49,7 +49,7 @@ enum AppTheme: String, CaseIterable {
     var background1: Color {
         switch self {
         case .light:
-            return Color(red: 250/255, green: 250/255, blue: 250/255)  // #FAFAFA
+            return Color(red: 254/255, green: 254/255, blue: 254/255)  // #FEFEFE
         case .dark:
             return Color(red: 0.05, green: 0.07, blue: 0.09)  // Dark navy
         }
@@ -58,7 +58,7 @@ enum AppTheme: String, CaseIterable {
     var background2: Color {
         switch self {
         case .light:
-            return .white
+            return Color(red: 248/255, green: 246/255, blue: 243/255)  // #F8F6F3 (creamy off-white)
         case .dark:
             return Color(red: 0.125, green: 0.145, blue: 0.188)  // Card navy (#202530)
         }

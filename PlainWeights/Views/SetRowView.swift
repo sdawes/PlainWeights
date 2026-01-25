@@ -34,113 +34,54 @@ struct SetRowView: View {
         self.showTimer = showTimer
     }
 
-    // MARK: - Computed Comparisons (using existing services)
-
-    private var hasComparisonData: Bool {
-        guard let sets = allSets else { return false }
-        return LastSessionCalculator.hasLastSession(from: sets) ||
-               BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday(sets)) != nil
-    }
-
-    private func setsExcludingToday(_ sets: [ExerciseSet]) -> [ExerciseSet] {
-        sets.filter {
-            Calendar.current.startOfDay(for: $0.timestamp) < Calendar.current.startOfDay(for: Date())
-        }
-    }
-
-    private var prevWeightDelta: Double {
-        guard let sets = allSets else { return 0 }
-        return set.weight - LastSessionCalculator.getLastSessionMaxWeight(from: sets)
-    }
-
-    private var prevRepsDelta: Int {
-        guard let sets = allSets else { return 0 }
-        return set.reps - LastSessionCalculator.getLastSessionMaxReps(from: sets)
-    }
-
-    private var bestWeightDelta: Double {
-        guard let sets = allSets else { return 0 }
-        let bestWeight = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday(sets))?.maxWeight ?? 0
-        return set.weight - bestWeight
-    }
-
-    private var bestRepsDelta: Int {
-        guard let sets = allSets else { return 0 }
-        let bestReps = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday(sets))?.repsAtMaxWeight ?? 0
-        return set.reps - bestReps
-    }
-
     var body: some View {
         HStack(spacing: 0) {
             // Content columns
             HStack(spacing: 0) {
                 // Col 1: Set number (left-aligned)
-                Text(String(format: "%02d", setNumber))
+                Text("\(setNumber)")
                     .font(.system(size: 14))
                     .foregroundStyle(.secondary)
                     .frame(width: 24, alignment: .leading)
 
-                // Col 2.5: PB indicator (between set number and weight)
+                // Col 2: PB indicator (between set number and weight)
                 if set.isPB {
                     Text("PB")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(themeManager.currentTheme.primaryText)
-                        .frame(width: 20, alignment: .center)
+                        .frame(width: 24, alignment: .center)
                 } else {
                     Spacer()
-                        .frame(width: 20)
+                        .frame(width: 24)
                 }
 
-                // Col 3: Weight × Reps (baseline aligned)
+                // Weight × Reps (baseline aligned, larger font to match Make)
                 HStack(alignment: .lastTextBaseline, spacing: 0) {
                     Text(Formatters.formatWeight(set.weight))
-                        .font(.headline.weight(.regular))
+                        .font(.system(size: 20))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                        .frame(width: 45, alignment: .trailing)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
 
-                    Text(" kg × ")
-                        .font(.caption)
+                    Text(" kg")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+
+                    Text(" × ")
+                        .font(.system(size: 14))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
 
                     Text("\(set.reps)")
-                        .font(.headline.weight(.regular))
+                        .font(.system(size: 20))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                        .frame(width: 25, alignment: .leading)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
-                .padding(.leading, 8)
+                .padding(.leading, 4)
 
                 Spacer()
-
-                // Col 7: Weight progression (always reserve space)
-                Group {
-                    if hasComparisonData {
-                        deltaText(for: prevWeightDelta, suffix: "kg")
-                            .font(.system(size: 14))
-                    } else {
-                        Color.clear
-                    }
-                }
-                .frame(width: 45, alignment: .trailing)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-
-                // Col 8: Reps progression (always reserve space)
-                Group {
-                    if hasComparisonData {
-                        deltaText(for: prevRepsDelta, suffix: "")
-                            .font(.system(size: 14))
-                    } else {
-                        Color.clear
-                    }
-                }
-                .frame(width: 30, alignment: .trailing)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
 
                 // Badges (immediately left of timer/timestamp)
                 badgesView
@@ -167,43 +108,6 @@ struct SetRowView: View {
             } label: {
                 Label("Delete", systemImage: "trash")
             }
-        }
-    }
-
-    // MARK: - Delta Text Helper
-
-    @ViewBuilder
-    private func deltaText(for delta: Double, suffix: String) -> some View {
-        let intDelta = Int(delta)
-        if intDelta > 0 {
-            Text("+\(intDelta)\(suffix)")
-                .fontWeight(.semibold)
-                .foregroundStyle(themeManager.currentTheme.progressUp)
-        } else if intDelta < 0 {
-            Text("\(intDelta)\(suffix)")
-                .fontWeight(.semibold)
-                .foregroundStyle(themeManager.currentTheme.progressDown)
-        } else {
-            Text("0\(suffix)")
-                .fontWeight(.semibold)
-                .foregroundStyle(themeManager.currentTheme.progressSame)
-        }
-    }
-
-    @ViewBuilder
-    private func deltaText(for delta: Int, suffix: String) -> some View {
-        if delta > 0 {
-            Text("+\(delta)\(suffix)")
-                .fontWeight(.semibold)
-                .foregroundStyle(themeManager.currentTheme.progressUp)
-        } else if delta < 0 {
-            Text("\(delta)\(suffix)")
-                .fontWeight(.semibold)
-                .foregroundStyle(themeManager.currentTheme.progressDown)
-        } else {
-            Text("0\(suffix)")
-                .fontWeight(.semibold)
-                .foregroundStyle(themeManager.currentTheme.progressSame)
         }
     }
 
@@ -297,8 +201,7 @@ struct SetRowView: View {
             Text(Formatters.formatDuration(Double(seconds)))
                 .font(.caption)
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
-                .monospacedDigit()
-        }
+                        }
     }
 
     @ViewBuilder
@@ -331,8 +234,7 @@ struct SetRowView: View {
                             .font(.caption)
                             .fontWeight(.bold)
                             .foregroundStyle(color)
-                            .monospacedDigit()
-                    }
+                                                }
                 }
             }
         }

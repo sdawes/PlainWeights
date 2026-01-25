@@ -29,6 +29,11 @@ struct ComparisonMetricsCard: View {
         return sets.filter { calendar.startOfDay(for: $0.timestamp) < today }
     }
 
+    // Today's sets
+    private var todaysSets: [ExerciseSet] {
+        TodaySessionCalculator.getTodaysSets(from: sets)
+    }
+
     // Last session metrics
     private var lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)? {
         let progressState = ProgressTracker.createProgressState(from: sets)
@@ -53,6 +58,37 @@ struct ComparisonMetricsCard: View {
         }
     }
 
+    // Progress indicators for Last Session mode
+    private var lastModeIndicators: ProgressTracker.LastModeIndicators? {
+        guard comparisonMode == .lastSession,
+              let lastMetrics = lastSessionMetrics,
+              !todaysSets.isEmpty else { return nil }
+
+        let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: sets)
+        let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: sets)
+        let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
+        let exerciseType = ExerciseMetricsType.determine(from: sets)
+
+        return ProgressTracker.LastModeIndicators.compare(
+            todaysMaxWeight: todaysMaxWeight,
+            todaysMaxReps: todaysMaxReps,
+            todaysVolume: todaysVolume,
+            lastSessionMaxWeight: lastMetrics.maxWeight,
+            lastSessionMaxReps: lastMetrics.maxReps,
+            lastSessionVolume: lastMetrics.totalVolume,
+            exerciseType: exerciseType
+        )
+    }
+
+    // Progress indicators for Best mode
+    private var bestModeIndicators: ProgressTracker.BestModeIndicators? {
+        guard comparisonMode == .allTimeBest else { return nil }
+        return ProgressTracker.calculateBestModeIndicators(
+            todaySets: todaysSets,
+            bestMetrics: bestMetrics
+        )
+    }
+
     // Header text with date
     private var headerText: String {
         guard let metrics = currentMetrics, let date = metrics.date else {
@@ -63,7 +99,7 @@ struct ComparisonMetricsCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             // Header
             Text(headerText)
                 .font(.caption)
@@ -71,40 +107,58 @@ struct ComparisonMetricsCard: View {
 
             if let metrics = currentMetrics {
                 // 3-column grid
-                HStack(spacing: 0) {
+                HStack(spacing: 16) {
                     // Weight
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(comparisonMode == .lastSession ? "Max Weight" : "Weight")
                             .font(.caption)
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Text(Formatters.formatWeight(metrics.maxWeight))
                             .font(.system(size: 18))
-                            .fontDesign(.monospaced)
                             .foregroundStyle(themeManager.currentTheme.primaryText)
+
+                        // Progress delta
+                        if let indicators = lastModeIndicators {
+                            deltaView(direction: indicators.weightDirection, value: indicators.weightImprovement, suffix: "kg")
+                        } else if let indicators = bestModeIndicators {
+                            deltaView(direction: indicators.weightDirection, value: indicators.weightImprovement, suffix: "kg")
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     // Reps
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(comparisonMode == .lastSession ? "Max Reps" : "Reps")
                             .font(.caption)
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Text("\(metrics.maxReps)")
                             .font(.system(size: 18))
-                            .fontDesign(.monospaced)
                             .foregroundStyle(themeManager.currentTheme.primaryText)
+
+                        // Progress delta
+                        if let indicators = lastModeIndicators {
+                            deltaView(direction: indicators.repsDirection, value: Double(indicators.repsImprovement), suffix: "")
+                        } else if let indicators = bestModeIndicators {
+                            deltaView(direction: indicators.repsDirection, value: Double(indicators.repsImprovement), suffix: "")
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                    // Total
-                    VStack(alignment: .leading, spacing: 2) {
+                    // Total (Volume)
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(comparisonMode == .lastSession ? "Max Total" : "Total")
                             .font(.caption)
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Text(Formatters.formatVolume(metrics.totalVolume))
                             .font(.system(size: 18))
-                            .fontDesign(.monospaced)
                             .foregroundStyle(themeManager.currentTheme.primaryText)
+
+                        // Progress delta
+                        if let indicators = lastModeIndicators {
+                            deltaView(direction: indicators.volumeDirection, value: indicators.volumeImprovement, suffix: "kg")
+                        } else if let indicators = bestModeIndicators {
+                            deltaView(direction: indicators.volumeDirection, value: indicators.volumeImprovement, suffix: "kg")
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -126,6 +180,27 @@ struct ComparisonMetricsCard: View {
                 .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
         )
         .animation(.easeInOut(duration: 0.2), value: comparisonMode)
+    }
+
+    // MARK: - Delta View Helper
+
+    @ViewBuilder
+    private func deltaView(direction: ProgressTracker.PRDirection, value: Double, suffix: String) -> some View {
+        let intValue = Int(value)
+        switch direction {
+        case .up:
+            Text("+\(intValue)\(suffix)")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(direction.progressColor)
+        case .down:
+            Text("\(intValue)\(suffix)")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(direction.progressColor)
+        case .same:
+            Text("0\(suffix)")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(direction.progressColor)
+        }
     }
 }
 
@@ -314,7 +389,6 @@ struct ExerciseDetailView: View {
                                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
                                     Text(isWeightedExercise ? "\(Formatters.formatVolume(todaysVolume)) kg" : "\(todaysTotalReps) reps")
                                         .font(.title2)
-                                        .fontDesign(.monospaced)
                                         .foregroundStyle(themeManager.currentTheme.primaryText)
                                 }
                                 Spacer()
@@ -325,7 +399,6 @@ struct ExerciseDetailView: View {
                                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                                         Text("\(mins) min")
                                             .font(.title3)
-                                            .fontDesign(.monospaced)
                                             .foregroundStyle(themeManager.currentTheme.primaryText)
                                     }
                                 }

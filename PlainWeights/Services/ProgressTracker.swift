@@ -50,6 +50,15 @@ enum ProgressTracker {
         var color: Color {
             .primary  // Black/white theme uses primary color
         }
+
+        /// Colored version for progress delta display (green/red/blue)
+        var progressColor: Color {
+            switch self {
+            case .up: return .green
+            case .down: return .red
+            case .same: return .blue
+            }
+        }
     }
 
     // MARK: - Last Mode Indicators (Today vs Last Session)
@@ -57,21 +66,26 @@ enum ProgressTracker {
     struct LastModeIndicators {
         let weightImprovement: Double
         let repsImprovement: Int
+        let volumeImprovement: Double
         let weightDirection: PRDirection
         let repsDirection: PRDirection
+        let volumeDirection: PRDirection
         let hasWeightPR: Bool
         let hasRepsPR: Bool
+        let hasVolumePR: Bool
         let exerciseType: ExerciseMetricsType
 
-        static func compare(todaysNewestWeight: Double, todaysNewestReps: Int,
-                          lastSessionMaxWeight: Double, lastSessionMaxReps: Int,
+        static func compare(todaysMaxWeight: Double, todaysMaxReps: Int, todaysVolume: Double,
+                          lastSessionMaxWeight: Double, lastSessionMaxReps: Int, lastSessionVolume: Double,
                           exerciseType: ExerciseMetricsType) -> LastModeIndicators {
 
-            let weightDiff = todaysNewestWeight - lastSessionMaxWeight
-            let repsDiff = todaysNewestReps - lastSessionMaxReps
+            let weightDiff = todaysMaxWeight - lastSessionMaxWeight
+            let repsDiff = todaysMaxReps - lastSessionMaxReps
+            let volumeDiff = todaysVolume - lastSessionVolume
 
             let weightDirection: PRDirection
             let repsDirection: PRDirection
+            let volumeDirection: PRDirection
 
             if weightDiff > 0 {
                 weightDirection = .up
@@ -89,13 +103,24 @@ enum ProgressTracker {
                 repsDirection = .same
             }
 
+            if volumeDiff > 0 {
+                volumeDirection = .up
+            } else if volumeDiff < 0 {
+                volumeDirection = .down
+            } else {
+                volumeDirection = .same
+            }
+
             return LastModeIndicators(
                 weightImprovement: weightDiff,
                 repsImprovement: repsDiff,
+                volumeImprovement: volumeDiff,
                 weightDirection: weightDirection,
                 repsDirection: repsDirection,
+                volumeDirection: volumeDirection,
                 hasWeightPR: weightDirection == .up,
                 hasRepsPR: repsDirection == .up,
+                hasVolumePR: volumeDirection == .up,
                 exerciseType: exerciseType
             )
         }
@@ -294,15 +319,18 @@ enum ProgressTracker {
             if let newestSet = TodaySessionCalculator.getTodaysMostRecentSet(from: sets) {
                 let lastMaxWeight = lastMetrics?.maxWeight ?? 0.0
                 let lastMaxReps = lastMetrics?.maxWeightReps ?? 0
+                let lastVolume = lastCompletedDayInfo?.volume ?? 0.0
 
                 // Detect exercise type for adaptive indicators
                 let exerciseType = ExerciseMetricsType.determine(from: sets)
 
                 self.personalRecords = LastModeIndicators.compare(
-                    todaysNewestWeight: newestSet.weight,
-                    todaysNewestReps: newestSet.reps,
+                    todaysMaxWeight: newestSet.weight,
+                    todaysMaxReps: newestSet.reps,
+                    todaysVolume: todayVolume,
                     lastSessionMaxWeight: lastMaxWeight,
                     lastSessionMaxReps: lastMaxReps,
+                    lastSessionVolume: lastVolume,
                     exerciseType: exerciseType
                 )
             } else {

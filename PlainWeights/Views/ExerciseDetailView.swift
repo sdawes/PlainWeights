@@ -8,6 +8,13 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Comparison Mode
+
+enum ComparisonMode: String, CaseIterable {
+    case lastSession = "Last Session"
+    case allTimeBest = "All-Time Best"
+}
+
 // MARK: - ExerciseDetailView
 
 struct ExerciseDetailView: View {
@@ -23,6 +30,7 @@ struct ExerciseDetailView: View {
     @State private var showingDeleteAlert = false
     @State private var showingNotesSheet = false
     @State private var showingEditSheet = false
+    @State private var comparisonMode: ComparisonMode = .lastSession
 
 
     // Cached data for performance
@@ -107,6 +115,47 @@ struct ExerciseDetailView: View {
                         TagPillsRow(tags: exercise.tags)
                     }
                 }
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+
+            // Comparison mode toggle
+            Section {
+                HStack(spacing: 4) {
+                    ForEach(ComparisonMode.allCases, id: \.self) { mode in
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                comparisonMode = mode
+                            }
+                        } label: {
+                            Text(mode.rawValue)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(
+                                    comparisonMode == mode
+                                        ? themeManager.currentTheme.primaryText
+                                        : themeManager.currentTheme.mutedForeground
+                                )
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(
+                                    comparisonMode == mode
+                                        ? themeManager.currentTheme.background
+                                        : Color.clear
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .shadow(
+                                    color: comparisonMode == mode ? .black.opacity(0.08) : .clear,
+                                    radius: 2,
+                                    x: 0,
+                                    y: 1
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(4)
+                .background(themeManager.currentTheme.muted)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)

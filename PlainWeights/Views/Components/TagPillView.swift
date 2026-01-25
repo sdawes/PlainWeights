@@ -12,15 +12,6 @@ struct TagPillView: View {
     let tag: String
     var onRemove: (() -> Void)?
 
-    // Inverted colors: background uses theme primary, text is opposite
-    private var highlightBackground: Color {
-        themeManager.currentTheme.primaryText
-    }
-
-    private var highlightText: Color {
-        themeManager.currentTheme == .dark ? .black : .white
-    }
-
     // Truncate very long tags and ensure lowercase
     private var displayTag: String {
         let lowercased = tag.lowercased()
@@ -34,21 +25,22 @@ struct TagPillView: View {
         HStack(spacing: 4) {
             Text(displayTag)
                 .font(.caption)
-                .foregroundStyle(highlightText)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
             if let onRemove = onRemove {
                 Button(action: onRemove) {
                     Image(systemName: "xmark")
                         .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(highlightText.opacity(0.7))
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground.opacity(0.7))
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
             }
         }
-        .padding(.horizontal, 6)
+        .padding(.horizontal, 8)
         .padding(.vertical, 2)
-        .background(highlightBackground)
+        .background(themeManager.currentTheme.muted)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
 

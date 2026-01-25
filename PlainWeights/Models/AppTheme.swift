@@ -58,6 +58,22 @@ enum AppTheme: String, CaseIterable {
         primary.opacity(0.2)
     }
 
+    // MARK: - Muted Colors (for tags, badges, subtle UI)
+
+    var muted: Color {
+        switch self {
+        case .light: return Color(red: 0.93, green: 0.93, blue: 0.94) // #ececf0
+        case .dark: return Color(red: 0.16, green: 0.16, blue: 0.16)  // #2a2a2a
+        }
+    }
+
+    var mutedForeground: Color {
+        switch self {
+        case .light: return Color(red: 0.44, green: 0.44, blue: 0.51) // #717182
+        case .dark: return Color(red: 0.63, green: 0.63, blue: 0.63)  // #a0a0a0
+        }
+    }
+
     // MARK: - Accent Color
 
     var accent: Color {

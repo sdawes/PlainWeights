@@ -10,6 +10,7 @@ import SwiftData
 
 /// Component for displaying today's sets separately from historic sets
 struct TodaySetsSectionView: View {
+    @Environment(ThemeManager.self) private var themeManager
     let todaySets: [ExerciseSet]
     let isMostRecentSet: (ExerciseSet, [ExerciseSet]) -> Bool
     let deleteSet: (ExerciseSet) -> Void
@@ -51,7 +52,7 @@ struct TodaySetsSectionView: View {
                 if set.isTimedSet {
                     if set.tempoSeconds > 0 {
                         Text("\(set.tempoSeconds)")
-                            .font(.system(size: 14))
+                            .font(themeManager.currentTheme.dataFont(size: 14))
                             .foregroundStyle(.primary)
                     } else {
                         Image(systemName: "timer")
@@ -67,8 +68,8 @@ struct TodaySetsSectionView: View {
                 }
 
                 Text(Formatters.formatTimeHM(set.timestamp))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                    .font(themeManager.currentTheme.dataFont(size: 12))
+                    .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())
             .onTapGesture {

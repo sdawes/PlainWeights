@@ -40,7 +40,7 @@ struct SetRowView: View {
             HStack(spacing: 0) {
                 // Col 1: Set number (left-aligned)
                 Text("\(setNumber)")
-                    .font(.system(size: 14))
+                    .font(themeManager.currentTheme.dataFont(size: 14))
                     .foregroundStyle(.secondary)
                     .frame(width: 24, alignment: .leading)
 
@@ -58,7 +58,7 @@ struct SetRowView: View {
                 // Weight × Reps (baseline aligned, larger font to match Make)
                 HStack(alignment: .lastTextBaseline, spacing: 0) {
                     Text(Formatters.formatWeight(set.weight))
-                        .font(.system(size: 20))
+                        .font(themeManager.currentTheme.dataFont(size: 20))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -74,7 +74,7 @@ struct SetRowView: View {
                         .lineLimit(1)
 
                     Text("\(set.reps)")
-                        .font(.system(size: 20))
+                        .font(themeManager.currentTheme.dataFont(size: 20))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -158,7 +158,7 @@ struct SetRowView: View {
         case "timed":
             if set.tempoSeconds > 0 {
                 Text("\(set.tempoSeconds)")
-                    .font(.system(size: 14))
+                    .font(themeManager.currentTheme.dataFont(size: 14))
                     .foregroundStyle(color)
             } else {
                 Image(systemName: "timer")
@@ -211,7 +211,7 @@ struct SetRowView: View {
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
 
             Text(Formatters.formatDuration(Double(seconds)))
-                .font(.caption)
+                .font(themeManager.currentTheme.dataFont(size: 12))
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
                         }
     }
@@ -230,7 +230,7 @@ struct SetRowView: View {
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
 
                     Text("3:00")
-                        .font(.caption)
+                        .font(themeManager.currentTheme.dataFont(size: 12))
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
                 .onAppear {
@@ -245,8 +245,7 @@ struct SetRowView: View {
                         .foregroundStyle(color)
 
                     Text(Formatters.formatDuration(elapsed))
-                        .font(.caption)
-                        .fontWeight(.bold)
+                        .font(themeManager.currentTheme.dataFont(size: 12, weight: .bold))
                         .foregroundStyle(color)
                 }
             }

@@ -62,17 +62,21 @@ struct VolumeProgressBar: View {
             // Labels row
             HStack {
                 // Target label
-                Text("\(targetLabel): \(Formatters.formatVolume(targetVolume)) kg")
-                    .font(.caption)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                HStack(spacing: 0) {
+                    Text("\(targetLabel): ")
+                        .font(.caption)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    Text("\(Formatters.formatVolume(targetVolume)) kg")
+                        .font(themeManager.currentTheme.dataFont(size: 12))
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                }
 
                 Spacer()
 
                 // Delta display
                 if delta != 0 {
                     Text(delta > 0 ? "+\(Formatters.formatVolume(delta))" : "\(Formatters.formatVolume(delta))")
-                        .font(.caption)
-                        .fontWeight(.medium)
+                        .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
                         .foregroundStyle(progressColor)
                 }
             }

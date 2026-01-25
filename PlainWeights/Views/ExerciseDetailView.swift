@@ -114,7 +114,7 @@ struct ComparisonMetricsCard: View {
                             .font(.caption)
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Text(Formatters.formatWeight(metrics.maxWeight))
-                            .font(.system(size: 18))
+                            .font(themeManager.currentTheme.dataFont(size: 18))
                             .foregroundStyle(themeManager.currentTheme.primaryText)
 
                         // Progress delta
@@ -132,7 +132,7 @@ struct ComparisonMetricsCard: View {
                             .font(.caption)
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Text("\(metrics.maxReps)")
-                            .font(.system(size: 18))
+                            .font(themeManager.currentTheme.dataFont(size: 18))
                             .foregroundStyle(themeManager.currentTheme.primaryText)
 
                         // Progress delta
@@ -150,7 +150,7 @@ struct ComparisonMetricsCard: View {
                             .font(.caption)
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Text(Formatters.formatVolume(metrics.totalVolume))
-                            .font(.system(size: 18))
+                            .font(themeManager.currentTheme.dataFont(size: 18))
                             .foregroundStyle(themeManager.currentTheme.primaryText)
 
                         // Progress delta
@@ -190,15 +190,15 @@ struct ComparisonMetricsCard: View {
         switch direction {
         case .up:
             Text("+\(intValue)\(suffix)")
-                .font(.caption.weight(.medium))
+                .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
                 .foregroundStyle(direction.progressColor)
         case .down:
             Text("\(intValue)\(suffix)")
-                .font(.caption.weight(.medium))
+                .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
                 .foregroundStyle(direction.progressColor)
         case .same:
             Text("0\(suffix)")
-                .font(.caption.weight(.medium))
+                .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
                 .foregroundStyle(direction.progressColor)
         }
     }
@@ -323,7 +323,7 @@ struct ExerciseDetailView: View {
                                 .font(.caption)
                                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
                             Text(isWeightedExercise ? "\(Formatters.formatVolume(todaysVolume)) kg" : "\(todaysTotalReps) reps")
-                                .font(.title2)
+                                .font(themeManager.currentTheme.dataFont(size: 22))
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                         }
                         Spacer()
@@ -333,7 +333,7 @@ struct ExerciseDetailView: View {
                                     .font(.caption)
                                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
                                 Text("\(mins) min")
-                                    .font(.title3)
+                                    .font(themeManager.currentTheme.dataFont(size: 18))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                         }

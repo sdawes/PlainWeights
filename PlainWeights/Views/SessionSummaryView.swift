@@ -118,7 +118,7 @@ struct SessionSummaryView: View {
                 VStack(spacing: 2) {
                     HStack(spacing: 4) {
                         Text("\(pbCount)")
-                            .font(.title3)
+                            .font(themeManager.currentTheme.dataFont(size: 20))
                         Image(systemName: "trophy.fill")
                             .font(.system(size: 14))
                             .foregroundStyle(themeManager.currentTheme.primaryText)
@@ -139,7 +139,7 @@ struct SessionSummaryView: View {
     private func statItem(value: String, label: String) -> some View {
         VStack(spacing: 2) {
             Text(value)
-                .font(.title3)
+                .font(themeManager.currentTheme.dataFont(size: 20))
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -183,24 +183,27 @@ struct SessionSummaryView: View {
             // Sets and volume
             HStack {
                 Text("\(workoutExercise.setCount) sets")
+                    .font(themeManager.currentTheme.dataFont(size: 15))
                     .foregroundStyle(.secondary)
 
                 Text("•")
+                    .font(.subheadline)
                     .foregroundStyle(.tertiary)
 
                 Text("\(Formatters.formatVolume(workoutExercise.volume)) kg")
+                    .font(themeManager.currentTheme.dataFont(size: 15))
                     .foregroundStyle(.secondary)
             }
-            .font(.subheadline)
 
             // Max weight × reps
             if let maxSet = workoutExercise.sets.filter({ !$0.isWarmUp && !$0.isBonus }).max(by: { $0.weight < $1.weight }) {
                 HStack {
                     Text("Max:")
+                        .font(.subheadline)
                         .foregroundStyle(.tertiary)
                     Text("\(Formatters.formatWeight(maxSet.weight)) kg × \(maxSet.reps)")
+                        .font(themeManager.currentTheme.dataFont(size: 15))
                 }
-                .font(.subheadline)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

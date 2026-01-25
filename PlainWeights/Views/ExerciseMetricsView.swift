@@ -45,6 +45,7 @@ struct DashedVerticalLine: Shape {
 // MARK: - Hero Metric Component
 
 struct HeroMetricView: View {
+    @Environment(ThemeManager.self) private var themeManager
     let weight: Double
     let reps: Int
     let totalVolume: Double
@@ -72,19 +73,20 @@ struct HeroMetricView: View {
             // Hero metric: Weight (large) × Reps (smaller, lighter)
             HStack(alignment: .center, spacing: 4) {
                 Text("\(Formatters.formatWeight(weight)) kg")
-                    .font(.largeTitle)
+                    .font(themeManager.currentTheme.dataFont(size: 34))
                     .foregroundStyle(.primary)
                 Text("× \(reps) reps")
-                    .font(.title2)
+                    .font(themeManager.currentTheme.dataFont(size: 22))
                     .foregroundStyle(.secondary)
             }
 
             // Total weight (medium, secondary)
             HStack(spacing: 4) {
                 Text("\(Formatters.formatVolume(totalVolume)) kg")
+                    .font(themeManager.currentTheme.dataFont(size: 15))
                 Text("total weight")
+                    .font(.subheadline)
             }
-            .font(.subheadline)
             .foregroundStyle(.secondary)
         }
         .padding(20)
@@ -165,6 +167,7 @@ struct ProgressBarData {
 // MARK: - TargetMetricsSection Component
 
 struct TargetMetricsSection: View {
+    @Environment(ThemeManager.self) private var themeManager
     let data: TargetMetricsData
 
     var body: some View {
@@ -188,10 +191,10 @@ struct TargetMetricsSection: View {
             // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.system(size: 38))
+                    .font(themeManager.currentTheme.dataFont(size: 38))
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
-                    .font(.title2)
+                    .font(themeManager.currentTheme.dataFont(size: 22))
                     .foregroundStyle(.secondary)
 
                 // Set indicator icons (matching ThisSetSection design)
@@ -210,7 +213,7 @@ struct TargetMetricsSection: View {
                 if data.isTimedSet {
                     if data.tempoSeconds > 0 {
                         Text("\(data.tempoSeconds)")
-                            .font(.system(size: 10))
+                            .font(themeManager.currentTheme.dataFont(size: 10))
                             .foregroundStyle(.secondary)
                     } else {
                         Image(systemName: "timer")
@@ -229,9 +232,10 @@ struct TargetMetricsSection: View {
             // Total weight (will have picker added by parent)
             HStack(spacing: 4) {
                 Text("\(Formatters.formatVolume(data.totalVolume)) kg")
+                    .font(themeManager.currentTheme.dataFont(size: 15))
                 Text("total weight")
+                    .font(.subheadline)
             }
-            .font(.subheadline)
             .foregroundStyle(.secondary)
             .padding(.top, 0)
         }
@@ -241,6 +245,7 @@ struct TargetMetricsSection: View {
 // MARK: - TargetMetricsSection with Picker
 
 struct TargetMetricsSectionWithPicker: View {
+    @Environment(ThemeManager.self) private var themeManager
     let data: TargetMetricsData
     @Binding var selectedMode: MetricMode
 
@@ -266,10 +271,10 @@ struct TargetMetricsSectionWithPicker: View {
             // Metric values: Weight × Reps with set indicator icons
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text("\(Formatters.formatWeight(data.weight)) kg")
-                    .font(.system(size: 38))
+                    .font(themeManager.currentTheme.dataFont(size: 38))
                     .foregroundStyle(.primary)
                 Text("× \(data.reps) reps")
-                    .font(.title2)
+                    .font(themeManager.currentTheme.dataFont(size: 22))
                     .foregroundStyle(.secondary)
 
                 // Set indicator icons
@@ -288,7 +293,7 @@ struct TargetMetricsSectionWithPicker: View {
                 if data.isTimedSet {
                     if data.tempoSeconds > 0 {
                         Text("\(data.tempoSeconds)")
-                            .font(.system(size: 10))
+                            .font(themeManager.currentTheme.dataFont(size: 10))
                             .foregroundStyle(.secondary)
                     } else {
                         Image(systemName: "timer")
@@ -308,9 +313,10 @@ struct TargetMetricsSectionWithPicker: View {
             HStack(alignment: .lastTextBaseline) {
                 HStack(spacing: 4) {
                     Text("\(Formatters.formatVolume(data.totalVolume)) kg")
+                        .font(themeManager.currentTheme.dataFont(size: 15))
                     Text("total weight")
+                        .font(.subheadline)
                 }
-                .font(.subheadline)
                 .foregroundStyle(.secondary)
 
                 Spacer()
@@ -334,6 +340,7 @@ struct TargetMetricsSectionWithPicker: View {
 // MARK: - ThisSetSection Component
 
 struct ThisSetSection: View {
+    @Environment(ThemeManager.self) private var themeManager
     let data: ThisSetData
     let lastSetTimestamp: Date?
 
@@ -357,11 +364,11 @@ struct ThisSetSection: View {
                 // Set values
                 HStack(alignment: .center, spacing: 6) {
                     Text("\(data.weight) kg")
-                        .font(.title3)
+                        .font(themeManager.currentTheme.dataFont(size: 20))
                         .foregroundStyle(.primary)
 
                     Text("× \(data.reps) reps")
-                        .font(.callout)
+                        .font(themeManager.currentTheme.dataFont(size: 16))
                         .foregroundStyle(.secondary)
 
                     if data.isDropSet {
@@ -379,7 +386,7 @@ struct ThisSetSection: View {
                     if data.isTimedSet {
                         if data.tempoSeconds > 0 {
                             Text("\(data.tempoSeconds)")
-                                .font(.system(size: 12))
+                                .font(themeManager.currentTheme.dataFont(size: 12))
                                 .foregroundStyle(.secondary)
                         } else {
                             Image(systemName: "timer")
@@ -575,8 +582,7 @@ struct TargetMetricsCard: View {
                         // Col 1: Weight
                         HStack(alignment: .firstTextBaseline, spacing: 0) {
                             Text(Formatters.formatWeight(lastInfo.maxWeight))
-                                .font(.system(size: 32))
-                                .fontWeight(.bold)
+                                .font(themeManager.currentTheme.dataFont(size: 32, weight: .bold))
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                             Text(" kg")
                                 .font(.system(size: 14))
@@ -590,16 +596,14 @@ struct TargetMetricsCard: View {
 
                         // Col 3: Reps
                         Text("\(lastInfo.maxWeightReps)")
-                            .font(.system(size: 20))
-                            .fontWeight(.bold)
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .bold))
                             .foregroundStyle(themeManager.currentTheme.primaryText)
 
                         // Col 4: Total (right-aligned)
                         HStack(alignment: .firstTextBaseline, spacing: 0) {
                             Spacer()
                             Text(Formatters.formatVolume(lastInfo.volume))
-                                .font(.system(size: 12))
-                                .fontWeight(.bold)
+                                .font(themeManager.currentTheme.dataFont(size: 12, weight: .bold))
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                             Text(" total kg")
                                 .font(.system(size: 12))
@@ -613,8 +617,7 @@ struct TargetMetricsCard: View {
                             // Col 1: Weight progress
                             HStack(alignment: .firstTextBaseline, spacing: 0) {
                                 Text(weightDelta.map { $0 > 0 ? "+\(Int($0))" : "\(Int($0))" } ?? "")
-                                    .font(.system(size: 14))
-                                    .fontWeight(.semibold)
+                                    .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
                                     .foregroundStyle(weightProgressColor)
                                 Text("kg")
                                     .font(.system(size: 14))
@@ -628,8 +631,7 @@ struct TargetMetricsCard: View {
 
                             // Col 3: Reps progress
                             Text(repsDelta.map { $0 > 0 ? "+\($0)" : "\($0)" } ?? "")
-                                .font(.system(size: 14))
-                                .fontWeight(.semibold)
+                                .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
                                 .foregroundStyle(repsProgressColor)
 
                             // Col 4: Empty

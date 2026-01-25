@@ -87,7 +87,6 @@ struct SetRowView: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 24, alignment: .leading)
                     .padding(.leading, 8)
-                    .border(Color.red, width: 1)
 
                 // Col 2.5: PB indicator (between set number and weight)
                 if set.isPB {
@@ -95,11 +94,9 @@ struct SetRowView: View {
                         .font(.appFont(size: 12, weight: .semiBold))
                         .foregroundStyle(Color.pw_amber)
                         .frame(width: 20, alignment: .center)
-                        .border(Color.orange, width: 1)
                 } else {
                     Spacer()
                         .frame(width: 20)
-                        .border(Color.orange, width: 1)
                 }
 
                 // Col 3: Weight × Reps (baseline aligned)
@@ -110,13 +107,11 @@ struct SetRowView: View {
                         .frame(width: 45, alignment: .trailing)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                        .border(Color.yellow, width: 1)
 
                     Text(" kg × ")
                         .font(.appFont(.caption))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
-                        .border(Color.mint, width: 1)
 
                     Text("\(set.reps)")
                         .font(.appFont(.headline, weight: .regular))
@@ -124,13 +119,10 @@ struct SetRowView: View {
                         .frame(width: 25, alignment: .leading)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                        .border(Color.teal, width: 1)
                 }
                 .padding(.leading, 8)
-                .border(Color.green, width: 1)
 
                 Spacer()
-                    .border(Color.gray, width: 1)
 
                 // Col 7: Weight progression (always reserve space)
                 Group {
@@ -144,7 +136,6 @@ struct SetRowView: View {
                 .frame(width: 45, alignment: .trailing)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .border(Color.blue, width: 1)
 
                 // Col 8: Reps progression (always reserve space)
                 Group {
@@ -158,19 +149,16 @@ struct SetRowView: View {
                 .frame(width: 30, alignment: .trailing)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .border(Color.purple, width: 1)
 
                 // Badges (immediately left of timer/timestamp)
                 badgesView
                     .frame(width: 55, alignment: .trailing)
                     .padding(.trailing, 4)
-                    .border(Color.cyan, width: 1)
 
                 // Col 9: Timer or Timestamp
                 restTimeView
                     .frame(width: 55, alignment: .trailing)
                     .lineLimit(1)
-                    .border(Color.pink, width: 1)
             }
             .padding(.vertical, 12)
         }

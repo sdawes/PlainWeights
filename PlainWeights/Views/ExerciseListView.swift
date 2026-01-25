@@ -126,7 +126,7 @@ struct FilteredExerciseListView: View {
                                 }
                                 .padding(.top, 6)
                             }
-                            .padding(.leading, 16)
+                            .padding(.leading, 8)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {

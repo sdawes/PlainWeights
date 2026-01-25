@@ -95,29 +95,21 @@ struct ExerciseDetailView: View {
         _noteText = State(initialValue: exercise.note ?? "")
     }
 
-    // MARK: - Extracted Views
-
-    private var titleSection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(exercise.name)
-                    .font(.title.weight(.semibold))
-                    .foregroundStyle(themeManager.currentTheme.accent)
-                    .minimumScaleFactor(0.5)
-                    .lineLimit(1)
-                if !exercise.tags.isEmpty {
-                    TagPillsRow(tags: exercise.tags)
-                        .padding(.top, 6)
-                }
-            }
-        }
-        .listRowSeparator(.hidden)
-        .listRowBackground(Color.clear)
-    }
-
     var body: some View {
         List {
-            titleSection
+            // Title section
+            Section {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(exercise.name)
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                    if !exercise.tags.isEmpty {
+                        TagPillsRow(tags: exercise.tags)
+                    }
+                }
+            }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
 
             // Target metrics cards (Previous session + Best Ever)
             Section {
@@ -281,24 +273,30 @@ struct ExerciseDetailView: View {
                 NavigationLink {
                     ExerciseChartDetailView(exercise: exercise, sets: Array(sets))
                 } label: {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
+                    Image(systemName: "waveform.path.ecg")
                         .font(.callout)
+                        .fontWeight(.medium)
+                        .foregroundStyle(themeManager.currentTheme.textColor)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingNotesSheet = true }) {
-                    Image(systemName: "note.text")
+                    Image(systemName: "doc.text")
                         .font(.callout)
+                        .fontWeight(.medium)
+                        .foregroundStyle(themeManager.currentTheme.textColor)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingEditSheet = true }) {
-                    Image(systemName: "pencil")
+                    Image(systemName: "square.and.pencil")
                         .font(.callout)
+                        .fontWeight(.medium)
+                        .foregroundStyle(themeManager.currentTheme.textColor)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
@@ -310,6 +308,13 @@ struct ExerciseDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(themeManager.currentTheme.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 0.5)
+        }
         .alert("Delete Exercise", isPresented: $showingDeleteAlert) {
             Button("Delete", role: .destructive) {
                 deleteExercise()

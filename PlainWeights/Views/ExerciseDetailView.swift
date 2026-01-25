@@ -15,6 +15,120 @@ enum ComparisonMode: String, CaseIterable {
     case allTimeBest = "All-Time Best"
 }
 
+// MARK: - Comparison Metrics Card
+
+struct ComparisonMetricsCard: View {
+    @Environment(ThemeManager.self) private var themeManager
+    let comparisonMode: ComparisonMode
+    let sets: [ExerciseSet]
+
+    // Sets excluding today (for metrics calculation)
+    private var setsExcludingToday: [ExerciseSet] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return sets.filter { calendar.startOfDay(for: $0.timestamp) < today }
+    }
+
+    // Last session metrics
+    private var lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)? {
+        let progressState = ProgressTracker.createProgressState(from: sets)
+        guard let lastInfo = progressState.lastCompletedDayInfo else { return nil }
+        return (lastInfo.date, lastInfo.maxWeight, lastInfo.maxWeightReps, lastInfo.volume)
+    }
+
+    // Best ever metrics
+    private var bestMetrics: BestSessionCalculator.BestDayMetrics? {
+        BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
+    }
+
+    // Current metrics based on mode
+    private var currentMetrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double)? {
+        switch comparisonMode {
+        case .lastSession:
+            guard let last = lastSessionMetrics else { return nil }
+            return (last.date, last.maxWeight, last.maxReps, last.totalVolume)
+        case .allTimeBest:
+            guard let best = bestMetrics else { return nil }
+            return (best.date, best.maxWeight, best.repsAtMaxWeight, best.totalVolume)
+        }
+    }
+
+    // Header text with date
+    private var headerText: String {
+        guard let metrics = currentMetrics, let date = metrics.date else {
+            return comparisonMode == .lastSession ? "Last Session" : "All-Time Best"
+        }
+        let dateStr = date.formatted(.dateTime.month(.abbreviated).day())
+        return comparisonMode == .lastSession ? "Last Session (\(dateStr))" : "All-Time Best (\(dateStr))"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Header
+            Text(headerText)
+                .font(.caption)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+            if let metrics = currentMetrics {
+                // 3-column grid
+                HStack(spacing: 0) {
+                    // Weight
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(comparisonMode == .lastSession ? "Max Weight" : "Weight")
+                            .font(.caption)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        Text(Formatters.formatWeight(metrics.maxWeight))
+                            .font(.system(size: 18))
+                            .fontDesign(.monospaced)
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // Reps
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(comparisonMode == .lastSession ? "Max Reps" : "Reps")
+                            .font(.caption)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        Text("\(metrics.maxReps)")
+                            .font(.system(size: 18))
+                            .fontDesign(.monospaced)
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    // Total
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(comparisonMode == .lastSession ? "Max Total" : "Total")
+                            .font(.caption)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        Text(Formatters.formatVolume(metrics.totalVolume))
+                            .font(.system(size: 18))
+                            .fontDesign(.monospaced)
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                // Empty state
+                Text("No data yet")
+                    .font(.subheadline)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 8)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(themeManager.currentTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
+        .animation(.easeInOut(duration: 0.2), value: comparisonMode)
+    }
+}
+
 // MARK: - ExerciseDetailView
 
 struct ExerciseDetailView: View {
@@ -160,20 +274,11 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
-            // Target metrics cards (Previous session + Best Ever)
+            // Comparison metrics card (responds to toggle)
             Section {
-                TargetMetricsCard(
-                    exercise: exercise,
-                    sets: sets
-                )
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .background(themeManager.currentTheme.cardBackgroundColor)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                        .foregroundStyle(themeManager.currentTheme.borderColor)
+                ComparisonMetricsCard(
+                    comparisonMode: comparisonMode,
+                    sets: Array(sets)
                 )
             }
             .listRowSeparator(.hidden)

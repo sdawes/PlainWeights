@@ -173,17 +173,29 @@ struct SetRowView: View {
 
     // MARK: - Rest Time Display
 
+    // Check if more than 3 minutes have passed since this set
+    private var hasExceededRestTime: Bool {
+        Date().timeIntervalSince(set.timestamp) >= 180
+    }
+
     @ViewBuilder
     private var restTimeView: some View {
-        // Priority 1: Show live timer for most recent set (no captured rest time yet)
-        if showTimer && set.restSeconds == nil {
-            liveTimerView
-        }
-        // Priority 2: Show captured rest time (static display)
-        else if let restSeconds = set.restSeconds {
+        // Priority 1: Show captured rest time (static display)
+        if let restSeconds = set.restSeconds {
             staticRestTimeView(seconds: restSeconds)
         }
-        // Priority 3: Default - show timestamp
+        // Priority 2: Show live timer for most recent set (under 3 mins, not yet captured)
+        else if showTimer && !hasExceededRestTime {
+            liveTimerView
+        }
+        // Priority 3: Most recent set exceeded 3 mins but not captured yet - capture and show
+        else if showTimer && hasExceededRestTime {
+            staticRestTimeView(seconds: 180)
+                .onAppear {
+                    captureRestTimeExpiry()
+                }
+        }
+        // Priority 4: Default - show timestamp
         else {
             Text(Formatters.formatTimeHM(set.timestamp))
                 .font(.caption)
@@ -207,34 +219,35 @@ struct SetRowView: View {
     @ViewBuilder
     private var liveTimerView: some View {
         TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
-            let rawElapsed = context.date.timeIntervalSince(set.timestamp)
+            let elapsed = context.date.timeIntervalSince(set.timestamp)
+            let color = restTimeColor(for: Int(elapsed))
 
-            // Only show timer for first 5 minutes (300 seconds)
-            if rawElapsed < 300 {
-                let elapsed = min(rawElapsed, 180)
-                let color = restTimeColor(for: Int(elapsed))
+            if elapsed >= 180 {
+                // At 3 minutes, show static display and capture rest time
+                HStack(spacing: 4) {
+                    Image(systemName: "moon.zzz")
+                        .font(.caption)
+                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
 
+                    Text("3:00")
+                        .font(.caption)
+                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                }
+                .onAppear {
+                    captureRestTimeExpiry()
+                }
+            } else {
+                // Under 3 minutes, show live timer
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
                         .font(.caption)
                         .fontWeight(.bold)
                         .foregroundStyle(color)
 
-                    if elapsed >= 180 {
-                        Text("> 3m")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundStyle(color)
-                            .onAppear {
-                                // Capture the expiry when timer hits 180s
-                                captureRestTimeExpiry()
-                            }
-                    } else {
-                        Text(Formatters.formatDuration(elapsed))
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundStyle(color)
-                                                }
+                    Text(Formatters.formatDuration(elapsed))
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundStyle(color)
                 }
             }
         }

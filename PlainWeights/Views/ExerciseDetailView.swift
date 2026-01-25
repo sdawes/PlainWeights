@@ -282,6 +282,115 @@ struct ExerciseDetailView: View {
         .primary
     }
 
+    // Comparison volume based on selected mode
+    private var comparisonVolume: Double {
+        comparisonMode == .lastSession ? lastSessionVolume : bestSessionVolume
+    }
+
+    // Label for progress bar based on selected mode
+    private var comparisonLabel: String {
+        comparisonMode == .lastSession ? "Last" : "Best"
+    }
+
+    // MARK: - Today's Sets Card (extracted to help compiler)
+
+    @ViewBuilder
+    private var todaySetsCard: some View {
+        VStack(spacing: 0) {
+            // Card Header
+            VStack(spacing: 0) {
+                HStack {
+                    Text("Today's Sets")
+                        .font(.headline)
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                    Spacer()
+                    if !todaySets.isEmpty {
+                        Text("\(todaySets.count) \(todaySets.count == 1 ? "set" : "sets")")
+                            .font(.subheadline)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+
+                // Volume info (only when has sets)
+                if !todaySets.isEmpty {
+                    Divider()
+                        .background(themeManager.currentTheme.borderColor)
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Total Volume")
+                                .font(.caption)
+                                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            Text(isWeightedExercise ? "\(Formatters.formatVolume(todaysVolume)) kg" : "\(todaysTotalReps) reps")
+                                .font(.title2)
+                                .foregroundStyle(themeManager.currentTheme.primaryText)
+                        }
+                        Spacer()
+                        if let mins = sessionDurationMinutes {
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text("Duration")
+                                    .font(.caption)
+                                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                                Text("\(mins) min")
+                                    .font(.title3)
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+
+                    // Progress bar vs comparison target
+                    if isWeightedExercise && comparisonVolume > 0 {
+                        VolumeProgressBar(
+                            currentVolume: todaysVolume,
+                            targetVolume: comparisonVolume,
+                            targetLabel: comparisonLabel
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
+                    }
+                }
+            }
+
+            Divider()
+                .background(themeManager.currentTheme.borderColor)
+
+            // Card Content
+            if todaySets.isEmpty {
+                Text("No sets logged yet")
+                    .font(.subheadline)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 32)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(todaySets.indices, id: \.self) { index in
+                        let set = todaySets[index]
+                        SetRowView(
+                            set: set,
+                            setNumber: todaySets.count - index,
+                            isFirst: index == 0,
+                            isLast: index == todaySets.count - 1,
+                            onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
+                            onDelete: { deleteSet(set) },
+                            allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
+                            showTimer: index == 0
+                        )
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+        .background(themeManager.currentTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
+    }
+
     init(exercise: Exercise) {
         self.exercise = exercise
         let id = exercise.persistentModelID
@@ -359,92 +468,9 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
-            // Today's Sets Card (matches Make design)
+            // Today's Sets Card
             Section {
-                VStack(spacing: 0) {
-                    // Card Header
-                    VStack(spacing: 0) {
-                        HStack {
-                            Text("Today's Sets")
-                                .font(.headline)
-                                .foregroundStyle(themeManager.currentTheme.primaryText)
-                            Spacer()
-                            if !todaySets.isEmpty {
-                                Text("\(todaySets.count) \(todaySets.count == 1 ? "set" : "sets")")
-                                    .font(.subheadline)
-                                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-
-                        // Volume info (only when has sets)
-                        if !todaySets.isEmpty {
-                            Divider()
-                                .background(themeManager.currentTheme.borderColor)
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Total Volume")
-                                        .font(.caption)
-                                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                                    Text(isWeightedExercise ? "\(Formatters.formatVolume(todaysVolume)) kg" : "\(todaysTotalReps) reps")
-                                        .font(.title2)
-                                        .foregroundStyle(themeManager.currentTheme.primaryText)
-                                }
-                                Spacer()
-                                if let mins = sessionDurationMinutes {
-                                    VStack(alignment: .trailing, spacing: 2) {
-                                        Text("Duration")
-                                            .font(.caption)
-                                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                                        Text("\(mins) min")
-                                            .font(.title3)
-                                            .foregroundStyle(themeManager.currentTheme.primaryText)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 12)
-                        }
-                    }
-
-                    Divider()
-                        .background(themeManager.currentTheme.borderColor)
-
-                    // Card Content
-                    if todaySets.isEmpty {
-                        // Empty state
-                        Text("No sets logged yet")
-                            .font(.subheadline)
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 32)
-                    } else {
-                        // Sets list
-                        VStack(spacing: 0) {
-                            ForEach(todaySets.indices, id: \.self) { index in
-                                let set = todaySets[index]
-                                SetRowView(
-                                    set: set,
-                                    setNumber: todaySets.count - index,
-                                    isFirst: index == 0,
-                                    isLast: index == todaySets.count - 1,
-                                    onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
-                                    onDelete: { deleteSet(set) },
-                                    allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
-                                    showTimer: index == 0
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                    }
-                }
-                .background(themeManager.currentTheme.cardBackgroundColor)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-                )
+                todaySetsCard
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)

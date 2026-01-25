@@ -108,7 +108,7 @@ struct FilteredExerciseListView: View {
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
-                                    .font(.system(size: 18, weight: .medium))
+                                    .font(.system(size: 18, weight: .semibold))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                                 if !exercise.tags.isEmpty {
                                     TagPillsRow(tags: exercise.tags)
@@ -124,7 +124,7 @@ struct FilteredExerciseListView: View {
                                         .font(.system(size: 14, weight: .medium))
                                         .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
                                 }
-                                .padding(.top, 6)
+                                .padding(.top, 10)
                             }
                             .padding(.leading, 8)
                         }

@@ -8,245 +8,48 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Weight and Reps Input Container
+// MARK: - Set Type Enum for UI
 
-struct WeightRepsInputContainer: View {
-    @Environment(ThemeManager.self) private var themeManager
-    @Binding var weightText: String
-    @Binding var repsText: String
-    @FocusState.Binding var focusedField: AddSetView.Field?
+enum SetTypeOption: String, CaseIterable, Identifiable {
+    case normal = "Normal"
+    case warmup = "Warm-up"
+    case dropset = "Drop Set"
+    case bonus = "Bonus"
+    case pause = "Pause Rep"
+    case timed = "Timed"
 
-    var body: some View {
-        HStack(spacing: 12) {
-            // Weight input box
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Weight (kg)")
-                    .font(.subheadline)
-                    .foregroundStyle(themeManager.currentTheme.secondaryText)
-
-                TextField("Enter weight (optional)", text: $weightText)
-                    .font(.body)
-                    .keyboardType(.decimalPad)
-                    .focused($focusedField, equals: .weight)
-                    .submitLabel(.next)
-                    .onSubmit {
-                        focusedField = .reps
-                    }
-                    .padding(16)
-                    .background(themeManager.currentTheme.background)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(themeManager.currentTheme.primary.opacity(focusedField == .weight ? 1 : 0.2), lineWidth: focusedField == .weight ? 2 : 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-
-            // Reps input box
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Reps")
-                    .font(.subheadline)
-                    .foregroundStyle(themeManager.currentTheme.secondaryText)
-
-                TextField("Enter reps (optional)", text: $repsText)
-                    .font(.body)
-                    .keyboardType(.numberPad)
-                    .focused($focusedField, equals: .reps)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        focusedField = nil
-                    }
-                    .padding(16)
-                    .background(themeManager.currentTheme.background)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(themeManager.currentTheme.primary.opacity(focusedField == .reps ? 1 : 0.2), lineWidth: focusedField == .reps ? 2 : 1)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-        }
-        .padding(16)
-        .background(themeManager.currentTheme.background)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(themeManager.currentTheme.border, lineWidth: 1)
-        )
-    }
+    var id: String { rawValue }
 }
 
-// MARK: - Set Options Chips
+// MARK: - Set Type Pill Selector
 
-struct SetOptionsToggles: View {
+struct SetTypePillSelector: View {
     @Environment(ThemeManager.self) private var themeManager
-    @Binding var isWarmUpSet: Bool
-    @Binding var isBonusSet: Bool
-    @Binding var isDropSet: Bool
-    @Binding var isPauseAtTop: Bool
-    @Binding var isTimedSet: Bool
-
-    private let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
+    @Binding var selectedType: SetTypeOption
 
     var body: some View {
-        LazyVGrid(columns: columns, spacing: 10) {
-            // Row 1
-            chipButton(icon: "flame.fill", text: "Warm-up", isSelected: isWarmUpSet) {
-                selectOption(.warmUp)
-            }
-            chipButton(icon: "chevron.down", text: "Drop set", isSelected: isDropSet) {
-                selectOption(.dropSet)
-            }
-            // Row 2
-            chipButton(icon: "pause.fill", text: "Pause", isSelected: isPauseAtTop) {
-                selectOption(.pause)
-            }
-            chipButton(icon: "timer", text: "Timed", isSelected: isTimedSet) {
-                selectOption(.timed)
-            }
-            // Row 3
-            chipButton(icon: "star.fill", text: "Bonus", isSelected: isBonusSet) {
-                selectOption(.bonus)
-            }
-            Color.clear // Empty cell
-        }
-        .padding(12)
-        .background(themeManager.currentTheme.background)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(themeManager.currentTheme.border, lineWidth: 1)
-        )
-    }
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Set Type")
+                .font(.subheadline)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
-    // MARK: - Helper Views
-
-    @ViewBuilder
-    private func chipButton(icon: String, text: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        let primary = themeManager.currentTheme.primary
-        let background = themeManager.currentTheme.background
-        Button {
-            action()
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 12))
-                Text(text)
-                    .font(.subheadline)
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity)
-            .background(isSelected ? primary : Color.clear)
-            .foregroundStyle(isSelected ? background : primary.opacity(0.6))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                    .foregroundStyle(isSelected ? Color.clear : themeManager.currentTheme.border)
-            )
-        }
-        .buttonStyle(.plain)
-        .contentShape(RoundedRectangle(cornerRadius: 10))
-    }
-
-    // MARK: - Selection Logic
-
-    private enum SetOption {
-        case warmUp, bonus, dropSet, pause, timed
-    }
-
-    private func selectOption(_ option: SetOption) {
-        // If already selected, deselect it
-        // Otherwise, select it and deselect all others (mutually exclusive)
-        switch option {
-        case .warmUp:
-            if isWarmUpSet {
-                isWarmUpSet = false
-            } else {
-                clearAll()
-                isWarmUpSet = true
-            }
-        case .bonus:
-            if isBonusSet {
-                isBonusSet = false
-            } else {
-                clearAll()
-                isBonusSet = true
-            }
-        case .dropSet:
-            if isDropSet {
-                isDropSet = false
-            } else {
-                clearAll()
-                isDropSet = true
-            }
-        case .pause:
-            if isPauseAtTop {
-                isPauseAtTop = false
-            } else {
-                clearAll()
-                isPauseAtTop = true
-            }
-        case .timed:
-            if isTimedSet {
-                isTimedSet = false
-            } else {
-                clearAll()
-                isTimedSet = true
+            FlowLayout(spacing: 8) {
+                ForEach(SetTypeOption.allCases) { type in
+                    Button {
+                        selectedType = type
+                    } label: {
+                        Text(type.rawValue)
+                            .font(.subheadline)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(selectedType == type ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
+                            .foregroundStyle(selectedType == type ? .white : themeManager.currentTheme.primaryText)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
-    }
-
-    private func clearAll() {
-        isWarmUpSet = false
-        isBonusSet = false
-        isDropSet = false
-        isPauseAtTop = false
-        isTimedSet = false
-    }
-}
-
-// MARK: - Add Set Button
-
-struct AddSetButton: View {
-    @Environment(ThemeManager.self) private var themeManager
-    let action: () -> Void
-    let isEnabled: Bool
-    let title: String
-    let iconName: String
-
-    init(action: @escaping () -> Void, isEnabled: Bool, title: String = "Add Set", iconName: String = "plus.circle.fill") {
-        self.action = action
-        self.isEnabled = isEnabled
-        self.title = title
-        self.iconName = iconName
-    }
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: iconName)
-                    .font(.headline)
-                Text(title)
-                    .font(.headline)
-            }
-            .foregroundStyle(isEnabled ? themeManager.currentTheme.textColor : .gray)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                    .foregroundStyle(isEnabled ? themeManager.currentTheme.textColor : .gray)
-            )
-        }
-        .buttonStyle(.plain)
-        .contentShape(RoundedRectangle(cornerRadius: 10))
-        .disabled(!isEnabled)
-        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 }
 
@@ -255,16 +58,13 @@ struct AddSetButton: View {
 struct AddSetView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
+    @Environment(ThemeManager.self) private var themeManager
     let exercise: Exercise
     let setToEdit: ExerciseSet?
 
     @State private var weightText = ""
     @State private var repsText = ""
-    @State private var isWarmUpSet = false
-    @State private var isBonusSet = false
-    @State private var isDropSet = false
-    @State private var isPauseAtTop = false
-    @State private var isTimedSet = false
+    @State private var selectedType: SetTypeOption = .normal
     @FocusState private var focusedField: Field?
 
     enum Field {
@@ -279,11 +79,7 @@ struct AddSetView: View {
         if let set = setToEdit {
             _weightText = State(initialValue: Formatters.formatWeight(set.weight))
             _repsText = State(initialValue: String(set.reps))
-            _isWarmUpSet = State(initialValue: set.isWarmUp)
-            _isBonusSet = State(initialValue: set.isBonus)
-            _isDropSet = State(initialValue: set.isDropSet)
-            _isPauseAtTop = State(initialValue: set.isPauseAtTop)
-            _isTimedSet = State(initialValue: set.isTimedSet)
+            _selectedType = State(initialValue: Self.typeFromSet(set))
         } else {
             // If adding new set, use initial values
             if let initialWeight = initialWeight, initialWeight >= 0 {
@@ -295,56 +91,87 @@ struct AddSetView: View {
         }
     }
 
+    private static func typeFromSet(_ set: ExerciseSet) -> SetTypeOption {
+        if set.isWarmUp { return .warmup }
+        if set.isBonus { return .bonus }
+        if set.isDropSet { return .dropset }
+        if set.isPauseAtTop { return .pause }
+        if set.isTimedSet { return .timed }
+        return .normal
+    }
+
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 24) {
-                // Weight and reps input container
-                WeightRepsInputContainer(
-                    weightText: $weightText,
-                    repsText: $repsText,
-                    focusedField: $focusedField
-                )
-
-                // Set options toggles
-                SetOptionsToggles(
-                    isWarmUpSet: $isWarmUpSet,
-                    isBonusSet: $isBonusSet,
-                    isDropSet: $isDropSet,
-                    isPauseAtTop: $isPauseAtTop,
-                    isTimedSet: $isTimedSet
-                )
-
-                // Add/Update Set button (moved up from bottom)
-                AddSetButton(
-                    action: addSet,
-                    isEnabled: canAddSet,
-                    title: setToEdit == nil ? "Add Set" : "Update Set",
-                    iconName: setToEdit == nil ? "plus.circle.fill" : "checkmark.circle.fill"
-                )
-                .padding(.top, 8)
-
+        VStack(alignment: .leading, spacing: 24) {
+            // Header
+            HStack {
+                Text("\(setToEdit == nil ? "Add Set" : "Edit Set") - \(exercise.name)")
+                    .font(.title3.weight(.semibold))
+                    .lineLimit(1)
                 Spacer()
-            }
-            .padding(16)
-            .background(AnimatedGradientBackground())
-            .navigationTitle(setToEdit == nil ? "Add Set" : "Edit Set")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.title3)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        addSet()
-                    }
-                    .disabled(!canAddSet)
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, 8)
+
+            // Weight and Reps inputs
+            HStack(spacing: 16) {
+                // Weight input
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Weight (kg)")
+                        .font(.subheadline)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                    TextField("0", text: $weightText)
+                        .font(.system(size: 20))
+                        .keyboardType(.decimalPad)
+                        .focused($focusedField, equals: .weight)
+                        .padding(16)
+                        .background(themeManager.currentTheme.muted)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+
+                // Reps input
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Reps")
+                        .font(.subheadline)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                    TextField("0", text: $repsText)
+                        .font(.system(size: 20))
+                        .keyboardType(.numberPad)
+                        .focused($focusedField, equals: .reps)
+                        .padding(16)
+                        .background(themeManager.currentTheme.muted)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
-            .onAppear {
-                focusedField = .weight
+
+            // Set Type selector
+            SetTypePillSelector(selectedType: $selectedType)
+
+            // Save button
+            Button(action: addSet) {
+                Text(setToEdit == nil ? "Save Set" : "Update Set")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(canAddSet ? themeManager.currentTheme.primary : themeManager.currentTheme.primary.opacity(0.4))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
+            .buttonStyle(.plain)
+            .disabled(!canAddSet)
+
+            Spacer()
+        }
+        .padding(24)
+        .background(themeManager.currentTheme.background)
+        .onAppear {
+            focusedField = .weight
         }
     }
 
@@ -362,6 +189,13 @@ struct AddSetView: View {
             return
         }
 
+        // Convert selectedType to boolean flags
+        let isWarmUp = selectedType == .warmup
+        let isBonus = selectedType == .bonus
+        let isDropSet = selectedType == .dropset
+        let isPauseAtTop = selectedType == .pause
+        let isTimedSet = selectedType == .timed
+
         do {
             if let setToEdit = setToEdit {
                 // Update existing set
@@ -369,8 +203,8 @@ struct AddSetView: View {
                     setToEdit,
                     weight: weight,
                     reps: reps,
-                    isWarmUp: isWarmUpSet,
-                    isBonus: isBonusSet,
+                    isWarmUp: isWarmUp,
+                    isBonus: isBonus,
                     isDropSet: isDropSet,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
@@ -382,8 +216,8 @@ struct AddSetView: View {
                 try ExerciseSetService.addSet(
                     weight: weight,
                     reps: reps,
-                    isWarmUp: isWarmUpSet,
-                    isBonus: isBonusSet,
+                    isWarmUp: isWarmUp,
+                    isBonus: isBonus,
                     isDropSet: isDropSet,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,

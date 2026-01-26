@@ -12,55 +12,61 @@ struct SettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    HStack {
-                        Text("Theme")
-                            .font(.body)
+        VStack(alignment: .leading, spacing: 24) {
+            // Header
+            HStack {
+                Text("Settings")
+                    .font(.title3.weight(.semibold))
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.title3)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, 8)
 
-                        Spacer()
+            // Theme section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Theme")
+                    .font(.subheadline)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
-                        HStack(spacing: 8) {
-                            // Light button
-                            Button {
-                                themeManager.currentTheme = .light
-                            } label: {
-                                Label("Light", systemImage: "sun.max.fill")
-                                    .font(.caption)
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(themeManager.currentTheme == .light ? .primary : .secondary)
-                            .opacity(themeManager.currentTheme == .light ? 1.0 : 0.5)
-
-                            // Dark button
-                            Button {
-                                themeManager.currentTheme = .dark
-                            } label: {
-                                Label("Dark", systemImage: "moon.fill")
-                                    .font(.caption)
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(themeManager.currentTheme == .dark ? .primary : .secondary)
-                            .opacity(themeManager.currentTheme == .dark ? 1.0 : 0.5)
-                        }
+                HStack(spacing: 8) {
+                    // Light pill
+                    Button {
+                        themeManager.currentTheme = .light
+                    } label: {
+                        Label("Light", systemImage: "sun.max.fill")
+                            .font(.subheadline)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(themeManager.currentTheme == .light ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
+                            .foregroundStyle(themeManager.currentTheme == .light ? .white : themeManager.currentTheme.primaryText)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                } header: {
-                    Text("APPEARANCE")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    .buttonStyle(.plain)
+
+                    // Dark pill
+                    Button {
+                        themeManager.currentTheme = .dark
+                    } label: {
+                        Label("Dark", systemImage: "moon.fill")
+                            .font(.subheadline)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(themeManager.currentTheme == .dark ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
+                            .foregroundStyle(themeManager.currentTheme == .dark ? .white : themeManager.currentTheme.primaryText)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
+
+            Spacer()
         }
+        .padding(24)
+        .background(themeManager.currentTheme.background)
     }
 }

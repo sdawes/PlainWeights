@@ -42,18 +42,18 @@ struct SetRowView: View {
                 Text("\(setNumber)")
                     .font(themeManager.currentTheme.dataFont(size: 17, weight: .medium))
                     .foregroundStyle(set.isWarmUp ? .orange : (set.isBonus ? .purple : .secondary))
-                    .frame(width: 28, alignment: .leading)
+                    .frame(width: 24, alignment: .leading)
                     .padding(.leading, 8)
 
-                // Col 2: PB indicator (between set number and weight)
+                // Col 2: PB indicator (centered between set number and weight)
                 if set.isPB {
                     Text("PB")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(themeManager.currentTheme.primaryText)
-                        .frame(width: 24, alignment: .center)
+                        .frame(width: 32, alignment: .center)
                 } else {
                     Spacer()
-                        .frame(width: 24)
+                        .frame(width: 32)
                 }
 
                 // Weight × Reps (baseline aligned, larger font to match Make)
@@ -80,13 +80,12 @@ struct SetRowView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
-                .padding(.leading, 4)
 
                 Spacer()
 
                 // Badges (immediately left of timer/timestamp)
                 badgesView
-                    .frame(width: 55, alignment: .trailing)
+                    .frame(minWidth: 55, alignment: .trailing)
                     .padding(.trailing, 4)
 
                 // Col 9: Timer or Timestamp
@@ -169,9 +168,13 @@ struct SetRowView: View {
         let color = themeManager.currentTheme.primaryText
         switch badge {
         case "warmup":
-            Image(systemName: "flame.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(color)
+            HStack(spacing: 4) {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 14))
+                Text("Warm Up")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundStyle(.orange)
         case "bonus":
             Image(systemName: "trophy.fill")
                 .font(.system(size: 14))
@@ -235,14 +238,14 @@ struct SetRowView: View {
     @ViewBuilder
     private func staticRestTimeView(seconds: Int) -> some View {
         HStack(spacing: 4) {
-            Image(systemName: "moon.zzz")
+            Image(systemName: "timer")
                 .font(.caption)
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
 
             Text(Formatters.formatDuration(Double(seconds)))
                 .font(themeManager.currentTheme.dataFont(size: 12))
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
-                        }
+        }
     }
 
     @ViewBuilder
@@ -254,7 +257,7 @@ struct SetRowView: View {
             if elapsed >= 180 {
                 // At 3 minutes, show static display and capture rest time
                 HStack(spacing: 4) {
-                    Image(systemName: "moon.zzz")
+                    Image(systemName: "timer")
                         .font(.caption)
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
 

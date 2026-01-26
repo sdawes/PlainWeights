@@ -59,17 +59,12 @@ struct VolumeProgressBar: View {
             }
             .frame(height: 8)
 
-            // Labels row
+            // Labels row (matching Make design)
             HStack {
-                // Target label
-                HStack(spacing: 0) {
-                    Text("\(targetLabel): ")
-                        .font(.caption)
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                    Text("\(Formatters.formatVolume(targetVolume)) kg")
-                        .font(themeManager.currentTheme.dataFont(size: 12))
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                }
+                // Target label - simplified format
+                Text("\(targetLabel): \(Formatters.formatVolume(targetVolume))")
+                    .font(.system(size: 12))
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
                 Spacer()
 

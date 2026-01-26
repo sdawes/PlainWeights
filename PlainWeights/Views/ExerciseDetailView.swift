@@ -214,7 +214,7 @@ struct ComparisonMetricsCard: View {
                 .font(.caption)
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
             Text(value)
-                .font(themeManager.currentTheme.dataFont(size: 18))
+                .font(themeManager.currentTheme.dataFont(size: 18, weight: .medium))
                 .foregroundStyle(themeManager.currentTheme.primaryText)
         }
         .padding(.horizontal, 16)
@@ -381,23 +381,27 @@ struct ExerciseDetailView: View {
                 if !todaySets.isEmpty {
                     Divider()
                         .background(themeManager.currentTheme.borderColor)
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Total Volume")
-                                .font(.caption)
-                                .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                            Text(isWeightedExercise ? "\(Formatters.formatVolume(todaysVolume)) kg" : "\(todaysTotalReps) reps")
-                                .font(themeManager.currentTheme.dataFont(size: 22))
-                                .foregroundStyle(themeManager.currentTheme.primaryText)
-                        }
+                    HStack(alignment: .lastTextBaseline) {
+                        Text("Total Volume")
+                            .font(.caption)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Spacer()
-                        if let mins = sessionDurationMinutes {
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text("Duration")
-                                    .font(.caption)
-                                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                                Text("\(mins) min")
-                                    .font(themeManager.currentTheme.dataFont(size: 18))
+                        if isWeightedExercise {
+                            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                                Text(Formatters.formatVolume(todaysVolume))
+                                    .font(themeManager.currentTheme.dataFont(size: 24))
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                                Text("kg")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                            }
+                        } else {
+                            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                                Text("\(todaysTotalReps)")
+                                    .font(themeManager.currentTheme.dataFont(size: 24))
+                                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                                Text("reps")
+                                    .font(.system(size: 14))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                         }
@@ -463,15 +467,23 @@ struct ExerciseDetailView: View {
     @ViewBuilder
     private func historicDayCard(dayGroup: ExerciseDataGrouper.DayGroup) -> some View {
         VStack(spacing: 0) {
-            // Card Header
+            // Card Header (matching Make styling)
             HStack {
                 Text(Formatters.formatFullDayHeader(dayGroup.date))
-                    .font(.subheadline.weight(.medium))
+                    .font(.subheadline)
                     .foregroundStyle(themeManager.currentTheme.primaryText)
                 Spacer()
-                Text("Volume: \(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets))) kg")
-                    .font(.subheadline)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                HStack(spacing: 4) {
+                    Text("Volume")
+                        .font(.caption)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)))")
+                        .font(themeManager.currentTheme.dataFont(size: 14, weight: .medium))
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                    Text("kg")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)

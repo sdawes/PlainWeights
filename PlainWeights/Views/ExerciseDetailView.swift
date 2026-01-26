@@ -416,7 +416,7 @@ struct ExerciseDetailView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 32)
             } else {
-                VStack(spacing: 0) {
+                List {
                     ForEach(todaySets.indices, id: \.self) { index in
                         let set = todaySets[index]
                         SetRowView(
@@ -431,7 +431,10 @@ struct ExerciseDetailView: View {
                         )
                     }
                 }
-                .padding(.horizontal, 16)
+                .listStyle(.plain)
+                .scrollDisabled(true)
+                .scrollContentBackground(.hidden)
+                .frame(height: CGFloat(todaySets.count) * 48)
             }
         }
         .background(themeManager.currentTheme.cardBackgroundColor)

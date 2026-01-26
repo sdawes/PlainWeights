@@ -108,6 +108,11 @@ enum Formatters {
         date.formatted(Date.FormatStyle().weekday(.abbreviated).day().month(.abbreviated))
     }
 
+    /// Format date for full day headers (e.g., "Sunday, Jan 25")
+    static func formatFullDayHeader(_ date: Date) -> String {
+        date.formatted(Date.FormatStyle().weekday(.wide).month(.abbreviated).day())
+    }
+
     /// Format time for set timestamps (e.g., "14:30")
     static func formatTimeHM(_ date: Date) -> String {
         timeHMFormatter.string(from: date)

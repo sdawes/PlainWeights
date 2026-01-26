@@ -445,6 +445,59 @@ struct ExerciseDetailView: View {
         )
     }
 
+    // MARK: - Historic Day Card
+
+    @ViewBuilder
+    private func historicDayCard(dayGroup: ExerciseDataGrouper.DayGroup) -> some View {
+        VStack(spacing: 0) {
+            // Card Header
+            HStack {
+                Text(Formatters.formatFullDayHeader(dayGroup.date))
+                    .font(.headline)
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("Volume")
+                        .font(.caption)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets))) kg")
+                        .font(themeManager.currentTheme.dataFont(size: 14))
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            Divider()
+                .background(themeManager.currentTheme.borderColor)
+
+            // Sets List
+            List {
+                ForEach(dayGroup.sets.indices, id: \.self) { index in
+                    let set = dayGroup.sets[index]
+                    SetRowView(
+                        set: set,
+                        setNumber: dayGroup.sets.count - index,
+                        isFirst: index == 0,
+                        isLast: index == dayGroup.sets.count - 1,
+                        onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
+                        onDelete: { deleteSet(set) }
+                    )
+                }
+            }
+            .listStyle(.plain)
+            .scrollDisabled(true)
+            .scrollContentBackground(.hidden)
+            .frame(height: CGFloat(dayGroup.sets.count) * 50 + 8)
+        }
+        .background(themeManager.currentTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
+    }
+
     init(exercise: Exercise) {
         self.exercise = exercise
         let id = exercise.persistentModelID
@@ -529,42 +582,21 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
-            // Historic sets: one section per day group
+            // Historic sets: card per day group
             if !historicDayGroups.isEmpty {
-                ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
-                    let dayGroup = historicDayGroups[groupIndex]
-                    Section {
-                        ForEach(dayGroup.sets.indices, id: \.self) { index in
-                            let set = dayGroup.sets[index]
-                            SetRowView(
-                                set: set,
-                                setNumber: dayGroup.sets.count - index,
-                                isFirst: index == 0,
-                                isLast: index == dayGroup.sets.count - 1,
-                                onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
-                                onDelete: { deleteSet(set) }
-                            )
-                        }
-                    } header: {
-                        VStack(alignment: .leading, spacing: 10) {
-                            if groupIndex == 0 {
-                                Text("PREVIOUS")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                            }
-                            HStack(spacing: 8) {
-                                Image(systemName: "chevron.down")
-                                    .font(.caption)
-                                    .foregroundStyle(themeManager.currentTheme.accent)
-                                Text("—")
-                                    .foregroundStyle(.secondary)
-                                Text(Formatters.formatAbbreviatedDayHeader(dayGroup.date))
-                                    .font(.footnote)
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                            }
+                Section {
+                    VStack(spacing: 16) {
+                        ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
+                            historicDayCard(dayGroup: historicDayGroups[groupIndex])
                         }
                     }
+                } header: {
+                    Text("PREVIOUS")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
                 }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
 
         }

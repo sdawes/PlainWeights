@@ -103,9 +103,9 @@ enum TodaySessionCalculator {
         }
     }
 
-    /// Get today's total reps (sum of all sets)
+    /// Get today's total reps (sum of working sets only - excludes warm-up and bonus)
     static func getTodaysTotalReps(from sets: [ExerciseSet]) -> Int {
         let todaySets = getTodaysSets(from: sets)
-        return todaySets.reduce(0) { $0 + $1.reps }
+        return todaySets.filter { !$0.isWarmUp && !$0.isBonus }.reduce(0) { $0 + $1.reps }
     }
 }

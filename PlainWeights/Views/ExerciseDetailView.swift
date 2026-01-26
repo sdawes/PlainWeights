@@ -98,80 +98,103 @@ struct ComparisonMetricsCard: View {
         return comparisonMode == .lastSession ? "Last Session (\(dateStr))" : "All-Time Best (\(dateStr))"
     }
 
+    // Delta values for comparison row
+    private var weightDirection: ProgressTracker.PRDirection? {
+        if let indicators = lastModeIndicators { return indicators.weightDirection }
+        if let indicators = bestModeIndicators { return indicators.weightDirection }
+        return nil
+    }
+
+    private var weightDelta: Double? {
+        if let indicators = lastModeIndicators { return indicators.weightImprovement }
+        if let indicators = bestModeIndicators { return indicators.weightImprovement }
+        return nil
+    }
+
+    private var repsDirection: ProgressTracker.PRDirection? {
+        if let indicators = lastModeIndicators { return indicators.repsDirection }
+        if let indicators = bestModeIndicators { return indicators.repsDirection }
+        return nil
+    }
+
+    private var repsDelta: Double? {
+        if let indicators = lastModeIndicators { return Double(indicators.repsImprovement) }
+        if let indicators = bestModeIndicators { return Double(indicators.repsImprovement) }
+        return nil
+    }
+
+    private var totalDirection: ProgressTracker.PRDirection? {
+        if let indicators = lastModeIndicators { return indicators.volumeDirection }
+        if let indicators = bestModeIndicators { return indicators.volumeDirection }
+        return nil
+    }
+
+    private var totalDelta: Double? {
+        if let indicators = lastModeIndicators { return indicators.volumeImprovement }
+        if let indicators = bestModeIndicators { return indicators.volumeImprovement }
+        return nil
+    }
+
+    // Check if today has sets (to show comparison row)
+    private var hasTodaySets: Bool {
+        !todaysSets.isEmpty
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header
+        VStack(alignment: .leading, spacing: 0) {
+            // Separate header section with muted background
             Text(headerText)
-                .font(.caption)
+                .font(.footnote.weight(.medium))
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(themeManager.currentTheme.muted.opacity(0.3))
+
+            // Divider below header
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 1)
 
             if let metrics = currentMetrics {
-                // 3-column grid
-                HStack(spacing: 16) {
-                    // Weight
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(comparisonMode == .lastSession ? "Max Weight" : "Weight")
-                            .font(.caption)
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                        Text(Formatters.formatWeight(metrics.maxWeight))
-                            .font(themeManager.currentTheme.dataFont(size: 18))
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
-
-                        // Progress delta
-                        if let indicators = lastModeIndicators {
-                            deltaView(direction: indicators.weightDirection, value: indicators.weightImprovement, suffix: "kg")
-                        } else if let indicators = bestModeIndicators {
-                            deltaView(direction: indicators.weightDirection, value: indicators.weightImprovement, suffix: "kg")
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    // Reps
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(comparisonMode == .lastSession ? "Max Reps" : "Reps")
-                            .font(.caption)
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                        Text("\(metrics.maxReps)")
-                            .font(themeManager.currentTheme.dataFont(size: 18))
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
-
-                        // Progress delta
-                        if let indicators = lastModeIndicators {
-                            deltaView(direction: indicators.repsDirection, value: Double(indicators.repsImprovement), suffix: "")
-                        } else if let indicators = bestModeIndicators {
-                            deltaView(direction: indicators.repsDirection, value: Double(indicators.repsImprovement), suffix: "")
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    // Total (Volume)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(comparisonMode == .lastSession ? "Max Total" : "Total")
-                            .font(.caption)
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                        Text(Formatters.formatVolume(metrics.totalVolume))
-                            .font(themeManager.currentTheme.dataFont(size: 18))
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
-
-                        // Progress delta
-                        if let indicators = lastModeIndicators {
-                            deltaView(direction: indicators.volumeDirection, value: indicators.volumeImprovement, suffix: "kg")
-                        } else if let indicators = bestModeIndicators {
-                            deltaView(direction: indicators.volumeDirection, value: indicators.volumeImprovement, suffix: "kg")
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                // Metrics row (no deltas here)
+                HStack(spacing: 0) {
+                    metricColumn(
+                        label: comparisonMode == .lastSession ? "Max Weight" : "Weight",
+                        value: Formatters.formatWeight(metrics.maxWeight)
+                    )
+                    metricColumn(
+                        label: comparisonMode == .lastSession ? "Max Reps" : "Reps",
+                        value: "\(metrics.maxReps)"
+                    )
+                    metricColumn(
+                        label: comparisonMode == .lastSession ? "Max Total" : "Total",
+                        value: Formatters.formatVolume(metrics.totalVolume)
+                    )
                 }
+                .padding(.vertical, 12)
+
+                // Divider above comparison row
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(height: 1)
+
+                // Comparison row - colored background cells (left-aligned)
+                HStack(spacing: 1) {
+                    comparisonCell(direction: weightDirection, value: weightDelta)
+                    comparisonCell(direction: repsDirection, value: repsDelta, isReps: true)
+                    comparisonCell(direction: totalDirection, value: totalDelta)
+                }
+                .background(themeManager.currentTheme.borderColor)
             } else {
                 // Empty state
                 Text("No data yet")
                     .font(.subheadline)
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 16)
             }
         }
-        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.currentTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -182,24 +205,52 @@ struct ComparisonMetricsCard: View {
         .animation(.easeInOut(duration: 0.2), value: comparisonMode)
     }
 
-    // MARK: - Delta View Helper
+    // MARK: - Metric Column Helper
 
     @ViewBuilder
-    private func deltaView(direction: ProgressTracker.PRDirection, value: Double, suffix: String) -> some View {
-        let intValue = Int(value)
-        switch direction {
-        case .up:
-            Text("+\(intValue)\(suffix)")
-                .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
-                .foregroundStyle(direction.progressColor)
-        case .down:
-            Text("\(intValue)\(suffix)")
-                .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
-                .foregroundStyle(direction.progressColor)
-        case .same:
-            Text("0\(suffix)")
-                .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
-                .foregroundStyle(direction.progressColor)
+    private func metricColumn(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            Text(value)
+                .font(themeManager.currentTheme.dataFont(size: 18))
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+        }
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Comparison Cell Helper
+
+    @ViewBuilder
+    private func comparisonCell(direction: ProgressTracker.PRDirection?, value: Double?, isReps: Bool = false) -> some View {
+        Group {
+            if hasTodaySets, let direction = direction, let value = value, direction != .same {
+                // Colored background with white text - LEFT ALIGNED
+                let displayValue = isReps ? "\(Int(value))" : Formatters.formatWeight(value)
+                let prefix = direction == .up ? "+" : ""
+                HStack {
+                    Text("\(prefix)\(displayValue)")
+                        .font(themeManager.currentTheme.dataFont(size: 14, weight: .bold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .frame(height: 40)
+                .background(direction == .up ? Color.green : Color.red)
+            } else {
+                // No change or no data - show dash - LEFT ALIGNED
+                HStack {
+                    Text("—")
+                        .font(.system(size: 14))
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground.opacity(0.3))
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .frame(height: 40)
+                .background(themeManager.currentTheme.cardBackgroundColor)
+            }
         }
     }
 }

@@ -104,6 +104,24 @@ enum AppTheme: String, CaseIterable {
     var tertiaryTextColor: Color { tertiaryText }
     var borderColor: Color { border }
 
+    // MARK: - Chart Colors
+
+    /// Primary chart color (for weight line)
+    var chartColor1: Color {
+        switch self {
+        case .light: return Color(red: 0.78, green: 0.45, blue: 0.25)  // Orange/rust
+        case .dark: return Color(red: 0.35, green: 0.35, blue: 0.85)   // Blue/purple
+        }
+    }
+
+    /// Secondary chart color (for reps line)
+    var chartColor2: Color {
+        switch self {
+        case .light: return Color(red: 0.35, green: 0.60, blue: 0.60)  // Teal
+        case .dark: return Color(red: 0.45, green: 0.70, blue: 0.55)   // Green/teal
+        }
+    }
+
     // MARK: - Data Font (System font for numerical data)
 
     /// System font for data display - weights, reps, volumes, timers

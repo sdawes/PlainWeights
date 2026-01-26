@@ -271,6 +271,7 @@ struct ExerciseDetailView: View {
     @State private var showingNotesSheet = false
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
+    @State private var showChart: Bool = false
 
 
     // Cached data for performance
@@ -596,6 +597,19 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
+            // Inline Progress Chart (toggled)
+            if showChart && !sets.isEmpty {
+                Section {
+                    InlineProgressChart(sets: Array(sets))
+                }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .move(edge: .top)).combined(with: .scale(scale: 0.95, anchor: .top)),
+                    removal: .opacity.combined(with: .scale(scale: 0.95, anchor: .top))
+                ))
+            }
+
             // Today's Sets Card
             Section {
                 todaySetsCard
@@ -649,13 +663,17 @@ struct ExerciseDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                NavigationLink {
-                    ExerciseChartDetailView(exercise: exercise, sets: Array(sets))
-                } label: {
-                    Image(systemName: "waveform.path.ecg")
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showChart.toggle()
+                    }
+                }) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
                         .font(.callout)
                         .fontWeight(.medium)
-                        .foregroundStyle(themeManager.currentTheme.textColor)
+                        .foregroundStyle(showChart
+                            ? themeManager.currentTheme.accent
+                            : themeManager.currentTheme.textColor)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())

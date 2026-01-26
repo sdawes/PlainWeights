@@ -95,7 +95,6 @@ struct SetRowView: View {
             }
             .padding(.vertical, 12)
         }
-        .background(setTypeRowBackground)  // Apply background directly for VStack/card contexts
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()

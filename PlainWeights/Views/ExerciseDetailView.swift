@@ -434,7 +434,7 @@ struct ExerciseDetailView: View {
                 .listStyle(.plain)
                 .scrollDisabled(true)
                 .scrollContentBackground(.hidden)
-                .frame(height: CGFloat(todaySets.count) * 48)
+                .frame(height: CGFloat(todaySets.count) * 50 + 8)
             }
         }
         .background(themeManager.currentTheme.cardBackgroundColor)

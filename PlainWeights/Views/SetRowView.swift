@@ -38,10 +38,10 @@ struct SetRowView: View {
         HStack(spacing: 0) {
             // Content columns
             HStack(spacing: 0) {
-                // Col 1: Set number (left-aligned, with padding for warm-up/bonus border clearance)
+                // Col 1: Set number (left-aligned, with padding for set type border clearance)
                 Text("\(setNumber)")
                     .font(themeManager.currentTheme.dataFont(size: 17, weight: .medium))
-                    .foregroundStyle(set.isWarmUp ? .orange : (set.isBonus ? .purple : .secondary))
+                    .foregroundStyle(setNumberColor)
                     .frame(width: 24, alignment: .leading)
                     .padding(.leading, 8)
 
@@ -115,29 +115,43 @@ struct SetRowView: View {
 
     // MARK: - Helper Methods
 
+    /// Color for set number based on set type
+    private var setNumberColor: Color {
+        if set.isWarmUp { return .orange }
+        if set.isBonus { return .green }
+        if set.isDropSet { return .blue }
+        if set.isTimedSet { return .blue }
+        if set.isPauseAtTop { return .indigo }
+        return .secondary
+    }
+
     /// Get the background view for set type styling (left border + light background)
     @ViewBuilder
     private var setTypeRowBackground: some View {
         if set.isWarmUp {
-            HStack(spacing: 0) {
-                Color.clear.frame(width: 16)
-                Rectangle()
-                    .fill(Color.orange)
-                    .frame(width: 2)
-                Rectangle()
-                    .fill(Color.orange.opacity(0.05))
-            }
+            setTypeBackground(color: .orange)
         } else if set.isBonus {
-            HStack(spacing: 0) {
-                Color.clear.frame(width: 16)
-                Rectangle()
-                    .fill(Color.purple)
-                    .frame(width: 2)
-                Rectangle()
-                    .fill(Color.purple.opacity(0.05))
-            }
+            setTypeBackground(color: .green)
+        } else if set.isDropSet {
+            setTypeBackground(color: .blue)
+        } else if set.isTimedSet {
+            setTypeBackground(color: .blue)
+        } else if set.isPauseAtTop {
+            setTypeBackground(color: .indigo)
         } else {
             Color.clear
+        }
+    }
+
+    /// Helper to create set type background with colored border
+    private func setTypeBackground(color: Color) -> some View {
+        HStack(spacing: 0) {
+            Color.clear.frame(width: 16)
+            Rectangle()
+                .fill(color)
+                .frame(width: 2)
+            Rectangle()
+                .fill(color.opacity(0.05))
         }
     }
 
@@ -165,7 +179,6 @@ struct SetRowView: View {
 
     @ViewBuilder
     private func badgeCircle(for badge: String) -> some View {
-        let color = themeManager.currentTheme.primaryText
         switch badge {
         case "warmup":
             HStack(spacing: 4) {
@@ -176,27 +189,42 @@ struct SetRowView: View {
             }
             .foregroundStyle(.orange)
         case "bonus":
-            Image(systemName: "trophy.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(color)
+            HStack(spacing: 4) {
+                Image(systemName: "plus")
+                    .font(.system(size: 14, weight: .bold))
+                Text("Bonus")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundStyle(.green)
         case "dropset":
-            Image(systemName: "chevron.down.2")
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(color)
+            HStack(spacing: 4) {
+                Image(systemName: "chevron.down.2")
+                    .font(.system(size: 14, weight: .bold))
+                Text("Drop Set")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundStyle(.blue)
         case "pause":
-            Image(systemName: "pause.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(color)
+            HStack(spacing: 4) {
+                Image(systemName: "pause.fill")
+                    .font(.system(size: 14))
+                Text("Pause")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundStyle(.indigo)
         case "timed":
-            if set.tempoSeconds > 0 {
-                Text("\(set.tempoSeconds)")
-                    .font(themeManager.currentTheme.dataFont(size: 14))
-                    .foregroundStyle(color)
-            } else {
+            HStack(spacing: 4) {
                 Image(systemName: "timer")
                     .font(.system(size: 14))
-                    .foregroundStyle(color)
+                if set.tempoSeconds > 0 {
+                    Text("\(set.tempoSeconds)s")
+                        .font(.system(size: 12, weight: .medium))
+                } else {
+                    Text("Timed")
+                        .font(.system(size: 12, weight: .medium))
+                }
             }
+            .foregroundStyle(.blue)
         default:
             EmptyView()
         }

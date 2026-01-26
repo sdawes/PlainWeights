@@ -107,7 +107,8 @@ enum AppTheme: String, CaseIterable {
     // MARK: - Data Font (System font for numerical data)
 
     /// System font for data display - weights, reps, volumes, timers
+    /// Uses monospacedDigit() for consistent number alignment
     func dataFont(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        return .system(size: size, weight: weight)
+        return .system(size: size, weight: weight).monospacedDigit()
     }
 }

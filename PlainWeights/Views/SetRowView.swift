@@ -40,9 +40,9 @@ struct SetRowView: View {
             HStack(spacing: 0) {
                 // Col 1: Set number (left-aligned)
                 Text("\(setNumber)")
-                    .font(themeManager.currentTheme.dataFont(size: 14))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 24, alignment: .leading)
+                    .font(themeManager.currentTheme.dataFont(size: 17, weight: .medium))
+                    .foregroundStyle(set.isWarmUp ? .orange : (set.isBonus ? .purple : .secondary))
+                    .frame(width: 28, alignment: .leading)
 
                 // Col 2: PB indicator (between set number and weight)
                 if set.isPB {
@@ -58,7 +58,7 @@ struct SetRowView: View {
                 // Weight × Reps (baseline aligned, larger font to match Make)
                 HStack(alignment: .lastTextBaseline, spacing: 0) {
                     Text(Formatters.formatWeight(set.weight))
-                        .font(themeManager.currentTheme.dataFont(size: 20))
+                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -74,7 +74,7 @@ struct SetRowView: View {
                         .lineLimit(1)
 
                     Text("\(set.reps)")
-                        .font(themeManager.currentTheme.dataFont(size: 20))
+                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
                         .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -101,7 +101,8 @@ struct SetRowView: View {
         }
         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
         .listRowBackground(setTypeRowBackground)  // Keep for List contexts
-        .listRowSeparator(.hidden)
+        .listRowSeparator(isLast ? .hidden : .visible, edges: .bottom)
+        .listRowSeparatorTint(themeManager.currentTheme.borderColor)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 onDelete()
@@ -113,11 +114,30 @@ struct SetRowView: View {
 
     // MARK: - Helper Methods
 
-    /// Get the background color for set type styling
-    private var setTypeRowBackground: Color {
-        if set.isWarmUp { return .orange.opacity(0.1) }
-        if set.isBonus { return .purple.opacity(0.1) }
-        return .clear
+    /// Get the background view for set type styling (left border + light background)
+    @ViewBuilder
+    private var setTypeRowBackground: some View {
+        if set.isWarmUp {
+            HStack(spacing: 0) {
+                Color.clear.frame(width: 16)
+                Rectangle()
+                    .fill(Color.orange)
+                    .frame(width: 2)
+                Rectangle()
+                    .fill(Color.orange.opacity(0.05))
+            }
+        } else if set.isBonus {
+            HStack(spacing: 0) {
+                Color.clear.frame(width: 16)
+                Rectangle()
+                    .fill(Color.purple)
+                    .frame(width: 2)
+                Rectangle()
+                    .fill(Color.purple.opacity(0.05))
+            }
+        } else {
+            Color.clear
+        }
     }
 
     // Badges view: user badges only (PB is shown separately after set number)

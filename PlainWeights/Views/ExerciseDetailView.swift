@@ -355,14 +355,10 @@ struct ExerciseDetailView: View {
                         .font(.headline)
                         .foregroundStyle(themeManager.currentTheme.primaryText)
                     Spacer()
-                    if !todaySets.isEmpty {
-                        Text("\(todaySets.count) \(todaySets.count == 1 ? "set" : "sets")")
-                            .font(.subheadline)
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
+                .background(themeManager.currentTheme.muted.opacity(0.3))
 
                 // Volume info (only when has sets)
                 if !todaySets.isEmpty {
@@ -453,20 +449,16 @@ struct ExerciseDetailView: View {
             // Card Header
             HStack {
                 Text(Formatters.formatFullDayHeader(dayGroup.date))
-                    .font(.headline)
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(themeManager.currentTheme.primaryText)
                 Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Volume")
-                        .font(.caption)
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                    Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets))) kg")
-                        .font(themeManager.currentTheme.dataFont(size: 14))
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
-                }
+                Text("Volume: \(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets))) kg")
+                    .font(.subheadline)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+            .background(themeManager.currentTheme.muted.opacity(0.3))
 
             Divider()
                 .background(themeManager.currentTheme.borderColor)
@@ -591,9 +583,9 @@ struct ExerciseDetailView: View {
                         }
                     }
                 } header: {
-                    Text("PREVIOUS")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                    Text("History")
+                        .font(.subheadline)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 }
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)

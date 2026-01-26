@@ -104,10 +104,10 @@ enum AppTheme: String, CaseIterable {
     var tertiaryTextColor: Color { tertiaryText }
     var borderColor: Color { border }
 
-    // MARK: - Data Font (SF Mono for numerical data)
+    // MARK: - Data Font (System font for numerical data)
 
-    /// Monospace font for data display - weights, reps, volumes, timers
+    /// System font for data display - weights, reps, volumes, timers
     func dataFont(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        return .system(size: size, weight: weight, design: .monospaced)
+        return .system(size: size, weight: weight)
     }
 }

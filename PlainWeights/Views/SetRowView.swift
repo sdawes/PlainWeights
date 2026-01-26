@@ -95,12 +95,13 @@ struct SetRowView: View {
             }
             .padding(.vertical, 12)
         }
+        .background(setTypeRowBackground)  // Apply background directly for VStack/card contexts
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
         }
         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-        .listRowBackground(set.isWarmUp ? themeManager.currentTheme.primary.opacity(0.05) : Color.clear)
+        .listRowBackground(setTypeRowBackground)  // Keep for List contexts
         .listRowSeparator(.hidden)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
@@ -112,6 +113,13 @@ struct SetRowView: View {
     }
 
     // MARK: - Helper Methods
+
+    /// Get the background color for set type styling
+    private var setTypeRowBackground: Color {
+        if set.isWarmUp { return .orange.opacity(0.1) }
+        if set.isBonus { return .purple.opacity(0.1) }
+        return .clear
+    }
 
     // Badges view: user badges only (PB is shown separately after set number)
     @ViewBuilder

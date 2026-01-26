@@ -38,11 +38,12 @@ struct SetRowView: View {
         HStack(spacing: 0) {
             // Content columns
             HStack(spacing: 0) {
-                // Col 1: Set number (left-aligned)
+                // Col 1: Set number (left-aligned, with padding for warm-up/bonus border clearance)
                 Text("\(setNumber)")
                     .font(themeManager.currentTheme.dataFont(size: 17, weight: .medium))
                     .foregroundStyle(set.isWarmUp ? .orange : (set.isBonus ? .purple : .secondary))
                     .frame(width: 28, alignment: .leading)
+                    .padding(.leading, 8)
 
                 // Col 2: PB indicator (between set number and weight)
                 if set.isPB {
@@ -103,6 +104,7 @@ struct SetRowView: View {
         .listRowBackground(setTypeRowBackground)  // Keep for List contexts
         .listRowSeparator(isLast ? .hidden : .visible, edges: .bottom)
         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
+        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 onDelete()

@@ -355,6 +355,23 @@ struct ExerciseDetailView: View {
                         .font(.headline)
                         .foregroundStyle(themeManager.currentTheme.primaryText)
                     Spacer()
+                    if !todaySets.isEmpty {
+                        HStack(spacing: 4) {
+                            Text("\(todaySets.count)")
+                                .font(themeManager.currentTheme.dataFont(size: 14))
+                            Text(todaySets.count == 1 ? "set" : "sets")
+                                .font(.system(size: 14))
+                            if let mins = sessionDurationMinutes {
+                                Text("•")
+                                    .font(.system(size: 14))
+                                Text("\(mins)")
+                                    .font(themeManager.currentTheme.dataFont(size: 14))
+                                Text("m")
+                                    .font(.system(size: 14))
+                            }
+                        }
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)

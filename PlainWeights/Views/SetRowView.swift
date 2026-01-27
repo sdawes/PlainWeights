@@ -108,11 +108,11 @@ struct SetRowView: View {
         .onTapGesture {
             onTap()
         }
-        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-        .listRowBackground(setTypeRowBackground)  // Keep for List contexts
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        .listRowBackground(setTypeRowBackground)
+        .listRowSeparator(isFirst ? .hidden : .visible, edges: .top)
         .listRowSeparator(isLast ? .hidden : .visible, edges: .bottom)
         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
-        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 onDelete()
@@ -134,37 +134,36 @@ struct SetRowView: View {
         return .secondary
     }
 
-    /// Get the background view for set type styling (left border + light background)
+    /// Get the background view for set type with colored left border accent
     @ViewBuilder
     private var setTypeRowBackground: some View {
-        if set.isWarmUp {
-            setTypeBackground(color: .orange)
-        } else if set.isBonus {
-            setTypeBackground(color: .green)
-        } else if set.isDropSet {
-            setTypeBackground(color: .blue)
-        } else if set.isTimedSet {
-            setTypeBackground(color: .blue)
-        } else if set.isPauseAtTop {
-            setTypeBackground(color: .indigo)
+        if let tintColor = setTypeTintColor {
+            // Special set types get colored left border + subtle tint
+            HStack(spacing: 0) {
+                Rectangle()
+                    .fill(tintColor)
+                    .frame(width: 3)
+                Rectangle()
+                    .fill(tintColor.opacity(0.06))
+            }
         } else {
+            // Normal sets use default list row background
             Color.clear
         }
     }
 
-    /// Helper to create set type background with colored border
-    private func setTypeBackground(color: Color) -> some View {
-        HStack(spacing: 0) {
-            Color.clear.frame(width: 16)
-            Rectangle()
-                .fill(color)
-                .frame(width: 2)
-            Rectangle()
-                .fill(color.opacity(0.05))
-        }
+    /// Get set type tint color (nil for normal sets)
+    private var setTypeTintColor: Color? {
+        if set.isWarmUp { return .orange }
+        if set.isBonus { return .green }
+        if set.isDropSet { return .blue }
+        if set.isTimedSet { return .blue }
+        if set.isPauseAtTop { return .indigo }
+        return nil
     }
 
-    // Badges view: user badges only (PB is shown separately after set number)
+    // MARK: - Badges
+
     @ViewBuilder
     private var badgesView: some View {
         // Only show first badge to keep row clean
@@ -239,33 +238,24 @@ struct SetRowView: View {
         }
     }
 
-
     // MARK: - Rest Time Display
 
-    // Check if more than 3 minutes have passed since this set
     private var hasExceededRestTime: Bool {
         Date().timeIntervalSince(set.timestamp) >= 180
     }
 
     @ViewBuilder
     private var restTimeView: some View {
-        // Priority 1: Show captured rest time (static display)
         if let restSeconds = set.restSeconds {
             staticRestTimeView(seconds: restSeconds)
-        }
-        // Priority 2: Show live timer for most recent set (under 3 mins, not yet captured)
-        else if showTimer && !hasExceededRestTime {
+        } else if showTimer && !hasExceededRestTime {
             liveTimerView
-        }
-        // Priority 3: Most recent set exceeded 3 mins but not captured yet - capture and show
-        else if showTimer && hasExceededRestTime {
+        } else if showTimer && hasExceededRestTime {
             staticRestTimeView(seconds: 180)
                 .onAppear {
                     captureRestTimeExpiry()
                 }
-        }
-        // Priority 4: Default - show timestamp
-        else {
+        } else {
             Text(Formatters.formatTimeHM(set.timestamp))
                 .font(themeManager.currentTheme.dataFont(size: 12))
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
@@ -278,7 +268,6 @@ struct SetRowView: View {
             Image(systemName: "timer")
                 .font(.caption)
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
-
             Text(Formatters.formatDuration(Double(seconds)))
                 .font(themeManager.currentTheme.dataFont(size: 12))
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
@@ -292,12 +281,10 @@ struct SetRowView: View {
             let color = restTimeColor(for: Int(elapsed))
 
             if elapsed >= 180 {
-                // At 3 minutes, show static display and capture rest time
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
                         .font(.caption)
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
-
                     Text("3:00")
                         .font(themeManager.currentTheme.dataFont(size: 12))
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
@@ -306,13 +293,11 @@ struct SetRowView: View {
                     captureRestTimeExpiry()
                 }
             } else {
-                // Under 3 minutes, show live timer
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
                         .font(.caption)
                         .fontWeight(.bold)
                         .foregroundStyle(color)
-
                     Text(Formatters.formatDuration(elapsed))
                         .font(themeManager.currentTheme.dataFont(size: 12, weight: .bold))
                         .foregroundStyle(color)
@@ -326,8 +311,8 @@ struct SetRowView: View {
     }
 
     private func captureRestTimeExpiry() {
-        // Only capture if not already captured
         guard set.restSeconds == nil else { return }
         try? ExerciseSetService.captureRestTimeExpiry(for: set, context: modelContext)
     }
 }
+

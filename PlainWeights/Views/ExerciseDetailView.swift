@@ -356,78 +356,86 @@ struct ExerciseDetailView: View {
 
     // MARK: - Section Headers (for flattened List structure)
 
-    /// Header for Today's Sets section
+    /// Header for Today's Sets section - prominent styling
     @ViewBuilder
     private var todaysSetsHeader: some View {
-        HStack {
-            Text("Today's Sets")
-                .font(themeManager.currentTheme.headlineFont)
-                .foregroundStyle(themeManager.currentTheme.primaryText)
-            Spacer()
-            if !todaySets.isEmpty {
-                HStack(spacing: 4) {
-                    if isWeightedExercise {
-                        Text("Volume:")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-                        Text(Formatters.formatVolume(todaysVolume))
-                            .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                        Text("kg")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-                    } else {
-                        Text("Reps:")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-                        Text("\(todaysTotalReps)")
-                            .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("TODAY")
+                    .font(themeManager.currentTheme.interFont(size: 13, weight: .bold))
+                    .foregroundStyle(themeManager.currentTheme.accent)
+                    .tracking(1.2)
+                Spacer()
+                if let mins = sessionDurationMinutes {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.system(size: 12))
+                        Text("\(mins) min")
+                            .font(themeManager.currentTheme.dataFont(size: 13, weight: .medium))
                     }
-                    if let mins = sessionDurationMinutes {
-                        Text("•")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-                        Text("\(mins)")
-                            .font(themeManager.currentTheme.dataFont(size: 14))
-                        Text("mins")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-                    }
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 }
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            }
+            if !todaySets.isEmpty {
+                HStack(spacing: 8) {
+                    if isWeightedExercise {
+                        HStack(spacing: 4) {
+                            Text(Formatters.formatVolume(todaysVolume))
+                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .semibold))
+                            Text("kg volume")
+                                .font(themeManager.currentTheme.interFont(size: 13))
+                        }
+                    } else {
+                        HStack(spacing: 4) {
+                            Text("\(todaysTotalReps)")
+                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .semibold))
+                            Text("total reps")
+                                .font(themeManager.currentTheme.interFont(size: 13))
+                        }
+                    }
+                    Text("•")
+                        .font(themeManager.currentTheme.interFont(size: 13))
+                    Text("\(todaySets.count) sets")
+                        .font(themeManager.currentTheme.interFont(size: 13))
+                }
+                .foregroundStyle(themeManager.currentTheme.secondaryText)
             }
         }
+        .padding(.vertical, 4)
         .textCase(nil)
     }
 
-    /// Header for historic day sections
+    /// Header for historic day sections - subtle styling
     @ViewBuilder
     private func historicDayHeader(dayGroup: ExerciseDataGrouper.DayGroup) -> some View {
         let isWeightedDay = dayGroup.sets.filter { !$0.isWarmUp && !$0.isBonus }.contains { $0.weight > 0 }
+        let volume = ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)
+        let totalReps = dayGroup.sets.reduce(0) { $0 + $1.reps }
 
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Text(Formatters.formatFullDayHeader(dayGroup.date))
-                .font(themeManager.currentTheme.subheadlineFont)
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                .foregroundStyle(themeManager.currentTheme.secondaryText)
+
             Spacer()
-            HStack(spacing: 4) {
+
+            HStack(spacing: 6) {
                 if isWeightedDay {
-                    Text("Volume:")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                    Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)))")
-                        .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                    Text("kg")
-                        .font(themeManager.currentTheme.interFont(size: 14))
+                    Text("\(Formatters.formatVolume(volume)) kg")
+                        .font(themeManager.currentTheme.dataFont(size: 13))
                 } else {
-                    Text("Reps:")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                    Text("\(dayGroup.sets.reduce(0) { $0 + $1.reps })")
-                        .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
+                    Text("\(totalReps) reps")
+                        .font(themeManager.currentTheme.dataFont(size: 13))
                 }
+
                 if let duration = calculateSessionDuration(for: dayGroup.sets) {
                     Text("•")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                    Text("\(duration)")
-                        .font(themeManager.currentTheme.dataFont(size: 14))
-                    Text("mins")
-                        .font(themeManager.currentTheme.interFont(size: 14))
+                    Text("\(duration) min")
+                        .font(themeManager.currentTheme.dataFont(size: 13))
                 }
             }
-            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            .font(themeManager.currentTheme.interFont(size: 13))
+            .foregroundStyle(themeManager.currentTheme.tertiaryText)
         }
         .textCase(nil)
     }
@@ -539,7 +547,7 @@ struct ExerciseDetailView: View {
                             targetVolume: comparisonVolume,
                             targetLabel: comparisonLabel
                         )
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                         .listRowSeparator(.hidden)
                     }
 
@@ -560,6 +568,19 @@ struct ExerciseDetailView: View {
                 }
             } header: {
                 todaysSetsHeader
+            }
+
+            // History label (only show if there are historic days)
+            if !historicDayGroups.isEmpty {
+                Section {
+                    EmptyView()
+                } header: {
+                    Text("HISTORY")
+                        .font(themeManager.currentTheme.interFont(size: 12, weight: .semibold))
+                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                        .tracking(1.0)
+                        .textCase(nil)
+                }
             }
 
             // Historic sets: one Section per day (flat - no nested Lists)
@@ -583,11 +604,12 @@ struct ExerciseDetailView: View {
             }
 
         }
-        .listStyle(.insetGrouped)
-        .listSectionSpacing(12)
+        .listStyle(.plain)
+        .listSectionSpacing(16)
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
+        .contentMargins(.horizontal, 16, for: .scrollContent)
         .contentMargins(.top, 0, for: .scrollContent)
         .overlay(alignment: .bottomTrailing) {
             Button(action: {

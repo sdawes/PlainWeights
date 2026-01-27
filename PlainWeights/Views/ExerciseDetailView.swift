@@ -15,6 +15,80 @@ enum ComparisonMode: String, CaseIterable {
     case allTimeBest = "All-Time Best"
 }
 
+// MARK: - Today Session Card
+
+struct TodaySessionCard: View {
+    @Environment(ThemeManager.self) private var themeManager
+    let volume: Double
+    let durationMinutes: Int?
+    let comparisonVolume: Double
+    let comparisonLabel: String
+    let isWeightedExercise: Bool
+    let totalReps: Int
+    let setCount: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header row
+            HStack {
+                Text("TODAY")
+                    .font(themeManager.currentTheme.interFont(size: 13, weight: .bold))
+                    .foregroundStyle(themeManager.currentTheme.accent)
+                    .tracking(1.2)
+
+                Spacer()
+
+                HStack(spacing: 4) {
+                    if isWeightedExercise {
+                        Text("Volume: \(Formatters.formatVolume(volume)) kg")
+                    } else {
+                        Text("\(totalReps) reps")
+                    }
+                    if let mins = durationMinutes {
+                        Text(".")
+                        Text("\(mins) min")
+                    }
+                }
+                .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(themeManager.currentTheme.muted.opacity(0.3))
+
+            // Divider
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 1)
+
+            // Progress bar (if applicable)
+            if isWeightedExercise && comparisonVolume > 0 {
+                VolumeProgressBar(
+                    currentVolume: volume,
+                    targetVolume: comparisonVolume,
+                    targetLabel: comparisonLabel
+                )
+                .padding(16)
+            } else {
+                // Show set count when no progress bar
+                HStack {
+                    Text("\(setCount) sets")
+                        .font(themeManager.currentTheme.interFont(size: 14))
+                        .foregroundStyle(themeManager.currentTheme.secondaryText)
+                    Spacer()
+                }
+                .padding(16)
+            }
+        }
+        .background(themeManager.currentTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
+    }
+}
+
 // MARK: - Comparison Metrics Card
 
 struct ComparisonMetricsCard: View {
@@ -356,56 +430,6 @@ struct ExerciseDetailView: View {
 
     // MARK: - Section Headers (for flattened List structure)
 
-    /// Header for Today's Sets section - prominent styling
-    @ViewBuilder
-    private var todaysSetsHeader: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("TODAY")
-                    .font(themeManager.currentTheme.interFont(size: 13, weight: .bold))
-                    .foregroundStyle(themeManager.currentTheme.accent)
-                    .tracking(1.2)
-                Spacer()
-                if let mins = sessionDurationMinutes {
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 12))
-                        Text("\(mins) min")
-                            .font(themeManager.currentTheme.dataFont(size: 13, weight: .medium))
-                    }
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                }
-            }
-            if !todaySets.isEmpty {
-                HStack(spacing: 8) {
-                    if isWeightedExercise {
-                        HStack(spacing: 4) {
-                            Text(Formatters.formatVolume(todaysVolume))
-                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .semibold))
-                            Text("kg volume")
-                                .font(themeManager.currentTheme.interFont(size: 13))
-                        }
-                    } else {
-                        HStack(spacing: 4) {
-                            Text("\(todaysTotalReps)")
-                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .semibold))
-                            Text("total reps")
-                                .font(themeManager.currentTheme.interFont(size: 13))
-                        }
-                    }
-                    Text("•")
-                        .font(themeManager.currentTheme.interFont(size: 13))
-                    Text("\(todaySets.count) sets")
-                        .font(themeManager.currentTheme.interFont(size: 13))
-                }
-                .foregroundStyle(themeManager.currentTheme.secondaryText)
-            }
-        }
-        .padding(.vertical, 4)
-        .padding(.leading, 8)
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
     /// Header for historic day sections - subtle styling
     @ViewBuilder
     private func historicDayHeader(dayGroup: ExerciseDataGrouper.DayGroup) -> some View {
@@ -542,10 +566,21 @@ struct ExerciseDetailView: View {
 
             // Today's Sets Section (flat - no nested List)
             Section {
-                // Header as a row for consistent margins
-                todaysSetsHeader
+                // TODAY card (only show when there are sets)
+                if !todaySets.isEmpty {
+                    TodaySessionCard(
+                        volume: todaysVolume,
+                        durationMinutes: sessionDurationMinutes,
+                        comparisonVolume: comparisonVolume,
+                        comparisonLabel: comparisonLabel,
+                        isWeightedExercise: isWeightedExercise,
+                        totalReps: todaysTotalReps,
+                        setCount: todaySets.count
+                    )
+                    .padding(.leading, 8)
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
+                }
 
                 if todaySets.isEmpty {
                     Text("No sets logged yet")
@@ -557,18 +592,6 @@ struct ExerciseDetailView: View {
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                 } else {
-                    // Progress bar if applicable
-                    if isWeightedExercise && comparisonVolume > 0 {
-                        VolumeProgressBar(
-                            currentVolume: todaysVolume,
-                            targetVolume: comparisonVolume,
-                            targetLabel: comparisonLabel
-                        )
-                        .padding(.leading, 8)
-                        .frame(maxWidth: .infinity)
-                        .listRowSeparator(.hidden)
-                    }
-
                     // Set rows directly in outer List
                     ForEach(todaySets.indices, id: \.self) { index in
                         let set = todaySets[index]

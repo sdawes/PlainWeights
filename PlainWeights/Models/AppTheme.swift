@@ -124,11 +124,11 @@ enum AppTheme: String, CaseIterable {
 
     // MARK: - PB (Personal Best) Color
 
-    /// Gold color for PB indicators
+    /// Gold-yellow color for PB indicators
     var pbColor: Color {
         switch self {
-        case .light: return Color(red: 1.0, green: 0.75, blue: 0.0)   // Bright vivid gold
-        case .dark: return Color(red: 1.0, green: 0.82, blue: 0.2)    // Brighter gold for contrast
+        case .light: return Color(red: 0.85, green: 0.65, blue: 0.0)   // Gold-yellow
+        case .dark: return Color(red: 0.9, green: 0.75, blue: 0.1)    // Gold-yellow for dark
         }
     }
 

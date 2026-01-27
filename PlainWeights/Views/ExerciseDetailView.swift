@@ -344,6 +344,16 @@ struct ExerciseDetailView: View {
         comparisonMode == .lastSession ? "Last" : "Best"
     }
 
+    // Calculate session duration in minutes for a set of sets
+    private func calculateSessionDuration(for sets: [ExerciseSet]) -> Int? {
+        guard sets.count >= 2 else { return nil }
+        let sortedSets = sets.sorted { $0.timestamp < $1.timestamp }
+        guard let first = sortedSets.first, let last = sortedSets.last else { return nil }
+        let duration = last.timestamp.timeIntervalSince(first.timestamp)
+        let minutes = Int(duration / 60)
+        return minutes > 0 ? minutes : nil
+    }
+
     // MARK: - Today's Sets Card (extracted to help compiler)
 
     @ViewBuilder
@@ -358,16 +368,25 @@ struct ExerciseDetailView: View {
                     Spacer()
                     if !todaySets.isEmpty {
                         HStack(spacing: 4) {
-                            Text("\(todaySets.count)")
-                                .font(themeManager.currentTheme.dataFont(size: 14))
-                            Text(todaySets.count == 1 ? "set" : "sets")
-                                .font(themeManager.currentTheme.interFont(size: 14))
+                            if isWeightedExercise {
+                                Text("Volume:")
+                                    .font(themeManager.currentTheme.interFont(size: 14))
+                                Text(Formatters.formatVolume(todaysVolume))
+                                    .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
+                                Text("kg")
+                                    .font(themeManager.currentTheme.interFont(size: 14))
+                            } else {
+                                Text("Reps:")
+                                    .font(themeManager.currentTheme.interFont(size: 14))
+                                Text("\(todaysTotalReps)")
+                                    .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
+                            }
                             if let mins = sessionDurationMinutes {
                                 Text("•")
                                     .font(themeManager.currentTheme.interFont(size: 14))
                                 Text("\(mins)")
                                     .font(themeManager.currentTheme.dataFont(size: 14))
-                                Text("m")
+                                Text("mins")
                                     .font(themeManager.currentTheme.interFont(size: 14))
                             }
                         }
@@ -378,48 +397,15 @@ struct ExerciseDetailView: View {
                 .padding(.vertical, 12)
                 .background(themeManager.currentTheme.muted.opacity(0.3))
 
-                // Volume info (only when has sets)
-                if !todaySets.isEmpty {
-                    Divider()
-                        .background(themeManager.currentTheme.borderColor)
-                    HStack(alignment: .lastTextBaseline) {
-                        Text("Total Volume")
-                            .font(themeManager.currentTheme.captionFont)
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                        Spacer()
-                        if isWeightedExercise {
-                            HStack(alignment: .lastTextBaseline, spacing: 4) {
-                                Text(Formatters.formatVolume(todaysVolume))
-                                    .font(themeManager.currentTheme.dataFont(size: 24))
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                                Text("kg")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                            }
-                        } else {
-                            HStack(alignment: .lastTextBaseline, spacing: 4) {
-                                Text("\(todaysTotalReps)")
-                                    .font(themeManager.currentTheme.dataFont(size: 24))
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                                Text("reps")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                            }
-                        }
-                    }
+                // Progress bar vs comparison target (volume now shown in header)
+                if !todaySets.isEmpty && isWeightedExercise && comparisonVolume > 0 {
+                    VolumeProgressBar(
+                        currentVolume: todaysVolume,
+                        targetVolume: comparisonVolume,
+                        targetLabel: comparisonLabel
+                    )
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-
-                    // Progress bar vs comparison target
-                    if isWeightedExercise && comparisonVolume > 0 {
-                        VolumeProgressBar(
-                            currentVolume: todaysVolume,
-                            targetVolume: comparisonVolume,
-                            targetLabel: comparisonLabel
-                        )
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 12)
-                    }
                 }
             }
 
@@ -475,15 +461,38 @@ struct ExerciseDetailView: View {
                     .foregroundStyle(themeManager.currentTheme.primaryText)
                 Spacer()
                 HStack(spacing: 4) {
-                    Text("Volume")
-                        .font(themeManager.currentTheme.captionFont)
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                    Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)))")
-                        .font(themeManager.currentTheme.dataFont(size: 14, weight: .medium))
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
-                    Text("kg")
-                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                    // Check if this day has weighted sets
+                    let isWeightedDay = dayGroup.sets.filter { !$0.isWarmUp && !$0.isBonus }.contains { $0.weight > 0 }
+
+                    if isWeightedDay {
+                        Text("Volume:")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)))")
+                            .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        Text("kg")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    } else {
+                        Text("Reps:")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        Text("\(dayGroup.sets.reduce(0) { $0 + $1.reps })")
+                            .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    }
+                    if let duration = calculateSessionDuration(for: dayGroup.sets) {
+                        Text("•")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        Text("\(duration)")
+                            .font(themeManager.currentTheme.dataFont(size: 14))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        Text("mins")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    }
                 }
             }
             .padding(.horizontal, 16)

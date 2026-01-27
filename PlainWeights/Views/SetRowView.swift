@@ -45,45 +45,49 @@ struct SetRowView: View {
                     .frame(width: 24, alignment: .leading)
                     .padding(.leading, 8)
 
-                // Col 2: PB indicator (gold trophy in circle, centered between set number and weight)
+                // Col 2: PB indicator (trophy without circle)
                 if set.isPB {
-                    ZStack {
-                        Circle()
-                            .fill(themeManager.currentTheme.pbColor.opacity(0.15))
-                            .frame(width: 28, height: 28)
-                        Image(systemName: "trophy.fill")
-                            .font(.system(size: 12))
-                            .foregroundStyle(themeManager.currentTheme.pbColor)
-                    }
-                    .frame(width: 36, alignment: .center)
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(themeManager.currentTheme.pbColor)
+                        .frame(width: 24, alignment: .center)
                 } else {
                     Spacer()
-                        .frame(width: 36)
+                        .frame(width: 24)
                 }
 
-                // Weight × Reps (baseline aligned, larger font to match Make)
-                HStack(alignment: .lastTextBaseline, spacing: 0) {
-                    Text(Formatters.formatWeight(set.weight))
-                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
-                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                // Weight × Reps with PB underline
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .lastTextBaseline, spacing: 0) {
+                        Text(Formatters.formatWeight(set.weight))
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
+                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
 
-                    Text(" kg")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                        Text(" kg")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
 
-                    Text(" × ")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                        Text(" × ")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
 
-                    Text("\(set.reps)")
-                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
-                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                        Text("\(set.reps)")
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
+                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+
+                    // PB underline under weight×reps
+                    if set.isPB {
+                        Rectangle()
+                            .fill(themeManager.currentTheme.pbColor)
+                            .frame(height: 2)
+                    }
                 }
 
                 Spacer()

@@ -206,9 +206,25 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
                 .symbolSize(50)
             } else {
-                // Multiple points: show lines with dots
+                // Multiple points: show lines (no dots)
 
-                // Weight line
+                // Weight area gradient
+                AreaMark(
+                    x: .value("Date", point.date),
+                    y: .value("Weight", point.normalizedWeight),
+                    series: .value("Type", "WeightArea")
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [themeManager.currentTheme.chartColor1.opacity(0.3),
+                                 themeManager.currentTheme.chartColor1.opacity(0.05)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .interpolationMethod(.monotone)
+
+                // Weight line (solid)
                 LineMark(
                     x: .value("Date", point.date),
                     y: .value("Weight", point.normalizedWeight),
@@ -218,31 +234,15 @@ struct InlineProgressChart: View {
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
 
-                // Weight points
-                PointMark(
-                    x: .value("Date", point.date),
-                    y: .value("Weight", point.normalizedWeight)
-                )
-                .foregroundStyle(themeManager.currentTheme.chartColor1)
-                .symbolSize(40)
-
-                // Reps line
+                // Reps line (dashed, no gradient)
                 LineMark(
                     x: .value("Date", point.date),
                     y: .value("Reps", point.normalizedReps),
                     series: .value("Type", "Reps")
                 )
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
-                .lineStyle(StrokeStyle(lineWidth: 2))
+                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
                 .interpolationMethod(.monotone)
-
-                // Reps points
-                PointMark(
-                    x: .value("Date", point.date),
-                    y: .value("Reps", point.normalizedReps)
-                )
-                .foregroundStyle(themeManager.currentTheme.chartColor2)
-                .symbolSize(40)
             }
         }
         .chartXAxis {
@@ -269,19 +269,31 @@ struct InlineProgressChart: View {
     @ViewBuilder
     private var legendView: some View {
         HStack(spacing: 16) {
-            legendItem(color: themeManager.currentTheme.chartColor1, label: "Weight (kg)")
-            legendItem(color: themeManager.currentTheme.chartColor2, label: "Reps")
+            legendItem(color: themeManager.currentTheme.chartColor1, label: "Weight (kg)", isDashed: false)
+            legendItem(color: themeManager.currentTheme.chartColor2, label: "Reps", isDashed: true)
         }
         .font(themeManager.currentTheme.captionFont)
         .foregroundStyle(themeManager.currentTheme.mutedForeground)
     }
 
     @ViewBuilder
-    private func legendItem(color: Color, label: String) -> some View {
+    private func legendItem(color: Color, label: String, isDashed: Bool) -> some View {
         HStack(spacing: 4) {
-            Circle()
-                .fill(color)
-                .frame(width: 8, height: 8)
+            if isDashed {
+                // Dashed line indicator
+                HStack(spacing: 2) {
+                    ForEach(0..<3, id: \.self) { _ in
+                        Rectangle()
+                            .fill(color)
+                            .frame(width: 4, height: 2)
+                    }
+                }
+            } else {
+                // Solid line indicator
+                Rectangle()
+                    .fill(color)
+                    .frame(width: 16, height: 2)
+            }
             Text(label)
         }
     }

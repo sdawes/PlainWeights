@@ -35,10 +35,10 @@ struct SessionSummaryView: View {
                         RetroLifterView(pixelSize: 5)
 
                         Text("No Workouts Yet")
-                            .font(.title2)
+                            .font(themeManager.currentTheme.title2Font)
 
                         Text("Complete your first workout to see a summary here.")
-                            .font(.subheadline)
+                            .font(themeManager.currentTheme.subheadlineFont)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -83,11 +83,11 @@ struct SessionSummaryView: View {
     private func headerSection(for day: ExerciseDataGrouper.WorkoutDay) -> some View {
         VStack(spacing: 4) {
             Text(isShowingToday ? "Today's Session" : "Last Session")
-                .font(.headline)
+                .font(themeManager.currentTheme.headlineFont)
                 .foregroundStyle(.secondary)
 
             Text(day.date, format: .dateTime.weekday(.wide).month(.wide).day())
-                .font(.title2)
+                .font(themeManager.currentTheme.title2Font)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -124,7 +124,7 @@ struct SessionSummaryView: View {
                             .foregroundStyle(themeManager.currentTheme.primaryText)
                     }
                     Text(pbCount == 1 ? "PB" : "PBs")
-                        .font(.caption)
+                        .font(themeManager.currentTheme.captionFont)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
@@ -141,7 +141,7 @@ struct SessionSummaryView: View {
             Text(value)
                 .font(themeManager.currentTheme.dataFont(size: 20))
             Text(label)
-                .font(.caption)
+                .font(themeManager.currentTheme.captionFont)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -164,7 +164,7 @@ struct SessionSummaryView: View {
             // Exercise name with PB badge
             HStack {
                 Text(workoutExercise.exercise.name)
-                    .font(.headline)
+                    .font(themeManager.currentTheme.headlineFont)
 
                 Spacer()
 
@@ -187,7 +187,7 @@ struct SessionSummaryView: View {
                     .foregroundStyle(.secondary)
 
                 Text("•")
-                    .font(.subheadline)
+                    .font(themeManager.currentTheme.subheadlineFont)
                     .foregroundStyle(.tertiary)
 
                 Text("\(Formatters.formatVolume(workoutExercise.volume)) kg")
@@ -199,7 +199,7 @@ struct SessionSummaryView: View {
             if let maxSet = workoutExercise.sets.filter({ !$0.isWarmUp && !$0.isBonus }).max(by: { $0.weight < $1.weight }) {
                 HStack {
                     Text("Max:")
-                        .font(.subheadline)
+                        .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(.tertiary)
                     Text("\(Formatters.formatWeight(maxSet.weight)) kg × \(maxSet.reps)")
                         .font(themeManager.currentTheme.dataFont(size: 15))

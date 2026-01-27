@@ -30,7 +30,7 @@ struct SetTypePillSelector: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Set Type")
-                .font(.subheadline)
+                .font(themeManager.currentTheme.subheadlineFont)
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
             FlowLayout(spacing: 8) {
@@ -39,7 +39,7 @@ struct SetTypePillSelector: View {
                         selectedType = type
                     } label: {
                         Text(type.rawValue)
-                            .font(.subheadline)
+                            .font(themeManager.currentTheme.subheadlineFont)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(selectedType == type ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
@@ -105,7 +105,7 @@ struct AddSetView: View {
             // Header
             HStack {
                 Text("\(setToEdit == nil ? "Add Set" : "Edit Set") - \(exercise.name)")
-                    .font(.title3.weight(.semibold))
+                    .font(themeManager.currentTheme.title3Font)
                     .lineLimit(1)
                 Spacer()
                 Button { dismiss() } label: {
@@ -122,11 +122,11 @@ struct AddSetView: View {
                 // Weight input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Weight (kg)")
-                        .font(.subheadline)
+                        .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
                     TextField("0", text: $weightText)
-                        .font(.system(size: 20))
+                        .font(themeManager.currentTheme.dataFont(size: 20))
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .weight)
                         .padding(16)
@@ -137,11 +137,11 @@ struct AddSetView: View {
                 // Reps input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Reps")
-                        .font(.subheadline)
+                        .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
                     TextField("0", text: $repsText)
-                        .font(.system(size: 20))
+                        .font(themeManager.currentTheme.dataFont(size: 20))
                         .keyboardType(.numberPad)
                         .focused($focusedField, equals: .reps)
                         .padding(16)
@@ -156,7 +156,7 @@ struct AddSetView: View {
             // Save button
             Button(action: addSet) {
                 Text(setToEdit == nil ? "Save Set" : "Update Set")
-                    .font(.headline)
+                    .font(themeManager.currentTheme.headlineFont)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)

@@ -144,7 +144,7 @@ struct ComparisonMetricsCard: View {
         VStack(alignment: .leading, spacing: 0) {
             // Separate header section with muted background
             Text(headerText)
-                .font(.footnote.weight(.medium))
+                .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
@@ -189,7 +189,7 @@ struct ComparisonMetricsCard: View {
             } else {
                 // Empty state
                 Text("No data yet")
-                    .font(.subheadline)
+                    .font(themeManager.currentTheme.subheadlineFont)
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 16)
@@ -211,10 +211,10 @@ struct ComparisonMetricsCard: View {
     private func metricColumn(label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
-                .font(.caption)
+                .font(themeManager.currentTheme.captionFont)
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
             Text(value)
-                .font(themeManager.currentTheme.dataFont(size: 18, weight: .medium))
+                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
                 .foregroundStyle(themeManager.currentTheme.primaryText)
         }
         .padding(.horizontal, 16)
@@ -243,7 +243,7 @@ struct ComparisonMetricsCard: View {
                 // No change or no data - show dash - LEFT ALIGNED
                 HStack {
                     Text("—")
-                        .font(.system(size: 14))
+                        .font(themeManager.currentTheme.interFont(size: 14))
                         .foregroundStyle(themeManager.currentTheme.mutedForeground.opacity(0.3))
                     Spacer()
                 }
@@ -353,7 +353,7 @@ struct ExerciseDetailView: View {
             VStack(spacing: 0) {
                 HStack {
                     Text("Today's Sets")
-                        .font(.headline)
+                        .font(themeManager.currentTheme.headlineFont)
                         .foregroundStyle(themeManager.currentTheme.primaryText)
                     Spacer()
                     if !todaySets.isEmpty {
@@ -361,14 +361,14 @@ struct ExerciseDetailView: View {
                             Text("\(todaySets.count)")
                                 .font(themeManager.currentTheme.dataFont(size: 14))
                             Text(todaySets.count == 1 ? "set" : "sets")
-                                .font(.system(size: 14))
+                                .font(themeManager.currentTheme.interFont(size: 14))
                             if let mins = sessionDurationMinutes {
                                 Text("•")
-                                    .font(.system(size: 14))
+                                    .font(themeManager.currentTheme.interFont(size: 14))
                                 Text("\(mins)")
                                     .font(themeManager.currentTheme.dataFont(size: 14))
                                 Text("m")
-                                    .font(.system(size: 14))
+                                    .font(themeManager.currentTheme.interFont(size: 14))
                             }
                         }
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
@@ -384,7 +384,7 @@ struct ExerciseDetailView: View {
                         .background(themeManager.currentTheme.borderColor)
                     HStack(alignment: .lastTextBaseline) {
                         Text("Total Volume")
-                            .font(.caption)
+                            .font(themeManager.currentTheme.captionFont)
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Spacer()
                         if isWeightedExercise {
@@ -393,7 +393,7 @@ struct ExerciseDetailView: View {
                                     .font(themeManager.currentTheme.dataFont(size: 24))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                                 Text("kg")
-                                    .font(.system(size: 14))
+                                    .font(themeManager.currentTheme.interFont(size: 14))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                         } else {
@@ -402,7 +402,7 @@ struct ExerciseDetailView: View {
                                     .font(themeManager.currentTheme.dataFont(size: 24))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                                 Text("reps")
-                                    .font(.system(size: 14))
+                                    .font(themeManager.currentTheme.interFont(size: 14))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                             }
                         }
@@ -429,7 +429,7 @@ struct ExerciseDetailView: View {
             // Card Content
             if todaySets.isEmpty {
                 Text("No sets logged yet")
-                    .font(.subheadline)
+                    .font(themeManager.currentTheme.subheadlineFont)
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 32)
@@ -471,18 +471,18 @@ struct ExerciseDetailView: View {
             // Card Header (matching Make styling)
             HStack {
                 Text(Formatters.formatFullDayHeader(dayGroup.date))
-                    .font(.subheadline)
+                    .font(themeManager.currentTheme.subheadlineFont)
                     .foregroundStyle(themeManager.currentTheme.primaryText)
                 Spacer()
                 HStack(spacing: 4) {
                     Text("Volume")
-                        .font(.caption)
+                        .font(themeManager.currentTheme.captionFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
                     Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)))")
                         .font(themeManager.currentTheme.dataFont(size: 14, weight: .medium))
                         .foregroundStyle(themeManager.currentTheme.primaryText)
                     Text("kg")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
                         .foregroundStyle(themeManager.currentTheme.primaryText)
                 }
             }
@@ -536,7 +536,7 @@ struct ExerciseDetailView: View {
             Section {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(exercise.name)
-                        .font(.title2.weight(.bold))
+                        .font(themeManager.currentTheme.title2Font)
                         .foregroundStyle(themeManager.currentTheme.primaryText)
                     if !exercise.tags.isEmpty {
                         TagPillsRow(tags: exercise.tags)
@@ -556,7 +556,7 @@ struct ExerciseDetailView: View {
                             }
                         } label: {
                             Text(mode.rawValue)
-                                .font(.subheadline.weight(.medium))
+                                .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
                                 .foregroundStyle(
                                     comparisonMode == mode
                                         ? themeManager.currentTheme.primaryText
@@ -627,7 +627,7 @@ struct ExerciseDetailView: View {
                     }
                 } header: {
                     Text("History")
-                        .font(.subheadline)
+                        .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 }
                 .listRowSeparator(.hidden)

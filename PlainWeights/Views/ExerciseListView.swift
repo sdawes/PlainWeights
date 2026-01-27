@@ -108,7 +108,7 @@ struct FilteredExerciseListView: View {
                         NavigationLink(value: exercise) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(exercise.name)
-                                    .font(.system(size: 18, weight: .semibold))
+                                    .font(themeManager.currentTheme.interFont(size: 18, weight: .semibold))
                                     .foregroundStyle(themeManager.currentTheme.primaryText)
                                 if !exercise.tags.isEmpty {
                                     TagPillsRow(tags: exercise.tags)
@@ -121,7 +121,7 @@ struct FilteredExerciseListView: View {
                                             .foregroundStyle(color)
                                     }
                                     Text("Last: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
-                                        .font(.system(size: 14, weight: .medium))
+                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
                                 }
                                 .padding(.top, 10)
@@ -171,7 +171,7 @@ struct FilteredExerciseListView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text("PlainWeights")
-                    .font(.headline.weight(.bold))
+                    .font(themeManager.currentTheme.interFont(size: 17, weight: .bold))
                     .foregroundStyle(themeManager.currentTheme.primaryText)
             }
             ToolbarItem(placement: .navigationBarTrailing) {

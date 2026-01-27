@@ -63,7 +63,7 @@ struct VolumeProgressBar: View {
             HStack {
                 // Target label - simplified format
                 Text("\(targetLabel): \(Formatters.formatVolume(targetVolume))")
-                    .font(.system(size: 12))
+                    .font(themeManager.currentTheme.interFont(size: 12))
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
                 Spacer()

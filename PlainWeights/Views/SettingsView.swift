@@ -16,7 +16,7 @@ struct SettingsView: View {
             // Header
             HStack {
                 Text("Settings")
-                    .font(.title3.weight(.semibold))
+                    .font(themeManager.currentTheme.title3Font)
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
@@ -30,7 +30,7 @@ struct SettingsView: View {
             // Theme section
             VStack(alignment: .leading, spacing: 12) {
                 Text("Theme")
-                    .font(.subheadline)
+                    .font(themeManager.currentTheme.subheadlineFont)
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
                 HStack(spacing: 8) {
@@ -39,7 +39,7 @@ struct SettingsView: View {
                         themeManager.currentTheme = .light
                     } label: {
                         Label("Light", systemImage: "sun.max.fill")
-                            .font(.subheadline)
+                            .font(themeManager.currentTheme.subheadlineFont)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(themeManager.currentTheme == .light ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
@@ -53,7 +53,7 @@ struct SettingsView: View {
                         themeManager.currentTheme = .dark
                     } label: {
                         Label("Dark", systemImage: "moon.fill")
-                            .font(.subheadline)
+                            .font(themeManager.currentTheme.subheadlineFont)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(themeManager.currentTheme == .dark ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)

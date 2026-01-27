@@ -57,7 +57,7 @@ struct HeroMetricView: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(headerLabel)
-                    .font(.caption)
+                    .font(themeManager.currentTheme.captionFont)
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -65,7 +65,7 @@ struct HeroMetricView: View {
 
                 if let date = date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.caption2)
+                        .font(themeManager.currentTheme.caption2Font)
                         .foregroundStyle(.tertiary)
                 }
             }
@@ -85,7 +85,7 @@ struct HeroMetricView: View {
                 Text("\(Formatters.formatVolume(totalVolume)) kg")
                     .font(themeManager.currentTheme.dataFont(size: 15))
                 Text("total weight")
-                    .font(.subheadline)
+                    .font(themeManager.currentTheme.subheadlineFont)
             }
             .foregroundStyle(.secondary)
         }
@@ -101,6 +101,7 @@ struct HeroMetricView: View {
 // MARK: - Progress Pill Component
 
 struct ProgressPillView: View {
+    @Environment(ThemeManager.self) private var themeManager
     let text: String
     let direction: ProgressTracker.PRDirection
 
@@ -108,11 +109,11 @@ struct ProgressPillView: View {
         HStack(spacing: 6) {
             Image(systemName: direction == .up ? "arrow.up" :
                              direction == .down ? "arrow.down" : "minus")
-                .font(.caption2)
+                .font(.system(size: 11))
                 .foregroundStyle(.white)
 
             Text(text)
-                .font(.caption)
+                .font(themeManager.currentTheme.captionFont)
                 .foregroundStyle(.white)
         }
         .padding(.horizontal, 12)
@@ -175,7 +176,7 @@ struct TargetMetricsSection: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(data.headerLabel)
-                    .font(.caption)
+                    .font(themeManager.currentTheme.captionFont)
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -183,7 +184,7 @@ struct TargetMetricsSection: View {
 
                 if let date = data.date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.caption2)
+                        .font(themeManager.currentTheme.caption2Font)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -234,7 +235,7 @@ struct TargetMetricsSection: View {
                 Text("\(Formatters.formatVolume(data.totalVolume)) kg")
                     .font(themeManager.currentTheme.dataFont(size: 15))
                 Text("total weight")
-                    .font(.subheadline)
+                    .font(themeManager.currentTheme.subheadlineFont)
             }
             .foregroundStyle(.secondary)
             .padding(.top, 0)
@@ -254,7 +255,7 @@ struct TargetMetricsSectionWithPicker: View {
             // Header: "LAST MAX WEIGHT" / "BEST EVER" label + date
             HStack {
                 Text(data.headerLabel)
-                    .font(.caption)
+                    .font(themeManager.currentTheme.captionFont)
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -262,7 +263,7 @@ struct TargetMetricsSectionWithPicker: View {
 
                 if let date = data.date {
                     Text(Formatters.formatAbbreviatedDayHeader(date))
-                        .font(.caption2)
+                        .font(themeManager.currentTheme.caption2Font)
                         .foregroundStyle(.secondary)
                         .frame(width: 140, alignment: .trailing)  // Match picker width for alignment
                 }
@@ -315,7 +316,7 @@ struct TargetMetricsSectionWithPicker: View {
                     Text("\(Formatters.formatVolume(data.totalVolume)) kg")
                         .font(themeManager.currentTheme.dataFont(size: 15))
                     Text("total weight")
-                        .font(.subheadline)
+                        .font(themeManager.currentTheme.subheadlineFont)
                 }
                 .foregroundStyle(.secondary)
 
@@ -350,14 +351,14 @@ struct ThisSetSection: View {
                 // Header row with "THIS SET" and "vs last session"
                 HStack {
                     Text("THIS SET")
-                        .font(.caption)
+                        .font(themeManager.currentTheme.captionFont)
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
 
                     Spacer()
 
                     Text(data.comparisonLabel)
-                        .font(.caption2)
+                        .font(themeManager.currentTheme.caption2Font)
                         .foregroundStyle(.secondary)
                 }
 
@@ -425,6 +426,7 @@ struct ThisSetSection: View {
 // MARK: - ProgressBarSection Component
 
 struct ProgressBarSection: View {
+    @Environment(ThemeManager.self) private var themeManager
     let data: ProgressBarData
 
     var body: some View {
@@ -451,7 +453,7 @@ struct ProgressBarSection: View {
 
             // Progress percentage text (right-aligned)
             Text(data.progressText)
-                .font(.caption)
+                .font(themeManager.currentTheme.captionFont)
                 .foregroundStyle(.secondary)
         }
     }
@@ -567,11 +569,11 @@ struct TargetMetricsCard: View {
                 // Row 1: Header (outside Grid for simplicity)
                 HStack {
                     Text("PREVIOUS SESSION")
-                        .font(.subheadline)
+                        .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(.secondary)
                     Spacer()
                     Text(Formatters.formatRelativeDate(lastInfo.date))
-                        .font(.caption)
+                        .font(themeManager.currentTheme.captionFont)
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
 
@@ -585,13 +587,13 @@ struct TargetMetricsCard: View {
                                 .font(themeManager.currentTheme.dataFont(size: 32, weight: .bold))
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                             Text(" kg")
-                                .font(.system(size: 14))
+                                .font(themeManager.currentTheme.interFont(size: 14))
                                 .foregroundStyle(.secondary)
                         }
 
                         // Col 2: ×
                         Text("×")
-                            .font(.system(size: 14))
+                            .font(themeManager.currentTheme.interFont(size: 14))
                             .foregroundStyle(.secondary)
 
                         // Col 3: Reps
@@ -606,7 +608,7 @@ struct TargetMetricsCard: View {
                                 .font(themeManager.currentTheme.dataFont(size: 12, weight: .bold))
                                 .foregroundStyle(themeManager.currentTheme.primaryText)
                             Text(" total kg")
-                                .font(.system(size: 12))
+                                .font(themeManager.currentTheme.interFont(size: 12))
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -620,13 +622,13 @@ struct TargetMetricsCard: View {
                                     .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
                                     .foregroundStyle(weightProgressColor)
                                 Text("kg")
-                                    .font(.system(size: 14))
+                                    .font(themeManager.currentTheme.interFont(size: 14))
                                     .foregroundStyle(weightProgressColor)
                             }
 
                             // Col 2: × (invisible, maintains column)
                             Text("×")
-                                .font(.system(size: 14))
+                                .font(themeManager.currentTheme.interFont(size: 14))
                                 .foregroundStyle(.clear)
 
                             // Col 3: Reps progress
@@ -641,7 +643,7 @@ struct TargetMetricsCard: View {
                 }
             } else {
                 Text("Previous session metrics will appear tomorrow")
-                    .font(.subheadline)
+                    .font(themeManager.currentTheme.subheadlineFont)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
@@ -671,7 +673,7 @@ struct TargetMetricsCard: View {
             if isTimedSet {
                 if tempoSeconds > 0 {
                     Text("\(tempoSeconds)")
-                        .font(.system(size: 10))
+                        .font(themeManager.currentTheme.dataFont(size: 10))
                         .foregroundStyle(.secondary)
                 } else {
                     Image(systemName: "timer")
@@ -682,7 +684,7 @@ struct TargetMetricsCard: View {
 
             if isPB {
                 Text("PB")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(themeManager.currentTheme.interFont(size: 10, weight: .bold))
                     .foregroundStyle(.primary)
             }
         }

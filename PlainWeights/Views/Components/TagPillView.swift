@@ -24,7 +24,7 @@ struct TagPillView: View {
     var body: some View {
         HStack(spacing: 4) {
             Text(displayTag)
-                .font(.system(size: 12, weight: .medium))
+                .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
             if let onRemove = onRemove {

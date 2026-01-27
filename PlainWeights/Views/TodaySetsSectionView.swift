@@ -20,7 +20,7 @@ struct TodaySetsSectionView: View {
         ForEach(todaySets, id: \.persistentModelID) { set in
             HStack(alignment: .bottom) {
                 Text(ExerciseSetFormatters.formatSet(set))
-                    .font(.body)
+                    .font(themeManager.currentTheme.bodyFont)
                     .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
                 Spacer()
@@ -63,7 +63,7 @@ struct TodaySetsSectionView: View {
 
                 if set.isPB {
                     Text("PB")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(themeManager.currentTheme.interFont(size: 12, weight: .semibold))
                         .foregroundStyle(.primary)
                 }
 

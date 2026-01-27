@@ -122,11 +122,49 @@ enum AppTheme: String, CaseIterable {
         }
     }
 
-    // MARK: - Data Font (System font for numerical data)
+    // MARK: - Inter Font
 
-    /// System font for data display - weights, reps, volumes, timers
-    /// Uses monospacedDigit() for consistent number alignment
-    func dataFont(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        return .system(size: size, weight: weight).monospacedDigit()
+    /// Get the Inter font name for a specific weight
+    private func interFontName(for weight: Font.Weight) -> String {
+        switch weight {
+        case .thin, .ultraLight:
+            return "Inter-Regular_Thin"
+        case .light:
+            return "Inter-Regular_Light"
+        case .regular:
+            return "Inter-Regular"
+        case .medium:
+            return "Inter-Regular_Medium"
+        case .semibold:
+            return "Inter-Regular_SemiBold"
+        case .bold:
+            return "Inter-Regular_Bold"
+        case .heavy, .black:
+            return "Inter-Regular_Black"
+        default:
+            return "Inter-Regular"
+        }
     }
+
+    /// Inter font for general text
+    func interFont(size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        .custom(interFontName(for: weight), size: size)
+    }
+
+    /// Inter font for numerical data with tabular figures
+    func dataFont(size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        .custom(interFontName(for: weight), size: size)
+            .monospacedDigit()
+    }
+
+    // MARK: - Semantic Font Helpers
+
+    var headlineFont: Font { interFont(size: 17, weight: .semibold) }
+    var bodyFont: Font { interFont(size: 17, weight: .regular) }
+    var subheadlineFont: Font { interFont(size: 15, weight: .regular) }
+    var captionFont: Font { interFont(size: 12, weight: .regular) }
+    var caption2Font: Font { interFont(size: 11, weight: .regular) }
+    var footnoteFont: Font { interFont(size: 13, weight: .regular) }
+    var title2Font: Font { interFont(size: 22, weight: .bold) }
+    var title3Font: Font { interFont(size: 20, weight: .semibold) }
 }

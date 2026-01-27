@@ -112,7 +112,7 @@ struct InlineProgressChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Progress")
-                .font(.headline)
+                .font(themeManager.currentTheme.headlineFont)
                 .foregroundStyle(themeManager.currentTheme.primaryText)
 
             if chartData.isEmpty {
@@ -144,7 +144,7 @@ struct InlineProgressChart: View {
     @ViewBuilder
     private var emptyState: some View {
         Text("No data yet. Log sets to see progress.")
-            .font(.subheadline)
+            .font(themeManager.currentTheme.subheadlineFont)
             .foregroundStyle(themeManager.currentTheme.mutedForeground)
             .frame(height: 200)
             .frame(maxWidth: .infinity)
@@ -163,7 +163,7 @@ struct InlineProgressChart: View {
                 Spacer()
                 Text(Formatters.formatWeight(weightRange.min))
             }
-            .font(.system(size: 10))
+            .font(themeManager.currentTheme.dataFont(size: 10))
             .foregroundStyle(themeManager.currentTheme.chartColor1)
             .frame(width: 35, height: 180)
 
@@ -179,7 +179,7 @@ struct InlineProgressChart: View {
                 Spacer()
                 Text("\(repsRange.min)")
             }
-            .font(.system(size: 10))
+            .font(themeManager.currentTheme.dataFont(size: 10))
             .foregroundStyle(themeManager.currentTheme.chartColor2)
             .frame(width: 25, height: 180)
         }
@@ -272,7 +272,7 @@ struct InlineProgressChart: View {
             legendItem(color: themeManager.currentTheme.chartColor1, label: "Weight (kg)")
             legendItem(color: themeManager.currentTheme.chartColor2, label: "Reps")
         }
-        .font(.caption)
+        .font(themeManager.currentTheme.captionFont)
         .foregroundStyle(themeManager.currentTheme.mutedForeground)
     }
 

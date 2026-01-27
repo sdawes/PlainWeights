@@ -99,7 +99,7 @@ struct EmptyChartPreview: View {
 
             // Text below chart
             Text("Your progress chart will appear here")
-                .font(.caption)
+                .font(themeManager.currentTheme.captionFont)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
@@ -109,6 +109,7 @@ struct EmptyChartPreview: View {
 // MARK: - Chart Toggle Button
 
 struct ChartToggleButton: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Binding var isExpanded: Bool
 
     var body: some View {
@@ -117,7 +118,7 @@ struct ChartToggleButton: View {
         }) {
             HStack(spacing: 4) {
                 Text("Chart")
-                    .font(.caption)
+                    .font(themeManager.currentTheme.captionFont)
                     .foregroundStyle(.primary)
 
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
@@ -209,7 +210,7 @@ struct ChartContentView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Chart title
             Text("Progress Chart")
-                .font(.subheadline.weight(.medium))
+                .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
                 .foregroundStyle(themeManager.currentTheme.primaryText)
 
             if chartData.isEmpty {
@@ -350,7 +351,7 @@ struct ChartContentView: View {
                                     .fill(chartColor)
                                     .frame(width: 8, height: 8)
                                 Text("Weight")
-                                    .font(.system(size: 9))
+                                    .font(themeManager.currentTheme.interFont(size: 9))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -361,7 +362,7 @@ struct ChartContentView: View {
                                 .fill(chartColor)
                                 .frame(width: 8, height: 8)
                             Text("Reps")
-                                .font(.system(size: 9))
+                                .font(themeManager.currentTheme.interFont(size: 9))
                                 .foregroundStyle(.secondary)
                         }
 
@@ -371,7 +372,7 @@ struct ChartContentView: View {
                                 .font(.system(size: 8))
                                 .foregroundStyle(chartColor)
                             Text("PB")
-                                .font(.system(size: 9))
+                                .font(themeManager.currentTheme.interFont(size: 9))
                                 .foregroundStyle(.secondary)
                         }
                     }

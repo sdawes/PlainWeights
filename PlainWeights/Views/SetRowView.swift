@@ -48,7 +48,7 @@ struct SetRowView: View {
                 // Col 2: PB indicator (centered between set number and weight)
                 if set.isPB {
                     Text("PB")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(themeManager.currentTheme.interFont(size: 12, weight: .semibold))
                         .foregroundStyle(themeManager.currentTheme.primaryText)
                         .frame(width: 32, alignment: .center)
                 } else {
@@ -65,12 +65,12 @@ struct SetRowView: View {
                         .minimumScaleFactor(0.7)
 
                     Text(" kg")
-                        .font(.system(size: 14))
+                        .font(themeManager.currentTheme.interFont(size: 14))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
 
                     Text(" × ")
-                        .font(.system(size: 14))
+                        .font(themeManager.currentTheme.interFont(size: 14))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
 
@@ -185,7 +185,7 @@ struct SetRowView: View {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 14))
                 Text("Warm Up")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.orange)
         case "bonus":
@@ -193,7 +193,7 @@ struct SetRowView: View {
                 Image(systemName: "plus")
                     .font(.system(size: 14, weight: .bold))
                 Text("Bonus")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.green)
         case "dropset":
@@ -201,7 +201,7 @@ struct SetRowView: View {
                 Image(systemName: "chevron.down.2")
                     .font(.system(size: 14, weight: .bold))
                 Text("Drop Set")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.blue)
         case "pause":
@@ -209,7 +209,7 @@ struct SetRowView: View {
                 Image(systemName: "pause.fill")
                     .font(.system(size: 14))
                 Text("Pause")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.indigo)
         case "timed":
@@ -218,10 +218,10 @@ struct SetRowView: View {
                     .font(.system(size: 14))
                 if set.tempoSeconds > 0 {
                     Text("\(set.tempoSeconds)s")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
                 } else {
                     Text("Timed")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
                 }
             }
             .foregroundStyle(.blue)
@@ -258,7 +258,7 @@ struct SetRowView: View {
         // Priority 4: Default - show timestamp
         else {
             Text(Formatters.formatTimeHM(set.timestamp))
-                .font(.caption)
+                .font(themeManager.currentTheme.dataFont(size: 12))
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
         }
     }

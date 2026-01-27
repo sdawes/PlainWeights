@@ -38,12 +38,12 @@ struct SetRowView: View {
         HStack(spacing: 0) {
             // Content columns
             HStack(spacing: 0) {
-                // Col 1: Set number (left-aligned, with padding for set type border clearance)
+                // Col 1: Set number (left-aligned, positioned after the set type border)
                 Text("\(setNumber)")
                     .font(themeManager.currentTheme.dataFont(size: 17, weight: .medium))
                     .foregroundStyle(setNumberColor)
                     .frame(width: 24, alignment: .leading)
-                    .padding(.leading, 8)
+                    .padding(.leading, 22)  // 16pt spacer + 2pt border + 4pt gap
 
                 // Col 2: PB indicator (trophy without circle)
                 if set.isPB {
@@ -103,13 +103,14 @@ struct SetRowView: View {
                     .lineLimit(1)
             }
             .padding(.vertical, 12)
+            .padding(.trailing, 16)  // Match right side spacing
         }
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
         }
-        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         .listRowBackground(setTypeRowBackground)
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         .listRowSeparator(isFirst ? .hidden : .visible, edges: .top)
         .listRowSeparator(isLast ? .hidden : .visible, edges: .bottom)
         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
@@ -135,20 +136,18 @@ struct SetRowView: View {
     }
 
     /// Get the background view for set type with colored left border accent
+    /// Mimics the staleness indicator pattern from ExerciseListView
     @ViewBuilder
     private var setTypeRowBackground: some View {
-        if let tintColor = setTypeTintColor {
-            // Special set types get colored left border + subtle tint
-            HStack(spacing: 0) {
+        HStack(spacing: 0) {
+            Color.clear.frame(width: 16)  // Match list leading inset
+            if let tintColor = setTypeTintColor {
                 Rectangle()
                     .fill(tintColor)
-                    .frame(width: 3)
-                Rectangle()
-                    .fill(tintColor.opacity(0.06))
+                    .frame(width: 2)
             }
-        } else {
-            // Normal sets use default list row background
-            Color.clear
+            Rectangle()
+                .fill(setTypeTintColor?.opacity(0.05) ?? Color.clear)
         }
     }
 

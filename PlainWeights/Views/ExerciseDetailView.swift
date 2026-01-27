@@ -402,7 +402,8 @@ struct ExerciseDetailView: View {
             }
         }
         .padding(.vertical, 4)
-        .textCase(nil)
+        .padding(.leading, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Header for historic day sections - subtle styling
@@ -437,7 +438,8 @@ struct ExerciseDetailView: View {
             .font(themeManager.currentTheme.interFont(size: 13))
             .foregroundStyle(themeManager.currentTheme.tertiaryText)
         }
-        .textCase(nil)
+        .padding(.leading, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     init(exercise: Exercise) {
@@ -462,6 +464,8 @@ struct ExerciseDetailView: View {
                         TagPillsRow(tags: exercise.tags)
                     }
                 }
+                .padding(.leading, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -470,6 +474,8 @@ struct ExerciseDetailView: View {
             if showChart && !sets.isEmpty {
                 Section {
                     InlineProgressChart(sets: Array(sets))
+                        .padding(.leading, 8)
+                        .frame(maxWidth: .infinity)
                 }
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -514,6 +520,8 @@ struct ExerciseDetailView: View {
                     }
                 }
                 .padding(4)
+                .padding(.leading, 8)
+                .frame(maxWidth: .infinity)
                 .background(themeManager.currentTheme.muted)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
@@ -526,18 +534,27 @@ struct ExerciseDetailView: View {
                     comparisonMode: comparisonMode,
                     sets: Array(sets)
                 )
+                .padding(.leading, 8)
+                .frame(maxWidth: .infinity)
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
             // Today's Sets Section (flat - no nested List)
             Section {
+                // Header as a row for consistent margins
+                todaysSetsHeader
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+
                 if todaySets.isEmpty {
                     Text("No sets logged yet")
                         .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 24)
+                        .padding(.leading, 8)
+                        .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                 } else {
                     // Progress bar if applicable
@@ -547,7 +564,8 @@ struct ExerciseDetailView: View {
                             targetVolume: comparisonVolume,
                             targetLabel: comparisonLabel
                         )
-                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                        .padding(.leading, 8)
+                        .frame(maxWidth: .infinity)
                         .listRowSeparator(.hidden)
                     }
 
@@ -566,20 +584,19 @@ struct ExerciseDetailView: View {
                         )
                     }
                 }
-            } header: {
-                todaysSetsHeader
             }
 
             // History label (only show if there are historic days)
             if !historicDayGroups.isEmpty {
                 Section {
-                    EmptyView()
-                } header: {
                     Text("HISTORY")
                         .font(themeManager.currentTheme.interFont(size: 12, weight: .semibold))
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
                         .tracking(1.0)
-                        .textCase(nil)
+                        .padding(.leading, 8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                 }
             }
 
@@ -587,6 +604,11 @@ struct ExerciseDetailView: View {
             ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
                 let dayGroup = historicDayGroups[groupIndex]
                 Section {
+                    // Header as a row for consistent margins
+                    historicDayHeader(dayGroup: dayGroup)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+
                     ForEach(dayGroup.sets.indices, id: \.self) { index in
                         let set = dayGroup.sets[index]
                         SetRowView(
@@ -598,8 +620,6 @@ struct ExerciseDetailView: View {
                             onDelete: { deleteSet(set) }
                         )
                     }
-                } header: {
-                    historicDayHeader(dayGroup: dayGroup)
                 }
             }
 
@@ -609,7 +629,6 @@ struct ExerciseDetailView: View {
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
-        .contentMargins(.horizontal, 16, for: .scrollContent)
         .contentMargins(.top, 0, for: .scrollContent)
         .overlay(alignment: .bottomTrailing) {
             Button(action: {

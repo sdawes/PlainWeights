@@ -9,9 +9,24 @@
 
 import Foundation
 import SwiftData
+import UIKit
 
 /// Service handling all ExerciseSet operations
 enum ExerciseSetService {
+
+    // MARK: - PB Celebration
+
+    /// Trigger haptic feedback and post notification for PB achievement
+    private static func triggerPBCelebration() {
+        // Strong haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+
+        // Post notification for confetti animation
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .pbAchieved, object: nil)
+        }
+    }
 
     // MARK: - Add Set
 
@@ -299,6 +314,7 @@ enum ExerciseSetService {
         guard let maxWeight = allWorkingSets.map({ $0.weight }).max() else {
             // No sets exist, make this one the PB
             newSet.isPB = true
+            triggerPBCelebration()
             try context.save()
             return
         }
@@ -322,6 +338,12 @@ enum ExerciseSetService {
 
         // Mark the winner
         currentPB.isPB = true
+
+        // Trigger celebration only if the new set is the PB
+        if currentPB.id == newSet.id {
+            triggerPBCelebration()
+        }
+
         try context.save()
     }
 

@@ -13,6 +13,7 @@ import Charts
 
 struct ChartDataPoint: Identifiable {
     let id = UUID()
+    let index: Int
     let date: Date
     let dateLabel: String
     let maxWeight: Double
@@ -72,9 +73,10 @@ struct InlineProgressChart: View {
         let adjustedWeightMin = weightMin - weightPadding
         let adjustedRepsMin = repsMin - repsPadding
 
-        // Create chart data points with normalized values
-        return dataPoints.map { point in
+        // Create chart data points with normalized values and index
+        return dataPoints.enumerated().map { index, point in
             ChartDataPoint(
+                index: index,
                 date: point.date,
                 dateLabel: dateFormatter.string(from: point.date),
                 maxWeight: point.maxWeight,
@@ -105,6 +107,50 @@ struct InlineProgressChart: View {
     // Check if there's only one data point
     private var hasSingleDataPoint: Bool {
         chartData.count == 1
+    }
+
+    // Check if this is a reps-only exercise (all weights are 0)
+    private var isRepsOnly: Bool {
+        let workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
+        return workingSets.allSatisfy { $0.weight == 0 }
+    }
+
+    // Determine if data spans multiple years
+    private var spansMultipleYears: Bool {
+        guard let first = chartData.first?.date,
+              let last = chartData.last?.date else { return false }
+        let calendar = Calendar.current
+        return calendar.component(.year, from: first) != calendar.component(.year, from: last)
+    }
+
+    // Format date based on data span - ultra compact
+    private func formatDateLabel(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        if spansMultipleYears {
+            formatter.dateFormat = "M/yy"   // "1/25" - month/year
+        } else {
+            formatter.dateFormat = "d/M"    // "27/1" - day/month
+        }
+        return formatter.string(from: date)
+    }
+
+    // Calculate evenly-spaced indices for X-axis labels (max 5)
+    private var xAxisIndices: [Int] {
+        let count = chartData.count
+        guard count > 1 else { return count == 1 ? [0] : [] }
+
+        let maxLabels = min(5, count)
+        if count <= maxLabels {
+            return Array(0..<count)
+        }
+
+        // Evenly spaced indices including first and last
+        var indices: [Int] = []
+        let step = Double(count - 1) / Double(maxLabels - 1)
+        for i in 0..<maxLabels {
+            indices.append(Int(round(Double(i) * step)))
+        }
+        return indices
     }
 
     // MARK: - Body
@@ -150,38 +196,56 @@ struct InlineProgressChart: View {
             .frame(maxWidth: .infinity)
     }
 
-    // MARK: - Chart with Dual Y-Axes
+    // MARK: - Chart with Y-Axes
 
     @ViewBuilder
     private var chartWithAxes: some View {
         HStack(alignment: .center, spacing: 4) {
-            // Left Y-axis labels (Weight in kg)
-            VStack(alignment: .trailing, spacing: 0) {
-                Text(Formatters.formatWeight(weightRange.max))
-                Spacer()
-                Text(Formatters.formatWeight((weightRange.min + weightRange.max) / 2))
-                Spacer()
-                Text(Formatters.formatWeight(weightRange.min))
-            }
-            .font(themeManager.currentTheme.dataFont(size: 10))
-            .foregroundStyle(themeManager.currentTheme.chartColor1)
-            .frame(width: 35, height: 180)
+            if isRepsOnly {
+                // Reps-only: single Y-axis on left for reps (green/teal)
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text("\(repsRange.max)")
+                    Spacer()
+                    Text("\((repsRange.min + repsRange.max) / 2)")
+                    Spacer()
+                    Text("\(repsRange.min)")
+                }
+                .font(themeManager.currentTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .frame(width: 25, height: 180)
 
-            // Main chart
-            chartView
-                .frame(height: 200)
+                // Main chart
+                chartView
+                    .frame(height: 200)
+            } else {
+                // Dual Y-axes: weight on left, reps on right
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text(Formatters.formatWeight(weightRange.max))
+                    Spacer()
+                    Text(Formatters.formatWeight((weightRange.min + weightRange.max) / 2))
+                    Spacer()
+                    Text(Formatters.formatWeight(weightRange.min))
+                }
+                .font(themeManager.currentTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.currentTheme.chartColor1)
+                .frame(width: 35, height: 180)
 
-            // Right Y-axis labels (Reps)
-            VStack(alignment: .leading, spacing: 0) {
-                Text("\(repsRange.max)")
-                Spacer()
-                Text("\((repsRange.min + repsRange.max) / 2)")
-                Spacer()
-                Text("\(repsRange.min)")
+                // Main chart
+                chartView
+                    .frame(height: 200)
+
+                // Right Y-axis labels (Reps)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("\(repsRange.max)")
+                    Spacer()
+                    Text("\((repsRange.min + repsRange.max) / 2)")
+                    Spacer()
+                    Text("\(repsRange.min)")
+                }
+                .font(themeManager.currentTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .frame(width: 25, height: 180)
             }
-            .font(themeManager.currentTheme.dataFont(size: 10))
-            .foregroundStyle(themeManager.currentTheme.chartColor2)
-            .frame(width: 25, height: 180)
         }
     }
 
@@ -191,26 +255,66 @@ struct InlineProgressChart: View {
     private var chartView: some View {
         Chart(chartData) { point in
             if hasSingleDataPoint {
-                // Single point: show dots only at center
-                PointMark(
-                    x: .value("Date", point.date),
-                    y: .value("Weight", 0.5)
-                )
-                .foregroundStyle(themeManager.currentTheme.chartColor1)
-                .symbolSize(50)
+                // Single point: show dot at center
+                if isRepsOnly {
+                    // Reps-only: show single reps dot in green/teal
+                    PointMark(
+                        x: .value("Index", point.index),
+                        y: .value("Reps", 0.5)
+                    )
+                    .foregroundStyle(themeManager.currentTheme.chartColor2)
+                    .symbolSize(50)
+                } else {
+                    // Weight and reps: show both dots
+                    PointMark(
+                        x: .value("Index", point.index),
+                        y: .value("Weight", 0.5)
+                    )
+                    .foregroundStyle(themeManager.currentTheme.chartColor1)
+                    .symbolSize(50)
 
-                PointMark(
-                    x: .value("Date", point.date),
-                    y: .value("Reps", 0.5)
+                    PointMark(
+                        x: .value("Index", point.index),
+                        y: .value("Reps", 0.5)
+                    )
+                    .foregroundStyle(themeManager.currentTheme.chartColor2)
+                    .symbolSize(50)
+                }
+            } else if isRepsOnly {
+                // Reps-only: show reps as solid line with gradient (no weight line)
+                // Uses chartColor2 (green/teal) to match the reps color
+
+                // Reps area gradient
+                AreaMark(
+                    x: .value("Index", point.index),
+                    y: .value("Reps", point.normalizedReps),
+                    series: .value("Type", "RepsArea")
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [themeManager.currentTheme.chartColor2.opacity(0.3),
+                                 themeManager.currentTheme.chartColor2.opacity(0.05)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .interpolationMethod(.monotone)
+
+                // Reps line (solid)
+                LineMark(
+                    x: .value("Index", point.index),
+                    y: .value("Reps", point.normalizedReps),
+                    series: .value("Type", "Reps")
                 )
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
-                .symbolSize(50)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.monotone)
             } else {
-                // Multiple points: show lines (no dots)
+                // Multiple points with weight and reps: show both lines
 
                 // Weight area gradient
                 AreaMark(
-                    x: .value("Date", point.date),
+                    x: .value("Index", point.index),
                     y: .value("Weight", point.normalizedWeight),
                     series: .value("Type", "WeightArea")
                 )
@@ -226,7 +330,7 @@ struct InlineProgressChart: View {
 
                 // Weight line (solid)
                 LineMark(
-                    x: .value("Date", point.date),
+                    x: .value("Index", point.index),
                     y: .value("Weight", point.normalizedWeight),
                     series: .value("Type", "Weight")
                 )
@@ -236,7 +340,7 @@ struct InlineProgressChart: View {
 
                 // Reps line (dashed, no gradient)
                 LineMark(
-                    x: .value("Date", point.date),
+                    x: .value("Index", point.index),
                     y: .value("Reps", point.normalizedReps),
                     series: .value("Type", "Reps")
                 )
@@ -246,15 +350,20 @@ struct InlineProgressChart: View {
             }
         }
         .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 5)) { _ in
+            AxisMarks(values: xAxisIndices) { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
                     .foregroundStyle(themeManager.currentTheme.borderColor)
                 AxisTick()
-                AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                    .font(.system(size: 10))
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                if let index = value.as(Int.self), index < chartData.count {
+                    AxisValueLabel {
+                        Text(formatDateLabel(chartData[index].date))
+                            .font(.system(size: 9))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    }
+                }
             }
         }
+        .chartXScale(domain: 0...(max(chartData.count - 1, 1)))
         .chartYAxis {
             AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
@@ -269,8 +378,14 @@ struct InlineProgressChart: View {
     @ViewBuilder
     private var legendView: some View {
         HStack(spacing: 16) {
-            legendItem(color: themeManager.currentTheme.chartColor1, label: "Weight (kg)", isDashed: false)
-            legendItem(color: themeManager.currentTheme.chartColor2, label: "Reps", isDashed: true)
+            if isRepsOnly {
+                // Only show reps legend for reps-only exercises (green/teal)
+                legendItem(color: themeManager.currentTheme.chartColor2, label: "Reps", isDashed: false)
+            } else {
+                // Show both weight and reps legends
+                legendItem(color: themeManager.currentTheme.chartColor1, label: "Weight (kg)", isDashed: false)
+                legendItem(color: themeManager.currentTheme.chartColor2, label: "Reps", isDashed: true)
+            }
         }
         .font(themeManager.currentTheme.captionFont)
         .foregroundStyle(themeManager.currentTheme.mutedForeground)

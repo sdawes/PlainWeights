@@ -45,15 +45,20 @@ struct SetRowView: View {
                     .frame(width: 24, alignment: .leading)
                     .padding(.leading, 8)
 
-                // Col 2: PB indicator (centered between set number and weight)
+                // Col 2: PB indicator (gold trophy in circle, centered between set number and weight)
                 if set.isPB {
-                    Text("PB")
-                        .font(themeManager.currentTheme.interFont(size: 12, weight: .semibold))
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
-                        .frame(width: 32, alignment: .center)
+                    ZStack {
+                        Circle()
+                            .fill(themeManager.currentTheme.pbColor.opacity(0.15))
+                            .frame(width: 28, height: 28)
+                        Image(systemName: "trophy.fill")
+                            .font(.system(size: 12))
+                            .foregroundStyle(themeManager.currentTheme.pbColor)
+                    }
+                    .frame(width: 36, alignment: .center)
                 } else {
                     Spacer()
-                        .frame(width: 32)
+                        .frame(width: 36)
                 }
 
                 // Weight × Reps (baseline aligned, larger font to match Make)

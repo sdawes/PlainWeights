@@ -109,17 +109,32 @@ enum AppTheme: String, CaseIterable {
     /// Primary chart color (for weight line)
     var chartColor1: Color {
         switch self {
-        case .light: return Color(red: 0.78, green: 0.45, blue: 0.25)  // Orange/rust
-        case .dark: return Color(red: 0.35, green: 0.35, blue: 0.85)   // Blue/purple
+        case .light: return Color(red: 0.92, green: 0.45, blue: 0.18)  // Vibrant orange
+        case .dark: return Color(red: 0.45, green: 0.50, blue: 0.95)   // Bright blue/purple
         }
     }
 
     /// Secondary chart color (for reps line)
     var chartColor2: Color {
         switch self {
-        case .light: return Color(red: 0.35, green: 0.60, blue: 0.60)  // Teal
-        case .dark: return Color(red: 0.45, green: 0.70, blue: 0.55)   // Green/teal
+        case .light: return Color(red: 0.18, green: 0.70, blue: 0.65)  // Vibrant teal
+        case .dark: return Color(red: 0.45, green: 0.82, blue: 0.58)   // Bright green
         }
+    }
+
+    // MARK: - PB (Personal Best) Color
+
+    /// Gold color for PB indicators
+    var pbColor: Color {
+        switch self {
+        case .light: return Color(red: 1.0, green: 0.75, blue: 0.0)   // Bright vivid gold
+        case .dark: return Color(red: 1.0, green: 0.82, blue: 0.2)    // Brighter gold for contrast
+        }
+    }
+
+    /// Subtle background tint for PB rows
+    var pbBackgroundTint: Color {
+        Color.yellow.opacity(0.12)
     }
 
     // MARK: - Inter Font

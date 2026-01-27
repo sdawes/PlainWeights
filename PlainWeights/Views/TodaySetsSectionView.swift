@@ -62,9 +62,9 @@ struct TodaySetsSectionView: View {
                 }
 
                 if set.isPB {
-                    Text("PB")
-                        .font(themeManager.currentTheme.interFont(size: 12, weight: .semibold))
-                        .foregroundStyle(.primary)
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(themeManager.currentTheme.pbColor)
                 }
 
                 Text(Formatters.formatTimeHM(set.timestamp))

@@ -164,11 +164,11 @@ struct ComparisonMetricsCard: View {
                         value: Formatters.formatWeight(metrics.maxWeight)
                     )
                     metricColumn(
-                        label: comparisonMode == .lastSession ? "Max Reps" : "Reps",
+                        label: "Reps",
                         value: "\(metrics.maxReps)"
                     )
                     metricColumn(
-                        label: comparisonMode == .lastSession ? "Max Total" : "Total",
+                        label: "Total",
                         value: Formatters.formatVolume(metrics.totalVolume)
                     )
                 }
@@ -272,7 +272,7 @@ struct ExerciseDetailView: View {
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
     @State private var showChart: Bool = false
-
+    @State private var showPBConfetti: Bool = false
 
     // Cached data for performance
     @State private var todaySets: [ExerciseSet] = []
@@ -746,6 +746,12 @@ struct ExerciseDetailView: View {
         }
         .onChange(of: sets) { _, _ in
             updateCachedData()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .pbAchieved)) { _ in
+            showPBConfetti = true
+        }
+        .overlay {
+            PBCelebrationOverlay(isShowing: $showPBConfetti)
         }
     }
 

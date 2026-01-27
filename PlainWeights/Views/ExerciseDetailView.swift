@@ -354,179 +354,82 @@ struct ExerciseDetailView: View {
         return minutes > 0 ? minutes : nil
     }
 
-    // MARK: - Today's Sets Card (extracted to help compiler)
+    // MARK: - Section Headers (for flattened List structure)
 
+    /// Header for Today's Sets section
     @ViewBuilder
-    private var todaySetsCard: some View {
-        VStack(spacing: 0) {
-            // Card Header
-            VStack(spacing: 0) {
-                HStack {
-                    Text("Today's Sets")
-                        .font(themeManager.currentTheme.headlineFont)
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
-                    Spacer()
-                    if !todaySets.isEmpty {
-                        HStack(spacing: 4) {
-                            if isWeightedExercise {
-                                Text("Volume:")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                                Text(Formatters.formatVolume(todaysVolume))
-                                    .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                                Text("kg")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                            } else {
-                                Text("Reps:")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                                Text("\(todaysTotalReps)")
-                                    .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                            }
-                            if let mins = sessionDurationMinutes {
-                                Text("•")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                                Text("\(mins)")
-                                    .font(themeManager.currentTheme.dataFont(size: 14))
-                                Text("mins")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                            }
-                        }
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(themeManager.currentTheme.muted.opacity(0.3))
-
-                // Progress bar vs comparison target (volume now shown in header)
-                if !todaySets.isEmpty && isWeightedExercise && comparisonVolume > 0 {
-                    VolumeProgressBar(
-                        currentVolume: todaysVolume,
-                        targetVolume: comparisonVolume,
-                        targetLabel: comparisonLabel
-                    )
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                }
-            }
-
-            Divider()
-                .background(themeManager.currentTheme.borderColor)
-
-            // Card Content
-            if todaySets.isEmpty {
-                Text("No sets logged yet")
-                    .font(themeManager.currentTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 32)
-            } else {
-                List {
-                    ForEach(todaySets.indices, id: \.self) { index in
-                        let set = todaySets[index]
-                        SetRowView(
-                            set: set,
-                            setNumber: todaySets.count - index,
-                            isFirst: index == 0,
-                            isLast: index == todaySets.count - 1,
-                            onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
-                            onDelete: { deleteSet(set) },
-                            allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
-                            showTimer: index == 0
-                        )
-                    }
-                }
-                .listStyle(.plain)
-                .scrollDisabled(true)
-                .scrollContentBackground(.hidden)
-                .frame(height: CGFloat(todaySets.count) * 50 + 8)
-            }
-        }
-        .background(themeManager.currentTheme.cardBackgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-        )
-    }
-
-    // MARK: - Historic Day Card
-
-    @ViewBuilder
-    private func historicDayCard(dayGroup: ExerciseDataGrouper.DayGroup) -> some View {
-        VStack(spacing: 0) {
-            // Card Header (matching Make styling)
-            HStack {
-                Text(Formatters.formatFullDayHeader(dayGroup.date))
-                    .font(themeManager.currentTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                Spacer()
+    private var todaysSetsHeader: some View {
+        HStack {
+            Text("Today's Sets")
+                .font(themeManager.currentTheme.headlineFont)
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+            Spacer()
+            if !todaySets.isEmpty {
                 HStack(spacing: 4) {
-                    // Check if this day has weighted sets
-                    let isWeightedDay = dayGroup.sets.filter { !$0.isWarmUp && !$0.isBonus }.contains { $0.weight > 0 }
-
-                    if isWeightedDay {
+                    if isWeightedExercise {
                         Text("Volume:")
                             .font(themeManager.currentTheme.interFont(size: 14))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                        Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)))")
+                        Text(Formatters.formatVolume(todaysVolume))
                             .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Text("kg")
                             .font(themeManager.currentTheme.interFont(size: 14))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
                     } else {
                         Text("Reps:")
                             .font(themeManager.currentTheme.interFont(size: 14))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                        Text("\(dayGroup.sets.reduce(0) { $0 + $1.reps })")
+                        Text("\(todaysTotalReps)")
                             .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
                     }
-                    if let duration = calculateSessionDuration(for: dayGroup.sets) {
+                    if let mins = sessionDurationMinutes {
                         Text("•")
                             .font(themeManager.currentTheme.interFont(size: 14))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                        Text("\(duration)")
+                        Text("\(mins)")
                             .font(themeManager.currentTheme.dataFont(size: 14))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         Text("mins")
                             .font(themeManager.currentTheme.interFont(size: 14))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
                     }
                 }
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(themeManager.currentTheme.muted.opacity(0.3))
+        }
+        .textCase(nil)
+    }
 
-            Divider()
-                .background(themeManager.currentTheme.borderColor)
+    /// Header for historic day sections
+    @ViewBuilder
+    private func historicDayHeader(dayGroup: ExerciseDataGrouper.DayGroup) -> some View {
+        let isWeightedDay = dayGroup.sets.filter { !$0.isWarmUp && !$0.isBonus }.contains { $0.weight > 0 }
 
-            // Sets List
-            List {
-                ForEach(dayGroup.sets.indices, id: \.self) { index in
-                    let set = dayGroup.sets[index]
-                    SetRowView(
-                        set: set,
-                        setNumber: dayGroup.sets.count - index,
-                        isFirst: index == 0,
-                        isLast: index == dayGroup.sets.count - 1,
-                        onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
-                        onDelete: { deleteSet(set) }
-                    )
+        HStack {
+            Text(Formatters.formatFullDayHeader(dayGroup.date))
+                .font(themeManager.currentTheme.subheadlineFont)
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+            Spacer()
+            HStack(spacing: 4) {
+                if isWeightedDay {
+                    Text("Volume:")
+                        .font(themeManager.currentTheme.interFont(size: 14))
+                    Text("\(Formatters.formatVolume(ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)))")
+                        .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
+                    Text("kg")
+                        .font(themeManager.currentTheme.interFont(size: 14))
+                } else {
+                    Text("Reps:")
+                        .font(themeManager.currentTheme.interFont(size: 14))
+                    Text("\(dayGroup.sets.reduce(0) { $0 + $1.reps })")
+                        .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
+                }
+                if let duration = calculateSessionDuration(for: dayGroup.sets) {
+                    Text("•")
+                        .font(themeManager.currentTheme.interFont(size: 14))
+                    Text("\(duration)")
+                        .font(themeManager.currentTheme.dataFont(size: 14))
+                    Text("mins")
+                        .font(themeManager.currentTheme.interFont(size: 14))
                 }
             }
-            .listStyle(.plain)
-            .scrollDisabled(true)
-            .scrollContentBackground(.hidden)
-            .frame(height: CGFloat(dayGroup.sets.count) * 50 + 8)
+            .foregroundStyle(themeManager.currentTheme.mutedForeground)
         }
-        .background(themeManager.currentTheme.cardBackgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-        )
+        .textCase(nil)
     }
 
     init(exercise: Exercise) {
@@ -619,33 +522,69 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
-            // Today's Sets Card
+            // Today's Sets Section (flat - no nested List)
             Section {
-                todaySetsCard
-            }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-
-            // Historic sets: card per day group
-            if !historicDayGroups.isEmpty {
-                Section {
-                    VStack(spacing: 16) {
-                        ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
-                            historicDayCard(dayGroup: historicDayGroups[groupIndex])
-                        }
-                    }
-                } header: {
-                    Text("History")
+                if todaySets.isEmpty {
+                    Text("No sets logged yet")
                         .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
+                        .listRowBackground(Color.clear)
+                } else {
+                    // Progress bar if applicable
+                    if isWeightedExercise && comparisonVolume > 0 {
+                        VolumeProgressBar(
+                            currentVolume: todaysVolume,
+                            targetVolume: comparisonVolume,
+                            targetLabel: comparisonLabel
+                        )
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowSeparator(.hidden)
+                    }
+
+                    // Set rows directly in outer List
+                    ForEach(todaySets.indices, id: \.self) { index in
+                        let set = todaySets[index]
+                        SetRowView(
+                            set: set,
+                            setNumber: todaySets.count - index,
+                            isFirst: index == 0,
+                            isLast: index == todaySets.count - 1,
+                            onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
+                            onDelete: { deleteSet(set) },
+                            allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
+                            showTimer: index == 0
+                        )
+                    }
                 }
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
+            } header: {
+                todaysSetsHeader
+            }
+
+            // Historic sets: one Section per day (flat - no nested Lists)
+            ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
+                let dayGroup = historicDayGroups[groupIndex]
+                Section {
+                    ForEach(dayGroup.sets.indices, id: \.self) { index in
+                        let set = dayGroup.sets[index]
+                        SetRowView(
+                            set: set,
+                            setNumber: dayGroup.sets.count - index,
+                            isFirst: index == 0,
+                            isLast: index == dayGroup.sets.count - 1,
+                            onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
+                            onDelete: { deleteSet(set) }
+                        )
+                    }
+                } header: {
+                    historicDayHeader(dayGroup: dayGroup)
+                }
             }
 
         }
-        .listStyle(.plain)
-        .listSectionSpacing(0)
+        .listStyle(.insetGrouped)
+        .listSectionSpacing(12)
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)

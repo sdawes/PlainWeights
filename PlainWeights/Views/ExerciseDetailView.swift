@@ -546,6 +546,19 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
+            // Inline Progress Chart (toggled) - above segmentation picker
+            if showChart && !sets.isEmpty {
+                Section {
+                    InlineProgressChart(sets: Array(sets))
+                }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .move(edge: .top)).combined(with: .scale(scale: 0.95, anchor: .top)),
+                    removal: .opacity.combined(with: .scale(scale: 0.95, anchor: .top))
+                ))
+            }
+
             // Comparison mode toggle
             Section {
                 HStack(spacing: 4) {
@@ -596,19 +609,6 @@ struct ExerciseDetailView: View {
             }
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
-
-            // Inline Progress Chart (toggled)
-            if showChart && !sets.isEmpty {
-                Section {
-                    InlineProgressChart(sets: Array(sets))
-                }
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .top)).combined(with: .scale(scale: 0.95, anchor: .top)),
-                    removal: .opacity.combined(with: .scale(scale: 0.95, anchor: .top))
-                ))
-            }
 
             // Today's Sets Card
             Section {

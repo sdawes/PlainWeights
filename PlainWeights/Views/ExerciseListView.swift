@@ -10,22 +10,34 @@ import SwiftData
 
 struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Query private var allExercises: [Exercise]
     @State private var showingAddExercise = false
     @State private var searchText = ""
     @State private var navigationPath = NavigationPath()
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            FilteredExerciseListView(
-                searchText: searchText,
-                showingAddExercise: $showingAddExercise,
-                navigationPath: $navigationPath
-            )
-            // Note: iOS 26+ automatically applies Liquid Glass styling to .searchable()
-            .searchable(text: $searchText, prompt: "Search by name or tags")
-            .navigationDestination(for: Exercise.self) { exercise in
-                ExerciseDetailView(exercise: exercise)
-            }
+            filteredListView
+                .navigationDestination(for: Exercise.self) { exercise in
+                    ExerciseDetailView(exercise: exercise)
+                }
+        }
+    }
+
+    @ViewBuilder
+    private var filteredListView: some View {
+        let listView = FilteredExerciseListView(
+            searchText: searchText,
+            showingAddExercise: $showingAddExercise,
+            navigationPath: $navigationPath
+        )
+
+        // Only show search bar when exercises exist
+        if allExercises.isEmpty {
+            listView
+        } else {
+            listView
+                .searchable(text: $searchText, prompt: "Search by name or tags")
         }
     }
 }
@@ -96,7 +108,6 @@ struct FilteredExerciseListView: View {
             if exercises.isEmpty {
                 Section {
                     EmptyExercisesView(
-                        searchText: searchText,
                         onAddExercise: { showingAddExercise = true }
                     )
                     .listRowBackground(Color.clear)

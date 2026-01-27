@@ -2,73 +2,128 @@
 //  EmptyExercisesView.swift
 //  PlainWeights
 //
-//  Created for displaying empty state when no exercises exist
+//  Empty state screen matching Figma Make design
 //
 
 import SwiftUI
 
 struct EmptyExercisesView: View {
     @Environment(ThemeManager.self) private var themeManager
-    let searchText: String
     let onAddExercise: () -> Void
 
     var body: some View {
-        if !searchText.isEmpty {
-            // Search returned no results
-            ContentUnavailableView.search(text: searchText)
-        } else {
-            // First-time user experience - no exercises at all
-            VStack(spacing: 24) {
+        // First-time user experience
+        ScrollView {
+            VStack(spacing: 0) {
                 Spacer()
+                    .frame(height: 32)
 
-                // Animated retro lifter
-                RetroLifterView(pixelSize: 6)
-                    .frame(height: 120)
+                // Sprite (no circle border)
+                RetroLifterView(pixelSize: 4)
 
-                // Text content
-                VStack(spacing: 8) {
-                    Text("No Exercises Yet")
-                        .font(themeManager.currentTheme.title2Font)
+                // Welcome text
+                VStack(spacing: 12) {
+                    Text("Welcome to PlainWeights")
+                        .font(themeManager.currentTheme.interFont(size: 24, weight: .medium))
                         .foregroundStyle(themeManager.currentTheme.primaryText)
 
-                    Text("Start tracking your workouts by adding your first exercise")
+                    Text("A minimal, text-focused gym tracker with a digital ledger aesthetic. Track your progress with precision.")
                         .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
+                        .lineSpacing(4)
                 }
+                .padding(.top, 32)
 
-                // Add button - solid filled style
-                Button(action: onAddExercise) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "plus")
-                        Text("Add Exercise")
-                    }
-                    .font(themeManager.currentTheme.interFont(size: 17, weight: .semibold))
-                    .foregroundStyle(themeManager.currentTheme.background)
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 14)
-                    .background(themeManager.currentTheme.primaryText)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                // Features card
+                VStack(alignment: .leading, spacing: 12) {
+                    coloredSetTypesRow
+                    featureRow("Track max weight, reps, and total volume")
+                    featureRow("Compare with last session or all-time best")
+                    featureRow("Visual progress charts and history")
                 }
-                .padding(.top, 8)
+                .padding(20)
+                .background(themeManager.currentTheme.cardBackgroundColor)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                )
+                .padding(.top, 32)
+
+                // CTA section
+                VStack(spacing: 16) {
+                    Text("Get started by adding your first exercise")
+                        .font(themeManager.currentTheme.subheadlineFont)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                    Button(action: onAddExercise) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus")
+                            Text("Add First Exercise")
+                        }
+                        .font(themeManager.currentTheme.headlineFont)
+                        .foregroundStyle(themeManager.currentTheme.background)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(themeManager.currentTheme.primaryText)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+                .padding(.top, 32)
 
                 Spacer()
+                    .frame(height: 80)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.horizontal, 16)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // Feature row with colored set types
+    private var coloredSetTypesRow: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Circle()
+                .fill(themeManager.currentTheme.primaryText)
+                .frame(width: 6, height: 6)
+                .padding(.top, 6)
+
+            (Text("Color-coded set types: ")
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+             + Text("Warm-up")
+                .foregroundStyle(.orange)
+             + Text(", ")
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+             + Text("Bonus")
+                .foregroundStyle(.green)
+             + Text(", ")
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+             + Text("Drop sets")
+                .foregroundStyle(.blue))
+                .font(themeManager.currentTheme.subheadlineFont)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // Feature row with bullet point
+    private func featureRow(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Circle()
+                .fill(themeManager.currentTheme.primaryText)
+                .frame(width: 6, height: 6)
+                .padding(.top, 6)
+
+            Text(text)
+                .font(themeManager.currentTheme.subheadlineFont)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
 
 #Preview {
     VStack {
-        EmptyExercisesView(searchText: "", onAddExercise: {})
-            .padding()
-
-        Divider()
-
-        EmptyExercisesView(searchText: "Bench Press", onAddExercise: {})
-            .padding()
+        EmptyExercisesView(onAddExercise: {})
     }
     .environment(ThemeManager())
 }

@@ -24,8 +24,9 @@ struct SetRowView: View {
     let showTimer: Bool  // Only show timer on most recent set
     let cardPosition: ListRowCardPosition?  // For unified card appearance with today's sets
     let isFirstInCard: Bool  // True for first set after header (no top divider needed)
+    let isLastSetInDay: Bool  // True for last set in a day (shows 3:00 if no restSeconds)
 
-    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true) {
+    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true, isLastSetInDay: Bool = false) {
         self.set = set
         self.setNumber = setNumber
         self.isFirst = isFirst
@@ -36,6 +37,7 @@ struct SetRowView: View {
         self.showTimer = showTimer
         self.cardPosition = cardPosition
         self.isFirstInCard = isFirstInCard
+        self.isLastSetInDay = isLastSetInDay
     }
 
     var body: some View {
@@ -100,6 +102,7 @@ struct SetRowView: View {
                 }
                 .padding(.vertical, 12)
                 .padding(.trailing, 16)  // Match right side spacing
+                .background(setTypeTintBackground)
             }
         }
         .contentShape(Rectangle())
@@ -203,6 +206,23 @@ struct SetRowView: View {
         return nil
     }
 
+    /// Tinted background for special set types (warm-up, bonus, etc.)
+    /// Shows colored left border + light fill, starting left of set number
+    @ViewBuilder
+    private var setTypeTintBackground: some View {
+        if let tintColor = setTypeTintColor {
+            HStack(spacing: 0) {
+                Rectangle()
+                    .fill(tintColor)
+                    .frame(width: 2)
+                Rectangle()
+                    .fill(tintColor.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+            }
+            .padding(.leading, 12)  // Start a few pixels left of set number
+        }
+    }
+
     // MARK: - Badges
 
     @ViewBuilder
@@ -296,6 +316,9 @@ struct SetRowView: View {
                 .onAppear {
                     captureRestTimeExpiry()
                 }
+        } else if isLastSetInDay {
+            // Last set in a historic day with no captured rest time - show 3:00
+            staticRestTimeView(seconds: 180)
         } else {
             Text(Formatters.formatTimeHM(set.timestamp))
                 .font(themeManager.currentTheme.dataFont(size: 12))

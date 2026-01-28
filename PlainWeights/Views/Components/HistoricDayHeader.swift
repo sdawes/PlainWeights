@@ -37,11 +37,19 @@ struct HistoricDayHeader: View {
 
                 HStack(spacing: 6) {
                     if isWeightedDay {
-                        Text("\(Formatters.formatVolume(volume)) kg")
-                            .font(themeManager.currentTheme.dataFont(size: 13))
+                        HStack(spacing: 2) {
+                            Text(Formatters.formatVolume(volume))
+                                .font(themeManager.currentTheme.dataFont(size: 13, weight: .semibold))
+                            Text("kg")
+                                .font(themeManager.currentTheme.dataFont(size: 13))
+                        }
                     } else {
-                        Text("\(totalReps) reps")
-                            .font(themeManager.currentTheme.dataFont(size: 13))
+                        HStack(spacing: 2) {
+                            Text("\(totalReps)")
+                                .font(themeManager.currentTheme.dataFont(size: 13, weight: .semibold))
+                            Text("reps")
+                                .font(themeManager.currentTheme.dataFont(size: 13))
+                        }
                     }
 
                     if let duration = sessionDurationMinutes {

@@ -63,7 +63,7 @@ struct TodaySessionCard: View {
                     .foregroundStyle(themeManager.currentTheme.tertiaryText)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(16)
-            } else if isWeightedExercise && comparisonVolume > 0 {
+            } else if comparisonVolume > 0 {
                 // Progress bar for weighted exercises with comparison data
                 VolumeProgressBar(
                     currentVolume: volume,

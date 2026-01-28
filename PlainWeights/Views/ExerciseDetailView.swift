@@ -140,6 +140,11 @@ struct ComparisonMetricsCard: View {
         !todaysSets.isEmpty
     }
 
+    // Check if today has working sets (non-warmup, non-bonus)
+    private var hasWorkingSets: Bool {
+        todaysSets.contains { !$0.isWarmUp && !$0.isBonus }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Separate header section with muted background
@@ -179,11 +184,11 @@ struct ComparisonMetricsCard: View {
                     .fill(themeManager.currentTheme.borderColor)
                     .frame(height: 1)
 
-                // Comparison row - colored background cells (left-aligned)
+                // Comparison row - colored background cells (show '-' when no working sets)
                 HStack(spacing: 1) {
-                    comparisonCell(direction: weightDirection, value: weightDelta)
-                    comparisonCell(direction: repsDirection, value: repsDelta, isReps: true)
-                    comparisonCell(direction: totalDirection, value: totalDelta)
+                    comparisonCell(direction: hasWorkingSets ? weightDirection : nil, value: hasWorkingSets ? weightDelta : nil)
+                    comparisonCell(direction: hasWorkingSets ? repsDirection : nil, value: hasWorkingSets ? repsDelta : nil, isReps: true)
+                    comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil)
                 }
                 .background(themeManager.currentTheme.borderColor)
             } else {
@@ -344,12 +349,13 @@ struct ExerciseDetailView: View {
     }
 
     // Calculate session duration in minutes for a set of sets
+    // Duration = time from first set to last set + 3 min rest after last set
     private func calculateSessionDuration(for sets: [ExerciseSet]) -> Int? {
-        guard sets.count >= 2 else { return nil }
+        guard !sets.isEmpty else { return nil }
         let sortedSets = sets.sorted { $0.timestamp < $1.timestamp }
         guard let first = sortedSets.first, let last = sortedSets.last else { return nil }
-        let duration = last.timestamp.timeIntervalSince(first.timestamp)
-        let minutes = Int(duration / 60)
+        let duration = last.timestamp.timeIntervalSince(first.timestamp) + 180
+        let minutes = Int(round(duration / 60))
         return minutes > 0 ? minutes : nil
     }
 
@@ -385,8 +391,7 @@ struct ExerciseDetailView: View {
             if showChart && !sets.isEmpty {
                 Section {
                     InlineProgressChart(sets: Array(sets))
-                        .padding(.leading, 8)
-                        .frame(maxWidth: .infinity)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 }
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -435,6 +440,7 @@ struct ExerciseDetailView: View {
                 .background(themeManager.currentTheme.muted)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
@@ -490,15 +496,15 @@ struct ExerciseDetailView: View {
             // History label (only show if there are historic days)
             if !historicDayGroups.isEmpty {
                 Section {
-                    Text("HISTORY")
-                        .font(themeManager.currentTheme.interFont(size: 12, weight: .semibold))
+                    Text("History")
+                        .font(themeManager.currentTheme.interFont(size: 14, weight: .semibold))
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
-                        .tracking(1.0)
                         .padding(.leading, 8)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
                 }
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
 
             // Historic sets: one Section per day (unified card appearance)
@@ -525,7 +531,8 @@ struct ExerciseDetailView: View {
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
                             cardPosition: isLast ? .bottom : .middle,
-                            isFirstInCard: index == 0
+                            isFirstInCard: index == 0,
+                            isLastSetInDay: isLast
                         )
                     }
                 }
@@ -533,7 +540,7 @@ struct ExerciseDetailView: View {
 
         }
         .listStyle(.plain)
-        .listSectionSpacing(16)
+        .listSectionSpacing(24)
         .environment(\.defaultMinListRowHeight, 1)  // Allow rows to be as short as needed
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())

@@ -431,7 +431,6 @@ struct ExerciseDetailView: View {
                     }
                 }
                 .padding(4)
-                .padding(.leading, 8)
                 .frame(maxWidth: .infinity)
                 .background(themeManager.currentTheme.muted)
                 .clipShape(RoundedRectangle(cornerRadius: 10))

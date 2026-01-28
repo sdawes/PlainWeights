@@ -23,26 +23,28 @@ struct TodaySessionCard: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header row
             HStack {
-                Text("TODAY")
-                    .font(themeManager.currentTheme.interFont(size: 13, weight: .bold))
-                    .foregroundStyle(themeManager.currentTheme.accent)
-                    .tracking(1.2)
+                Text("Today's Sets")
+                    .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
                 Spacer()
 
-                HStack(spacing: 4) {
-                    if isWeightedExercise {
-                        Text("Volume: \(Formatters.formatVolume(volume)) kg")
-                    } else {
-                        Text("\(totalReps) reps")
+                // Only show stats when sets exist
+                if setCount > 0 {
+                    HStack(spacing: 4) {
+                        if isWeightedExercise {
+                            Text("Volume: \(Formatters.formatVolume(volume)) kg")
+                        } else {
+                            Text("\(totalReps) reps")
+                        }
+                        if let mins = durationMinutes {
+                            Text(".")
+                            Text("\(mins) min")
+                        }
                     }
-                    if let mins = durationMinutes {
-                        Text(".")
-                        Text("\(mins) min")
-                    }
+                    .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 }
-                .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
@@ -53,8 +55,16 @@ struct TodaySessionCard: View {
                 .fill(themeManager.currentTheme.borderColor)
                 .frame(height: 1)
 
-            // Progress bar (if applicable)
-            if isWeightedExercise && comparisonVolume > 0 {
+            // Content area
+            if setCount == 0 {
+                // No sets logged yet
+                Text("No sets logged yet")
+                    .font(themeManager.currentTheme.interFont(size: 14))
+                    .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(16)
+            } else if isWeightedExercise && comparisonVolume > 0 {
+                // Progress bar for weighted exercises with comparison data
                 VolumeProgressBar(
                     currentVolume: volume,
                     targetVolume: comparisonVolume,

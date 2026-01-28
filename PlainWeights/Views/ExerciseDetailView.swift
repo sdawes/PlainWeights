@@ -15,74 +15,6 @@ enum ComparisonMode: String, CaseIterable {
     case allTimeBest = "All-Time Best"
 }
 
-// MARK: - Today Session Card
-
-struct TodaySessionCard: View {
-    @Environment(ThemeManager.self) private var themeManager
-    let volume: Double
-    let durationMinutes: Int?
-    let comparisonVolume: Double
-    let comparisonLabel: String
-    let isWeightedExercise: Bool
-    let totalReps: Int
-    let setCount: Int
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header row
-            HStack {
-                Text("TODAY")
-                    .font(themeManager.currentTheme.interFont(size: 13, weight: .bold))
-                    .foregroundStyle(themeManager.currentTheme.accent)
-                    .tracking(1.2)
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    if isWeightedExercise {
-                        Text("Volume: \(Formatters.formatVolume(volume)) kg")
-                    } else {
-                        Text("\(totalReps) reps")
-                    }
-                    if let mins = durationMinutes {
-                        Text(".")
-                        Text("\(mins) min")
-                    }
-                }
-                .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(themeManager.currentTheme.muted.opacity(0.3))
-
-            // Divider
-            Rectangle()
-                .fill(themeManager.currentTheme.borderColor)
-                .frame(height: 1)
-
-            // Progress bar (if applicable)
-            if isWeightedExercise && comparisonVolume > 0 {
-                VolumeProgressBar(
-                    currentVolume: volume,
-                    targetVolume: comparisonVolume,
-                    targetLabel: comparisonLabel
-                )
-                .padding(16)
-            } else {
-                // Show set count when no progress bar
-                HStack {
-                    Text("\(setCount) sets")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                        .foregroundStyle(themeManager.currentTheme.secondaryText)
-                    Spacer()
-                }
-                .padding(16)
-            }
-        }
-    }
-}
-
 // MARK: - Comparison Metrics Card
 
 struct ComparisonMetricsCard: View {
@@ -340,7 +272,6 @@ struct ExerciseDetailView: View {
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
     @State private var showChart: Bool = false
-    @State private var showPBConfetti: Bool = false
 
     // Cached data for performance
     @State private var todaySets: [ExerciseSet] = []
@@ -456,8 +387,15 @@ struct ExerciseDetailView: View {
             .font(themeManager.currentTheme.interFont(size: 13))
             .foregroundStyle(themeManager.currentTheme.tertiaryText)
         }
-        .padding(.leading, 8)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(themeManager.currentTheme.cardBackgroundColor)
+        .clipShape(RoundedCorner(radius: 12, corners: [.topLeft, .topRight]))
+        .overlay(
+            RoundedCorner(radius: 12, corners: [.topLeft, .topRight])
+                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
     }
 
     init(exercise: Exercise) {
@@ -552,11 +490,10 @@ struct ExerciseDetailView: View {
                     comparisonMode: comparisonMode,
                     sets: Array(sets)
                 )
-                .padding(.leading, 8)
-                .frame(maxWidth: .infinity)
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
 
             // Today's Sets Section (unified card appearance)
             Section {
@@ -568,11 +505,12 @@ struct ExerciseDetailView: View {
                     comparisonLabel: comparisonLabel,
                     isWeightedExercise: isWeightedExercise,
                     totalReps: todaysTotalReps,
-                    setCount: todaySets.count
+                    setCount: todaySets.count,
+                    hasSetsBelow: !todaySets.isEmpty
                 )
-                .listRowBackground(CardBackground(position: todaySets.isEmpty ? .single : .top))
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
 
                 if !todaySets.isEmpty {
                     // Set rows with card positions
@@ -608,24 +546,27 @@ struct ExerciseDetailView: View {
                 }
             }
 
-            // Historic sets: one Section per day (flat - no nested Lists)
+            // Historic sets: one Section per day (unified card appearance)
             ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
                 let dayGroup = historicDayGroups[groupIndex]
                 Section {
-                    // Header as a row for consistent margins
+                    // Day header with top-rounded corners
                     historicDayHeader(dayGroup: dayGroup)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
 
                     ForEach(dayGroup.sets.indices, id: \.self) { index in
                         let set = dayGroup.sets[index]
+                        let isLast = index == dayGroup.sets.count - 1
                         SetRowView(
                             set: set,
                             setNumber: dayGroup.sets.count - index,
-                            isFirst: index == 0,
-                            isLast: index == dayGroup.sets.count - 1,
+                            isFirst: false,
+                            isLast: isLast,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
-                            onDelete: { deleteSet(set) }
+                            onDelete: { deleteSet(set) },
+                            cardPosition: isLast ? .bottom : .middle
                         )
                     }
                 }
@@ -743,12 +684,6 @@ struct ExerciseDetailView: View {
         }
         .onChange(of: sets) { _, _ in
             updateCachedData()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .pbAchieved)) { _ in
-            showPBConfetti = true
-        }
-        .overlay {
-            PBCelebrationOverlay(isShowing: $showPBConfetti)
         }
     }
 

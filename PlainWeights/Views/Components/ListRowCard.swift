@@ -1,5 +1,5 @@
 //
-//  CardBackground.swift
+//  ListRowCard.swift
 //  PlainWeights
 //
 //  Segmented card background for creating unified card appearance
@@ -8,20 +8,20 @@
 
 import SwiftUI
 
-// MARK: - Card Position
+// MARK: - List Row Card Position
 
-enum CardPosition {
+enum ListRowCardPosition {
     case top
     case middle
     case bottom
     case single
 }
 
-// MARK: - Card Background
+// MARK: - List Row Card Background
 
-struct CardBackground: View {
+struct ListRowCardBackground: View {
     @Environment(ThemeManager.self) private var themeManager
-    let position: CardPosition
+    let position: ListRowCardPosition
 
     var body: some View {
         themeManager.currentTheme.cardBackgroundColor

@@ -22,9 +22,9 @@ struct SetRowView: View {
     let onDelete: () -> Void
     let allSets: [ExerciseSet]?  // Pass sets array to calculate comparisons (nil = no comparison row)
     let showTimer: Bool  // Only show timer on most recent set
-    let cardPosition: CardPosition?  // For unified card appearance with today's sets
+    let cardPosition: ListRowCardPosition?  // For unified card appearance with today's sets
 
-    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: CardPosition? = nil) {
+    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil) {
         self.set = set
         self.setNumber = setNumber
         self.isFirst = isFirst
@@ -47,49 +47,33 @@ struct SetRowView: View {
                     .frame(width: 24, alignment: .leading)
                     .padding(.leading, 22)  // 16pt spacer + 2pt border + 4pt gap
 
-                // Col 2: PB indicator (trophy without circle)
-                if set.isPB {
-                    Image(systemName: "trophy.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(themeManager.currentTheme.pbColor)
-                        .frame(width: 24, alignment: .center)
-                } else {
-                    Spacer()
-                        .frame(width: 24)
-                }
+                // Col 2: Spacer (reserved for future indicators)
+                Spacer()
+                    .frame(width: 24)
 
-                // Weight × Reps with PB underline
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(alignment: .lastTextBaseline, spacing: 0) {
-                        Text(Formatters.formatWeight(set.weight))
-                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
-                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                // Weight × Reps
+                HStack(alignment: .lastTextBaseline, spacing: 0) {
+                    Text(Formatters.formatWeight(set.weight))
+                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
+                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
-                        Text(" kg")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                    Text(" kg")
+                        .font(themeManager.currentTheme.interFont(size: 14))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
 
-                        Text(" × ")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                    Text(" × ")
+                        .font(themeManager.currentTheme.interFont(size: 14))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
 
-                        Text("\(set.reps)")
-                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
-                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                    }
-
-                    // PB underline under weight×reps
-                    if set.isPB {
-                        Rectangle()
-                            .fill(themeManager.currentTheme.pbColor)
-                            .frame(height: 2)
-                    }
+                    Text("\(set.reps)")
+                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
+                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
 
                 Spacer()
@@ -111,8 +95,16 @@ struct SetRowView: View {
         .onTapGesture {
             onTap()
         }
+        .background(cardPosition != nil ? themeManager.currentTheme.cardBackgroundColor : Color.clear)
+        .clipShape(cardPosition != nil ? RoundedCorner(radius: 12, corners: cardCorners) : RoundedCorner(radius: 0, corners: []))
+        .overlay(
+            cardPosition != nil ?
+                RoundedCorner(radius: 12, corners: cardCorners)
+                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                : nil
+        )
         .listRowBackground(rowBackground)
-        .listRowInsets(cardPosition != nil ? EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16) : EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        .listRowInsets(cardPosition != nil ? EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16) : EdgeInsets())
         .listRowSeparator(cardPosition != nil ? .hidden : (isFirst ? .hidden : .visible), edges: .top)
         .listRowSeparator(cardPosition != nil ? .hidden : (isLast ? .hidden : .visible), edges: .bottom)
         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
@@ -127,13 +119,24 @@ struct SetRowView: View {
 
     // MARK: - Helper Methods
 
-    /// Row background - uses CardBackground for today's card, setTypeRowBackground otherwise
+    /// Row background - clear for card mode, setTypeRowBackground otherwise
     @ViewBuilder
     private var rowBackground: some View {
-        if let position = cardPosition {
-            CardBackground(position: position)
+        if cardPosition != nil {
+            Color.clear
         } else {
             setTypeRowBackground
+        }
+    }
+
+    /// Corners to round based on card position
+    private var cardCorners: UIRectCorner {
+        guard let position = cardPosition else { return [] }
+        switch position {
+        case .top: return [.topLeft, .topRight]
+        case .middle: return []
+        case .bottom: return [.bottomLeft, .bottomRight]
+        case .single: return .allCorners
         }
     }
 

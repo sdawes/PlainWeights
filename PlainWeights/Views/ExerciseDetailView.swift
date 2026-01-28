@@ -80,12 +80,6 @@ struct TodaySessionCard: View {
                 .padding(16)
             }
         }
-        .background(themeManager.currentTheme.cardBackgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-        )
     }
 }
 
@@ -564,46 +558,37 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
-            // Today's Sets Section (flat - no nested List)
+            // Today's Sets Section (unified card appearance)
             Section {
-                // TODAY card (only show when there are sets)
-                if !todaySets.isEmpty {
-                    TodaySessionCard(
-                        volume: todaysVolume,
-                        durationMinutes: sessionDurationMinutes,
-                        comparisonVolume: comparisonVolume,
-                        comparisonLabel: comparisonLabel,
-                        isWeightedExercise: isWeightedExercise,
-                        totalReps: todaysTotalReps,
-                        setCount: todaySets.count
-                    )
-                    .padding(.leading, 8)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                }
+                // TODAY card header
+                TodaySessionCard(
+                    volume: todaysVolume,
+                    durationMinutes: sessionDurationMinutes,
+                    comparisonVolume: comparisonVolume,
+                    comparisonLabel: comparisonLabel,
+                    isWeightedExercise: isWeightedExercise,
+                    totalReps: todaysTotalReps,
+                    setCount: todaySets.count
+                )
+                .listRowBackground(CardBackground(position: todaySets.isEmpty ? .single : .top))
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
 
-                if todaySets.isEmpty {
-                    Text("No sets logged yet")
-                        .font(themeManager.currentTheme.subheadlineFont)
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 24)
-                        .padding(.leading, 8)
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                } else {
-                    // Set rows directly in outer List
+                if !todaySets.isEmpty {
+                    // Set rows with card positions
                     ForEach(todaySets.indices, id: \.self) { index in
                         let set = todaySets[index]
+                        let isLast = index == todaySets.count - 1
                         SetRowView(
                             set: set,
                             setNumber: todaySets.count - index,
-                            isFirst: index == 0,
-                            isLast: index == todaySets.count - 1,
+                            isFirst: false,
+                            isLast: isLast,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
                             allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
-                            showTimer: index == 0
+                            showTimer: index == 0,
+                            cardPosition: isLast ? .bottom : .middle
                         )
                     }
                 }

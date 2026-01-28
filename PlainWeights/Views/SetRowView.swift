@@ -22,8 +22,9 @@ struct SetRowView: View {
     let onDelete: () -> Void
     let allSets: [ExerciseSet]?  // Pass sets array to calculate comparisons (nil = no comparison row)
     let showTimer: Bool  // Only show timer on most recent set
+    let cardPosition: CardPosition?  // For unified card appearance with today's sets
 
-    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false) {
+    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: CardPosition? = nil) {
         self.set = set
         self.setNumber = setNumber
         self.isFirst = isFirst
@@ -32,6 +33,7 @@ struct SetRowView: View {
         self.onDelete = onDelete
         self.allSets = allSets
         self.showTimer = showTimer
+        self.cardPosition = cardPosition
     }
 
     var body: some View {
@@ -109,10 +111,10 @@ struct SetRowView: View {
         .onTapGesture {
             onTap()
         }
-        .listRowBackground(setTypeRowBackground)
-        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-        .listRowSeparator(isFirst ? .hidden : .visible, edges: .top)
-        .listRowSeparator(isLast ? .hidden : .visible, edges: .bottom)
+        .listRowBackground(rowBackground)
+        .listRowInsets(cardPosition != nil ? EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16) : EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        .listRowSeparator(cardPosition != nil ? .hidden : (isFirst ? .hidden : .visible), edges: .top)
+        .listRowSeparator(cardPosition != nil ? .hidden : (isLast ? .hidden : .visible), edges: .bottom)
         .listRowSeparatorTint(themeManager.currentTheme.borderColor)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
@@ -124,6 +126,16 @@ struct SetRowView: View {
     }
 
     // MARK: - Helper Methods
+
+    /// Row background - uses CardBackground for today's card, setTypeRowBackground otherwise
+    @ViewBuilder
+    private var rowBackground: some View {
+        if let position = cardPosition {
+            CardBackground(position: position)
+        } else {
+            setTypeRowBackground
+        }
+    }
 
     /// Color for set number based on set type
     private var setNumberColor: Color {

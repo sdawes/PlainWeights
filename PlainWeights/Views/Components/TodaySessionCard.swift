@@ -24,26 +24,37 @@ struct TodaySessionCard: View {
             // Header row
             HStack {
                 Text("Today's Sets")
-                    .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                    .foregroundStyle(themeManager.currentTheme.secondaryText)
 
                 Spacer()
 
                 // Only show stats when sets exist
                 if setCount > 0 {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         if isWeightedExercise {
-                            Text("Volume: \(Formatters.formatVolume(volume)) kg")
+                            HStack(spacing: 2) {
+                                Text(Formatters.formatVolume(volume))
+                                    .font(themeManager.currentTheme.dataFont(size: 13, weight: .semibold))
+                                Text("kg")
+                                    .font(themeManager.currentTheme.dataFont(size: 13))
+                            }
                         } else {
-                            Text("\(totalReps) reps")
+                            HStack(spacing: 2) {
+                                Text("\(totalReps)")
+                                    .font(themeManager.currentTheme.dataFont(size: 13, weight: .semibold))
+                                Text("reps")
+                                    .font(themeManager.currentTheme.dataFont(size: 13))
+                            }
                         }
                         if let mins = durationMinutes {
-                            Text(".")
+                            Text("•")
                             Text("\(mins) min")
+                                .font(themeManager.currentTheme.dataFont(size: 13))
                         }
                     }
-                    .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    .font(themeManager.currentTheme.interFont(size: 13))
+                    .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
             }
             .padding(.horizontal, 16)

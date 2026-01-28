@@ -94,6 +94,62 @@ The whole point of PlainWeights is to strip away all unnecessary complexity and 
 - **Swift Charts**: For data visualization
 - **Minimum iOS Target**: iOS 17+ (to use latest SwiftData and SwiftUI features)
 
+### SwiftUI List Unified Card Pattern - CRITICAL
+
+When creating a unified card appearance across multiple List rows (e.g., header + set rows that look like one card), follow these rules:
+
+#### The Problem
+SwiftUI List enforces a **default minimum row height (~44pt)**. When content is shorter, the List **centers** it vertically, creating gaps between rows.
+
+#### The Solution
+
+1. **Use structs, NOT functions** for custom row views:
+   ```swift
+   // ✅ CORRECT - List recognizes this as a stable row component
+   struct HistoricDayHeader: View { ... }
+
+   // ❌ WRONG - List may add extra spacing/padding
+   private func historicDayHeader() -> some View { ... }
+   ```
+
+2. **Override the default minimum row height** on the List:
+   ```swift
+   List {
+       // rows...
+   }
+   .environment(\.defaultMinListRowHeight, 1)  // Allow rows to size naturally
+   ```
+
+3. **Use partial border shapes** to connect rows visually:
+   - `TopOpenBorder` - draws top + left + right edges (no bottom)
+   - `SidesOnlyBorder` - draws left + right edges only
+   - `BottomOpenBorder` - draws bottom + left + right edges (no top)
+
+4. **Standard row modifiers for card appearance**:
+   ```swift
+   MyCardRow()
+       .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+       .listRowSeparator(.hidden)
+       .listRowBackground(Color.clear)
+   ```
+
+#### Example: Unified Card Structure
+```
+┌─ Header (TopOpenBorder) ─────────┐
+│ Tuesday 27 Jan         164 kg    │
+├──────────────────────────────────┤  ← Internal divider
+│ Set 2: 12 kg × 7 (SidesOnlyBorder)│
+├──────────────────────────────────┤  ← Internal divider
+│ Set 1: 10 kg × 8 (BottomOpenBorder)│
+└──────────────────────────────────┘
+```
+
+#### Key Files
+- `ListRowCard.swift` - Border shapes (TopOpenBorder, SidesOnlyBorder, BottomOpenBorder)
+- `TodaySessionCard.swift` - Example of working unified card header
+- `HistoricDayHeader.swift` - Historic day header using same pattern
+- `SetRowView.swift` - Set rows with `cardPosition` parameter for border selection
+
 ### UIKit Policy - CRITICAL
 **NEVER use UIKit unless there is absolutely no SwiftUI alternative to achieve the desired result.**
 

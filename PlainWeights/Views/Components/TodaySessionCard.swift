@@ -71,12 +71,27 @@ struct TodaySessionCard: View {
                 }
                 .padding(16)
             }
+
+            // Bottom divider (when sets follow below)
+            if hasSetsBelow {
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(height: 1)
+            }
         }
         .background(themeManager.currentTheme.cardBackgroundColor)
         .clipShape(RoundedCorner(radius: 12, corners: hasSetsBelow ? [.topLeft, .topRight] : .allCorners))
-        .overlay(
-            RoundedCorner(radius: 12, corners: hasSetsBelow ? [.topLeft, .topRight] : .allCorners)
+        .overlay(borderOverlay)
+    }
+
+    @ViewBuilder
+    private var borderOverlay: some View {
+        if hasSetsBelow {
+            TopOpenBorder(radius: 12)
                 .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-        )
+        } else {
+            RoundedCorner(radius: 12, corners: .allCorners)
+                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+        }
     }
 }

@@ -353,51 +353,6 @@ struct ExerciseDetailView: View {
         return minutes > 0 ? minutes : nil
     }
 
-    // MARK: - Section Headers (for flattened List structure)
-
-    /// Header for historic day sections - subtle styling
-    @ViewBuilder
-    private func historicDayHeader(dayGroup: ExerciseDataGrouper.DayGroup) -> some View {
-        let isWeightedDay = dayGroup.sets.filter { !$0.isWarmUp && !$0.isBonus }.contains { $0.weight > 0 }
-        let volume = ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)
-        let totalReps = dayGroup.sets.reduce(0) { $0 + $1.reps }
-
-        HStack(alignment: .firstTextBaseline) {
-            Text(Formatters.formatFullDayHeader(dayGroup.date))
-                .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.secondaryText)
-
-            Spacer()
-
-            HStack(spacing: 6) {
-                if isWeightedDay {
-                    Text("\(Formatters.formatVolume(volume)) kg")
-                        .font(themeManager.currentTheme.dataFont(size: 13))
-                } else {
-                    Text("\(totalReps) reps")
-                        .font(themeManager.currentTheme.dataFont(size: 13))
-                }
-
-                if let duration = calculateSessionDuration(for: dayGroup.sets) {
-                    Text("•")
-                    Text("\(duration) min")
-                        .font(themeManager.currentTheme.dataFont(size: 13))
-                }
-            }
-            .font(themeManager.currentTheme.interFont(size: 13))
-            .foregroundStyle(themeManager.currentTheme.tertiaryText)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(themeManager.currentTheme.cardBackgroundColor)
-        .clipShape(RoundedCorner(radius: 12, corners: [.topLeft, .topRight]))
-        .overlay(
-            RoundedCorner(radius: 12, corners: [.topLeft, .topRight])
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-        )
-    }
-
     init(exercise: Exercise) {
         self.exercise = exercise
         let id = exercise.persistentModelID
@@ -526,7 +481,8 @@ struct ExerciseDetailView: View {
                             onDelete: { deleteSet(set) },
                             allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
                             showTimer: index == 0,
-                            cardPosition: isLast ? .bottom : .middle
+                            cardPosition: isLast ? .bottom : .middle,
+                            isFirstInCard: index == 0
                         )
                     }
                 }
@@ -550,11 +506,14 @@ struct ExerciseDetailView: View {
             ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
                 let dayGroup = historicDayGroups[groupIndex]
                 Section {
-                    // Day header with top-rounded corners
-                    historicDayHeader(dayGroup: dayGroup)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
+                    // Day header (must be struct for List spacing to work correctly)
+                    HistoricDayHeader(
+                        dayGroup: dayGroup,
+                        sessionDurationMinutes: calculateSessionDuration(for: dayGroup.sets)
+                    )
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
 
                     ForEach(dayGroup.sets.indices, id: \.self) { index in
                         let set = dayGroup.sets[index]
@@ -566,7 +525,8 @@ struct ExerciseDetailView: View {
                             isLast: isLast,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            cardPosition: isLast ? .bottom : .middle
+                            cardPosition: isLast ? .bottom : .middle,
+                            isFirstInCard: index == 0
                         )
                     }
                 }
@@ -575,6 +535,7 @@ struct ExerciseDetailView: View {
         }
         .listStyle(.plain)
         .listSectionSpacing(16)
+        .environment(\.defaultMinListRowHeight, 1)  // Allow rows to be as short as needed
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)

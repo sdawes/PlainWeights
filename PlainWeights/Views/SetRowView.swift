@@ -23,8 +23,9 @@ struct SetRowView: View {
     let allSets: [ExerciseSet]?  // Pass sets array to calculate comparisons (nil = no comparison row)
     let showTimer: Bool  // Only show timer on most recent set
     let cardPosition: ListRowCardPosition?  // For unified card appearance with today's sets
+    let isFirstInCard: Bool  // True for first set after header (no top divider needed)
 
-    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil) {
+    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true) {
         self.set = set
         self.setNumber = setNumber
         self.isFirst = isFirst
@@ -34,62 +35,72 @@ struct SetRowView: View {
         self.allSets = allSets
         self.showTimer = showTimer
         self.cardPosition = cardPosition
+        self.isFirstInCard = isFirstInCard
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Content columns
-            HStack(spacing: 0) {
-                // Col 1: Set number (left-aligned, positioned after the set type border)
-                Text("\(setNumber)")
-                    .font(themeManager.currentTheme.dataFont(size: 17, weight: .medium))
-                    .foregroundStyle(setNumberColor)
-                    .frame(width: 24, alignment: .leading)
-                    .padding(.leading, 22)  // 16pt spacer + 2pt border + 4pt gap
-
-                // Col 2: Spacer (reserved for future indicators)
-                Spacer()
-                    .frame(width: 24)
-
-                // Weight × Reps
-                HStack(alignment: .lastTextBaseline, spacing: 0) {
-                    Text(Formatters.formatWeight(set.weight))
-                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
-                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-
-                    Text(" kg")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-
-                    Text(" × ")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-
-                    Text("\(set.reps)")
-                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
-                        .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                }
-
-                Spacer()
-
-                // Badges (immediately left of timer/timestamp)
-                badgesView
-                    .frame(minWidth: 55, alignment: .trailing)
-                    .padding(.trailing, 4)
-
-                // Col 9: Timer or Timestamp
-                restTimeView
-                    .frame(width: 55, alignment: .trailing)
-                    .lineLimit(1)
+        VStack(spacing: 0) {
+            // Divider at top (between rows, not first row after header)
+            if cardPosition != nil && !isFirstInCard {
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(height: 1)
             }
-            .padding(.vertical, 12)
-            .padding(.trailing, 16)  // Match right side spacing
+
+            HStack(spacing: 0) {
+                // Content columns
+                HStack(spacing: 0) {
+                    // Col 1: Set number (left-aligned, positioned after the set type border)
+                    Text("\(setNumber)")
+                        .font(themeManager.currentTheme.dataFont(size: 17, weight: .medium))
+                        .foregroundStyle(setNumberColor)
+                        .frame(width: 24, alignment: .leading)
+                        .padding(.leading, 22)  // 16pt spacer + 2pt border + 4pt gap
+
+                    // Col 2: Spacer (reserved for future indicators)
+                    Spacer()
+                        .frame(width: 24)
+
+                    // Weight × Reps
+                    HStack(alignment: .lastTextBaseline, spacing: 0) {
+                        Text(Formatters.formatWeight(set.weight))
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
+                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+
+                        Text(" kg")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+
+                        Text(" × ")
+                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+
+                        Text("\(set.reps)")
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
+                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+
+                    Spacer()
+
+                    // Badges (immediately left of timer/timestamp)
+                    badgesView
+                        .frame(minWidth: 55, alignment: .trailing)
+                        .padding(.trailing, 4)
+
+                    // Col 9: Timer or Timestamp
+                    restTimeView
+                        .frame(width: 55, alignment: .trailing)
+                        .lineLimit(1)
+                }
+                .padding(.vertical, 12)
+                .padding(.trailing, 16)  // Match right side spacing
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -97,12 +108,7 @@ struct SetRowView: View {
         }
         .background(cardPosition != nil ? themeManager.currentTheme.cardBackgroundColor : Color.clear)
         .clipShape(cardPosition != nil ? RoundedCorner(radius: 12, corners: cardCorners) : RoundedCorner(radius: 0, corners: []))
-        .overlay(
-            cardPosition != nil ?
-                RoundedCorner(radius: 12, corners: cardCorners)
-                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-                : nil
-        )
+        .overlay(cardBorderOverlay)
         .listRowBackground(rowBackground)
         .listRowInsets(cardPosition != nil ? EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16) : EdgeInsets())
         .listRowSeparator(cardPosition != nil ? .hidden : (isFirst ? .hidden : .visible), edges: .top)
@@ -137,6 +143,27 @@ struct SetRowView: View {
         case .middle: return []
         case .bottom: return [.bottomLeft, .bottomRight]
         case .single: return .allCorners
+        }
+    }
+
+    /// Border overlay based on card position - draws only the edges needed to connect with adjacent rows
+    @ViewBuilder
+    private var cardBorderOverlay: some View {
+        if let position = cardPosition {
+            switch position {
+            case .top:
+                TopOpenBorder(radius: 12)
+                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+            case .middle:
+                SidesOnlyBorder()
+                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+            case .bottom:
+                BottomOpenBorder(radius: 12)
+                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+            case .single:
+                RoundedCorner(radius: 12, corners: .allCorners)
+                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+            }
         }
     }
 

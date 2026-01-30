@@ -3,10 +3,10 @@
 //  PlainWeights
 //
 //  Created by Claude on 25/09/2025.
-//  Last Updated: 30 Jan 2026 at 16:00:34
+//  Last Updated: 30 Jan 2026 at 18:00:36
 //
 //  Real Gym Data
-//  67 exercises, 67 workout sessions (22 Sep 2025 - 29 Jan 2026)
+//  67 exercises, 68 workout sessions (22 Sep 2025 - 30 Jan 2026)
 
 #if DEBUG
 import Foundation
@@ -19,7 +19,7 @@ class TestData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData")
-        logger.info("Generating test data (Real gym data - 67 exercises, 67 sessions)...")
+        logger.info("Generating test data (Real gym data - 67 exercises, 68 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -31,7 +31,7 @@ class TestData {
     // MARK: - Data Generation
 
     private static func generateGymData(modelContext: ModelContext) {
-        // EXPORT DATE: 30 Jan 2026 at 16:00:34
+        // EXPORT DATE: 30 Jan 2026 at 18:00:36
 
         // Helper function to create timestamps
         func date(_ year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int, _ second: Int = 0) -> Date {
@@ -86,7 +86,7 @@ class TestData {
     (name: "Ball tricep pushdown", tags: ["Tricep"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 17, 33, 41)),
     (name: "Straight arm cable pulldown", tags: ["Back"], note: "8 is 45kg 9 is 50.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 22, 15, 30, 32)),
     (name: "Incline Dumbbell Chest Press", tags: ["Chest"], note: "Include the raise as one", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 16, 59, 54)),
-    (name: "Press ups", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 29, 16, 50, 29)),
+    (name: "Press ups", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 30, 17, 54, 29)),
     (name: "Chest Cable Flys", tags: ["Chest"], note: "3 is 17.5 and 4 is 23", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 12, 29, 16, 49, 11)),
     (name: "Tricep rope pushdown", tags: ["Triceps"], note: "7 - 39.5, , 8 - 45", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 28, 16, 29, 44)),
     (name: "Lat pull down", tags: ["Back"], note: "6- 47.5, 7- 48.5, 8 - 54, 9 - 59.5kg, 10 - 65kg", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 29, 17, 4, 5)),
@@ -128,7 +128,7 @@ class TestData {
         // Helper function to add a working set
         func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {
             guard let ex = exercises[exercise] else { return }
-            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: false, isDropSet: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)
+            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: false, isDropSet: false, isAssisted: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)
             set.restSeconds = restSeconds
             modelContext.insert(set)
         }
@@ -136,7 +136,7 @@ class TestData {
         // Helper function to add a warm-up set
         func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0) {
             guard let ex = exercises[exercise] else { return }
-            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, isBonus: false, isDropSet: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: false, exercise: ex)
+            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, isBonus: false, isDropSet: false, isAssisted: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: false, exercise: ex)
             set.restSeconds = restSeconds
             modelContext.insert(set)
         }
@@ -144,7 +144,7 @@ class TestData {
         // Helper function to add a bonus set (excluded from metrics)
         func addBonusSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0) {
             guard let ex = exercises[exercise] else { return }
-            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: true, isDropSet: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: false, exercise: ex)
+            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: true, isDropSet: false, isAssisted: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: false, exercise: ex)
             set.restSeconds = restSeconds
             modelContext.insert(set)
         }
@@ -152,9 +152,18 @@ class TestData {
         // Helper function to add a drop set
         func addDropSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {
             guard let ex = exercises[exercise] else { return }
-            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: false, isDropSet: true, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)
+            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: false, isDropSet: true, isAssisted: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)
             set.restSeconds = restSeconds
             modelContext.insert(set)
+        }
+
+        // Helper function to add an assisted set
+        func addAssistedSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {
+            guard let ex = exercises[exercise] else { return }
+            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isBonus: false, isDropSet: false, isAssisted: true, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)
+            set.restSeconds = restSeconds
+            modelContext.insert(set)
+
         }
 
         // SESSION 1: 2025-09-22 17:00:00
@@ -1604,6 +1613,7 @@ class TestData {
         // Lu Raise: 1 sets
         addSet(exercise: "Lu Raise", weight: 5.0, reps: 10, timestamp: date(2026, 1, 7, 17, 38, 19), restSeconds: 141, isPB: true)
         // Front lateral raise plates: 1 sets
+
         addSet(exercise: "Front lateral raise plates", weight: 10.0, reps: 10, timestamp: date(2026, 1, 7, 17, 39, 1), restSeconds: 105, isPB: true)
         // Lu Raise: 1 sets
         addSet(exercise: "Lu Raise", weight: 5.0, reps: 10, timestamp: date(2026, 1, 7, 17, 40, 40))
@@ -1788,7 +1798,7 @@ class TestData {
         // Barbell shoulder press: 1 sets
         addSet(exercise: "Barbell shoulder press", weight: 20.0, reps: 10, timestamp: date(2026, 1, 29, 16, 48, 44))
         // Press ups: 1 sets
-        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2026, 1, 29, 16, 50, 29))
+        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2026, 1, 29, 16, 50, 29), restSeconds: 180)
         // Lat pull down: 3 sets
         addSet(exercise: "Lat pull down", weight: 65.0, reps: 11, timestamp: date(2026, 1, 29, 16, 55, 18), restSeconds: 126)
         addSet(exercise: "Lat pull down", weight: 65.0, reps: 11, timestamp: date(2026, 1, 29, 16, 57, 25), restSeconds: 180)
@@ -1806,6 +1816,18 @@ class TestData {
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 14, timestamp: date(2026, 1, 29, 17, 18, 47), restSeconds: 79)
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 10, timestamp: date(2026, 1, 29, 17, 20, 6), restSeconds: 115)
         addDropSet(exercise: "Bicep rope curls", weight: 45.0, reps: 10, timestamp: date(2026, 1, 29, 17, 22, 2), restSeconds: 180)
+
+        // SESSION 68: 2026-01-30 17:17:57
+        // Press ups: 9 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 30, 17, 17, 57), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 12, timestamp: date(2026, 1, 30, 17, 21, 5), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 13, timestamp: date(2026, 1, 30, 17, 24, 36), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 30, 17, 28, 32), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 13, timestamp: date(2026, 1, 30, 17, 33, 26), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 14, timestamp: date(2026, 1, 30, 17, 37, 56), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 30, 17, 42, 47), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 30, 17, 50, 13), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 12, timestamp: date(2026, 1, 30, 17, 54, 29), restSeconds: 180)
 
         // Save all changes
         do {

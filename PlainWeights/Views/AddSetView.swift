@@ -14,6 +14,7 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
     case normal = "Normal"
     case warmup = "Warm-up"
     case dropset = "Drop Set"
+    case assisted = "Assisted"
     case bonus = "Bonus"
     case pause = "Pause Rep"
     case timed = "Timed"
@@ -95,6 +96,7 @@ struct AddSetView: View {
         if set.isWarmUp { return .warmup }
         if set.isBonus { return .bonus }
         if set.isDropSet { return .dropset }
+        if set.isAssisted { return .assisted }
         if set.isPauseAtTop { return .pause }
         if set.isTimedSet { return .timed }
         return .normal
@@ -212,6 +214,7 @@ struct AddSetView: View {
         let isWarmUp = selectedType == .warmup
         let isBonus = selectedType == .bonus
         let isDropSet = selectedType == .dropset
+        let isAssisted = selectedType == .assisted
         let isPauseAtTop = selectedType == .pause
         let isTimedSet = selectedType == .timed
 
@@ -225,6 +228,7 @@ struct AddSetView: View {
                     isWarmUp: isWarmUp,
                     isBonus: isBonus,
                     isDropSet: isDropSet,
+                    isAssisted: isAssisted,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
                     tempoSeconds: 0,
@@ -238,6 +242,7 @@ struct AddSetView: View {
                     isWarmUp: isWarmUp,
                     isBonus: isBonus,
                     isDropSet: isDropSet,
+                    isAssisted: isAssisted,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
                     tempoSeconds: 0,

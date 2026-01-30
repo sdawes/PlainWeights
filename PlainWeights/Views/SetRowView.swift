@@ -183,6 +183,7 @@ struct SetRowView: View {
         if set.isWarmUp { return .orange }
         if set.isBonus { return .green }
         if set.isDropSet { return .blue }
+        if set.isAssisted { return .red }
         if set.isTimedSet { return .blue }
         if set.isPauseAtTop { return .indigo }
         return .secondary
@@ -209,6 +210,7 @@ struct SetRowView: View {
         if set.isWarmUp { return .orange }
         if set.isBonus { return .green }
         if set.isDropSet { return .blue }
+        if set.isAssisted { return .red }
         if set.isTimedSet { return .blue }
         if set.isPauseAtTop { return .indigo }
         return nil
@@ -249,6 +251,7 @@ struct SetRowView: View {
         if set.isWarmUp { badges.append("warmup") }
         if set.isBonus { badges.append("bonus") }
         if set.isDropSet { badges.append("dropset") }
+        if set.isAssisted { badges.append("assisted") }
         if set.isPauseAtTop { badges.append("pause") }
         if set.isTimedSet { badges.append("timed") }
         return badges
@@ -281,6 +284,14 @@ struct SetRowView: View {
                     .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.blue)
+        case "assisted":
+            HStack(spacing: 4) {
+                Image(systemName: "hand.raised.fill")
+                    .font(.system(size: 14))
+                Text("Assisted")
+                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
+            }
+            .foregroundStyle(.red)
         case "pause":
             HStack(spacing: 4) {
                 Image(systemName: "pause.fill")

@@ -37,6 +37,7 @@ enum ExerciseSetService {
     ///   - isWarmUp: Whether this is a warm-up set
     ///   - isBonus: Whether this is a bonus set (excluded from metrics like warm-up)
     ///   - isDropSet: Whether this is a drop set
+    ///   - isAssisted: Whether this is an assisted set (e.g., spotter help)
     ///   - isPauseAtTop: Whether this is a pause at top set
     ///   - isTimedSet: Whether this is a timed/tempo set
     ///   - tempoSeconds: Tempo duration in seconds (only used when isTimedSet is true)
@@ -48,6 +49,7 @@ enum ExerciseSetService {
         isWarmUp: Bool = false,
         isBonus: Bool = false,
         isDropSet: Bool = false,
+        isAssisted: Bool = false,
         isPauseAtTop: Bool = false,
         isTimedSet: Bool = false,
         tempoSeconds: Int = 0,
@@ -70,6 +72,7 @@ enum ExerciseSetService {
             isWarmUp: isWarmUp,
             isBonus: isBonus,
             isDropSet: isDropSet,
+            isAssisted: isAssisted,
             isPauseAtTop: isPauseAtTop,
             isTimedSet: isTimedSet,
             tempoSeconds: tempoSeconds,
@@ -201,6 +204,7 @@ enum ExerciseSetService {
     ///   - isWarmUp: Whether this is a warm-up set
     ///   - isBonus: Whether this is a bonus set (excluded from metrics like warm-up)
     ///   - isDropSet: Whether this is a drop set
+    ///   - isAssisted: Whether this is an assisted set (e.g., spotter help)
     ///   - isPauseAtTop: Whether this is a pause at top set
     ///   - isTimedSet: Whether this is a timed/tempo set
     ///   - tempoSeconds: Tempo duration in seconds (only used when isTimedSet is true)
@@ -212,6 +216,7 @@ enum ExerciseSetService {
         isWarmUp: Bool,
         isBonus: Bool,
         isDropSet: Bool,
+        isAssisted: Bool,
         isPauseAtTop: Bool,
         isTimedSet: Bool,
         tempoSeconds: Int,
@@ -232,6 +237,7 @@ enum ExerciseSetService {
         set.isWarmUp = isWarmUp
         set.isBonus = isBonus
         set.isDropSet = isDropSet
+        set.isAssisted = isAssisted
         set.isPauseAtTop = isPauseAtTop
         set.isTimedSet = isTimedSet
         set.tempoSeconds = tempoSeconds

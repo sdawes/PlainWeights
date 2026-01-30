@@ -16,6 +16,7 @@ final class ExerciseSet {
     var isWarmUp: Bool = false       // flag to exclude from performance calculations
     var isBonus: Bool = false        // flag for bonus/extra sets excluded from metrics (like warm-up)
     var isDropSet: Bool = false      // flag to indicate drop set (included in performance calculations)
+    var isAssisted: Bool = false     // flag to indicate assisted set (e.g., spotter help)
     var isPauseAtTop: Bool = false   // flag to indicate pause at top technique
     var isTimedSet: Bool = false     // flag to indicate timed/tempo set (slow controlled movement)
     var tempoSeconds: Int = 0        // tempo duration in seconds (only used when isTimedSet is true)
@@ -23,13 +24,14 @@ final class ExerciseSet {
     var restSeconds: Int?            // seconds rested after this set (nil for first set or not yet captured)
     var exercise: Exercise?  // parent (optional to handle cascade delete properly)
 
-    init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isBonus: Bool = false, isDropSet: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, exercise: Exercise) {
+    init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isBonus: Bool = false, isDropSet: Bool = false, isAssisted: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, exercise: Exercise) {
         self.timestamp = timestamp
         self.weight = weight
         self.reps = reps
         self.isWarmUp = isWarmUp
         self.isBonus = isBonus
         self.isDropSet = isDropSet
+        self.isAssisted = isAssisted
         self.isPauseAtTop = isPauseAtTop
         self.isTimedSet = isTimedSet
         self.tempoSeconds = tempoSeconds

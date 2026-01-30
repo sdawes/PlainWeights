@@ -395,6 +395,7 @@ struct ExerciseDetailView: View {
     }
 
     var body: some View {
+        ScrollViewReader { scrollProxy in
         List {
             // Title section
             Section {
@@ -409,6 +410,7 @@ struct ExerciseDetailView: View {
                 .padding(.leading, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .id("top")
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -605,6 +607,9 @@ struct ExerciseDetailView: View {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         showChart.toggle()
+                        if showChart {
+                            scrollProxy.scrollTo("top", anchor: .top)
+                        }
                     }
                 }) {
                     Image(systemName: "chart.line.uptrend.xyaxis")
@@ -679,6 +684,7 @@ struct ExerciseDetailView: View {
         .onChange(of: sets) { _, _ in
             updateCachedData()
         }
+        } // ScrollViewReader
     }
 
     // MARK: - Data Management

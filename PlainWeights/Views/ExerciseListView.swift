@@ -118,30 +118,33 @@ struct FilteredExerciseListView: View {
             } else {
                 Section {
                     ForEach(Array(exercises.enumerated()), id: \.element.persistentModelID) { index, exercise in
-                        NavigationLink(value: exercise) {
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text(exercise.name)
-                                    .font(themeManager.currentTheme.interFont(size: 18, weight: .semibold))
-                                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                                if !exercise.tags.isEmpty {
-                                    TagPillsRow(tags: exercise.tags)
-                                        .padding(.top, 6)
-                                }
-                                HStack(spacing: 4) {
-                                    if let color = stalenessColor(for: exercise) {
-                                        Image(systemName: "exclamationmark.circle")
-                                            .font(.system(size: 14))
-                                            .foregroundStyle(color)
-                                    }
-                                    Text("Last: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
-                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
-                                }
-                                .padding(.top, 10)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(exercise.name)
+                                .font(themeManager.currentTheme.interFont(size: 18, weight: .semibold))
+                                .foregroundStyle(themeManager.currentTheme.primaryText)
+                            if !exercise.tags.isEmpty {
+                                TagPillsRow(tags: exercise.tags)
+                                    .padding(.top, 6)
                             }
-                            .padding(.leading, 8)
+                            HStack(spacing: 4) {
+                                if let color = stalenessColor(for: exercise) {
+                                    Image(systemName: "exclamationmark.circle")
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(color)
+                                }
+                                Text("Last: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
+                                    .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                                    .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+                            }
+                            .padding(.top, 10)
                         }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        .padding(.leading, 8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            navigationPath.append(exercise)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
                                 exerciseToDelete = exercise
                             } label: {

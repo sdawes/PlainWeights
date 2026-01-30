@@ -107,7 +107,7 @@ struct FilteredExerciseListView: View {
     var body: some View {
         List {
             // Exercises section
-            if exercises.isEmpty {
+            if exercises.isEmpty && searchText.isEmpty {
                 Section {
                     EmptyExercisesView(
                         onAddExercise: { showingAddExercise = true }

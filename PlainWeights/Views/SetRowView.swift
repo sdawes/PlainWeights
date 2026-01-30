@@ -59,9 +59,17 @@ struct SetRowView: View {
                         .frame(width: 24, alignment: .leading)
                         .padding(.leading, 22)  // 16pt spacer + 2pt border + 4pt gap
 
-                    // Col 2: Spacer (reserved for future indicators)
-                    Spacer()
-                        .frame(width: 24)
+                    // Col 2: PB indicator or spacer
+                    if set.isPB {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.red)
+                            .frame(width: 24, alignment: .leading)
+                            .offset(x: -1)
+                    } else {
+                        Spacer()
+                            .frame(width: 24)
+                    }
 
                     // Weight × Reps
                     HStack(alignment: .lastTextBaseline, spacing: 0) {

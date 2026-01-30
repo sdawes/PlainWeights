@@ -20,6 +20,7 @@ struct ChartDataPoint: Identifiable {
     let maxReps: Int
     let normalizedWeight: Double
     let normalizedReps: Double
+    let isPB: Bool
 }
 
 // MARK: - Inline Progress Chart
@@ -46,12 +47,13 @@ struct InlineProgressChart: View {
             calendar.startOfDay(for: set.timestamp)
         }
 
-        // Calculate max weight and reps per day
-        var dataPoints: [(date: Date, maxWeight: Double, maxReps: Int)] = []
+        // Calculate max weight and reps per day, and check for PB
+        var dataPoints: [(date: Date, maxWeight: Double, maxReps: Int, isPB: Bool)] = []
         for (date, daySets) in grouped {
             let maxWeight = daySets.map { $0.weight }.max() ?? 0
             let maxReps = daySets.map { $0.reps }.max() ?? 0
-            dataPoints.append((date, maxWeight, maxReps))
+            let hasPB = daySets.contains { $0.isPB }
+            dataPoints.append((date, maxWeight, maxReps, hasPB))
         }
 
         // Sort by date ascending
@@ -82,7 +84,8 @@ struct InlineProgressChart: View {
                 maxWeight: point.maxWeight,
                 maxReps: point.maxReps,
                 normalizedWeight: (point.maxWeight - adjustedWeightMin) / weightRange,
-                normalizedReps: (Double(point.maxReps) - adjustedRepsMin) / repsRange
+                normalizedReps: (Double(point.maxReps) - adjustedRepsMin) / repsRange,
+                isPB: point.isPB
             )
         }
     }
@@ -347,6 +350,19 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
                 .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
                 .interpolationMethod(.monotone)
+            }
+
+            // PB star indicator
+            if point.isPB {
+                PointMark(
+                    x: .value("Index", point.index),
+                    y: .value("PB", isRepsOnly ? point.normalizedReps : point.normalizedWeight)
+                )
+                .symbol {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.red)
+                }
             }
         }
         .chartXAxis {

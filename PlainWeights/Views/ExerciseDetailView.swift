@@ -232,7 +232,7 @@ struct ComparisonMetricsCard: View {
     private func comparisonCell(direction: ProgressTracker.PRDirection?, value: Double?, isReps: Bool = false) -> some View {
         Group {
             if hasTodaySets, let direction = direction, let value = value, direction != .same {
-                // Colored background with white text - LEFT ALIGNED
+                // Up or down - colored background with white text
                 let displayValue = isReps ? "\(Int(value))" : Formatters.formatWeight(value)
                 let prefix = direction == .up ? "+" : ""
                 HStack {
@@ -245,7 +245,7 @@ struct ComparisonMetricsCard: View {
                 .frame(height: 40)
                 .background(direction == .up ? Color.green : Color.red)
             } else {
-                // No change or no data - show dash - LEFT ALIGNED
+                // No data - show dash
                 HStack {
                     Text("—")
                         .font(themeManager.currentTheme.interFont(size: 14))

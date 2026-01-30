@@ -98,10 +98,12 @@ struct SetRowView: View {
 
                     Spacer()
 
-                    // Badges (immediately left of timer/timestamp)
-                    badgesView
-                        .frame(minWidth: 55, alignment: .trailing)
-                        .padding(.trailing, 4)
+                    // Badges (immediately left of timer/timestamp) - only reserve space when badge exists
+                    if !userBadges.isEmpty {
+                        badgesView
+                            .frame(minWidth: 55, alignment: .trailing)
+                            .padding(.trailing, 4)
+                    }
 
                     // Col 9: Timer or Timestamp
                     restTimeView
@@ -183,8 +185,8 @@ struct SetRowView: View {
         if set.isWarmUp { return .orange }
         if set.isBonus { return .green }
         if set.isDropSet { return .blue }
-        if set.isAssisted { return .red }
-        if set.isTimedSet { return .blue }
+        if set.isAssisted { return Color(red: 1.0, green: 0.2, blue: 0.5) }
+        if set.isTimedSet { return .gray }
         if set.isPauseAtTop { return .indigo }
         return .secondary
     }
@@ -210,8 +212,8 @@ struct SetRowView: View {
         if set.isWarmUp { return .orange }
         if set.isBonus { return .green }
         if set.isDropSet { return .blue }
-        if set.isAssisted { return .red }
-        if set.isTimedSet { return .blue }
+        if set.isAssisted { return Color(red: 1.0, green: 0.2, blue: 0.5) }
+        if set.isTimedSet { return .gray }
         if set.isPauseAtTop { return .indigo }
         return nil
     }
@@ -221,12 +223,13 @@ struct SetRowView: View {
     @ViewBuilder
     private var setTypeTintBackground: some View {
         if let tintColor = setTypeTintColor {
+            let bgOpacity = set.isAssisted ? 0.05 : 0.1  // Lighter background for assisted
             HStack(spacing: 0) {
                 Rectangle()
                     .fill(tintColor)
                     .frame(width: 2)
                 Rectangle()
-                    .fill(tintColor.opacity(0.1))
+                    .fill(tintColor.opacity(bgOpacity))
                     .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
             }
             .padding(.leading, 12)  // Start a few pixels left of set number
@@ -264,7 +267,7 @@ struct SetRowView: View {
             HStack(spacing: 4) {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 14))
-                Text("Warm Up")
+                Text("Warm")
                     .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.orange)
@@ -280,7 +283,7 @@ struct SetRowView: View {
             HStack(spacing: 4) {
                 Image(systemName: "chevron.down.2")
                     .font(.system(size: 14, weight: .bold))
-                Text("Drop Set")
+                Text("Drop")
                     .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.blue)
@@ -288,10 +291,10 @@ struct SetRowView: View {
             HStack(spacing: 4) {
                 Image(systemName: "hand.raised.fill")
                     .font(.system(size: 14))
-                Text("Assisted")
+                Text("Assist")
                     .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
             }
-            .foregroundStyle(.red)
+            .foregroundStyle(Color(red: 1.0, green: 0.2, blue: 0.5))
         case "pause":
             HStack(spacing: 4) {
                 Image(systemName: "pause.fill")
@@ -312,7 +315,7 @@ struct SetRowView: View {
                         .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
                 }
             }
-            .foregroundStyle(.blue)
+            .foregroundStyle(.gray)
         default:
             EmptyView()
         }

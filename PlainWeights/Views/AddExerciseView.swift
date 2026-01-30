@@ -181,7 +181,7 @@ struct AddExerciseView: View {
 
     private func addTag() {
         let trimmed = tagInput.trimmingCharacters(in: .whitespaces).lowercased()
-        if !trimmed.isEmpty && !tags.contains(trimmed) {
+        if !trimmed.isEmpty && !tags.contains(trimmed) && tags.count < 10 {
             withAnimation {
                 tags.append(trimmed)
             }

@@ -50,11 +50,15 @@ enum Formatters {
         volumeFormatter.string(from: NSNumber(value: volume)) ?? "0"
     }
 
-    /// Format weight value, showing decimals only when needed (e.g., "100" or "100.5")
+    /// Format weight value, showing decimals only when needed (e.g., "100", "100.5", or "100.25")
     static func formatWeight(_ value: Double) -> String {
-        value.truncatingRemainder(dividingBy: 1) == 0 ?
-            String(format: "%.0f", value) :
-            String(format: "%.1f", value)
+        if value.truncatingRemainder(dividingBy: 1) == 0 {
+            return String(format: "%.0f", value)
+        } else if (value * 10).truncatingRemainder(dividingBy: 1) == 0 {
+            return String(format: "%.1f", value)
+        } else {
+            return String(format: "%.2f", value)
+        }
     }
 
     // MARK: - Relative Date Formatting

@@ -384,6 +384,7 @@ struct ExerciseDetailView: View {
                 .padding(.leading, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
@@ -610,13 +611,6 @@ struct ExerciseDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(themeManager.currentTheme.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .safeAreaInset(edge: .top, spacing: 0) {
-            Rectangle()
-                .fill(themeManager.currentTheme.borderColor)
-                .frame(height: 0.5)
-        }
         .alert("Delete Exercise", isPresented: $showingDeleteAlert) {
             Button("Delete", role: .destructive) {
                 deleteExercise()

@@ -3,10 +3,10 @@
 //  PlainWeights
 //
 //  Created by Claude on 25/09/2025.
-//  Last Updated: 27 Jan 2026 at 19:13:11
+//  Last Updated: 30 Jan 2026 at 16:00:34
 //
 //  Real Gym Data
-//  66 exercises, 66 workout sessions (22 Sep 2025 - 27 Jan 2026)
+//  67 exercises, 67 workout sessions (22 Sep 2025 - 29 Jan 2026)
 
 #if DEBUG
 import Foundation
@@ -19,7 +19,7 @@ class TestData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData")
-        logger.info("Generating test data (Real gym data - 66 exercises, 66 sessions)...")
+        logger.info("Generating test data (Real gym data - 67 exercises, 67 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -31,7 +31,7 @@ class TestData {
     // MARK: - Data Generation
 
     private static func generateGymData(modelContext: ModelContext) {
-        // EXPORT DATE: 27 Jan 2026 at 19:13:11
+        // EXPORT DATE: 30 Jan 2026 at 16:00:34
 
         // Helper function to create timestamps
         func date(_ year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int, _ second: Int = 0) -> Date {
@@ -47,62 +47,61 @@ class TestData {
 
         // Exercise definitions with notes and timestamps
         let exerciseData: [(name: String, tags: [String], note: String?, createdDate: Date, lastUpdated: Date)] = [
-    (name: "Seated cable row", tags: ["Back"], note: "8 is 54kg, 9 is 59.5kg", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 25, 16, 23, 37)),
-    (name: "Incline Dumbbell Chest Press", tags: ["Chest"], note: "Include the raise as one", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 16, 59, 54)),
-    (name: "Chest Cable Flys", tags: ["Chest"], note: "3 is 17.5 and 4 is 23", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 12, 29, 16, 49, 11)),
     (name: "Front lateral dumbbell raise", tags: ["Shoulder"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 29, 17, 36, 55)),
-    (name: "Seated Incline Dumbell Curls", tags: ["Bicep"], note: "Bench number 5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 25, 16, 54, 2)),
-    (name: "Barbell squat", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 6, 17, 0, 17)),
-    (name: "Romanian deadlift ", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 6, 16, 45, 7)),
-    (name: "Straight arm cable pulldown", tags: ["Back"], note: "8 is 45kg 9 is 50.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 22, 15, 30, 32)),
-    (name: "Tricep Dips", tags: ["Triceps"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 17, 42, 1)),
-    (name: "Incline chest press machine", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 12, 3, 16, 52, 32)),
-    (name: "Dumbbell chest press", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 18, 17, 15, 24)),
-    (name: "Box jumps", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 25, 17, 47, 13)),
-    (name: "Knees to toe", tags: ["Core"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 14, 17, 19, 25)),
-    (name: "Standing dumbbell hammer curls", tags: ["Bicep"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 21, 17, 53, 6)),
+    (name: "Reverse dumbbell lateral flys", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 4, 15, 27, 8)),
+    (name: "Barbell Lunges", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 9, 30, 17, 7, 30)),
+    (name: "Seated tricep dips", tags: ["Tricep"], note: "With bench level box full out", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 5, 17, 58, 47)),
+    (name: "Seated dumbbell Arnold press", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 29, 17, 25, 39)),
+    (name: "Deadlifts (Trapbar)", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 14, 16, 25, 47)),
     (name: "Dumbbell lunges", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 21, 23, 51, 8)),
+    (name: "Dumbbell chest press", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 18, 17, 15, 24)),
+    (name: "Dumbbell flys", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 7, 17, 7, 34)),
+    (name: "Bicep rope curls", tags: ["Bicep"], note: "8 is 45kg, , 9 is 50.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 29, 17, 22, 2)),
+    (name: "Landmine Row", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 23, 19, 26, 42)),
+    (name: "Butterfly sit up", tags: ["Core"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 9, 26, 16, 59, 27)),
+    (name: "Dumbbell shoulder shrugs", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 1, 20, 50, 58)),
+    (name: "Knees to toe", tags: ["Core"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 14, 17, 19, 25)),
+    (name: "EZ bar curl", tags: ["Biceps"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 3, 17, 38, 25)),
+    (name: "Dumbbell hammer curls ", tags: ["Bicep"], note: "Single arm raises each count as one rep.", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 13, 21, 26, 26)),
+    (name: "Dumbbell shoulder press", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 17, 12, 54)),
+    (name: "Romanian deadlift ", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 6, 16, 45, 7)),
+    (name: "Tricep Dips", tags: ["Triceps"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 17, 42, 1)),
     (name: "Hamstring Curls", tags: ["Legs"], note: "4 is 32kg, 5 is 37.5, 6 is 43kg, 7 is 48.5kg", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 7, 12, 8, 23)),
     (name: "Dumbbell lateral raises", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 17, 26, 28)),
-    (name: "Tricep rope pushdown", tags: ["Triceps"], note: "7 - 39.5, , 8 - 45", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 28, 16, 29, 44)),
-    (name: "Dumbbell flys", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 7, 17, 7, 34)),
-    (name: "Bicep rope curls", tags: ["Bicep"], note: "8 is 45kg, , 9 is 50.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 14, 17, 6, 49)),
-    (name: "Toes to bar", tags: ["Core"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 9, 16, 37, 31)),
-    (name: "Reverse Cable Flys", tags: ["Back"], note: "2 15 and 3 17.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 7, 50, 52)),
-    (name: "Seated tricep dips", tags: ["Tricep"], note: "With bench level box full out", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 5, 17, 58, 47)),
-    (name: "T Bar Row", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 14, 16, 44, 6)),
-    (name: "Reverse dumbbell lateral flys", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 4, 15, 27, 8)),
-    (name: "Press-ups", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 26, 23, 46, 23)),
-    (name: "Cable chest flys mid", tags: ["Chest"], note: "6 holes from the top", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 1, 9, 17, 4)),
-    (name: "Leg press", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 6, 16, 28, 48)),
-    (name: "Landmine Shoulder Press", tags: ["Shoulder"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 23, 19, 18, 45)),
-    (name: "Dumbbell shoulder shrugs", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 1, 20, 50, 58)),
-    (name: "Butterfly sit up", tags: ["Core"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 9, 26, 16, 59, 27)),
-    (name: "Sled Push", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 6, 17, 6, 21)),
-    (name: "Lat pull down", tags: ["Back"], note: "6- 47.5, 7- 48.5, 8 - 54, 9 - 59.5kg, 10 - 65kg", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 4, 14, 57, 36)),
-    (name: "Chest Press", tags: ["Chest"], note: "What can I say about a chest press??", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 7, 16, 45, 53)),
-    (name: "Dumbbell split squats", tags: ["Legs"], note: "Number of reps done on one side logged", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 25, 17, 23, 28)),
-    (name: "Front lateral cable raise", tags: ["Shoulders"], note: "3 is 17.5, 4 23 and 5 28.5, 2 handed pull", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 28, 16, 15, 36)),
-    (name: "Rope Face Pulls", tags: ["Back"], note: "8 is 45kg, 9 is 50.5kg, 10 is 56?", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 4, 15, 40, 38)),
-    (name: "Dumbbell hammer curls ", tags: ["Bicep"], note: "Single arm raises each count as one rep.", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 13, 21, 26, 26)),
-    (name: "Seated dumbbell curl (on knee)", tags: ["Bicep"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 5, 17, 58, 15)),
-    (name: "Single cable lateral raise", tags: ["Shoulders"], note: "2 - 15kg, 3 - 17.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 12, 29, 16, 59, 0)),
-    (name: "Overhead Tricep Rope Pulls", tags: ["Triceps"], note: "7 is 39.5, 8 is 45", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 7, 17, 35, 27)),
+    (name: "Incline chest press machine", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 12, 3, 16, 52, 32)),
+    (name: "Standing dumbbell hammer curls", tags: ["Bicep"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 21, 17, 53, 6)),
     (name: "Hyper extensions", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 28, 17, 47, 19)),
-    (name: "EZ bar curl", tags: ["Biceps"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 3, 17, 38, 25)),
-    (name: "Dumbbell shoulder press", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 17, 12, 54)),
-    (name: "Seated dumbbell Arnold press", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 29, 17, 25, 39)),
-    (name: "Landmine Row", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 23, 19, 26, 42)),
-    (name: "Calf Raises", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 25, 17, 5, 46)),
-    (name: "Ball tricep pushdown", tags: ["Tricep"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 17, 33, 41)),
-    (name: "Deadlifts (Trapbar)", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 14, 16, 25, 47)),
-    (name: "Pull ups", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 25, 16, 18, 0)),
+    (name: "Seated cable row", tags: ["Back"], note: "8 is 54kg, 9 is 59.5kg", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 25, 16, 23, 37)),
     (name: "Chest press machine", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 17, 13, 31, 21)),
-    (name: "Barbell Lunges", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 9, 30, 17, 7, 30)),
-    (name: "Leg Raises", tags: ["Legs"], note: "6 is 43kg, 7 is 48.5, 8 is 54, 9 is 59.5, 10 is 65", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 6, 16, 14, 19)),
     (name: "Shoulder press machine ", tags: ["Shoulders"], note: "4 - 32kg, 5 - 37.5, 6 - 43kg", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 5, 17, 14, 33)),
+    (name: "Toes to bar", tags: ["Core"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 9, 16, 37, 31)),
+    (name: "Leg press", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 6, 16, 28, 48)),
+    (name: "Overhead Tricep Rope Pulls", tags: ["Triceps"], note: "7 is 39.5, 8 is 45", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 7, 17, 35, 27)),
+    (name: "Landmine Shoulder Press", tags: ["Shoulder"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 23, 19, 18, 45)),
+    (name: "Chest Press", tags: ["Chest"], note: "What can I say about a chest press??", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 7, 16, 45, 53)),
+    (name: "Reverse Cable Flys", tags: ["Back"], note: "2 15 and 3 17.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 29, 17, 13, 41)),
+    (name: "Pull ups", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 29, 16, 36, 41)),
+    (name: "Single cable lateral raise", tags: ["Shoulders"], note: "2 - 15kg, 3 - 17.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 12, 29, 16, 59, 0)),
+    (name: "Sled Push", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 6, 17, 6, 21)),
+    (name: "Ball tricep pushdown", tags: ["Tricep"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 17, 33, 41)),
+    (name: "Straight arm cable pulldown", tags: ["Back"], note: "8 is 45kg 9 is 50.5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 22, 15, 30, 32)),
+    (name: "Incline Dumbbell Chest Press", tags: ["Chest"], note: "Include the raise as one", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 27, 16, 59, 54)),
+    (name: "Press ups", tags: ["Chest"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 29, 16, 50, 29)),
+    (name: "Chest Cable Flys", tags: ["Chest"], note: "3 is 17.5 and 4 is 23", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 12, 29, 16, 49, 11)),
+    (name: "Tricep rope pushdown", tags: ["Triceps"], note: "7 - 39.5, , 8 - 45", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 28, 16, 29, 44)),
+    (name: "Lat pull down", tags: ["Back"], note: "6- 47.5, 7- 48.5, 8 - 54, 9 - 59.5kg, 10 - 65kg", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 29, 17, 4, 5)),
+    (name: "Front lateral cable raise", tags: ["Shoulders"], note: "3 is 17.5, 4 23 and 5 28.5, 2 handed pull", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 28, 16, 15, 36)),
+    (name: "Cable chest flys mid", tags: ["Chest"], note: "6 holes from the top", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 1, 9, 17, 4)),
+    (name: "Barbell squat", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 6, 17, 0, 17)),
+    (name: "Leg Raises", tags: ["Legs"], note: "6 is 43kg, 7 is 48.5, 8 is 54, 9 is 59.5, 10 is 65", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 6, 16, 14, 19)),
+    (name: "Dumbbell split squats", tags: ["Legs"], note: "Number of reps done on one side logged", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 25, 17, 23, 28)),
+    (name: "Calf Raises", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 25, 17, 5, 46)),
+    (name: "Box jumps", tags: ["Legs"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 25, 17, 47, 13)),
+    (name: "Seated Incline Dumbell Curls", tags: ["Bicep"], note: "Bench number 5", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 25, 16, 54, 2)),
+    (name: "Seated dumbbell curl (on knee)", tags: ["Bicep"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 11, 5, 17, 58, 15)),
+    (name: "T Bar Row", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 1, 14, 16, 44, 6)),
     (name: "Single arm back pull machine", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 9, 16, 6, 34), lastUpdated: date(2025, 11, 9, 16, 14, 21)),
-    (name: "Barbell shoulder press", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 10, 18, 2, 11), lastUpdated: date(2026, 1, 25, 17, 5, 9)),
+    (name: "Barbell shoulder press", tags: ["Shoulders"], note: nil as String?, createdDate: date(2025, 11, 10, 18, 2, 11), lastUpdated: date(2026, 1, 29, 16, 48, 44)),
     (name: "Deadlifts", tags: ["Back"], note: nil as String?, createdDate: date(2025, 11, 20, 16, 25, 23), lastUpdated: date(2025, 11, 20, 16, 33, 10)),
     (name: "Dumbbell Romanian deadlift", tags: ["Hamstring", "Legs"], note: nil as String?, createdDate: date(2025, 11, 25, 17, 12, 23), lastUpdated: date(2025, 11, 25, 17, 15, 30)),
     (name: "Tricep ez bar", tags: ["Tricep"], note: nil as String?, createdDate: date(2025, 11, 28, 16, 50, 36), lastUpdated: date(2025, 11, 28, 16, 54, 15)),
@@ -113,6 +112,8 @@ class TestData {
     (name: "Front lateral raise plates", tags: ["Shoulder"], note: nil as String?, createdDate: date(2026, 1, 7, 17, 38, 52), lastUpdated: date(2026, 1, 7, 17, 40, 46)),
     (name: "Single arm bicep cable curl", tags: ["biceps"], note: nil as String?, createdDate: date(2026, 1, 14, 17, 7, 34), lastUpdated: date(2026, 1, 14, 17, 12, 10)),
     (name: "Plate loaded lat pulldown", tags: ["last", "back"], note: nil as String?, createdDate: date(2026, 1, 25, 16, 30, 4), lastUpdated: date(2026, 1, 25, 16, 33, 55)),
+    (name: "Angled rope row", tags: ["back", "shoulders"], note: nil as String?, createdDate: date(2026, 1, 29, 16, 40, 39), lastUpdated: date(2026, 1, 29, 16, 46, 28)),
+    (name: "Face pulls", tags: ["back"], note: "Height 5", createdDate: date(2026, 1, 29, 17, 16, 34), lastUpdated: date(2026, 1, 29, 17, 18, 0)),
         ]
 
         // Create exercises
@@ -215,10 +216,6 @@ class TestData {
         addSet(exercise: "Deadlifts (Trapbar)", weight: 60.0, reps: 10, timestamp: date(2025, 9, 24, 17, 25, 0), restSeconds: 60)
         addSet(exercise: "Deadlifts (Trapbar)", weight: 60.0, reps: 10, timestamp: date(2025, 9, 24, 17, 27, 30), restSeconds: 60)
         addSet(exercise: "Deadlifts (Trapbar)", weight: 60.0, reps: 10, timestamp: date(2025, 9, 24, 17, 30, 0), restSeconds: 60)
-        // Rope Face Pulls: 3 sets
-        addSet(exercise: "Rope Face Pulls", weight: 45.0, reps: 10, timestamp: date(2025, 9, 24, 17, 32, 30), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 45.0, reps: 10, timestamp: date(2025, 9, 24, 17, 34, 30), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 45.0, reps: 10, timestamp: date(2025, 9, 24, 17, 36, 30), restSeconds: 60)
         // Bicep rope curls: 4 sets
         addSet(exercise: "Bicep rope curls", weight: 39.5, reps: 12, timestamp: date(2025, 9, 24, 17, 39, 0), restSeconds: 60)
         addSet(exercise: "Bicep rope curls", weight: 39.5, reps: 12, timestamp: date(2025, 9, 24, 17, 41, 30), restSeconds: 60)
@@ -658,10 +655,6 @@ class TestData {
         addSet(exercise: "T Bar Row", weight: 35.0, reps: 10, timestamp: date(2025, 10, 15, 17, 10, 19), restSeconds: 60)
         addSet(exercise: "T Bar Row", weight: 35.0, reps: 8, timestamp: date(2025, 10, 15, 17, 12, 54), restSeconds: 60)
         addSet(exercise: "T Bar Row", weight: 35.0, reps: 7, timestamp: date(2025, 10, 15, 17, 15, 10), restSeconds: 60)
-        // Rope Face Pulls: 3 sets
-        addSet(exercise: "Rope Face Pulls", weight: 45.0, reps: 14, timestamp: date(2025, 10, 15, 17, 17, 22), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 45.0, reps: 14, timestamp: date(2025, 10, 15, 17, 19, 14), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 45.0, reps: 14, timestamp: date(2025, 10, 15, 17, 21, 31), restSeconds: 60)
         // Bicep rope curls: 4 sets
         addSet(exercise: "Bicep rope curls", weight: 45.0, reps: 10, timestamp: date(2025, 10, 15, 17, 22, 30), restSeconds: 60)
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 10, timestamp: date(2025, 10, 15, 17, 25, 31), restSeconds: 60)
@@ -830,7 +823,6 @@ class TestData {
         addSet(exercise: "Leg Raises", weight: 59.5, reps: 11, timestamp: date(2025, 10, 28, 17, 3, 16), restSeconds: 60)
         addSet(exercise: "Leg Raises", weight: 59.5, reps: 11, timestamp: date(2025, 10, 28, 17, 6, 3), restSeconds: 60)
         // Hamstring Curls: 1 sets
-
         addDropSet(exercise: "Hamstring Curls", weight: 43.0, reps: 10, timestamp: date(2025, 10, 28, 17, 7, 29), restSeconds: 60)
         // Calf Raises: 4 sets
         addSet(exercise: "Calf Raises", weight: 40.0, reps: 18, timestamp: date(2025, 10, 28, 17, 10, 19), restSeconds: 60)
@@ -948,14 +940,14 @@ class TestData {
         addSet(exercise: "Tricep rope pushdown", weight: 39.5, reps: 10, timestamp: date(2025, 11, 1, 9, 45, 53), restSeconds: 60)
         // Bicep rope curls: 1 sets
         addSet(exercise: "Bicep rope curls", weight: 39.5, reps: 15, timestamp: date(2025, 11, 1, 9, 47, 41), restSeconds: 60)
-        // Press-ups: 2 sets
-        addSet(exercise: "Press-ups", weight: 0.0, reps: 15, timestamp: date(2025, 11, 1, 9, 48, 22))
-        addSet(exercise: "Press-ups", weight: 0.0, reps: 10, timestamp: date(2025, 11, 1, 9, 49, 34), restSeconds: 60)
+        // Press ups: 2 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2025, 11, 1, 9, 48, 22))
+        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2025, 11, 1, 9, 49, 34), restSeconds: 60)
         // Bicep rope curls: 2 sets
         addSet(exercise: "Bicep rope curls", weight: 39.5, reps: 15, timestamp: date(2025, 11, 1, 9, 49, 40), restSeconds: 60)
         addDropSet(exercise: "Bicep rope curls", weight: 39.5, reps: 15, timestamp: date(2025, 11, 1, 9, 52, 20), restSeconds: 60)
-        // Press-ups: 1 sets
-        addSet(exercise: "Press-ups", weight: 0.0, reps: 10, timestamp: date(2025, 11, 1, 9, 52, 25), restSeconds: 180)
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2025, 11, 1, 9, 52, 25), restSeconds: 180)
 
         // SESSION 32: 2025-11-03 17:11:55
         // Pull ups: 4 sets
@@ -975,10 +967,6 @@ class TestData {
         addSet(exercise: "Lat pull down", weight: 59.5, reps: 10, timestamp: date(2025, 11, 3, 17, 41, 19), restSeconds: 60)
         addSet(exercise: "Lat pull down", weight: 59.5, reps: 8, timestamp: date(2025, 11, 3, 17, 43, 6), restSeconds: 60)
         addDropSet(exercise: "Lat pull down", weight: 59.5, reps: 8, timestamp: date(2025, 11, 3, 17, 45, 54), restSeconds: 60)
-        // Rope Face Pulls: 3 sets
-        addSet(exercise: "Rope Face Pulls", weight: 50.5, reps: 15, timestamp: date(2025, 11, 3, 17, 48, 34), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 50.5, reps: 15, timestamp: date(2025, 11, 3, 17, 50, 56), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 50.5, reps: 12, timestamp: date(2025, 11, 3, 17, 52, 40), restSeconds: 60)
         // Dumbbell hammer curls : 3 sets
         addSet(exercise: "Dumbbell hammer curls ", weight: 10.0, reps: 15, timestamp: date(2025, 11, 3, 17, 55, 43), restSeconds: 60)
         addSet(exercise: "Dumbbell hammer curls ", weight: 10.0, reps: 15, timestamp: date(2025, 11, 3, 17, 57, 10), restSeconds: 60)
@@ -1216,10 +1204,6 @@ class TestData {
         addSet(exercise: "T Bar Row", weight: 35.0, reps: 11, timestamp: date(2025, 11, 19, 16, 45, 10), restSeconds: 60)
         addSet(exercise: "T Bar Row", weight: 35.0, reps: 9, timestamp: date(2025, 11, 19, 16, 48, 14), restSeconds: 60)
         addSet(exercise: "T Bar Row", weight: 35.0, reps: 10, timestamp: date(2025, 11, 19, 16, 51, 2), restSeconds: 60)
-        // Rope Face Pulls: 3 sets
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 12, timestamp: date(2025, 11, 19, 16, 52, 50), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 12, timestamp: date(2025, 11, 19, 16, 55, 13), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 9, timestamp: date(2025, 11, 19, 16, 57, 57), restSeconds: 60)
         // Straight arm cable pulldown: 3 sets
         addSet(exercise: "Straight arm cable pulldown", weight: 50.5, reps: 12, timestamp: date(2025, 11, 19, 16, 59, 41), restSeconds: 60)
         addSet(exercise: "Straight arm cable pulldown", weight: 50.5, reps: 14, timestamp: date(2025, 11, 19, 17, 2, 26), restSeconds: 60)
@@ -1323,10 +1307,6 @@ class TestData {
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 16, timestamp: date(2025, 11, 24, 17, 51, 10), isPB: true)
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 14, timestamp: date(2025, 11, 24, 17, 53, 10), restSeconds: 60)
         addDropSet(exercise: "Bicep rope curls", weight: 50.5, reps: 12, timestamp: date(2025, 11, 24, 17, 55, 57), restSeconds: 60)
-        // Rope Face Pulls: 3 sets
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 10, timestamp: date(2025, 11, 24, 17, 57, 25), restSeconds: 60)
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 14, timestamp: date(2025, 11, 24, 17, 59, 38), isPB: true)
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 11, timestamp: date(2025, 11, 24, 18, 1, 15), restSeconds: 180)
         // Seated Incline Dumbell Curls: 4 sets
         addSet(exercise: "Seated Incline Dumbell Curls", weight: 10.0, reps: 11, timestamp: date(2025, 11, 24, 18, 2, 53), restSeconds: 60)
         addSet(exercise: "Seated Incline Dumbell Curls", weight: 10.0, reps: 12, timestamp: date(2025, 11, 24, 18, 5, 10), restSeconds: 60)
@@ -1536,8 +1516,8 @@ class TestData {
         // Lat pull down: 4 sets
         addWarmUpSet(exercise: "Lat pull down", weight: 47.5, reps: 10, timestamp: date(2026, 1, 4, 14, 51, 40), restSeconds: 56)
         addSet(exercise: "Lat pull down", weight: 65.0, reps: 8, timestamp: date(2026, 1, 4, 14, 52, 36), restSeconds: 136)
-        addSet(exercise: "Lat pull down", weight: 65.0, reps: 10, timestamp: date(2026, 1, 4, 14, 54, 53), restSeconds: 162, isPB: true)
-        addSet(exercise: "Lat pull down", weight: 65.0, reps: 9, timestamp: date(2026, 1, 4, 14, 57, 36))
+        addSet(exercise: "Lat pull down", weight: 65.0, reps: 10, timestamp: date(2026, 1, 4, 14, 54, 53), restSeconds: 162)
+        addSet(exercise: "Lat pull down", weight: 65.0, reps: 9, timestamp: date(2026, 1, 4, 14, 57, 36), restSeconds: 180)
         // T Bar Row: 5 sets
         addWarmUpSet(exercise: "T Bar Row", weight: 20.0, reps: 12, timestamp: date(2026, 1, 4, 14, 58, 24), restSeconds: 176)
         addSet(exercise: "T Bar Row", weight: 40.0, reps: 8, timestamp: date(2026, 1, 4, 15, 1, 21), restSeconds: 174)
@@ -1556,10 +1536,6 @@ class TestData {
         addSet(exercise: "Dumbbell hammer curls ", weight: 12.5, reps: 14, timestamp: date(2026, 1, 4, 15, 29, 5), restSeconds: 143)
         addSet(exercise: "Dumbbell hammer curls ", weight: 12.5, reps: 12, timestamp: date(2026, 1, 4, 15, 31, 29), restSeconds: 171)
         addSet(exercise: "Dumbbell hammer curls ", weight: 12.5, reps: 13, timestamp: date(2026, 1, 4, 15, 34, 21), restSeconds: 180)
-        // Rope Face Pulls: 3 sets
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 13, timestamp: date(2026, 1, 4, 15, 36, 29), restSeconds: 138)
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 11, timestamp: date(2026, 1, 4, 15, 38, 48), restSeconds: 110)
-        addSet(exercise: "Rope Face Pulls", weight: 56.0, reps: 8, timestamp: date(2026, 1, 4, 15, 40, 38))
         // Neutral grip pull ups: 2 sets
         addSet(exercise: "Neutral grip pull ups", weight: 0.0, reps: 3, timestamp: date(2026, 1, 4, 15, 41, 42), restSeconds: 76)
         addSet(exercise: "Neutral grip pull ups", weight: 0.0, reps: 4, timestamp: date(2026, 1, 4, 15, 42, 59), restSeconds: 180)
@@ -1696,7 +1672,7 @@ class TestData {
         // Bicep rope curls: 3 sets
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 14, timestamp: date(2026, 1, 14, 17, 2, 16), restSeconds: 122)
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 14, timestamp: date(2026, 1, 14, 17, 4, 18), restSeconds: 150)
-        addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 13, timestamp: date(2026, 1, 14, 17, 6, 49))
+        addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 13, timestamp: date(2026, 1, 14, 17, 6, 49), restSeconds: 180)
         // Single arm bicep cable curl: 2 sets
         addSet(exercise: "Single arm bicep cable curl", weight: 17.5, reps: 12, timestamp: date(2026, 1, 14, 17, 9, 17), restSeconds: 172, isPB: true)
         addSet(exercise: "Single arm bicep cable curl", weight: 17.5, reps: 12, timestamp: date(2026, 1, 14, 17, 12, 10))
@@ -1712,7 +1688,7 @@ class TestData {
         addSet(exercise: "Pull ups", weight: 0.0, reps: 5, timestamp: date(2026, 1, 25, 16, 12, 57), restSeconds: 97)
         addSet(exercise: "Pull ups", weight: 0.0, reps: 5, timestamp: date(2026, 1, 25, 16, 14, 34), restSeconds: 108)
         addSet(exercise: "Pull ups", weight: 0.0, reps: 5, timestamp: date(2026, 1, 25, 16, 16, 22), restSeconds: 97)
-        addSet(exercise: "Pull ups", weight: 0.0, reps: 5, timestamp: date(2026, 1, 25, 16, 18, 0))
+        addSet(exercise: "Pull ups", weight: 0.0, reps: 5, timestamp: date(2026, 1, 25, 16, 18, 0), restSeconds: 180)
         // Seated cable row: 3 sets
         addSet(exercise: "Seated cable row", weight: 54.0, reps: 12, timestamp: date(2026, 1, 25, 16, 20, 21), restSeconds: 100)
         addSet(exercise: "Seated cable row", weight: 59.5, reps: 11, timestamp: date(2026, 1, 25, 16, 22, 1), restSeconds: 96, isPB: true)
@@ -1739,16 +1715,16 @@ class TestData {
         addSet(exercise: "Calf Raises", weight: 40.0, reps: 15, timestamp: date(2026, 1, 25, 17, 1, 34), restSeconds: 143)
         addSet(exercise: "Calf Raises", weight: 40.0, reps: 15, timestamp: date(2026, 1, 25, 17, 3, 57), restSeconds: 109)
         // Barbell shoulder press: 1 sets
-        addSet(exercise: "Barbell shoulder press", weight: 20.0, reps: 10, timestamp: date(2026, 1, 25, 17, 5, 9))
+        addSet(exercise: "Barbell shoulder press", weight: 20.0, reps: 10, timestamp: date(2026, 1, 25, 17, 5, 9), restSeconds: 180)
         // Calf Raises: 1 sets
         addSet(exercise: "Calf Raises", weight: 40.0, reps: 12, timestamp: date(2026, 1, 25, 17, 5, 46))
 
         // SESSION 65: 2026-01-26 23:45:50
-        // Press-ups: 4 sets
-        addSet(exercise: "Press-ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 26, 23, 45, 50), restSeconds: 17)
-        addSet(exercise: "Press-ups", weight: 0.0, reps: 16, timestamp: date(2026, 1, 26, 23, 46, 7), restSeconds: 6, isPB: true)
-        addSet(exercise: "Press-ups", weight: 0.0, reps: 8, timestamp: date(2026, 1, 26, 23, 46, 13), restSeconds: 10)
-        addSet(exercise: "Press-ups", weight: 0.0, reps: 8, timestamp: date(2026, 1, 26, 23, 46, 23))
+        // Press ups: 4 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 26, 23, 45, 50), restSeconds: 17)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 16, timestamp: date(2026, 1, 26, 23, 46, 7), restSeconds: 6)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 8, timestamp: date(2026, 1, 26, 23, 46, 13), restSeconds: 10)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 8, timestamp: date(2026, 1, 26, 23, 46, 23), restSeconds: 180)
 
         // SESSION 66: 2026-01-27 16:45:46
         // Incline Dumbbell Chest Press: 5 sets
@@ -1775,6 +1751,61 @@ class TestData {
         addSet(exercise: "Tricep Dips", weight: 10.0, reps: 10, timestamp: date(2026, 1, 27, 17, 37, 28), restSeconds: 110, isPB: true)
         addSet(exercise: "Tricep Dips", weight: 10.0, reps: 8, timestamp: date(2026, 1, 27, 17, 39, 18), restSeconds: 162)
         addSet(exercise: "Tricep Dips", weight: 10.0, reps: 8, timestamp: date(2026, 1, 27, 17, 42, 1), restSeconds: 180)
+
+        // SESSION 67: 2026-01-29 16:22:49
+        // Pull ups: 1 sets
+        addSet(exercise: "Pull ups", weight: 0.0, reps: 7, timestamp: date(2026, 1, 29, 16, 22, 49), restSeconds: 180)
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 29, 16, 24, 10), restSeconds: 155)
+        // Pull ups: 1 sets
+        addSet(exercise: "Pull ups", weight: 0.0, reps: 8, timestamp: date(2026, 1, 29, 16, 26, 2), restSeconds: 174)
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 29, 16, 26, 45), restSeconds: 174)
+        // Pull ups: 1 sets
+        addSet(exercise: "Pull ups", weight: 0.0, reps: 7, timestamp: date(2026, 1, 29, 16, 28, 56), restSeconds: 180)
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 12, timestamp: date(2026, 1, 29, 16, 29, 39), restSeconds: 180)
+        // Pull ups: 1 sets
+        addSet(exercise: "Pull ups", weight: 0.0, reps: 7, timestamp: date(2026, 1, 29, 16, 32, 39), restSeconds: 180)
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 11, timestamp: date(2026, 1, 29, 16, 33, 18), restSeconds: 180)
+        // Pull ups: 1 sets
+        addSet(exercise: "Pull ups", weight: 0.0, reps: 7, timestamp: date(2026, 1, 29, 16, 36, 41))
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 17, timestamp: date(2026, 1, 29, 16, 38, 46), restSeconds: 180, isPB: true)
+        // Angled rope row: 1 sets
+        addSet(exercise: "Angled rope row", weight: 0.0, reps: 9, timestamp: date(2026, 1, 29, 16, 40, 44), restSeconds: 155)
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 13, timestamp: date(2026, 1, 29, 16, 42, 6), restSeconds: 174)
+        // Angled rope row: 1 sets
+        addSet(exercise: "Angled rope row", weight: 0.0, reps: 11, timestamp: date(2026, 1, 29, 16, 43, 19), restSeconds: 180, isPB: true)
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 11, timestamp: date(2026, 1, 29, 16, 45, 0), restSeconds: 180)
+        // Angled rope row: 1 sets
+        addSet(exercise: "Angled rope row", weight: 0.0, reps: 10, timestamp: date(2026, 1, 29, 16, 46, 28))
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 12, timestamp: date(2026, 1, 29, 16, 48, 18), restSeconds: 130)
+        // Barbell shoulder press: 1 sets
+        addSet(exercise: "Barbell shoulder press", weight: 20.0, reps: 10, timestamp: date(2026, 1, 29, 16, 48, 44))
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2026, 1, 29, 16, 50, 29))
+        // Lat pull down: 3 sets
+        addSet(exercise: "Lat pull down", weight: 65.0, reps: 11, timestamp: date(2026, 1, 29, 16, 55, 18), restSeconds: 126)
+        addSet(exercise: "Lat pull down", weight: 65.0, reps: 11, timestamp: date(2026, 1, 29, 16, 57, 25), restSeconds: 180)
+        addSet(exercise: "Lat pull down", weight: 70.5, reps: 12, timestamp: date(2026, 1, 29, 17, 4, 5), restSeconds: 180, isPB: true)
+        // Bicep rope curls: 1 sets
+        addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 16, timestamp: date(2026, 1, 29, 17, 6, 10), restSeconds: 180)
+        // Reverse Cable Flys: 3 sets
+        addWarmUpSet(exercise: "Reverse Cable Flys", weight: 17.5, reps: 11, timestamp: date(2026, 1, 29, 17, 8, 0), restSeconds: 180)
+        addSet(exercise: "Reverse Cable Flys", weight: 20.0, reps: 12, timestamp: date(2026, 1, 29, 17, 11, 3), restSeconds: 157)
+        addDropSet(exercise: "Reverse Cable Flys", weight: 20.0, reps: 9, timestamp: date(2026, 1, 29, 17, 13, 41), restSeconds: 180)
+        // Face pulls: 2 sets
+        addSet(exercise: "Face pulls", weight: 39.5, reps: 13, timestamp: date(2026, 1, 29, 17, 16, 49), restSeconds: 71, isPB: true)
+        addSet(exercise: "Face pulls", weight: 39.5, reps: 13, timestamp: date(2026, 1, 29, 17, 18, 0))
+        // Bicep rope curls: 3 sets
+        addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 14, timestamp: date(2026, 1, 29, 17, 18, 47), restSeconds: 79)
+        addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 10, timestamp: date(2026, 1, 29, 17, 20, 6), restSeconds: 115)
+        addDropSet(exercise: "Bicep rope curls", weight: 45.0, reps: 10, timestamp: date(2026, 1, 29, 17, 22, 2), restSeconds: 180)
 
         // Save all changes
         do {

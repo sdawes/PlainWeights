@@ -52,6 +52,8 @@ struct FilteredExerciseListView: View {
     @State private var showingSummary = false
     @State private var showingSettings = false
 
+    @State private var exerciseToDelete: Exercise?
+
     #if DEBUG
     @State private var showingGenerateDataAlert = false
     @State private var showingClearDataAlert = false
@@ -139,9 +141,9 @@ struct FilteredExerciseListView: View {
                             }
                             .padding(.leading, 8)
                         }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
-                                deleteExercise(exercise)
+                                exerciseToDelete = exercise
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
@@ -172,19 +174,7 @@ struct FilteredExerciseListView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(themeManager.currentTheme.background, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .safeAreaInset(edge: .top, spacing: 0) {
-            Rectangle()
-                .fill(themeManager.currentTheme.borderColor)
-                .frame(height: 0.5)
-        }
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("PlainWeights")
-                    .font(themeManager.currentTheme.interFont(size: 17, weight: .bold))
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
-            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showingSettings = true } label: {
                     Image(systemName: "gearshape")
@@ -266,6 +256,24 @@ struct FilteredExerciseListView: View {
             Text("This will DELETE all your workout data including exercises and sets. This cannot be undone.")
         }
         #endif
+        .alert("Delete Exercise", isPresented: Binding(
+            get: { exerciseToDelete != nil },
+            set: { if !$0 { exerciseToDelete = nil } }
+        )) {
+            Button("Cancel", role: .cancel) {
+                exerciseToDelete = nil
+            }
+            Button("Delete", role: .destructive) {
+                if let exercise = exerciseToDelete {
+                    deleteExercise(exercise)
+                    exerciseToDelete = nil
+                }
+            }
+        } message: {
+            if let exercise = exerciseToDelete {
+                Text("This will permanently delete \"\(exercise.name)\" and all its sets. This action cannot be undone.")
+            }
+        }
     }
 
     // MARK: - Helper Functions

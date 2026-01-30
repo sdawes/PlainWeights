@@ -132,6 +132,18 @@ struct AddSetView: View {
                         .padding(16)
                         .background(themeManager.currentTheme.muted)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .onChange(of: weightText) { _, newValue in
+                            // Allow only digits and one decimal point, max 6 chars (e.g., "100.25")
+                            let filtered = newValue.filter { $0.isNumber || $0 == "." }
+                            let limited = String(filtered.prefix(6))
+                            // Ensure only one decimal point
+                            let parts = limited.split(separator: ".", omittingEmptySubsequences: false)
+                            if parts.count > 2 {
+                                weightText = String(parts[0]) + "." + String(parts[1])
+                            } else if limited != newValue {
+                                weightText = limited
+                            }
+                        }
                 }
 
                 // Reps input
@@ -147,6 +159,13 @@ struct AddSetView: View {
                         .padding(16)
                         .background(themeManager.currentTheme.muted)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .onChange(of: repsText) { _, newValue in
+                            // Allow only digits, max 3 chars
+                            let filtered = newValue.filter { $0.isNumber }
+                            if filtered != newValue || filtered.count > 3 {
+                                repsText = String(filtered.prefix(3))
+                            }
+                        }
                 }
             }
 

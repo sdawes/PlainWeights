@@ -69,7 +69,7 @@ struct SetRowView: View {
                             .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
                             .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                             .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                            .minimumScaleFactor(0.5)
 
                         Text(" kg")
                             .font(themeManager.currentTheme.interFont(size: 14))
@@ -85,7 +85,7 @@ struct SetRowView: View {
                             .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
                             .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                             .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                            .minimumScaleFactor(0.5)
                     }
 
                     Spacer()

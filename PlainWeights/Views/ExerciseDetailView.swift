@@ -598,7 +598,7 @@ struct ExerciseDetailView: View {
         .overlay(alignment: .bottom) {
             if let activeSet = activeTimerSet {
                 FloatingRestTimer(setTimestamp: activeSet.timestamp)
-                    .padding(.bottom, 20)  // Aligned with FAB
+                    .offset(y: 6)  // Center aligned with FAB (48pt button + 20pt padding)
                     .transition(.scale.combined(with: .opacity))
             }
         }

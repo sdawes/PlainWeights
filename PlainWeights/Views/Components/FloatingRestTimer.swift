@@ -33,25 +33,25 @@ struct FloatingRestTimer: View {
                 ZStack {
                     // Background ring
                     Circle()
-                        .stroke(themeManager.currentTheme.muted, lineWidth: 4)
+                        .stroke(themeManager.currentTheme.muted, lineWidth: 5)
 
                     // Progress ring
                     Circle()
                         .trim(from: 0, to: CGFloat(elapsed / maxTime))
                         .stroke(
                             timerColor(for: elapsed),
-                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                            style: StrokeStyle(lineWidth: 5, lineCap: .round)
                         )
                         .rotationEffect(.degrees(-90))
                         .animation(.linear(duration: 1), value: elapsed)
 
                     // Time text
                     Text(Formatters.formatDuration(elapsed))
-                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .bold))
+                        .font(themeManager.currentTheme.dataFont(size: 24, weight: .bold))
                         .foregroundStyle(timerColor(for: elapsed))
                 }
-                .frame(width: 60, height: 60)
-                .padding(12)
+                .frame(width: 72, height: 72)
+                .padding(14)
                 .background(themeManager.currentTheme.cardBackgroundColor)
                 .clipShape(Circle())
                 .overlay(

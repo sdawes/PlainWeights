@@ -69,10 +69,10 @@ enum RepsAnalytics {
         return lastSessionSets.map { $0.reps }.max() ?? 0
     }
 
-    /// Get total volume of reps from the most recent completed session (excluding today)
-    /// This mirrors the weight volume calculation pattern for consistency
+    /// Get total volume of reps from the most recent completed reps-only session (excluding today)
+    /// Only considers sessions where all working sets have weight=0
     /// - Parameter sets: Array of ExerciseSet sorted by timestamp descending
-    /// - Returns: Sum of all reps from last session (excluding warm-ups), or 0 if no previous session
+    /// - Returns: Sum of all reps from last reps-only session, or 0 if no previous reps-only session
     static func getLastSessionTotalRepsVolume(from sets: [ExerciseSet]) -> Int {
         let calendar = Calendar.current
 
@@ -81,16 +81,57 @@ enum RepsAnalytics {
             !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp && !$0.isBonus
         }
 
-        guard let mostRecentDate = historicWorkingSets.first?.timestamp else {
-            return 0
+        // Group by day
+        let grouped = Dictionary(grouping: historicWorkingSets) { set in
+            calendar.startOfDay(for: set.timestamp)
         }
 
-        // Get all working sets from the most recent day
-        let lastSessionSets = historicWorkingSets.filter {
-            calendar.isDate($0.timestamp, inSameDayAs: mostRecentDate)
+        // Sort days by date descending
+        let sortedDays = grouped.keys.sorted(by: >)
+
+        // Find the most recent day that is reps-only (all sets have weight=0)
+        for day in sortedDays {
+            guard let daySets = grouped[day] else { continue }
+            let isRepsOnlyDay = daySets.allSatisfy { $0.weight == 0 }
+            if isRepsOnlyDay {
+                return calculateTotalReps(from: daySets)
+            }
         }
 
-        return calculateTotalReps(from: lastSessionSets)
+        return 0
+    }
+
+    /// Get total reps from the best reps-only session ever (highest total reps in a single day, excluding today)
+    /// Only considers sessions where all working sets have weight=0
+    /// - Parameter sets: Array of ExerciseSet
+    /// - Returns: Highest total reps from any reps-only session, or 0 if no previous reps-only sessions
+    static func getBestSessionTotalReps(from sets: [ExerciseSet]) -> Int {
+        let calendar = Calendar.current
+
+        // Filter out today's sets and warm-ups/bonus
+        let historicWorkingSets = sets.filter {
+            !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp && !$0.isBonus
+        }
+
+        // Group by day
+        let grouped = Dictionary(grouping: historicWorkingSets) { set in
+            calendar.startOfDay(for: set.timestamp)
+        }
+
+        // Find the day with highest total reps (only considering reps-only days)
+        var bestTotal = 0
+        for (_, daySets) in grouped {
+            // Only consider days where all sets have weight=0
+            let isRepsOnlyDay = daySets.allSatisfy { $0.weight == 0 }
+            if isRepsOnlyDay {
+                let dayTotal = calculateTotalReps(from: daySets)
+                if dayTotal > bestTotal {
+                    bestTotal = dayTotal
+                }
+            }
+        }
+
+        return bestTotal
     }
 
     // MARK: - Reps Volume Comparison

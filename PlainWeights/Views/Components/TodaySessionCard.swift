@@ -13,6 +13,7 @@ struct TodaySessionCard: View {
     let volume: Double
     let durationMinutes: Int?
     let comparisonVolume: Double
+    let comparisonReps: Int  // For reps-only exercises
     let comparisonLabel: String
     let isWeightedExercise: Bool
     let totalReps: Int
@@ -74,12 +75,22 @@ struct TodaySessionCard: View {
                     .foregroundStyle(themeManager.currentTheme.tertiaryText)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(16)
+            } else if !isWeightedExercise && comparisonReps > 0 {
+                // Progress bar for reps-only exercises
+                VolumeProgressBar(
+                    currentVolume: Double(totalReps),
+                    targetVolume: Double(comparisonReps),
+                    targetLabel: comparisonLabel,
+                    isRepsOnly: true
+                )
+                .padding(16)
             } else if comparisonVolume > 0 {
                 // Progress bar for weighted exercises with comparison data
                 VolumeProgressBar(
                     currentVolume: volume,
                     targetVolume: comparisonVolume,
-                    targetLabel: comparisonLabel
+                    targetLabel: comparisonLabel,
+                    isRepsOnly: false
                 )
                 .padding(16)
             } else {

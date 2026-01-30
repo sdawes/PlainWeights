@@ -343,6 +343,21 @@ struct ExerciseDetailView: View {
         comparisonMode == .lastSession ? lastSessionVolume : bestSessionVolume
     }
 
+    // Last session total reps (for reps-only exercises)
+    private var lastSessionReps: Int {
+        RepsAnalytics.getLastSessionTotalRepsVolume(from: Array(sets))
+    }
+
+    // Best session total reps (for reps-only exercises)
+    private var bestSessionReps: Int {
+        RepsAnalytics.getBestSessionTotalReps(from: Array(sets))
+    }
+
+    // Comparison reps based on selected mode (for reps-only exercises)
+    private var comparisonReps: Int {
+        comparisonMode == .lastSession ? lastSessionReps : bestSessionReps
+    }
+
     // Label for progress bar based on selected mode
     private var comparisonLabel: String {
         comparisonMode == .lastSession ? "Last" : "Best"
@@ -463,6 +478,7 @@ struct ExerciseDetailView: View {
                     volume: todaysVolume,
                     durationMinutes: sessionDurationMinutes,
                     comparisonVolume: comparisonVolume,
+                    comparisonReps: comparisonReps,
                     comparisonLabel: comparisonLabel,
                     isWeightedExercise: isWeightedExercise,
                     totalReps: todaysTotalReps,

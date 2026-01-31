@@ -12,6 +12,8 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
 
+    @State private var showingDeleteAllAlert = false
+
     #if DEBUG
     @State private var showingGenerateDataAlert = false
     @State private var showingClearDataAlert = false
@@ -91,6 +93,29 @@ struct SettingsView: View {
                 .tint(themeManager.currentTheme.primary)
             }
 
+            // Data section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Data")
+                    .font(themeManager.currentTheme.subheadlineFont)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                Button {
+                    showingDeleteAllAlert = true
+                } label: {
+                    HStack {
+                        Image(systemName: "trash")
+                        Text("Delete All Exercises")
+                    }
+                    .font(themeManager.currentTheme.bodyFont)
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(themeManager.currentTheme.muted)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+            }
+
             #if DEBUG
             // Developer Tools section
             VStack(alignment: .leading, spacing: 12) {
@@ -157,6 +182,14 @@ struct SettingsView: View {
         }
         .padding(24)
         .background(themeManager.currentTheme.background)
+        .alert("Delete All Exercises?", isPresented: $showingDeleteAllAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete Everything", role: .destructive) {
+                deleteAllExercises()
+            }
+        } message: {
+            Text("This will permanently delete ALL your exercises and workout history. This action cannot be undone.")
+        }
         #if DEBUG
         .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {
             Button("Cancel", role: .cancel) { }
@@ -175,5 +208,14 @@ struct SettingsView: View {
             Text("This will DELETE all your workout data including exercises and sets. This cannot be undone.")
         }
         #endif
+    }
+
+    private func deleteAllExercises() {
+        do {
+            try modelContext.delete(model: Exercise.self)
+            try modelContext.save()
+        } catch {
+            print("Failed to delete all exercises: \(error)")
+        }
     }
 }

@@ -215,6 +215,8 @@ struct InlineProgressChart: View {
                 }
                 .font(themeManager.currentTheme.dataFont(size: 10))
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .frame(width: 25, height: 180)
 
                 // Main chart
@@ -231,6 +233,8 @@ struct InlineProgressChart: View {
                 }
                 .font(themeManager.currentTheme.dataFont(size: 10))
                 .foregroundStyle(themeManager.currentTheme.chartColor1)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .frame(width: 35, height: 180)
 
                 // Main chart
@@ -247,6 +251,8 @@ struct InlineProgressChart: View {
                 }
                 .font(themeManager.currentTheme.dataFont(size: 10))
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .frame(width: 25, height: 180)
             }
         }

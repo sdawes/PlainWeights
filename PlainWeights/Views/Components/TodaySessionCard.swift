@@ -33,11 +33,6 @@ struct TodaySessionCard: View {
                 // Only show stats when sets exist
                 if setCount > 0 {
                     HStack(spacing: 6) {
-                        Text("\(setCount) sets")
-                            .font(themeManager.currentTheme.dataFont(size: 13))
-
-                        Text("•")
-
                         if isWeightedExercise {
                             HStack(spacing: 2) {
                                 Text(Formatters.formatVolume(volume))

@@ -335,7 +335,7 @@ struct ExerciseDetailView: View {
     // Form state
     @State private var noteText: String = ""
     @State private var showingDeleteAlert = false
-    @State private var showingNotesSheet = false
+    @State private var showNotes: Bool = false
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
     @State private var showChart: Bool = true  // Will be set in onAppear from setting
@@ -437,6 +437,16 @@ struct ExerciseDetailView: View {
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
+
+            // Inline Notes - conditional based on toggle
+            if showNotes {
+                Section {
+                    InlineNotesComponent(noteText: $noteText, onSave: updateNote)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+            }
 
             // Inline Progress Chart - conditional based on toggle
             if showChart && !sets.isEmpty {
@@ -643,18 +653,20 @@ struct ExerciseDetailView: View {
                 .contentShape(Rectangle())
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showingNotesSheet = true }) {
-                    Image(systemName: "doc.text")
+                Button(action: { showNotes.toggle() }) {
+                    Image(systemName: "note.text")
                         .font(.callout)
                         .fontWeight(.medium)
-                        .foregroundStyle(themeManager.currentTheme.textColor)
+                        .foregroundStyle(showNotes
+                            ? themeManager.currentTheme.accent
+                            : themeManager.currentTheme.textColor)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingEditSheet = true }) {
-                    Image(systemName: "square.and.pencil")
+                    Image(systemName: "pencil")
                         .font(.callout)
                         .fontWeight(.medium)
                         .foregroundStyle(themeManager.currentTheme.textColor)
@@ -686,20 +698,13 @@ struct ExerciseDetailView: View {
             )
             .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
-        .sheet(isPresented: $showingNotesSheet) {
-            ExerciseNotesSheet(
-                exercise: exercise,
-                noteText: $noteText,
-                onSave: updateNote
-            )
-            .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        }
         .sheet(isPresented: $showingEditSheet) {
             AddExerciseView(exerciseToEdit: exercise)
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .onAppear {
             showChart = themeManager.chartVisibleByDefault
+            showNotes = themeManager.notesVisibleByDefault
             updateCachedData()
         }
         .onChange(of: sets) { _, _ in

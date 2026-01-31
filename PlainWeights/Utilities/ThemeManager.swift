@@ -11,6 +11,7 @@ import SwiftUI
 final class ThemeManager {
     private static let themeKey = "selectedTheme"
     private static let chartVisibleKey = "chartVisibleByDefault"
+    private static let notesVisibleKey = "notesVisibleByDefault"
 
     var currentTheme: AppTheme {
         didSet {
@@ -24,11 +25,20 @@ final class ThemeManager {
         }
     }
 
+    var notesVisibleByDefault: Bool {
+        didSet {
+            UserDefaults.standard.set(notesVisibleByDefault, forKey: Self.notesVisibleKey)
+        }
+    }
+
     init() {
         let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.dark.rawValue
         self.currentTheme = AppTheme(rawValue: savedTheme) ?? .dark
 
         // Chart visibility - defaults to true (visible)
         self.chartVisibleByDefault = UserDefaults.standard.object(forKey: Self.chartVisibleKey) as? Bool ?? true
+
+        // Notes visibility - defaults to false (hidden)
+        self.notesVisibleByDefault = UserDefaults.standard.object(forKey: Self.notesVisibleKey) as? Bool ?? false
     }
 }

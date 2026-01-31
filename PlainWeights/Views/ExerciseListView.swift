@@ -54,11 +54,6 @@ struct FilteredExerciseListView: View {
 
     @State private var exerciseToDelete: Exercise?
 
-    #if DEBUG
-    @State private var showingGenerateDataAlert = false
-    @State private var showingClearDataAlert = false
-    #endif
-
     init(searchText: String, showingAddExercise: Binding<Bool>, navigationPath: Binding<NavigationPath>) {
         self.searchText = searchText
         self._showingAddExercise = showingAddExercise
@@ -193,29 +188,6 @@ struct FilteredExerciseListView: View {
                         .fontWeight(.medium)
                 }
             }
-            #if DEBUG
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button("Print Data to Console") {
-                        TestDataGenerator.printCurrentData(modelContext: modelContext)
-                    }
-
-                    Divider()
-
-                    Button("Generate Test Data", role: .destructive) {
-                        showingGenerateDataAlert = true
-                    }
-                    Button("Clear All Data", role: .destructive) {
-                        showingClearDataAlert = true
-                    }
-                } label: {
-                    Image(systemName: "hammer")
-                        .font(.callout)
-                        .fontWeight(.medium)
-                        .foregroundStyle(themeManager.currentTheme.textColor)
-                }
-            }
-            #endif
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     showingSummary = true
@@ -241,24 +213,6 @@ struct FilteredExerciseListView: View {
             SettingsView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
-        #if DEBUG
-        .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete & Generate", role: .destructive) {
-                TestDataGenerator.generateTestData(modelContext: modelContext)
-            }
-        } message: {
-            Text("This will DELETE all your existing workout data and replace it with test data. This cannot be undone.")
-        }
-        .alert("Clear All Data?", isPresented: $showingClearDataAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete All", role: .destructive) {
-                TestDataGenerator.clearAllData(modelContext: modelContext)
-            }
-        } message: {
-            Text("This will DELETE all your workout data including exercises and sets. This cannot be undone.")
-        }
-        #endif
         .alert("Delete Exercise", isPresented: Binding(
             get: { exerciseToDelete != nil },
             set: { if !$0 { exerciseToDelete = nil } }

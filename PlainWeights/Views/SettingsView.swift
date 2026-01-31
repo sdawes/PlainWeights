@@ -9,7 +9,13 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
+
+    #if DEBUG
+    @State private var showingGenerateDataAlert = false
+    @State private var showingClearDataAlert = false
+    #endif
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -64,9 +70,9 @@ struct SettingsView: View {
                 }
             }
 
-            // Chart section
+            // Display section
             VStack(alignment: .leading, spacing: 12) {
-                Text("Charts")
+                Text("Display")
                     .font(themeManager.currentTheme.subheadlineFont)
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
@@ -76,11 +82,98 @@ struct SettingsView: View {
                 ))
                 .font(themeManager.currentTheme.bodyFont)
                 .tint(themeManager.currentTheme.primary)
+
+                Toggle("Show notes by default", isOn: Binding(
+                    get: { themeManager.notesVisibleByDefault },
+                    set: { themeManager.notesVisibleByDefault = $0 }
+                ))
+                .font(themeManager.currentTheme.bodyFont)
+                .tint(themeManager.currentTheme.primary)
             }
+
+            #if DEBUG
+            // Developer Tools section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Developer Tools")
+                    .font(themeManager.currentTheme.subheadlineFont)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                VStack(spacing: 8) {
+                    // Print Data button
+                    Button {
+                        TestDataGenerator.printCurrentData(modelContext: modelContext)
+                    } label: {
+                        HStack {
+                            Image(systemName: "terminal")
+                            Text("Print Data to Console")
+                        }
+                        .font(themeManager.currentTheme.bodyFont)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(themeManager.currentTheme.muted)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+
+                    // Generate and Clear buttons side by side
+                    HStack(spacing: 8) {
+                        Button {
+                            showingGenerateDataAlert = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "wand.and.stars")
+                                Text("Generate")
+                            }
+                            .font(themeManager.currentTheme.bodyFont)
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity)
+                            .padding(12)
+                            .background(themeManager.currentTheme.muted)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        .buttonStyle(.plain)
+
+                        Button {
+                            showingClearDataAlert = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Clear All")
+                            }
+                            .font(themeManager.currentTheme.bodyFont)
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity)
+                            .padding(12)
+                            .background(themeManager.currentTheme.muted)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            #endif
 
             Spacer()
         }
         .padding(24)
         .background(themeManager.currentTheme.background)
+        #if DEBUG
+        .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete & Generate", role: .destructive) {
+                TestDataGenerator.generateTestData(modelContext: modelContext)
+            }
+        } message: {
+            Text("This will DELETE all your existing workout data and replace it with test data. This cannot be undone.")
+        }
+        .alert("Clear All Data?", isPresented: $showingClearDataAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete All", role: .destructive) {
+                TestDataGenerator.clearAllData(modelContext: modelContext)
+            }
+        } message: {
+            Text("This will DELETE all your workout data including exercises and sets. This cannot be undone.")
+        }
+        #endif
     }
 }

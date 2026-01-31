@@ -130,6 +130,16 @@ struct FilteredExerciseListView: View {
                                 Text("Last: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
                                     .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
                                     .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+
+                                Spacer()
+
+                                // Progress indicators on the right
+                                if let progress = RecentProgressCalculator.calculate(from: exercise.sets),
+                                   progress.hasValidComparison,
+                                   progress.isWeightedExercise,
+                                   progress.hasAnyChange {
+                                    ExerciseProgressIndicator(progress: progress)
+                                }
                             }
                             .padding(.top, 10)
                         }
@@ -182,17 +192,17 @@ struct FilteredExerciseListView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showingAddExercise = true } label: {
-                    Image(systemName: "plus")
+                Button {
+                    showingSummary = true
+                } label: {
+                    Image(systemName: "chart.bar.doc.horizontal")
                         .font(.callout)
                         .fontWeight(.medium)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingSummary = true
-                } label: {
-                    Image(systemName: "chart.bar.doc.horizontal")
+                Button { showingAddExercise = true } label: {
+                    Image(systemName: "plus")
                         .font(.callout)
                         .fontWeight(.medium)
                 }

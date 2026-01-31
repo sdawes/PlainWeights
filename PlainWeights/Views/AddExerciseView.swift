@@ -94,7 +94,11 @@ struct AddExerciseView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(nameFieldFocused ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                        .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(nameFieldFocused ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
                 )
                 .focused($nameFieldFocused)
                 .onSubmit {
@@ -120,7 +124,11 @@ struct AddExerciseView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(tagFieldFocused ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                            .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(tagFieldFocused ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
                     )
                     .focused($tagFieldFocused)
                     .onChange(of: tagInput) { _, newValue in

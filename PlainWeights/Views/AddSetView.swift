@@ -134,6 +134,14 @@ struct AddSetView: View {
                         .padding(16)
                         .background(themeManager.currentTheme.muted)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(focusedField == .weight ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                        )
                         .onChange(of: weightText) { _, newValue in
                             // Allow only digits and one decimal point, max 6 chars (e.g., "100.25")
                             let filtered = newValue.filter { $0.isNumber || $0 == "." }
@@ -161,6 +169,14 @@ struct AddSetView: View {
                         .padding(16)
                         .background(themeManager.currentTheme.muted)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(focusedField == .reps ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                        )
                         .onChange(of: repsText) { _, newValue in
                             // Allow only digits, max 3 chars
                             let filtered = newValue.filter { $0.isNumber }
@@ -193,6 +209,13 @@ struct AddSetView: View {
         .background(themeManager.currentTheme.background)
         .onAppear {
             focusedField = .weight
+        }
+        .onChange(of: focusedField) { _, newValue in
+            if newValue != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    UIApplication.shared.sendAction(#selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil)
+                }
+            }
         }
     }
 

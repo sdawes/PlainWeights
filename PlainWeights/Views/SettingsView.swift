@@ -64,6 +64,20 @@ struct SettingsView: View {
                 }
             }
 
+            // Chart section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Charts")
+                    .font(themeManager.currentTheme.subheadlineFont)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                Toggle("Show charts by default", isOn: Binding(
+                    get: { themeManager.chartVisibleByDefault },
+                    set: { themeManager.chartVisibleByDefault = $0 }
+                ))
+                .font(themeManager.currentTheme.bodyFont)
+                .tint(themeManager.currentTheme.primary)
+            }
+
             Spacer()
         }
         .padding(24)

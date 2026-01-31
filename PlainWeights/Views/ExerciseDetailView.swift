@@ -22,31 +22,118 @@ struct ComparisonMetricsCard: View {
     let comparisonMode: ComparisonMode
     let sets: [ExerciseSet]
 
-    // Sets excluding today (for metrics calculation)
-    private var setsExcludingToday: [ExerciseSet] {
+    // Cached metrics - computed in init to prevent layout shift and improve scroll performance
+    @State private var cachedTodaysSets: [ExerciseSet]
+    @State private var cachedSetsExcludingToday: [ExerciseSet]
+    @State private var cachedLastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)?
+    @State private var cachedBestMetrics: BestSessionCalculator.BestDayMetrics?
+    @State private var cachedLastModeIndicators: ProgressTracker.LastModeIndicators?
+    @State private var cachedBestModeIndicators: ProgressTracker.BestModeIndicators?
+
+    init(comparisonMode: ComparisonMode, sets: [ExerciseSet]) {
+        self.comparisonMode = comparisonMode
+        self.sets = sets
+
+        // Pre-compute all metrics during init
+        let computed = Self.computeAllMetrics(sets: sets, comparisonMode: comparisonMode)
+        _cachedTodaysSets = State(initialValue: computed.todaysSets)
+        _cachedSetsExcludingToday = State(initialValue: computed.setsExcludingToday)
+        _cachedLastSessionMetrics = State(initialValue: computed.lastSessionMetrics)
+        _cachedBestMetrics = State(initialValue: computed.bestMetrics)
+        _cachedLastModeIndicators = State(initialValue: computed.lastModeIndicators)
+        _cachedBestModeIndicators = State(initialValue: computed.bestModeIndicators)
+    }
+
+    // MARK: - Static Computation
+
+    private struct ComputedMetrics {
+        let todaysSets: [ExerciseSet]
+        let setsExcludingToday: [ExerciseSet]
+        let lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)?
+        let bestMetrics: BestSessionCalculator.BestDayMetrics?
+        let lastModeIndicators: ProgressTracker.LastModeIndicators?
+        let bestModeIndicators: ProgressTracker.BestModeIndicators?
+    }
+
+    private static func computeAllMetrics(sets: [ExerciseSet], comparisonMode: ComparisonMode) -> ComputedMetrics {
+        // Today's sets
+        let todaysSets = TodaySessionCalculator.getTodaysSets(from: sets)
+
+        // Sets excluding today
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        return sets.filter { calendar.startOfDay(for: $0.timestamp) < today }
-    }
+        let setsExcludingToday = sets.filter { calendar.startOfDay(for: $0.timestamp) < today }
 
-    // Today's sets
-    private var todaysSets: [ExerciseSet] {
-        TodaySessionCalculator.getTodaysSets(from: sets)
-    }
-
-    // Last session metrics
-    private var lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)? {
+        // Last session metrics
         let progressState = ProgressTracker.createProgressState(from: sets)
-        guard let lastInfo = progressState.lastCompletedDayInfo else { return nil }
-        return (lastInfo.date, lastInfo.maxWeight, lastInfo.maxWeightReps, lastInfo.volume)
+        let lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)?
+        if let lastInfo = progressState.lastCompletedDayInfo {
+            lastSessionMetrics = (lastInfo.date, lastInfo.maxWeight, lastInfo.maxWeightReps, lastInfo.volume)
+        } else {
+            lastSessionMetrics = nil
+        }
+
+        // Best metrics
+        let bestMetrics = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
+
+        // Last mode indicators
+        var lastModeIndicators: ProgressTracker.LastModeIndicators? = nil
+        if comparisonMode == .lastSession, let lastMetrics = lastSessionMetrics, !todaysSets.isEmpty {
+            let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: sets)
+            let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: sets)
+            let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
+            let exerciseType = ExerciseMetricsType.determine(from: sets)
+
+            lastModeIndicators = ProgressTracker.LastModeIndicators.compare(
+                todaysMaxWeight: todaysMaxWeight,
+                todaysMaxReps: todaysMaxReps,
+                todaysVolume: todaysVolume,
+                lastSessionMaxWeight: lastMetrics.maxWeight,
+                lastSessionMaxReps: lastMetrics.maxReps,
+                lastSessionVolume: lastMetrics.totalVolume,
+                exerciseType: exerciseType
+            )
+        }
+
+        // Best mode indicators
+        var bestModeIndicators: ProgressTracker.BestModeIndicators? = nil
+        if comparisonMode == .allTimeBest {
+            bestModeIndicators = ProgressTracker.calculateBestModeIndicators(
+                todaySets: todaysSets,
+                bestMetrics: bestMetrics
+            )
+        }
+
+        return ComputedMetrics(
+            todaysSets: todaysSets,
+            setsExcludingToday: setsExcludingToday,
+            lastSessionMetrics: lastSessionMetrics,
+            bestMetrics: bestMetrics,
+            lastModeIndicators: lastModeIndicators,
+            bestModeIndicators: bestModeIndicators
+        )
     }
 
-    // Best ever metrics
-    private var bestMetrics: BestSessionCalculator.BestDayMetrics? {
-        BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
+    private func updateCache() {
+        let computed = Self.computeAllMetrics(sets: sets, comparisonMode: comparisonMode)
+        cachedTodaysSets = computed.todaysSets
+        cachedSetsExcludingToday = computed.setsExcludingToday
+        cachedLastSessionMetrics = computed.lastSessionMetrics
+        cachedBestMetrics = computed.bestMetrics
+        cachedLastModeIndicators = computed.lastModeIndicators
+        cachedBestModeIndicators = computed.bestModeIndicators
     }
 
-    // Current metrics based on mode
+    // MARK: - Simple Getters for Cached Values
+
+    private var todaysSets: [ExerciseSet] { cachedTodaysSets }
+    private var setsExcludingToday: [ExerciseSet] { cachedSetsExcludingToday }
+    private var lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)? { cachedLastSessionMetrics }
+    private var bestMetrics: BestSessionCalculator.BestDayMetrics? { cachedBestMetrics }
+    private var lastModeIndicators: ProgressTracker.LastModeIndicators? { cachedLastModeIndicators }
+    private var bestModeIndicators: ProgressTracker.BestModeIndicators? { cachedBestModeIndicators }
+
+    // Current metrics based on mode (derived from cached values - cheap)
     private var currentMetrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double)? {
         switch comparisonMode {
         case .lastSession:
@@ -58,38 +145,7 @@ struct ComparisonMetricsCard: View {
         }
     }
 
-    // Progress indicators for Last Session mode
-    private var lastModeIndicators: ProgressTracker.LastModeIndicators? {
-        guard comparisonMode == .lastSession,
-              let lastMetrics = lastSessionMetrics,
-              !todaysSets.isEmpty else { return nil }
-
-        let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: sets)
-        let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: sets)
-        let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
-        let exerciseType = ExerciseMetricsType.determine(from: sets)
-
-        return ProgressTracker.LastModeIndicators.compare(
-            todaysMaxWeight: todaysMaxWeight,
-            todaysMaxReps: todaysMaxReps,
-            todaysVolume: todaysVolume,
-            lastSessionMaxWeight: lastMetrics.maxWeight,
-            lastSessionMaxReps: lastMetrics.maxReps,
-            lastSessionVolume: lastMetrics.totalVolume,
-            exerciseType: exerciseType
-        )
-    }
-
-    // Progress indicators for Best mode
-    private var bestModeIndicators: ProgressTracker.BestModeIndicators? {
-        guard comparisonMode == .allTimeBest else { return nil }
-        return ProgressTracker.calculateBestModeIndicators(
-            todaySets: todaysSets,
-            bestMetrics: bestMetrics
-        )
-    }
-
-    // Header text with date
+    // Header text with date (derived - cheap)
     private var headerText: String {
         guard let metrics = currentMetrics, let date = metrics.date else {
             return comparisonMode == .lastSession ? "Last Session" : "All-Time Best"
@@ -98,7 +154,7 @@ struct ComparisonMetricsCard: View {
         return comparisonMode == .lastSession ? "Last Session (\(dateStr))" : "All-Time Best (\(dateStr))"
     }
 
-    // Delta values for comparison row
+    // Delta values for comparison row (derived from cached indicators - cheap)
     private var weightDirection: ProgressTracker.PRDirection? {
         if let indicators = lastModeIndicators { return indicators.weightDirection }
         if let indicators = bestModeIndicators { return indicators.weightDirection }
@@ -135,12 +191,12 @@ struct ComparisonMetricsCard: View {
         return nil
     }
 
-    // Check if today has sets (to show comparison row)
+    // Check if today has sets (derived - cheap)
     private var hasTodaySets: Bool {
         !todaysSets.isEmpty
     }
 
-    // Check if today has working sets (non-warmup, non-bonus)
+    // Check if today has working sets (derived - cheap)
     private var hasWorkingSets: Bool {
         todaysSets.contains { !$0.isWarmUp && !$0.isBonus }
     }
@@ -208,6 +264,12 @@ struct ComparisonMetricsCard: View {
                 .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
         )
         .animation(.easeInOut(duration: 0.2), value: comparisonMode)
+        .onChange(of: sets) { _, _ in
+            updateCache()
+        }
+        .onChange(of: comparisonMode) { _, _ in
+            updateCache()
+        }
     }
 
     // MARK: - Metric Column Helper
@@ -278,84 +340,45 @@ struct ExerciseDetailView: View {
     @State private var comparisonMode: ComparisonMode = .lastSession
     @State private var showChart: Bool = true  // Will be set in onAppear from setting
 
-    // Cached data for performance
+    // Cached data for performance - updated only when sets change
     @State private var todaySets: [ExerciseSet] = []
     @State private var historicDayGroups: [ExerciseDataGrouper.DayGroup] = []
+    @State private var cachedTodaysVolume: Double = 0
+    @State private var cachedTodaysTotalReps: Int = 0
+    @State private var cachedSessionDuration: Int? = nil
+    @State private var cachedIsWeightedExercise: Bool = true
+    @State private var cachedLastSessionVolume: Double = 0
+    @State private var cachedBestSessionVolume: Double = 0
+    @State private var cachedLastSessionReps: Int = 0
+    @State private var cachedBestSessionReps: Int = 0
 
-    // Today's volume for running total
-    private var todaysVolume: Double {
-        TodaySessionCalculator.getTodaysVolume(from: Array(sets))
-    }
+    // Simple getters for cached values
+    private var todaysVolume: Double { cachedTodaysVolume }
+    private var todaysTotalReps: Int { cachedTodaysTotalReps }
+    private var sessionDurationMinutes: Int? { cachedSessionDuration }
+    private var isWeightedExercise: Bool { cachedIsWeightedExercise }
+    private var lastSessionVolume: Double { cachedLastSessionVolume }
+    private var bestSessionVolume: Double { cachedBestSessionVolume }
+    private var lastSessionReps: Int { cachedLastSessionReps }
+    private var bestSessionReps: Int { cachedBestSessionReps }
 
-    // Today's cumulative reps (sum of all sets today)
-    private var todaysTotalReps: Int {
-        TodaySessionCalculator.getTodaysTotalReps(from: Array(sets))
-    }
-
-    // Session duration in minutes
-    private var sessionDurationMinutes: Int? {
-        TodaySessionCalculator.getSessionDurationMinutes(from: Array(sets))
-    }
-
-    // Check if this is a weighted exercise (any working set has weight > 0)
-    private var isWeightedExercise: Bool {
-        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
-        return workingSets.contains { $0.weight > 0 }
-    }
-
-    // Last session volume (baseline) - returns 0 if no data
-    private var lastSessionVolume: Double {
-        LastSessionCalculator.getLastSessionVolume(from: Array(sets))
-    }
-
-    // Best ever volume (upper target) - exclude today
-    private var bestSessionVolume: Double {
-        let setsExcludingToday = Array(sets).filter {
-            Calendar.current.startOfDay(for: $0.timestamp) < Calendar.current.startOfDay(for: Date())
-        }
-        return BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)?.totalVolume ?? 0
-    }
-
-    // Percentage of baseline (treat 0 as 1 to always show percentage)
+    // Derived properties (cheap - just use cached values)
     private var percentOfBaseline: Int {
-        let divisor = max(lastSessionVolume, 1)
-        return Int(round((todaysVolume / divisor) * 100))
+        let divisor = max(cachedLastSessionVolume, 1)
+        return Int(round((cachedTodaysVolume / divisor) * 100))
     }
 
-    // Percentage of upper target (treat 0 as 1 to always show percentage)
     private var percentOfTarget: Int {
-        let divisor = max(bestSessionVolume, 1)
-        return Int(round((todaysVolume / divisor) * 100))
+        let divisor = max(cachedBestSessionVolume, 1)
+        return Int(round((cachedTodaysVolume / divisor) * 100))
     }
 
-    // Color for baseline comparison
-    private var baselineColor: Color {
-        .primary
-    }
-
-    // Color for target comparison
-    private var targetColor: Color {
-        .primary
-    }
-
-    // Comparison volume based on selected mode
     private var comparisonVolume: Double {
-        comparisonMode == .lastSession ? lastSessionVolume : bestSessionVolume
+        comparisonMode == .lastSession ? cachedLastSessionVolume : cachedBestSessionVolume
     }
 
-    // Last session total reps (for reps-only exercises)
-    private var lastSessionReps: Int {
-        RepsAnalytics.getLastSessionTotalRepsVolume(from: Array(sets))
-    }
-
-    // Best session total reps (for reps-only exercises)
-    private var bestSessionReps: Int {
-        RepsAnalytics.getBestSessionTotalReps(from: Array(sets))
-    }
-
-    // Comparison reps based on selected mode (for reps-only exercises)
     private var comparisonReps: Int {
-        comparisonMode == .lastSession ? lastSessionReps : bestSessionReps
+        comparisonMode == .lastSession ? cachedLastSessionReps : cachedBestSessionReps
     }
 
     // Label for progress bar based on selected mode
@@ -689,16 +712,37 @@ struct ExerciseDetailView: View {
 
     /// Update cached expensive calculations when sets change
     private func updateCachedData() {
+        let allSets = Array(sets)
         let (todaysData, historicData) = ExerciseDataGrouper.separateTodayFromHistoric(sets: sets)
         todaySets = todaysData
         historicDayGroups = historicData
+
+        // Cache expensive calculations ONCE
+        cachedTodaysVolume = TodaySessionCalculator.getTodaysVolume(from: allSets)
+        cachedTodaysTotalReps = TodaySessionCalculator.getTodaysTotalReps(from: allSets)
+        cachedSessionDuration = TodaySessionCalculator.getSessionDurationMinutes(from: allSets)
+        cachedLastSessionVolume = LastSessionCalculator.getLastSessionVolume(from: allSets)
+        cachedLastSessionReps = RepsAnalytics.getLastSessionTotalRepsVolume(from: allSets)
+
+        // Exclude today for best calculations
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let setsExcludingToday = allSets.filter { calendar.startOfDay(for: $0.timestamp) < today }
+        cachedBestSessionVolume = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)?.totalVolume ?? 0
+        cachedBestSessionReps = RepsAnalytics.getBestSessionTotalReps(from: allSets)
+
+        // Check if weighted exercise
+        let workingSets = todaysData.filter { !$0.isWarmUp && !$0.isBonus }
+        cachedIsWeightedExercise = workingSets.contains { $0.weight > 0 }
     }
 
     private func deleteSet(_ set: ExerciseSet) {
-        do {
-            try ExerciseSetService.deleteSet(set, context: context)
-        } catch {
-            print("Error deleting set: \(error)")
+        withAnimation {
+            do {
+                try ExerciseSetService.deleteSet(set, context: context)
+            } catch {
+                print("Error deleting set: \(error)")
+            }
         }
     }
 

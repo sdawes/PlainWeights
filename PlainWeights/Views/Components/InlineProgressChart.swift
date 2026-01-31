@@ -29,12 +29,21 @@ struct InlineProgressChart: View {
     @Environment(ThemeManager.self) private var themeManager
     let sets: [ExerciseSet]
 
-    // Animation state
-    @State private var isAnimating = false
+    // Animation state - start true so chart appears immediately with container
+    @State private var isAnimating = true
+
+    // Cached chart data - computed on init to prevent layout shift
+    @State private var cachedChartData: [ChartDataPoint]
+
+    init(sets: [ExerciseSet]) {
+        self.sets = sets
+        // Compute chart data during init to prevent layout shift on appear
+        _cachedChartData = State(initialValue: Self.computeChartData(from: sets))
+    }
 
     // MARK: - Data Transformation
 
-    private var chartData: [ChartDataPoint] {
+    private static func computeChartData(from sets: [ExerciseSet]) -> [ChartDataPoint] {
         let calendar = Calendar.current
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM d"
@@ -92,7 +101,7 @@ struct InlineProgressChart: View {
 
     // Axis range values for labels
     private var weightRange: (min: Double, max: Double) {
-        let weights = chartData.map { $0.maxWeight }
+        let weights = cachedChartData.map { $0.maxWeight }
         let minVal = weights.min() ?? 0
         let maxVal = weights.max() ?? 100
         let padding = max((maxVal - minVal) * 0.1, 1)
@@ -100,7 +109,7 @@ struct InlineProgressChart: View {
     }
 
     private var repsRange: (min: Int, max: Int) {
-        let reps = chartData.map { $0.maxReps }
+        let reps = cachedChartData.map { $0.maxReps }
         let minVal = reps.min() ?? 0
         let maxVal = reps.max() ?? 10
         let padding = max(Int(Double(maxVal - minVal) * 0.1), 1)
@@ -109,7 +118,7 @@ struct InlineProgressChart: View {
 
     // Check if there's only one data point
     private var hasSingleDataPoint: Bool {
-        chartData.count == 1
+        cachedChartData.count == 1
     }
 
     // Check if this is a reps-only exercise (all weights are 0)
@@ -120,8 +129,8 @@ struct InlineProgressChart: View {
 
     // Determine if data spans multiple years
     private var spansMultipleYears: Bool {
-        guard let first = chartData.first?.date,
-              let last = chartData.last?.date else { return false }
+        guard let first = cachedChartData.first?.date,
+              let last = cachedChartData.last?.date else { return false }
         let calendar = Calendar.current
         return calendar.component(.year, from: first) != calendar.component(.year, from: last)
     }
@@ -139,7 +148,7 @@ struct InlineProgressChart: View {
 
     // Calculate evenly-spaced indices for X-axis labels (max 5)
     private var xAxisIndices: [Int] {
-        let count = chartData.count
+        let count = cachedChartData.count
         guard count > 1 else { return count == 1 ? [0] : [] }
 
         let maxLabels = min(5, count)
@@ -164,7 +173,7 @@ struct InlineProgressChart: View {
                 .font(themeManager.currentTheme.headlineFont)
                 .foregroundStyle(themeManager.currentTheme.primaryText)
 
-            if chartData.isEmpty {
+            if cachedChartData.isEmpty {
                 emptyState
             } else {
                 chartWithAxes
@@ -181,10 +190,8 @@ struct InlineProgressChart: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
         )
-        .onAppear {
-            withAnimation(.easeOut(duration: 0.4).delay(0.1)) {
-                isAnimating = true
-            }
+        .onChange(of: sets) { _, _ in
+            cachedChartData = Self.computeChartData(from: sets)
         }
     }
 
@@ -262,7 +269,7 @@ struct InlineProgressChart: View {
 
     @ViewBuilder
     private var chartView: some View {
-        Chart(chartData) { point in
+        Chart(cachedChartData) { point in
             if hasSingleDataPoint {
                 // Single point: show dot at center
                 if isRepsOnly {
@@ -376,16 +383,16 @@ struct InlineProgressChart: View {
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
                     .foregroundStyle(themeManager.currentTheme.borderColor)
                 AxisTick()
-                if let index = value.as(Int.self), index < chartData.count {
+                if let index = value.as(Int.self), index < cachedChartData.count {
                     AxisValueLabel {
-                        Text(formatDateLabel(chartData[index].date))
+                        Text(formatDateLabel(cachedChartData[index].date))
                             .font(.system(size: 9))
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                     }
                 }
             }
         }
-        .chartXScale(domain: 0...(max(chartData.count - 1, 1)))
+        .chartXScale(domain: 0...(max(cachedChartData.count - 1, 1)))
         .chartYAxis {
             AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))

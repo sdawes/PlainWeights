@@ -235,6 +235,155 @@ The app has its own theme system with Light and Dark themes, managed by `ThemeMa
 - **NEVER try to "improve" SwiftData with MVVM** - It breaks the framework's elegant design
 - **DO use Services for business logic** - But call them directly from views, not through ViewModels
 
+#### Caching SwiftData Transformations - CRITICAL FOR PERFORMANCE
+
+**Problem:** Computed properties that transform SwiftData (filtering, grouping, aggregating) run on EVERY view render - potentially 60+ times per second during scrolling, causing lag/jutter.
+
+**Solution:** Cache expensive transformations with `@State`, update only when data changes.
+
+```swift
+// ✅ CORRECT - Cache with @State, update on data change
+struct MyView: View {
+    let sets: [ExerciseSet]
+    @State private var cachedChartData: [ChartDataPoint]
+
+    init(sets: [ExerciseSet]) {
+        self.sets = sets
+        // Compute in init to prevent layout shift on appear
+        _cachedChartData = State(initialValue: Self.computeChartData(from: sets))
+    }
+
+    private static func computeChartData(from sets: [ExerciseSet]) -> [ChartDataPoint] {
+        // Expensive transformation logic
+    }
+
+    var body: some View {
+        Chart(cachedChartData) { ... }
+            .onChange(of: sets) { _, _ in
+                cachedChartData = Self.computeChartData(from: sets)
+            }
+    }
+}
+
+// ❌ WRONG - Computed property runs on every render
+struct MyView: View {
+    let sets: [ExerciseSet]
+
+    private var chartData: [ChartDataPoint] {
+        // This runs 60+ times/second during scroll!
+        sets.filter { ... }.grouped { ... }.map { ... }
+    }
+}
+```
+
+**Key patterns:**
+1. **Use static functions** for transformations called in `init` (can't access `self` yet)
+2. **Compute in init** when data is passed as parameter - prevents layout shift
+3. **Update in onChange(of:)** to react to data changes
+4. **Don't animate initial load** if it causes visible delay - set animation state to `true` initially
+
+### SwiftUI Animation Best Practices
+
+#### Deletions - Always Use `withAnimation`
+When deleting items from a List/ForEach, wrap the deletion in `withAnimation` to prevent glitchy animations where adjacent rows briefly disappear:
+
+```swift
+// ✅ CORRECT - Smooth deletion animation
+private func deleteItem(_ item: Item) {
+    withAnimation {
+        context.delete(item)
+        try? context.save()
+    }
+}
+
+// ❌ WRONG - Adjacent rows may flicker/disappear
+private func deleteItem(_ item: Item) {
+    context.delete(item)
+    try? context.save()
+}
+```
+
+#### State Changes That Affect Layout
+Any state change that adds/removes/reorders views should be wrapped in `withAnimation`:
+- Adding/removing items from arrays
+- Toggling visibility of sections
+- Reordering list items
+
+#### Input Field UX Patterns
+
+**Select All on Focus** - For numeric input fields, select all text when field gains focus:
+```swift
+.onChange(of: focusedField) { _, newValue in
+    if newValue != nil {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            UIApplication.shared.sendAction(#selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil)
+        }
+    }
+}
+```
+
+**Border Clipping Fix** - Use `.strokeBorder()` instead of `.stroke()` for overlays to prevent border clipping:
+```swift
+// ✅ CORRECT - Border draws inside bounds
+.overlay(
+    RoundedRectangle(cornerRadius: 12)
+        .strokeBorder(borderColor, lineWidth: 1)
+)
+
+// ❌ WRONG - Border may be clipped on edges
+.overlay(
+    RoundedRectangle(cornerRadius: 12)
+        .stroke(borderColor, lineWidth: 1)
+)
+```
+
+**Text Truncation Prevention** - For numeric labels that might overflow (e.g., chart axis labels), use:
+```swift
+Text("764.65")
+    .lineLimit(1)
+    .minimumScaleFactor(0.7)  // Shrinks text to fit rather than wrapping
+```
+
+#### Full Swipe-to-Delete with Confirmation Alert
+
+When you need full swipe to trigger a **confirmation alert** (e.g., deleting an entire exercise), NavigationLink blocks the gesture. Use programmatic navigation instead:
+
+```swift
+// ✅ CORRECT - Full swipe triggers confirmation alert
+@State private var navigationPath = NavigationPath()
+@State private var exerciseToDelete: Exercise?
+
+NavigationStack(path: $navigationPath) {
+    List {
+        ForEach(exercises) { exercise in
+            ExerciseRow(exercise: exercise)
+                .onTapGesture {
+                    navigationPath.append(exercise)  // Programmatic navigation
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        exerciseToDelete = exercise  // Triggers alert
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+        }
+    }
+    .alert("Delete Exercise?", isPresented: .constant(exerciseToDelete != nil)) {
+        // Confirmation buttons...
+    }
+}
+```
+
+**Note:** This pattern is for destructive actions needing confirmation (deleting exercises). For simple deletions without confirmation (like sets), standard swipe actions work fine without programmatic navigation.
+
+#### Reusable Components
+
+When creating UI elements that may be reused (buttons, inputs, etc.), create them as separate component files in `Views/Components/` rather than private functions within views. Examples:
+- `StepperButton.swift` - +/- buttons for numeric inputs
+- `TagPillView.swift` - Tag display pills
+- `FlowLayout.swift` - Wrapping horizontal layout
+
 ### Git Workflow
 **CRITICAL: DO NOT commit or push changes unless explicitly requested by the user.**
 - Only make commits when the user specifically asks you to commit

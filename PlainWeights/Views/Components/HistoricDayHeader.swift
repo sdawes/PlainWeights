@@ -36,6 +36,11 @@ struct HistoricDayHeader: View {
                 Spacer()
 
                 HStack(spacing: 6) {
+                    Text("\(dayGroup.sets.count) sets")
+                        .font(themeManager.currentTheme.dataFont(size: 13))
+
+                    Text("•")
+
                     if isWeightedDay {
                         HStack(spacing: 2) {
                             Text(Formatters.formatVolume(volume))

@@ -33,6 +33,11 @@ struct TodaySessionCard: View {
                 // Only show stats when sets exist
                 if setCount > 0 {
                     HStack(spacing: 6) {
+                        Text("\(setCount) sets")
+                            .font(themeManager.currentTheme.dataFont(size: 13))
+
+                        Text("•")
+
                         if isWeightedExercise {
                             HStack(spacing: 2) {
                                 Text(Formatters.formatVolume(volume))
@@ -48,6 +53,7 @@ struct TodaySessionCard: View {
                                     .font(themeManager.currentTheme.dataFont(size: 13))
                             }
                         }
+
                         if let mins = durationMinutes {
                             Text("•")
                             Text("\(mins) min")
@@ -94,12 +100,17 @@ struct TodaySessionCard: View {
                 )
                 .padding(16)
             } else {
-                // Show set count when no progress bar
-                HStack {
-                    Text("\(setCount) sets")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                        .foregroundStyle(themeManager.currentTheme.secondaryText)
-                    Spacer()
+                // Show empty progress bar with explanation when no comparison data
+                VStack(alignment: .leading, spacing: 8) {
+                    // Empty progress bar
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(themeManager.currentTheme.muted)
+                        .frame(height: 8)
+
+                    // Explanatory text
+                    Text("Next session will compare to this one")
+                        .font(themeManager.currentTheme.captionFont)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 }
                 .padding(16)
             }

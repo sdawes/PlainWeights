@@ -276,7 +276,6 @@ struct ExerciseDetailView: View {
     @State private var showingNotesSheet = false
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
-    @State private var showChart: Bool = false
 
     // Cached data for performance
     @State private var todaySets: [ExerciseSet] = []
@@ -395,7 +394,6 @@ struct ExerciseDetailView: View {
     }
 
     var body: some View {
-        ScrollViewReader { scrollProxy in
         List {
             // Title section
             Section {
@@ -410,23 +408,18 @@ struct ExerciseDetailView: View {
                 .padding(.leading, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .id("top")
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 
-            // Inline Progress Chart (toggled) - above segmentation picker
-            if showChart && !sets.isEmpty {
+            // Inline Progress Chart - always visible when sets exist
+            if !sets.isEmpty {
                 Section {
                     InlineProgressChart(sets: Array(sets))
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 }
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .top)).combined(with: .scale(scale: 0.95, anchor: .top)),
-                    removal: .opacity.combined(with: .scale(scale: 0.95, anchor: .top))
-                ))
             }
 
             // Comparison mode toggle
@@ -604,25 +597,6 @@ struct ExerciseDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        showChart.toggle()
-                        if showChart {
-                            scrollProxy.scrollTo("top", anchor: .top)
-                        }
-                    }
-                }) {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(.callout)
-                        .fontWeight(.medium)
-                        .foregroundStyle(showChart
-                            ? themeManager.currentTheme.accent
-                            : themeManager.currentTheme.textColor)
-                }
-                .buttonStyle(.plain)
-                .contentShape(Rectangle())
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingNotesSheet = true }) {
                     Image(systemName: "doc.text")
                         .font(.callout)
@@ -684,7 +658,6 @@ struct ExerciseDetailView: View {
         .onChange(of: sets) { _, _ in
             updateCachedData()
         }
-        } // ScrollViewReader
     }
 
     // MARK: - Data Management

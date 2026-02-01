@@ -114,6 +114,7 @@ class TestData {
     (name: "Plate loaded lat pulldown", tags: ["last", "back"], note: nil as String?, createdDate: date(2026, 1, 25, 16, 30, 4), lastUpdated: date(2026, 1, 25, 16, 33, 55)),
     (name: "Angled rope row", tags: ["back", "shoulders"], note: nil as String?, createdDate: date(2026, 1, 29, 16, 40, 39), lastUpdated: date(2026, 1, 29, 16, 46, 28)),
     (name: "Face pulls", tags: ["back"], note: "Height 5", createdDate: date(2026, 1, 29, 17, 16, 34), lastUpdated: date(2026, 1, 29, 17, 18, 0)),
+    (name: "Test Exercise", tags: ["Test"], note: "Performance test exercise with 2 years of weekly data", createdDate: date(2024, 2, 1, 10, 0, 0), lastUpdated: date(2026, 1, 27, 17, 0, 0)),
         ]
 
         // Create exercises
@@ -1828,6 +1829,536 @@ class TestData {
         addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 30, 17, 42, 47), restSeconds: 180)
         addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 30, 17, 50, 13), restSeconds: 180)
         addSet(exercise: "Press ups", weight: 0.0, reps: 12, timestamp: date(2026, 1, 30, 17, 54, 29), restSeconds: 180)
+
+        // ============================================================
+        // TEST EXERCISE: 2 years of weekly data (104 sessions)
+        // Feb 2024 - Jan 2026, progressive weight increase 40kg -> 80kg
+        // ============================================================
+
+        // Week 1: 2024-02-01
+        addSet(exercise: "Test Exercise", weight: 40.0, reps: 10, timestamp: date(2024, 2, 1, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 40.0, reps: 10, timestamp: date(2024, 2, 1, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 40.0, reps: 9, timestamp: date(2024, 2, 1, 17, 6, 0), restSeconds: 90)
+
+        // Week 2: 2024-02-08
+        addSet(exercise: "Test Exercise", weight: 40.0, reps: 10, timestamp: date(2024, 2, 8, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 40.0, reps: 10, timestamp: date(2024, 2, 8, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 40.0, reps: 10, timestamp: date(2024, 2, 8, 17, 6, 0), restSeconds: 90)
+
+        // Week 3: 2024-02-15
+        addSet(exercise: "Test Exercise", weight: 42.5, reps: 10, timestamp: date(2024, 2, 15, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 42.5, reps: 9, timestamp: date(2024, 2, 15, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 42.5, reps: 8, timestamp: date(2024, 2, 15, 17, 6, 0), restSeconds: 90)
+
+        // Week 4: 2024-02-22
+        addSet(exercise: "Test Exercise", weight: 42.5, reps: 10, timestamp: date(2024, 2, 22, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 42.5, reps: 10, timestamp: date(2024, 2, 22, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 42.5, reps: 9, timestamp: date(2024, 2, 22, 17, 6, 0), restSeconds: 90)
+
+        // Week 5: 2024-02-29
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 10, timestamp: date(2024, 2, 29, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 9, timestamp: date(2024, 2, 29, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 8, timestamp: date(2024, 2, 29, 17, 6, 0), restSeconds: 90)
+
+        // Week 6: 2024-03-07
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 10, timestamp: date(2024, 3, 7, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 10, timestamp: date(2024, 3, 7, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 9, timestamp: date(2024, 3, 7, 17, 6, 0), restSeconds: 90)
+
+        // Week 7: 2024-03-14
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 11, timestamp: date(2024, 3, 14, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 10, timestamp: date(2024, 3, 14, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 45.0, reps: 10, timestamp: date(2024, 3, 14, 17, 6, 0), restSeconds: 90)
+
+        // Week 8: 2024-03-21
+        addSet(exercise: "Test Exercise", weight: 47.5, reps: 10, timestamp: date(2024, 3, 21, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 47.5, reps: 9, timestamp: date(2024, 3, 21, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 47.5, reps: 8, timestamp: date(2024, 3, 21, 17, 6, 0), restSeconds: 90)
+
+        // Week 9: 2024-03-28
+        addSet(exercise: "Test Exercise", weight: 47.5, reps: 10, timestamp: date(2024, 3, 28, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 47.5, reps: 10, timestamp: date(2024, 3, 28, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 47.5, reps: 9, timestamp: date(2024, 3, 28, 17, 6, 0), restSeconds: 90)
+
+        // Week 10: 2024-04-04
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 10, timestamp: date(2024, 4, 4, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 9, timestamp: date(2024, 4, 4, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 8, timestamp: date(2024, 4, 4, 17, 6, 0), restSeconds: 90)
+
+        // Week 11: 2024-04-11
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 10, timestamp: date(2024, 4, 11, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 10, timestamp: date(2024, 4, 11, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 9, timestamp: date(2024, 4, 11, 17, 6, 0), restSeconds: 90)
+
+        // Week 12: 2024-04-18
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 11, timestamp: date(2024, 4, 18, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 10, timestamp: date(2024, 4, 18, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 50.0, reps: 10, timestamp: date(2024, 4, 18, 17, 6, 0), restSeconds: 90)
+
+        // Week 13: 2024-04-25
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 10, timestamp: date(2024, 4, 25, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 9, timestamp: date(2024, 4, 25, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 8, timestamp: date(2024, 4, 25, 17, 6, 0), restSeconds: 90)
+
+        // Week 14: 2024-05-02
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 10, timestamp: date(2024, 5, 2, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 10, timestamp: date(2024, 5, 2, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 9, timestamp: date(2024, 5, 2, 17, 6, 0), restSeconds: 90)
+
+        // Week 15: 2024-05-09
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 11, timestamp: date(2024, 5, 9, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 10, timestamp: date(2024, 5, 9, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 52.5, reps: 10, timestamp: date(2024, 5, 9, 17, 6, 0), restSeconds: 90)
+
+        // Week 16: 2024-05-16
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 10, timestamp: date(2024, 5, 16, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 9, timestamp: date(2024, 5, 16, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 8, timestamp: date(2024, 5, 16, 17, 6, 0), restSeconds: 90)
+
+        // Week 17: 2024-05-23
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 10, timestamp: date(2024, 5, 23, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 10, timestamp: date(2024, 5, 23, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 9, timestamp: date(2024, 5, 23, 17, 6, 0), restSeconds: 90)
+
+        // Week 18: 2024-05-30
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 11, timestamp: date(2024, 5, 30, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 10, timestamp: date(2024, 5, 30, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 55.0, reps: 10, timestamp: date(2024, 5, 30, 17, 6, 0), restSeconds: 90)
+
+        // Week 19: 2024-06-06
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 10, timestamp: date(2024, 6, 6, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 9, timestamp: date(2024, 6, 6, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 8, timestamp: date(2024, 6, 6, 17, 6, 0), restSeconds: 90)
+
+        // Week 20: 2024-06-13
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 10, timestamp: date(2024, 6, 13, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 10, timestamp: date(2024, 6, 13, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 9, timestamp: date(2024, 6, 13, 17, 6, 0), restSeconds: 90)
+
+        // Week 21: 2024-06-20
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 11, timestamp: date(2024, 6, 20, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 10, timestamp: date(2024, 6, 20, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 57.5, reps: 10, timestamp: date(2024, 6, 20, 17, 6, 0), restSeconds: 90)
+
+        // Week 22: 2024-06-27
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 10, timestamp: date(2024, 6, 27, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 9, timestamp: date(2024, 6, 27, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 8, timestamp: date(2024, 6, 27, 17, 6, 0), restSeconds: 90)
+
+        // Week 23: 2024-07-04
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 10, timestamp: date(2024, 7, 4, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 10, timestamp: date(2024, 7, 4, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 9, timestamp: date(2024, 7, 4, 17, 6, 0), restSeconds: 90)
+
+        // Week 24: 2024-07-11
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 11, timestamp: date(2024, 7, 11, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 10, timestamp: date(2024, 7, 11, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 10, timestamp: date(2024, 7, 11, 17, 6, 0), restSeconds: 90)
+
+        // Week 25: 2024-07-18
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 12, timestamp: date(2024, 7, 18, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 11, timestamp: date(2024, 7, 18, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 60.0, reps: 10, timestamp: date(2024, 7, 18, 17, 6, 0), restSeconds: 90)
+
+        // Week 26: 2024-07-25 (6 months in)
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 10, timestamp: date(2024, 7, 25, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 9, timestamp: date(2024, 7, 25, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 8, timestamp: date(2024, 7, 25, 17, 6, 0), restSeconds: 90)
+
+        // Week 27: 2024-08-01
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 10, timestamp: date(2024, 8, 1, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 10, timestamp: date(2024, 8, 1, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 9, timestamp: date(2024, 8, 1, 17, 6, 0), restSeconds: 90)
+
+        // Week 28: 2024-08-08
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 11, timestamp: date(2024, 8, 8, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 10, timestamp: date(2024, 8, 8, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 62.5, reps: 10, timestamp: date(2024, 8, 8, 17, 6, 0), restSeconds: 90)
+
+        // Week 29: 2024-08-15
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 10, timestamp: date(2024, 8, 15, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 9, timestamp: date(2024, 8, 15, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 8, timestamp: date(2024, 8, 15, 17, 6, 0), restSeconds: 90)
+
+        // Week 30: 2024-08-22
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 10, timestamp: date(2024, 8, 22, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 10, timestamp: date(2024, 8, 22, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 9, timestamp: date(2024, 8, 22, 17, 6, 0), restSeconds: 90)
+
+        // Week 31: 2024-08-29
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 11, timestamp: date(2024, 8, 29, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 10, timestamp: date(2024, 8, 29, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 10, timestamp: date(2024, 8, 29, 17, 6, 0), restSeconds: 90)
+
+        // Week 32: 2024-09-05
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 12, timestamp: date(2024, 9, 5, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 11, timestamp: date(2024, 9, 5, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 65.0, reps: 10, timestamp: date(2024, 9, 5, 17, 6, 0), restSeconds: 90)
+
+        // Week 33: 2024-09-12
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 10, timestamp: date(2024, 9, 12, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 9, timestamp: date(2024, 9, 12, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 8, timestamp: date(2024, 9, 12, 17, 6, 0), restSeconds: 90)
+
+        // Week 34: 2024-09-19
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 10, timestamp: date(2024, 9, 19, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 10, timestamp: date(2024, 9, 19, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 9, timestamp: date(2024, 9, 19, 17, 6, 0), restSeconds: 90)
+
+        // Week 35: 2024-09-26
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 11, timestamp: date(2024, 9, 26, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 10, timestamp: date(2024, 9, 26, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 67.5, reps: 10, timestamp: date(2024, 9, 26, 17, 6, 0), restSeconds: 90)
+
+        // Week 36: 2024-10-03
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 10, timestamp: date(2024, 10, 3, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 9, timestamp: date(2024, 10, 3, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 8, timestamp: date(2024, 10, 3, 17, 6, 0), restSeconds: 90)
+
+        // Week 37: 2024-10-10
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 10, timestamp: date(2024, 10, 10, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 10, timestamp: date(2024, 10, 10, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 9, timestamp: date(2024, 10, 10, 17, 6, 0), restSeconds: 90)
+
+        // Week 38: 2024-10-17
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 11, timestamp: date(2024, 10, 17, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 10, timestamp: date(2024, 10, 17, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 10, timestamp: date(2024, 10, 17, 17, 6, 0), restSeconds: 90)
+
+        // Week 39: 2024-10-24
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 12, timestamp: date(2024, 10, 24, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 11, timestamp: date(2024, 10, 24, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 70.0, reps: 10, timestamp: date(2024, 10, 24, 17, 6, 0), restSeconds: 90)
+
+        // Week 40: 2024-10-31
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 10, timestamp: date(2024, 10, 31, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 9, timestamp: date(2024, 10, 31, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 8, timestamp: date(2024, 10, 31, 17, 6, 0), restSeconds: 90)
+
+        // Week 41: 2024-11-07
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 10, timestamp: date(2024, 11, 7, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 10, timestamp: date(2024, 11, 7, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 9, timestamp: date(2024, 11, 7, 17, 6, 0), restSeconds: 90)
+
+        // Week 42: 2024-11-14
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 11, timestamp: date(2024, 11, 14, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 10, timestamp: date(2024, 11, 14, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 10, timestamp: date(2024, 11, 14, 17, 6, 0), restSeconds: 90)
+
+        // Week 43: 2024-11-21
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 12, timestamp: date(2024, 11, 21, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 11, timestamp: date(2024, 11, 21, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 72.5, reps: 10, timestamp: date(2024, 11, 21, 17, 6, 0), restSeconds: 90)
+
+        // Week 44: 2024-11-28
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 10, timestamp: date(2024, 11, 28, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 9, timestamp: date(2024, 11, 28, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 8, timestamp: date(2024, 11, 28, 17, 6, 0), restSeconds: 90)
+
+        // Week 45: 2024-12-05
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 10, timestamp: date(2024, 12, 5, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 10, timestamp: date(2024, 12, 5, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 9, timestamp: date(2024, 12, 5, 17, 6, 0), restSeconds: 90)
+
+        // Week 46: 2024-12-12
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 11, timestamp: date(2024, 12, 12, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 10, timestamp: date(2024, 12, 12, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 10, timestamp: date(2024, 12, 12, 17, 6, 0), restSeconds: 90)
+
+        // Week 47: 2024-12-19
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 12, timestamp: date(2024, 12, 19, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 11, timestamp: date(2024, 12, 19, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 10, timestamp: date(2024, 12, 19, 17, 6, 0), restSeconds: 90)
+
+        // Week 48: 2024-12-26
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 12, timestamp: date(2024, 12, 26, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 12, timestamp: date(2024, 12, 26, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 75.0, reps: 11, timestamp: date(2024, 12, 26, 17, 6, 0), restSeconds: 90)
+
+        // Week 49: 2025-01-02
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 10, timestamp: date(2025, 1, 2, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 9, timestamp: date(2025, 1, 2, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 8, timestamp: date(2025, 1, 2, 17, 6, 0), restSeconds: 90)
+
+        // Week 50: 2025-01-09
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 10, timestamp: date(2025, 1, 9, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 10, timestamp: date(2025, 1, 9, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 9, timestamp: date(2025, 1, 9, 17, 6, 0), restSeconds: 90)
+
+        // Week 51: 2025-01-16
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 11, timestamp: date(2025, 1, 16, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 10, timestamp: date(2025, 1, 16, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 10, timestamp: date(2025, 1, 16, 17, 6, 0), restSeconds: 90)
+
+        // Week 52: 2025-01-23 (1 year mark)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 12, timestamp: date(2025, 1, 23, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 11, timestamp: date(2025, 1, 23, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 77.5, reps: 10, timestamp: date(2025, 1, 23, 17, 6, 0), restSeconds: 90)
+
+        // Week 53: 2025-01-30
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 10, timestamp: date(2025, 1, 30, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 9, timestamp: date(2025, 1, 30, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 8, timestamp: date(2025, 1, 30, 17, 6, 0), restSeconds: 90)
+
+        // Week 54: 2025-02-06
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 10, timestamp: date(2025, 2, 6, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 10, timestamp: date(2025, 2, 6, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 9, timestamp: date(2025, 2, 6, 17, 6, 0), restSeconds: 90)
+
+        // Week 55: 2025-02-13
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 11, timestamp: date(2025, 2, 13, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 10, timestamp: date(2025, 2, 13, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 10, timestamp: date(2025, 2, 13, 17, 6, 0), restSeconds: 90)
+
+        // Week 56: 2025-02-20
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 12, timestamp: date(2025, 2, 20, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 11, timestamp: date(2025, 2, 20, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 80.0, reps: 10, timestamp: date(2025, 2, 20, 17, 6, 0), restSeconds: 90)
+
+        // Week 57: 2025-02-27
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 10, timestamp: date(2025, 2, 27, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 9, timestamp: date(2025, 2, 27, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 8, timestamp: date(2025, 2, 27, 17, 6, 0), restSeconds: 90)
+
+        // Week 58: 2025-03-06
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 10, timestamp: date(2025, 3, 6, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 10, timestamp: date(2025, 3, 6, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 9, timestamp: date(2025, 3, 6, 17, 6, 0), restSeconds: 90)
+
+        // Week 59: 2025-03-13
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 11, timestamp: date(2025, 3, 13, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 10, timestamp: date(2025, 3, 13, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 10, timestamp: date(2025, 3, 13, 17, 6, 0), restSeconds: 90)
+
+        // Week 60: 2025-03-20
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 12, timestamp: date(2025, 3, 20, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 11, timestamp: date(2025, 3, 20, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 82.5, reps: 10, timestamp: date(2025, 3, 20, 17, 6, 0), restSeconds: 90)
+
+        // Week 61: 2025-03-27
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 10, timestamp: date(2025, 3, 27, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 9, timestamp: date(2025, 3, 27, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 8, timestamp: date(2025, 3, 27, 17, 6, 0), restSeconds: 90)
+
+        // Week 62: 2025-04-03
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 10, timestamp: date(2025, 4, 3, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 10, timestamp: date(2025, 4, 3, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 9, timestamp: date(2025, 4, 3, 17, 6, 0), restSeconds: 90)
+
+        // Week 63: 2025-04-10
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 11, timestamp: date(2025, 4, 10, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 10, timestamp: date(2025, 4, 10, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 10, timestamp: date(2025, 4, 10, 17, 6, 0), restSeconds: 90)
+
+        // Week 64: 2025-04-17
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 12, timestamp: date(2025, 4, 17, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 11, timestamp: date(2025, 4, 17, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 85.0, reps: 10, timestamp: date(2025, 4, 17, 17, 6, 0), restSeconds: 90)
+
+        // Week 65: 2025-04-24
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 10, timestamp: date(2025, 4, 24, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 9, timestamp: date(2025, 4, 24, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 8, timestamp: date(2025, 4, 24, 17, 6, 0), restSeconds: 90)
+
+        // Week 66: 2025-05-01
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 10, timestamp: date(2025, 5, 1, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 10, timestamp: date(2025, 5, 1, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 9, timestamp: date(2025, 5, 1, 17, 6, 0), restSeconds: 90)
+
+        // Week 67: 2025-05-08
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 11, timestamp: date(2025, 5, 8, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 10, timestamp: date(2025, 5, 8, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 10, timestamp: date(2025, 5, 8, 17, 6, 0), restSeconds: 90)
+
+        // Week 68: 2025-05-15
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 12, timestamp: date(2025, 5, 15, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 11, timestamp: date(2025, 5, 15, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 87.5, reps: 10, timestamp: date(2025, 5, 15, 17, 6, 0), restSeconds: 90)
+
+        // Week 69: 2025-05-22
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 10, timestamp: date(2025, 5, 22, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 9, timestamp: date(2025, 5, 22, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 8, timestamp: date(2025, 5, 22, 17, 6, 0), restSeconds: 90)
+
+        // Week 70: 2025-05-29
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 10, timestamp: date(2025, 5, 29, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 10, timestamp: date(2025, 5, 29, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 9, timestamp: date(2025, 5, 29, 17, 6, 0), restSeconds: 90)
+
+        // Week 71: 2025-06-05
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 11, timestamp: date(2025, 6, 5, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 10, timestamp: date(2025, 6, 5, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 10, timestamp: date(2025, 6, 5, 17, 6, 0), restSeconds: 90)
+
+        // Week 72: 2025-06-12
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 12, timestamp: date(2025, 6, 12, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 11, timestamp: date(2025, 6, 12, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 90.0, reps: 10, timestamp: date(2025, 6, 12, 17, 6, 0), restSeconds: 90)
+
+        // Week 73: 2025-06-19
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 10, timestamp: date(2025, 6, 19, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 9, timestamp: date(2025, 6, 19, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 8, timestamp: date(2025, 6, 19, 17, 6, 0), restSeconds: 90)
+
+        // Week 74: 2025-06-26
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 10, timestamp: date(2025, 6, 26, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 10, timestamp: date(2025, 6, 26, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 9, timestamp: date(2025, 6, 26, 17, 6, 0), restSeconds: 90)
+
+        // Week 75: 2025-07-03
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 11, timestamp: date(2025, 7, 3, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 10, timestamp: date(2025, 7, 3, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 10, timestamp: date(2025, 7, 3, 17, 6, 0), restSeconds: 90)
+
+        // Week 76: 2025-07-10
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 12, timestamp: date(2025, 7, 10, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 11, timestamp: date(2025, 7, 10, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 92.5, reps: 10, timestamp: date(2025, 7, 10, 17, 6, 0), restSeconds: 90)
+
+        // Week 77: 2025-07-17
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 10, timestamp: date(2025, 7, 17, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 9, timestamp: date(2025, 7, 17, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 8, timestamp: date(2025, 7, 17, 17, 6, 0), restSeconds: 90)
+
+        // Week 78: 2025-07-24 (18 months)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 10, timestamp: date(2025, 7, 24, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 10, timestamp: date(2025, 7, 24, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 9, timestamp: date(2025, 7, 24, 17, 6, 0), restSeconds: 90)
+
+        // Week 79: 2025-07-31
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 11, timestamp: date(2025, 7, 31, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 10, timestamp: date(2025, 7, 31, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 10, timestamp: date(2025, 7, 31, 17, 6, 0), restSeconds: 90)
+
+        // Week 80: 2025-08-07
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 12, timestamp: date(2025, 8, 7, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 11, timestamp: date(2025, 8, 7, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 95.0, reps: 10, timestamp: date(2025, 8, 7, 17, 6, 0), restSeconds: 90)
+
+        // Week 81: 2025-08-14
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 10, timestamp: date(2025, 8, 14, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 9, timestamp: date(2025, 8, 14, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 8, timestamp: date(2025, 8, 14, 17, 6, 0), restSeconds: 90)
+
+        // Week 82: 2025-08-21
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 10, timestamp: date(2025, 8, 21, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 10, timestamp: date(2025, 8, 21, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 9, timestamp: date(2025, 8, 21, 17, 6, 0), restSeconds: 90)
+
+        // Week 83: 2025-08-28
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 11, timestamp: date(2025, 8, 28, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 10, timestamp: date(2025, 8, 28, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 10, timestamp: date(2025, 8, 28, 17, 6, 0), restSeconds: 90)
+
+        // Week 84: 2025-09-04
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 12, timestamp: date(2025, 9, 4, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 11, timestamp: date(2025, 9, 4, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 97.5, reps: 10, timestamp: date(2025, 9, 4, 17, 6, 0), restSeconds: 90)
+
+        // Week 85: 2025-09-11
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 10, timestamp: date(2025, 9, 11, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 9, timestamp: date(2025, 9, 11, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 8, timestamp: date(2025, 9, 11, 17, 6, 0), restSeconds: 90)
+
+        // Week 86: 2025-09-18
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 10, timestamp: date(2025, 9, 18, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 10, timestamp: date(2025, 9, 18, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 9, timestamp: date(2025, 9, 18, 17, 6, 0), restSeconds: 90)
+
+        // Week 87: 2025-09-25
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 11, timestamp: date(2025, 9, 25, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 10, timestamp: date(2025, 9, 25, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 10, timestamp: date(2025, 9, 25, 17, 6, 0), restSeconds: 90)
+
+        // Week 88: 2025-10-02
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 12, timestamp: date(2025, 10, 2, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 11, timestamp: date(2025, 10, 2, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 100.0, reps: 10, timestamp: date(2025, 10, 2, 17, 6, 0), restSeconds: 90)
+
+        // Week 89: 2025-10-09
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 10, timestamp: date(2025, 10, 9, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 9, timestamp: date(2025, 10, 9, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 8, timestamp: date(2025, 10, 9, 17, 6, 0), restSeconds: 90)
+
+        // Week 90: 2025-10-16
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 10, timestamp: date(2025, 10, 16, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 10, timestamp: date(2025, 10, 16, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 9, timestamp: date(2025, 10, 16, 17, 6, 0), restSeconds: 90)
+
+        // Week 91: 2025-10-23
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 11, timestamp: date(2025, 10, 23, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 10, timestamp: date(2025, 10, 23, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 10, timestamp: date(2025, 10, 23, 17, 6, 0), restSeconds: 90)
+
+        // Week 92: 2025-10-30
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 12, timestamp: date(2025, 10, 30, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 11, timestamp: date(2025, 10, 30, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 102.5, reps: 10, timestamp: date(2025, 10, 30, 17, 6, 0), restSeconds: 90)
+
+        // Week 93: 2025-11-06
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 10, timestamp: date(2025, 11, 6, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 9, timestamp: date(2025, 11, 6, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 8, timestamp: date(2025, 11, 6, 17, 6, 0), restSeconds: 90)
+
+        // Week 94: 2025-11-13
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 10, timestamp: date(2025, 11, 13, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 10, timestamp: date(2025, 11, 13, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 9, timestamp: date(2025, 11, 13, 17, 6, 0), restSeconds: 90)
+
+        // Week 95: 2025-11-20
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 11, timestamp: date(2025, 11, 20, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 10, timestamp: date(2025, 11, 20, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 10, timestamp: date(2025, 11, 20, 17, 6, 0), restSeconds: 90)
+
+        // Week 96: 2025-11-27
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 12, timestamp: date(2025, 11, 27, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 11, timestamp: date(2025, 11, 27, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 105.0, reps: 10, timestamp: date(2025, 11, 27, 17, 6, 0), restSeconds: 90)
+
+        // Week 97: 2025-12-04
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 10, timestamp: date(2025, 12, 4, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 9, timestamp: date(2025, 12, 4, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 8, timestamp: date(2025, 12, 4, 17, 6, 0), restSeconds: 90)
+
+        // Week 98: 2025-12-11
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 10, timestamp: date(2025, 12, 11, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 10, timestamp: date(2025, 12, 11, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 9, timestamp: date(2025, 12, 11, 17, 6, 0), restSeconds: 90)
+
+        // Week 99: 2025-12-18
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 11, timestamp: date(2025, 12, 18, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 10, timestamp: date(2025, 12, 18, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 10, timestamp: date(2025, 12, 18, 17, 6, 0), restSeconds: 90)
+
+        // Week 100: 2025-12-25
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 12, timestamp: date(2025, 12, 25, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 11, timestamp: date(2025, 12, 25, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 107.5, reps: 10, timestamp: date(2025, 12, 25, 17, 6, 0), restSeconds: 90)
+
+        // Week 101: 2026-01-01
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 10, timestamp: date(2026, 1, 1, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 9, timestamp: date(2026, 1, 1, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 8, timestamp: date(2026, 1, 1, 17, 6, 0), restSeconds: 90)
+
+        // Week 102: 2026-01-08
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 10, timestamp: date(2026, 1, 8, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 10, timestamp: date(2026, 1, 8, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 9, timestamp: date(2026, 1, 8, 17, 6, 0), restSeconds: 90)
+
+        // Week 103: 2026-01-15
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 11, timestamp: date(2026, 1, 15, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 10, timestamp: date(2026, 1, 15, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 10, timestamp: date(2026, 1, 15, 17, 6, 0), restSeconds: 90)
+
+        // Week 104: 2026-01-22
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 12, timestamp: date(2026, 1, 22, 17, 0, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 11, timestamp: date(2026, 1, 22, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 10, timestamp: date(2026, 1, 22, 17, 6, 0), restSeconds: 90)
+
+        // Week 105: 2026-01-27 (most recent - 2 years complete)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 12, timestamp: date(2026, 1, 27, 17, 0, 0), restSeconds: 90, isPB: true)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 12, timestamp: date(2026, 1, 27, 17, 3, 0), restSeconds: 90)
+        addSet(exercise: "Test Exercise", weight: 110.0, reps: 11, timestamp: date(2026, 1, 27, 17, 6, 0), restSeconds: 90)
 
         // Save all changes
         do {

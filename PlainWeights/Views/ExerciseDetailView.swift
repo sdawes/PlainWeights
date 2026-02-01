@@ -343,6 +343,7 @@ struct ExerciseDetailView: View {
     // Cached data for performance - updated only when sets change
     @State private var todaySets: [ExerciseSet] = []
     @State private var historicDayGroups: [ExerciseDataGrouper.DayGroup] = []
+    @State private var visibleHistoricDaysCount: Int = 10  // Pagination - show 10 days initially
     @State private var cachedTodaysVolume: Double = 0
     @State private var cachedTodaysTotalReps: Int = 0
     @State private var cachedSessionDuration: Int? = nil
@@ -556,8 +557,13 @@ struct ExerciseDetailView: View {
             }
 
             // Historic sets: one Section per day (unified card appearance)
-            ForEach(historicDayGroups.indices, id: \.self) { groupIndex in
-                let dayGroup = historicDayGroups[groupIndex]
+            // Show limited days initially for performance
+            let visibleHistoricDays = Array(historicDayGroups.prefix(visibleHistoricDaysCount))
+            let hasMoreHistory = historicDayGroups.count > visibleHistoricDaysCount
+            let remainingCount = historicDayGroups.count - visibleHistoricDaysCount
+
+            ForEach(visibleHistoricDays.indices, id: \.self) { groupIndex in
+                let dayGroup = visibleHistoricDays[groupIndex]
                 Section {
                     // Day header (must be struct for List spacing to work correctly)
                     HistoricDayHeader(
@@ -583,6 +589,28 @@ struct ExerciseDetailView: View {
                             isLastSetInDay: isLast
                         )
                     }
+                }
+            }
+
+            // "See older sessions" button when more history exists
+            if hasMoreHistory {
+                Section {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            visibleHistoricDaysCount += 10
+                        }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("See older sessions (\(remainingCount) more)")
+                                .font(themeManager.currentTheme.subheadlineFont)
+                                .foregroundStyle(themeManager.currentTheme.primary)
+                            Spacer()
+                        }
+                        .padding(.vertical, 12)
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
             }
 

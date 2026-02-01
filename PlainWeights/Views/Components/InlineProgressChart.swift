@@ -9,6 +9,41 @@
 import SwiftUI
 import Charts
 
+// MARK: - Chart Time Range
+
+enum ChartTimeRange: String, CaseIterable, Identifiable {
+    case ninetyDays = "90D"
+    case oneYear = "1Y"
+    case threeYears = "3Y"
+    case max = "Max"
+
+    var id: String { rawValue }
+
+    /// Returns cutoff date for filtering, or nil for max (all data)
+    var cutoffDate: Date? {
+        let calendar = Calendar.current
+        switch self {
+        case .ninetyDays: return calendar.date(byAdding: .day, value: -90, to: Date())
+        case .oneYear: return calendar.date(byAdding: .year, value: -1, to: Date())
+        case .threeYears: return calendar.date(byAdding: .year, value: -3, to: Date())
+        case .max: return nil
+        }
+    }
+
+    /// Grouping granularity for downsampling
+    enum Granularity {
+        case daily, weekly, monthly
+    }
+
+    var granularity: Granularity {
+        switch self {
+        case .ninetyDays: return .daily
+        case .oneYear: return .weekly
+        case .threeYears, .max: return .monthly
+        }
+    }
+}
+
 // MARK: - Chart Data Point
 
 struct ChartDataPoint: Identifiable {
@@ -32,36 +67,60 @@ struct InlineProgressChart: View {
     // Animation state - start true so chart appears immediately with container
     @State private var isAnimating = true
 
+    // Time range selection - default to 90 days for performance
+    @State private var selectedTimeRange: ChartTimeRange = .ninetyDays
+
     // Cached chart data - computed on init to prevent layout shift
     @State private var cachedChartData: [ChartDataPoint]
 
     init(sets: [ExerciseSet]) {
         self.sets = sets
         // Compute chart data during init to prevent layout shift on appear
-        _cachedChartData = State(initialValue: Self.computeChartData(from: sets))
+        _cachedChartData = State(initialValue: Self.computeChartData(from: sets, timeRange: .ninetyDays))
     }
 
     // MARK: - Data Transformation
 
-    private static func computeChartData(from sets: [ExerciseSet]) -> [ChartDataPoint] {
+    private static func computeChartData(from sets: [ExerciseSet], timeRange: ChartTimeRange) -> [ChartDataPoint] {
         let calendar = Calendar.current
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM d"
 
         // Filter out warm-up and bonus sets
-        let workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
+        var workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
 
-        // Group sets by day
-        let grouped = Dictionary(grouping: workingSets) { set in
-            calendar.startOfDay(for: set.timestamp)
+        // Apply time range filter
+        if let cutoff = timeRange.cutoffDate {
+            workingSets = workingSets.filter { $0.timestamp >= cutoff }
         }
 
-        // Calculate max weight and reps per day, and check for PB
+        // Group sets based on granularity (daily, weekly, or monthly)
+        let grouped: [Date: [ExerciseSet]]
+        switch timeRange.granularity {
+        case .daily:
+            grouped = Dictionary(grouping: workingSets) { set in
+                calendar.startOfDay(for: set.timestamp)
+            }
+        case .weekly:
+            grouped = Dictionary(grouping: workingSets) { set in
+                // Group by start of week
+                let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: set.timestamp)
+                return calendar.date(from: components) ?? set.timestamp
+            }
+        case .monthly:
+            grouped = Dictionary(grouping: workingSets) { set in
+                // Group by start of month
+                let components = calendar.dateComponents([.year, .month], from: set.timestamp)
+                return calendar.date(from: components) ?? set.timestamp
+            }
+        }
+
+        // Calculate max weight and reps per period, and check for PB
         var dataPoints: [(date: Date, maxWeight: Double, maxReps: Int, isPB: Bool)] = []
-        for (date, daySets) in grouped {
-            let maxWeight = daySets.map { $0.weight }.max() ?? 0
-            let maxReps = daySets.map { $0.reps }.max() ?? 0
-            let hasPB = daySets.contains { $0.isPB }
+        for (date, periodSets) in grouped {
+            let maxWeight = periodSets.map { $0.weight }.max() ?? 0
+            let maxReps = periodSets.map { $0.reps }.max() ?? 0
+            let hasPB = periodSets.contains { $0.isPB }
             dataPoints.append((date, maxWeight, maxReps, hasPB))
         }
 
@@ -135,13 +194,20 @@ struct InlineProgressChart: View {
         return calendar.component(.year, from: first) != calendar.component(.year, from: last)
     }
 
-    // Format date based on data span - ultra compact
+    // Format date based on data span and granularity - ultra compact
     private func formatDateLabel(_ date: Date) -> String {
         let formatter = DateFormatter()
-        if spansMultipleYears {
+        switch selectedTimeRange.granularity {
+        case .daily:
+            if spansMultipleYears {
+                formatter.dateFormat = "M/yy"   // "1/25" - month/year
+            } else {
+                formatter.dateFormat = "d/M"    // "27/1" - day/month
+            }
+        case .weekly:
+            formatter.dateFormat = "d/M"    // "27/1" - week start date
+        case .monthly:
             formatter.dateFormat = "M/yy"   // "1/25" - month/year
-        } else {
-            formatter.dateFormat = "d/M"    // "27/1" - day/month
         }
         return formatter.string(from: date)
     }
@@ -169,9 +235,23 @@ struct InlineProgressChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Progress")
-                .font(themeManager.currentTheme.headlineFont)
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+            // Header with title and time range picker
+            HStack {
+                Text("Progress")
+                    .font(themeManager.currentTheme.headlineFont)
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
+
+                Spacer()
+
+                // Time range picker
+                Picker("Time Range", selection: $selectedTimeRange) {
+                    ForEach(ChartTimeRange.allCases) { range in
+                        Text(range.rawValue).tag(range)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 180)
+            }
 
             if cachedChartData.isEmpty {
                 emptyState
@@ -191,7 +271,12 @@ struct InlineProgressChart: View {
                 .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
         )
         .onChange(of: sets) { _, _ in
-            cachedChartData = Self.computeChartData(from: sets)
+            cachedChartData = Self.computeChartData(from: sets, timeRange: selectedTimeRange)
+        }
+        .onChange(of: selectedTimeRange) { _, newRange in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                cachedChartData = Self.computeChartData(from: sets, timeRange: newRange)
+            }
         }
     }
 

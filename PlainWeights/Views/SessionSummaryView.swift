@@ -38,9 +38,9 @@ struct SessionSummaryView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
 
-                        ForEach(Array(day.exercises.enumerated()), id: \.element.id) { index, exercise in
-                            exerciseRow(for: exercise, index: index, total: day.exercises.count)
-                                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        ForEach(day.exercises, id: \.id) { exercise in
+                            exerciseCard(for: exercise)
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
                         }
@@ -105,14 +105,21 @@ struct SessionSummaryView: View {
         let sessionAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: allSetsForDay)
 
         VStack(alignment: .leading, spacing: 0) {
-            // Header with date
-            Text(day.date, format: .dateTime.weekday(.wide).month(.wide).day())
-                .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.secondaryText)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(themeManager.currentTheme.muted.opacity(0.3))
+            // Header with date and duration
+            HStack {
+                Text(day.date, format: .dateTime.weekday(.wide).month(.wide).day())
+                    .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                    .foregroundStyle(themeManager.currentTheme.secondaryText)
+                Spacer()
+                if let duration = sessionDuration {
+                    Text("\(duration) min")
+                        .font(themeManager.currentTheme.dataFont(size: 14))
+                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(themeManager.currentTheme.muted.opacity(0.3))
 
             // Divider
             Rectangle()
@@ -164,6 +171,8 @@ struct SessionSummaryView: View {
             Text(value)
                 .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
                 .foregroundStyle(themeManager.currentTheme.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -177,25 +186,21 @@ struct SessionSummaryView: View {
             Text("PBs")
                 .font(themeManager.currentTheme.captionFont)
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
-            if pbCount > 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 16))
-                        .foregroundStyle(.red)
-                    Text("\(pbCount)")
-                        .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
-                }
-            } else {
-                Text("—")
-                    .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
-            }
+            Text(pbCount > 0 ? "\(pbCount)" : "—")
+                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                .foregroundStyle(themeManager.currentTheme.primaryText)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(themeManager.currentTheme.cardBackgroundColor)
+        .background {
+            ZStack {
+                themeManager.currentTheme.cardBackgroundColor
+                if pbCount > 0 {
+                    Color.red.opacity(0.1)
+                }
+            }
+        }
     }
 
     private var exercisesHeader: some View {
@@ -208,147 +213,121 @@ struct SessionSummaryView: View {
     }
 
     @ViewBuilder
-    private func exerciseRow(for workoutExercise: ExerciseDataGrouper.WorkoutExercise, index: Int, total: Int) -> some View {
+    private func exerciseCard(for workoutExercise: ExerciseDataGrouper.WorkoutExercise) -> some View {
         let hasPB = workoutExercise.sets.contains { $0.isPB }
         let maxSet = workoutExercise.sets.filter { !$0.isWarmUp && !$0.isBonus }.max(by: { $0.weight < $1.weight })
         let exerciseDuration = SessionStatsCalculator.getExerciseDurationMinutes(from: workoutExercise.sets)
         let exerciseAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: workoutExercise.sets)
 
-        VStack(spacing: 0) {
-            // Divider at top (not for first row)
-            if index > 0 {
-                Rectangle()
-                    .fill(themeManager.currentTheme.borderColor)
-                    .frame(height: 1)
-            }
-
-            // Content
+        VStack(alignment: .leading, spacing: 0) {
+            // Header with exercise name and duration
             HStack {
-                VStack(alignment: .leading, spacing: 6) {
-                    // Exercise name
-                    Text(workoutExercise.exercise.name)
-                        .font(themeManager.currentTheme.interFont(size: 17, weight: .semibold))
-
-                    // Stats line: sets, volume, max
-                    HStack(spacing: 4) {
-                        Text("\(workoutExercise.setCount)")
-                            .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                        Text("sets")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-
-                        Text("•")
-                            .foregroundStyle(themeManager.currentTheme.tertiaryText)
-
-                        Text(Formatters.formatVolume(workoutExercise.volume))
-                            .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                        Text("kg")
-                            .font(themeManager.currentTheme.interFont(size: 14))
-
-                        if let maxSet = maxSet, maxSet.weight > 0 {
-                            Text("•")
-                                .foregroundStyle(themeManager.currentTheme.tertiaryText)
-
-                            Text("Max:")
-                                .font(themeManager.currentTheme.interFont(size: 14))
-                            Text("\(Formatters.formatWeight(maxSet.weight))")
-                                .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                            Text("×")
-                                .font(themeManager.currentTheme.interFont(size: 14))
-                            Text("\(maxSet.reps)")
-                                .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                        }
-                    }
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-
-                    // Duration and rest time line
-                    if exerciseDuration != nil || exerciseAvgRest != nil {
-                        HStack(spacing: 4) {
-                            if let duration = exerciseDuration {
-                                Text("\(duration)")
-                                    .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                                Text("min")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                            }
-
-                            if exerciseDuration != nil && exerciseAvgRest != nil {
-                                Text("•")
-                                    .foregroundStyle(themeManager.currentTheme.tertiaryText)
-                            }
-
-                            if let avgRest = exerciseAvgRest {
-                                Text("~\(avgRest)")
-                                    .font(themeManager.currentTheme.dataFont(size: 14, weight: .semibold))
-                                Text("s rest")
-                                    .font(themeManager.currentTheme.interFont(size: 14))
-                            }
-                        }
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                    }
-                }
-
+                Text(workoutExercise.exercise.name)
+                    .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                    .foregroundStyle(themeManager.currentTheme.secondaryText)
                 Spacer()
-
-                // PB indicator (badge-style matching warmup/bonus)
-                if hasPB {
-                    HStack(spacing: 4) {
-                        Image(systemName: "star.fill")
-                            .font(.system(size: 14))
-                        Text("PB")
-                            .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
-                    }
-                    .foregroundStyle(.red)
+                if let duration = exerciseDuration {
+                    Text("\(duration) min")
+                        .font(themeManager.currentTheme.dataFont(size: 14))
+                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background {
-                if hasPB {
-                    pbTintBackground
+            .padding(.vertical, 10)
+            .background(themeManager.currentTheme.muted.opacity(0.3))
+
+            // Divider
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 1)
+
+            // Row 1: Sets, Max
+            HStack(spacing: 1) {
+                metricCell(label: "Sets", value: "\(workoutExercise.setCount)")
+                if let maxSet = maxSet, maxSet.weight > 0 {
+                    pbHighlightedMetricCell(
+                        label: "Max",
+                        value: "\(Formatters.formatWeight(maxSet.weight)) × \(maxSet.reps)",
+                        hasPB: hasPB
+                    )
+                } else {
+                    pbHighlightedMetricCell(
+                        label: "Max Reps",
+                        value: "\(maxSet?.reps ?? workoutExercise.sets.map { $0.reps }.max() ?? 0)",
+                        hasPB: hasPB
+                    )
                 }
             }
-        }
-        .background(
-            RoundedCorner(radius: 12, corners: cornersForRow(index: index, total: total))
-                .fill(themeManager.currentTheme.cardBackgroundColor)
-        )
-        .overlay(borderOverlay(index: index, total: total))
-    }
+            .background(themeManager.currentTheme.borderColor)
 
-    /// Red tint background for exercise rows with PBs (matching SetRowView warmup/bonus pattern)
-    private var pbTintBackground: some View {
-        HStack(spacing: 0) {
+            // Divider between rows
             Rectangle()
-                .fill(Color.red)
-                .frame(width: 2)
-            Rectangle()
-                .fill(Color.red.opacity(0.1))
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 1)
+
+            // Row 2: Volume, Avg Rest
+            HStack(spacing: 1) {
+                metricCell(label: "Volume", value: "\(Formatters.formatVolume(workoutExercise.volume)) kg")
+                metricCell(label: "Avg Rest", value: formatRestTime(exerciseAvgRest))
+            }
+            .background(themeManager.currentTheme.borderColor)
         }
-        .padding(.leading, 12)
-    }
-
-    // MARK: - Helper Functions
-
-    private func cornersForRow(index: Int, total: Int) -> UIRectCorner {
-        if total == 1 { return .allCorners }
-        if index == 0 { return [.topLeft, .topRight] }
-        if index == total - 1 { return [.bottomLeft, .bottomRight] }
-        return []
-    }
-
-    @ViewBuilder
-    private func borderOverlay(index: Int, total: Int) -> some View {
-        if total == 1 {
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(themeManager.currentTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-        } else if index == 0 {
-            TopOpenBorder(radius: 12)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
-        } else if index == total - 1 {
-            BottomOpenBorder(radius: 12)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
+    }
+
+    /// Format rest time: "45s" if under 1 min, "1m 30s" if over
+    private func formatRestTime(_ seconds: Int?) -> String {
+        guard let seconds = seconds else { return "—" }
+        if seconds < 60 {
+            return "\(seconds)s"
         } else {
-            SidesOnlyBorder()
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+            let mins = seconds / 60
+            let secs = seconds % 60
+            if secs == 0 {
+                return "\(mins)m"
+            } else {
+                return "\(mins)m \(secs)s"
+            }
+        }
+    }
+
+    /// Metric cell with optional PB highlight (red tinted background with PB label)
+    @ViewBuilder
+    private func pbHighlightedMetricCell(label: String, value: String, hasPB: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(label)
+                    .font(themeManager.currentTheme.captionFont)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                if hasPB {
+                    Spacer()
+                    Text("PB")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.red)
+                }
+            }
+            Text(value)
+                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            ZStack {
+                themeManager.currentTheme.cardBackgroundColor
+                if hasPB {
+                    Color.red.opacity(0.1)
+                }
+            }
         }
     }
 }

@@ -150,6 +150,154 @@ SwiftUI List enforces a **default minimum row height (~44pt)**. When content is 
 - `HistoricDayHeader.swift` - Historic day header using same pattern
 - `SetRowView.swift` - Set rows with `cardPosition` parameter for border selection
 
+### Accent Strip Pattern
+
+A 2px colored left border with light tinted background, used to visually highlight rows or sections with a specific status.
+
+#### Use Cases
+- **PBs (red)**: Exercise cards/rows containing personal bests
+- **Staleness indicators**: Exercise list items (orange = 14+ days, red = 30+ days, green = today)
+- **Set type badges**: Warm-up (orange), Bonus (green), Drop set (blue), Assisted (pink), Timed (gray), Pause (indigo)
+
+#### Visual Specification
+```
+┌──┬────────────────────────────────┐
+│▌▌│ Content with tinted background │  ← 2px solid color + 10% opacity fill
+└──┴────────────────────────────────┘
+```
+
+#### Code Template
+```swift
+@ViewBuilder
+private func accentStrip(color: Color) -> some View {
+    HStack(spacing: 0) {
+        Rectangle()
+            .fill(color)
+            .frame(width: 2)
+        Rectangle()
+            .fill(color.opacity(0.1))
+    }
+}
+
+// Usage as background:
+.background {
+    if shouldHighlight {
+        accentStrip(color: .red)
+    } else {
+        defaultBackground
+    }
+}
+```
+
+#### Key Files
+- `SessionSummaryView.swift` - PB accent strip on exercise card headers
+- `ExerciseListView.swift` - Staleness indicator on exercise rows
+- `SetRowView.swift` - Set type indicators (warm-up, bonus, etc.)
+
+### Standalone Card Component Pattern
+
+When creating info cards with headers and metric cells (like session summary cards), follow this pattern:
+
+#### Card Structure
+```
+┌─────────────────────────────────────────────┐
+│ Header Text                        PB (opt) │  ← Header row (muted background)
+├─────────────────────────────────────────────┤  ← 1px divider
+│ Label 1    │ Label 2    │ Label 3          │  ← Metric cells row
+│ Value 1    │ Value 2    │ Value 3          │
+└─────────────────────────────────────────────┘
+```
+
+#### Visual Specifications
+
+**Card Container:**
+- Background: `themeManager.currentTheme.cardBackgroundColor`
+- Corner radius: `12`
+- Border: `1px` stroke using `themeManager.currentTheme.borderColor`
+
+**Header Row:**
+- Background: `themeManager.currentTheme.muted.opacity(0.3)`
+- Font: `themeManager.currentTheme.interFont(size: 14, weight: .medium)`
+- Text color: `themeManager.currentTheme.secondaryText`
+- Padding: `.horizontal(16)` `.vertical(10)`
+- Optional right-aligned indicator (e.g., "PB" in bold red)
+
+**Dividers:**
+- Between header and content: `Rectangle().fill(themeManager.currentTheme.borderColor).frame(height: 1)`
+- Between metric rows: Same 1px divider
+
+**Metric Cells:**
+- Container: `HStack(spacing: 1)` with `.background(themeManager.currentTheme.borderColor)` for 1px gaps
+- Each cell background: `themeManager.currentTheme.cardBackgroundColor`
+- Label font: `themeManager.currentTheme.captionFont`
+- Label color: `themeManager.currentTheme.mutedForeground`
+- Value font: `themeManager.currentTheme.dataFont(size: 20, weight: .semibold)`
+- Value color: `themeManager.currentTheme.primaryText`
+- Cell padding: `.horizontal(16)` `.vertical(12)`
+- Cell alignment: `.frame(maxWidth: .infinity, alignment: .leading)`
+
+#### Code Template
+```swift
+@ViewBuilder
+private func infoCard(title: String, hasPB: Bool = false) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+        // Header
+        HStack {
+            Text(title)
+                .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                .foregroundStyle(themeManager.currentTheme.secondaryText)
+            Spacer()
+            if hasPB {
+                Text("PB")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.red)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(themeManager.currentTheme.muted.opacity(0.3))
+
+        // Divider
+        Rectangle()
+            .fill(themeManager.currentTheme.borderColor)
+            .frame(height: 1)
+
+        // Metric cells row
+        HStack(spacing: 1) {
+            metricCell(label: "Label", value: "Value")
+            metricCell(label: "Label", value: "Value")
+            metricCell(label: "Label", value: "Value")
+        }
+        .background(themeManager.currentTheme.borderColor)
+    }
+    .background(themeManager.currentTheme.cardBackgroundColor)
+    .clipShape(RoundedRectangle(cornerRadius: 12))
+    .overlay(
+        RoundedRectangle(cornerRadius: 12)
+            .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+    )
+}
+
+@ViewBuilder
+private func metricCell(label: String, value: String) -> some View {
+    VStack(alignment: .leading, spacing: 4) {
+        Text(label)
+            .font(themeManager.currentTheme.captionFont)
+            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+        Text(value)
+            .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+            .foregroundStyle(themeManager.currentTheme.primaryText)
+    }
+    .padding(.horizontal, 16)
+    .padding(.vertical, 12)
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .background(themeManager.currentTheme.cardBackgroundColor)
+}
+```
+
+#### Key Files
+- `SessionSummaryView.swift` - Reference implementation with session info card and exercise cards
+
 ### UIKit Policy - CRITICAL
 **NEVER use UIKit unless there is absolutely no SwiftUI alternative to achieve the desired result.**
 

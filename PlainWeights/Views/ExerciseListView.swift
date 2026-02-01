@@ -182,17 +182,17 @@ struct FilteredExerciseListView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showingAddExercise = true } label: {
-                    Image(systemName: "plus")
+                Button {
+                    showingSummary = true
+                } label: {
+                    Image(systemName: "trophy")
                         .font(.callout)
                         .fontWeight(.medium)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingSummary = true
-                } label: {
-                    Image(systemName: "trophy")
+                Button { showingAddExercise = true } label: {
+                    Image(systemName: "plus")
                         .font(.callout)
                         .fontWeight(.medium)
                 }
@@ -205,7 +205,7 @@ struct FilteredExerciseListView: View {
             }
             .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
-        .fullScreenCover(isPresented: $showingSummary) {
+        .sheet(isPresented: $showingSummary) {
             SessionSummaryView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }

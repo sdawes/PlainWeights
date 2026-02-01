@@ -109,10 +109,22 @@ struct FilteredExerciseListView: View {
         List {
             // Exercises section
             if exercises.isEmpty && searchText.isEmpty {
+                // Simple inline hint when no exercises exist
                 Section {
-                    EmptyExercisesView(
-                        onAddExercise: { showingAddExercise = true }
-                    )
+                    HStack {
+                        Text("Add first exercise using the + above")
+                            .font(themeManager.currentTheme.subheadlineFont)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                        Spacer()
+
+                        // Curved arrow pointing up toward + button
+                        Image(systemName: "arrow.turn.right.up")
+                            .font(.title3)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 8)
                     .listRowBackground(Color.clear)
                 }
                 .listRowSeparator(.hidden)

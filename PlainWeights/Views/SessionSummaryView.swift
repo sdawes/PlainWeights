@@ -40,7 +40,7 @@ struct SessionSummaryView: View {
 
                         ForEach(day.exercises, id: \.id) { exercise in
                             exerciseCard(for: exercise, displayedDay: day.date)
-                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
                         }

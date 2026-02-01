@@ -173,13 +173,16 @@ struct FilteredExerciseListView: View {
                         .listRowBackground(
                             HStack(spacing: 0) {
                                 Color.clear.frame(width: 16)  // Match list leading inset
-                                if let color = stalenessColor(for: exercise) {
-                                    Rectangle()
-                                        .fill(color)
-                                        .frame(width: 2)
-                                }
+                                // Vertical accent bar - staleness color or dark grey for standard items
                                 Rectangle()
-                                    .fill(stalenessColor(for: exercise)?.opacity(themeManager.currentTheme == .dark ? 0.15 : 0.05) ?? Color.clear)
+                                    .fill(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+                                    .frame(width: 2)
+                                // Background tint - staleness color tint or light grey for standard items
+                                Rectangle()
+                                    .fill(
+                                        stalenessColor(for: exercise)?.opacity(themeManager.currentTheme == .dark ? 0.15 : 0.05)
+                                        ?? themeManager.currentTheme.muted.opacity(0.5)
+                                    )
                             }
                         )
                         .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)

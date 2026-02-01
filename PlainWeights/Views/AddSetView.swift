@@ -44,7 +44,7 @@ struct SetTypePillSelector: View {
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(selectedType == type ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
-                            .foregroundStyle(selectedType == type ? .white : themeManager.currentTheme.primaryText)
+                            .foregroundStyle(selectedType == type ? themeManager.currentTheme.background : themeManager.currentTheme.primaryText)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
@@ -198,7 +198,7 @@ struct AddSetView: View {
             Button(action: addSet) {
                 Text(setToEdit == nil ? "Save Set" : "Update Set")
                     .font(themeManager.currentTheme.headlineFont)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(themeManager.currentTheme.background)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(canAddSet ? themeManager.currentTheme.primary : themeManager.currentTheme.primary.opacity(0.4))

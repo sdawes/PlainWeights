@@ -147,7 +147,7 @@ struct AddExerciseView: View {
                     let isDisabled = tagInput.trimmingCharacters(in: .whitespaces).isEmpty
                     Text("Add")
                         .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(themeManager.currentTheme.background)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 16)
                         .background(themeManager.currentTheme.primaryText.opacity(isDisabled ? 0.4 : 1))
@@ -176,7 +176,7 @@ struct AddExerciseView: View {
         Button(action: saveExercise) {
             Text(isEditMode ? "Save Changes" : "Add Exercise")
                 .font(themeManager.currentTheme.headlineFont)
-                .foregroundStyle(.white)
+                .foregroundStyle(themeManager.currentTheme.background)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(themeManager.currentTheme.primaryText.opacity(name.isEmpty ? 0.4 : 1))

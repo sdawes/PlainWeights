@@ -61,7 +61,7 @@ struct TodaySessionCard: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(themeManager.currentTheme.muted.opacity(0.3))
+            .background(themeManager.currentTheme.cardHeaderBackground)
 
             // Divider
             Rectangle()

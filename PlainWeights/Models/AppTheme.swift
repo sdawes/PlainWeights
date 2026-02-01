@@ -55,7 +55,7 @@ enum AppTheme: String, CaseIterable {
     // MARK: - Border Color
 
     var border: Color {
-        primary.opacity(0.2)
+        primary.opacity(0.3)
     }
 
     // MARK: - Muted Colors (for tags, badges, subtle UI)
@@ -72,6 +72,12 @@ enum AppTheme: String, CaseIterable {
         case .light: return Color(red: 0.44, green: 0.44, blue: 0.51) // #717182
         case .dark: return Color(red: 0.63, green: 0.63, blue: 0.63)  // #a0a0a0
         }
+    }
+
+    // MARK: - Card Header Background
+
+    var cardHeaderBackground: Color {
+        muted.opacity(0.5)  // Was 0.3, now one step darker/lighter
     }
 
     // MARK: - Accent Color

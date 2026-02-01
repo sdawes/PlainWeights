@@ -70,7 +70,7 @@ struct HistoricDayHeader: View {
                 .frame(height: 1)
         }
         .frame(maxWidth: .infinity)
-        .background(themeManager.currentTheme.muted.opacity(0.3))
+        .background(themeManager.currentTheme.cardHeaderBackground)
         .clipShape(RoundedCorner(radius: 12, corners: [.topLeft, .topRight]))
         .overlay(
             TopOpenBorder(radius: 12)

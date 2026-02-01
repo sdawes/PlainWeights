@@ -39,7 +39,7 @@ struct SessionSummaryView: View {
                             .listRowBackground(Color.clear)
 
                         ForEach(day.exercises, id: \.id) { exercise in
-                            exerciseCard(for: exercise)
+                            exerciseCard(for: exercise, displayedDay: day.date)
                                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
@@ -119,7 +119,7 @@ struct SessionSummaryView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(themeManager.currentTheme.muted.opacity(0.3))
+            .background(themeManager.currentTheme.cardHeaderBackground)
 
             // Divider
             Rectangle()
@@ -127,12 +127,17 @@ struct SessionSummaryView: View {
                 .frame(height: 1)
 
             // Row 1: Exercises, Sets, Volume
-            HStack(spacing: 1) {
+            HStack(spacing: 0) {
                 metricCell(label: "Exercises", value: "\(day.exerciseCount)")
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(width: 1)
                 metricCell(label: "Sets", value: "\(day.totalSets)")
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(width: 1)
                 metricCell(label: "Volume", value: "\(Formatters.formatVolume(day.totalVolume)) kg")
             }
-            .background(themeManager.currentTheme.borderColor)
 
             // Divider between rows
             Rectangle()
@@ -140,18 +145,23 @@ struct SessionSummaryView: View {
                 .frame(height: 1)
 
             // Row 2: Duration, Avg Rest, PBs
-            HStack(spacing: 1) {
+            HStack(spacing: 0) {
                 metricCell(
                     label: "Duration",
                     value: sessionDuration.map { "\($0) min" } ?? "—"
                 )
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(width: 1)
                 metricCell(
                     label: "Avg Rest",
-                    value: sessionAvgRest.map { "\($0)s" } ?? "—"
+                    value: sessionAvgRest.map { formatRestTime($0) } ?? "—"
                 )
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(width: 1)
                 pbMetricCell(pbCount: pbCount)
             }
-            .background(themeManager.currentTheme.borderColor)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.currentTheme.cardBackgroundColor)
@@ -170,13 +180,37 @@ struct SessionSummaryView: View {
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
             Text(value)
                 .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                .monospacedDigit()
                 .foregroundStyle(themeManager.currentTheme.primaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(themeManager.currentTheme.cardBackgroundColor)
+    }
+
+    /// Metric cell that reserves space for delta row (used in exercise cards)
+    @ViewBuilder
+    private func metricCellWithDeltaSpace(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(themeManager.currentTheme.captionFont)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            Text(value)
+                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                .monospacedDigit()
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            // Empty space to match cells with deltas
+            Text(" ")
+                .font(themeManager.currentTheme.dataFont(size: 12))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(themeManager.currentTheme.cardBackgroundColor)
     }
 
@@ -188,11 +222,14 @@ struct SessionSummaryView: View {
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
             Text(pbCount > 0 ? "\(pbCount)" : "—")
                 .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                .monospacedDigit()
                 .foregroundStyle(themeManager.currentTheme.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background {
             ZStack {
                 themeManager.currentTheme.cardBackgroundColor
@@ -213,11 +250,28 @@ struct SessionSummaryView: View {
     }
 
     @ViewBuilder
-    private func exerciseCard(for workoutExercise: ExerciseDataGrouper.WorkoutExercise) -> some View {
+    private func exerciseCard(for workoutExercise: ExerciseDataGrouper.WorkoutExercise, displayedDay: Date) -> some View {
         let hasPB = workoutExercise.sets.contains { $0.isPB }
-        let maxSet = workoutExercise.sets.filter { !$0.isWarmUp && !$0.isBonus }.max(by: { $0.weight < $1.weight })
+        let workingSets = workoutExercise.sets.filter { !$0.isWarmUp && !$0.isBonus }
+        let maxSet = workingSets.max(by: { $0.weight < $1.weight })
         let exerciseDuration = SessionStatsCalculator.getExerciseDurationMinutes(from: workoutExercise.sets)
         let exerciseAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: workoutExercise.sets)
+
+        // Current session values
+        let currentMaxWeight = maxSet?.weight ?? 0
+        let currentMaxReps = maxSet?.reps ?? workingSets.map { $0.reps }.max() ?? 0
+        let currentVolume = workoutExercise.volume
+
+        // Get previous session data for comparison
+        let previousSession = getPreviousSessionMetrics(
+            for: workoutExercise.exercise,
+            before: displayedDay
+        )
+
+        // Calculate deltas
+        let weightDelta: Double? = previousSession.map { currentMaxWeight - $0.maxWeight }
+        let repsDelta: Int? = previousSession.map { currentMaxReps - $0.maxReps }
+        let volumeDelta: Double? = previousSession.map { currentVolume - $0.volume }
 
         VStack(alignment: .leading, spacing: 0) {
             // Header with exercise name and duration
@@ -229,36 +283,45 @@ struct SessionSummaryView: View {
                 if let duration = exerciseDuration {
                     Text("\(duration) min")
                         .font(themeManager.currentTheme.dataFont(size: 14))
+                        .monospacedDigit()
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(themeManager.currentTheme.muted.opacity(0.3))
+            .background(themeManager.currentTheme.cardHeaderBackground)
 
-            // Divider
+            // Divider below header
             Rectangle()
                 .fill(themeManager.currentTheme.borderColor)
                 .frame(height: 1)
 
             // Row 1: Sets, Max
-            HStack(spacing: 1) {
-                metricCell(label: "Sets", value: "\(workoutExercise.setCount)")
-                if let maxSet = maxSet, maxSet.weight > 0 {
-                    pbHighlightedMetricCell(
-                        label: "Max",
-                        value: "\(Formatters.formatWeight(maxSet.weight)) × \(maxSet.reps)",
+            HStack(spacing: 0) {
+                metricCellWithDeltaSpace(label: "Sets", value: "\(workoutExercise.setCount)")
+
+                // Vertical divider
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(width: 1)
+
+                if currentMaxWeight > 0 {
+                    maxMetricCellWithDelta(
+                        weight: currentMaxWeight,
+                        reps: currentMaxReps,
+                        weightDelta: weightDelta,
+                        repsDelta: repsDelta,
                         hasPB: hasPB
                     )
                 } else {
-                    pbHighlightedMetricCell(
-                        label: "Max Reps",
-                        value: "\(maxSet?.reps ?? workoutExercise.sets.map { $0.reps }.max() ?? 0)",
+                    // Reps-only exercise
+                    repsOnlyMetricCellWithDelta(
+                        reps: currentMaxReps,
+                        repsDelta: repsDelta,
                         hasPB: hasPB
                     )
                 }
             }
-            .background(themeManager.currentTheme.borderColor)
 
             // Divider between rows
             Rectangle()
@@ -266,11 +329,19 @@ struct SessionSummaryView: View {
                 .frame(height: 1)
 
             // Row 2: Volume, Avg Rest
-            HStack(spacing: 1) {
-                metricCell(label: "Volume", value: "\(Formatters.formatVolume(workoutExercise.volume)) kg")
-                metricCell(label: "Avg Rest", value: formatRestTime(exerciseAvgRest))
+            HStack(spacing: 0) {
+                volumeMetricCellWithDelta(
+                    volume: currentVolume,
+                    volumeDelta: volumeDelta
+                )
+
+                // Vertical divider
+                Rectangle()
+                    .fill(themeManager.currentTheme.borderColor)
+                    .frame(width: 1)
+
+                metricCellWithDeltaSpace(label: "Avg Rest", value: formatRestTime(exerciseAvgRest))
             }
-            .background(themeManager.currentTheme.borderColor)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.currentTheme.cardBackgroundColor)
@@ -279,6 +350,47 @@ struct SessionSummaryView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
         )
+    }
+
+    // MARK: - Previous Session Comparison
+
+    private struct PreviousSessionMetrics {
+        let maxWeight: Double
+        let maxReps: Int
+        let volume: Double
+    }
+
+    /// Get metrics from the previous session for this exercise (before the displayed day)
+    private func getPreviousSessionMetrics(for exercise: Exercise, before displayedDay: Date) -> PreviousSessionMetrics? {
+        let calendar = Calendar.current
+        let displayedDayStart = calendar.startOfDay(for: displayedDay)
+
+        // Get all sets for this exercise before the displayed day
+        let exerciseSets = allSets.filter { set in
+            set.exercise?.persistentModelID == exercise.persistentModelID &&
+            calendar.startOfDay(for: set.timestamp) < displayedDayStart &&
+            !set.isWarmUp && !set.isBonus
+        }
+
+        guard !exerciseSets.isEmpty else { return nil }
+
+        // Group by day and get the most recent
+        let grouped = Dictionary(grouping: exerciseSets) { set in
+            calendar.startOfDay(for: set.timestamp)
+        }
+
+        guard let mostRecentDay = grouped.keys.max(),
+              let previousDaySets = grouped[mostRecentDay] else {
+            return nil
+        }
+
+        // Calculate metrics from previous session
+        let maxSet = previousDaySets.max(by: { $0.weight < $1.weight })
+        let maxWeight = maxSet?.weight ?? 0
+        let maxReps = maxSet?.reps ?? previousDaySets.map { $0.reps }.max() ?? 0
+        let volume = previousDaySets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
+
+        return PreviousSessionMetrics(maxWeight: maxWeight, maxReps: maxReps, volume: volume)
     }
 
     /// Format rest time: "45s" if under 1 min, "1m 30s" if over
@@ -297,12 +409,19 @@ struct SessionSummaryView: View {
         }
     }
 
-    /// Metric cell with optional PB highlight (red tinted background with PB label)
+    /// Max weight metric cell with delta underneath
     @ViewBuilder
-    private func pbHighlightedMetricCell(label: String, value: String, hasPB: Bool) -> some View {
+    private func maxMetricCellWithDelta(
+        weight: Double,
+        reps: Int,
+        weightDelta: Double?,
+        repsDelta: Int?,
+        hasPB: Bool
+    ) -> some View {
         VStack(alignment: .leading, spacing: 4) {
+            // Label row with PB
             HStack {
-                Text(label)
+                Text("Max Weight")
                     .font(themeManager.currentTheme.captionFont)
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 if hasPB {
@@ -312,15 +431,52 @@ struct SessionSummaryView: View {
                         .foregroundStyle(.red)
                 }
             }
-            Text(value)
-                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                .foregroundStyle(themeManager.currentTheme.primaryText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+
+            // Value: "70.5 kg × 12"
+            HStack(alignment: .lastTextBaseline, spacing: 0) {
+                Text(Formatters.formatWeight(weight))
+                    .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                Text(" kg")
+                    .font(themeManager.currentTheme.interFont(size: 14))
+                    .foregroundStyle(.secondary)
+                Text(" × ")
+                    .font(themeManager.currentTheme.interFont(size: 14))
+                    .foregroundStyle(.secondary)
+                Text("\(reps)")
+                    .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
+            }
+
+            // Delta row (combined weight and reps deltas)
+            let hasWeightDelta = weightDelta != nil && weightDelta != 0
+            let hasRepsDelta = repsDelta != nil && repsDelta != 0
+            if hasWeightDelta || hasRepsDelta {
+                HStack(spacing: 8) {
+                    if let wDelta = weightDelta, wDelta != 0 {
+                        Text(formatWeightDelta(wDelta))
+                            .font(themeManager.currentTheme.dataFont(size: 12))
+                            .monospacedDigit()
+                            .foregroundStyle(deltaColor(wDelta))
+                    }
+                    if let rDelta = repsDelta, rDelta != 0 {
+                        Text(formatRepsDelta(rDelta) + " reps")
+                            .font(themeManager.currentTheme.dataFont(size: 12))
+                            .monospacedDigit()
+                            .foregroundStyle(deltaColor(Double(rDelta)))
+                    }
+                }
+            } else {
+                // Reserve space for delta row
+                Text(" ")
+                    .font(themeManager.currentTheme.dataFont(size: 12))
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background {
             ZStack {
                 themeManager.currentTheme.cardBackgroundColor
@@ -329,5 +485,120 @@ struct SessionSummaryView: View {
                 }
             }
         }
+    }
+
+    /// Reps-only metric cell with delta underneath
+    @ViewBuilder
+    private func repsOnlyMetricCellWithDelta(
+        reps: Int,
+        repsDelta: Int?,
+        hasPB: Bool
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Max Reps")
+                    .font(themeManager.currentTheme.captionFont)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                if hasPB {
+                    Spacer()
+                    Text("PB")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.red)
+                }
+            }
+            Text("\(reps)")
+                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                .monospacedDigit()
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+
+            if let rDelta = repsDelta, rDelta != 0 {
+                Text(formatRepsDelta(rDelta))
+                    .font(themeManager.currentTheme.dataFont(size: 12))
+                    .monospacedDigit()
+                    .foregroundStyle(deltaColor(Double(rDelta)))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            } else {
+                // Reserve space for delta row
+                Text(" ")
+                    .font(themeManager.currentTheme.dataFont(size: 12))
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background {
+            ZStack {
+                themeManager.currentTheme.cardBackgroundColor
+                if hasPB {
+                    Color.red.opacity(0.1)
+                }
+            }
+        }
+    }
+
+    /// Volume metric cell with delta underneath
+    @ViewBuilder
+    private func volumeMetricCellWithDelta(
+        volume: Double,
+        volumeDelta: Double?
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Volume")
+                .font(themeManager.currentTheme.captionFont)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            HStack(alignment: .lastTextBaseline, spacing: 0) {
+                Text(Formatters.formatVolume(volume))
+                    .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                Text(" kg")
+                    .font(themeManager.currentTheme.interFont(size: 14))
+                    .foregroundStyle(.secondary)
+            }
+
+            if let vDelta = volumeDelta, vDelta != 0 {
+                Text(formatVolumeDelta(vDelta))
+                    .font(themeManager.currentTheme.dataFont(size: 12))
+                    .monospacedDigit()
+                    .foregroundStyle(deltaColor(vDelta))
+            } else {
+                // Reserve space for delta row
+                Text(" ")
+                    .font(themeManager.currentTheme.dataFont(size: 12))
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(themeManager.currentTheme.cardBackgroundColor)
+    }
+
+    // MARK: - Delta Formatting Helpers
+
+    private func formatWeightDelta(_ delta: Double) -> String {
+        if delta == 0 { return "" }
+        let sign = delta > 0 ? "+" : ""
+        return "\(sign)\(Formatters.formatWeight(delta))"
+    }
+
+    private func formatRepsDelta(_ delta: Int) -> String {
+        if delta == 0 { return "" }
+        let sign = delta > 0 ? "+" : ""
+        return "\(sign)\(delta)"
+    }
+
+    private func formatVolumeDelta(_ delta: Double) -> String {
+        if delta == 0 { return "" }
+        let sign = delta > 0 ? "+" : ""
+        return "\(sign)\(Formatters.formatVolume(delta))"
+    }
+
+    private func deltaColor(_ value: Double) -> Color {
+        if value > 0 { return .green }
+        if value < 0 { return .red }
+        return .secondary
     }
 }

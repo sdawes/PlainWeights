@@ -230,26 +230,8 @@ struct InlineProgressChart: View {
                 chartView
                     .frame(height: 200)
             } else {
-                // Dual Y-axes: weight on left, reps on right
+                // Dual Y-axes: reps on left, weight on right
                 VStack(alignment: .trailing, spacing: 0) {
-                    Text(Formatters.formatWeight(weightRange.max))
-                    Spacer()
-                    Text(Formatters.formatWeight((weightRange.min + weightRange.max) / 2))
-                    Spacer()
-                    Text(Formatters.formatWeight(weightRange.min))
-                }
-                .font(themeManager.currentTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.currentTheme.chartColor1)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .frame(width: 35, height: 180)
-
-                // Main chart
-                chartView
-                    .frame(height: 200)
-
-                // Right Y-axis labels (Reps)
-                VStack(alignment: .leading, spacing: 0) {
                     Text("\(repsRange.max)")
                     Spacer()
                     Text("\((repsRange.min + repsRange.max) / 2)")
@@ -261,6 +243,24 @@ struct InlineProgressChart: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 25, height: 180)
+
+                // Main chart
+                chartView
+                    .frame(height: 200)
+
+                // Right Y-axis labels (Weight)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(Formatters.formatWeight(weightRange.max))
+                    Spacer()
+                    Text(Formatters.formatWeight((weightRange.min + weightRange.max) / 2))
+                    Spacer()
+                    Text(Formatters.formatWeight(weightRange.min))
+                }
+                .font(themeManager.currentTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.currentTheme.chartColor1)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(width: 35, height: 180)
             }
         }
     }
@@ -354,14 +354,14 @@ struct InlineProgressChart: View {
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
 
-                // Reps line (dashed, no gradient)
+                // Reps line (dashed, no gradient, thinner)
                 LineMark(
                     x: .value("Index", point.index),
                     y: .value("Reps", point.normalizedReps),
                     series: .value("Type", "Reps")
                 )
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
-                .lineStyle(StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
                 .interpolationMethod(.monotone)
             }
 

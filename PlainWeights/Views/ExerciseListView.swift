@@ -87,15 +87,21 @@ struct FilteredExerciseListView: View {
         return exercise.lastUpdated < oneMonthAgo
     }
 
+    /// Check if exercise was done today (green)
+    private func isDoneToday(_ exercise: Exercise) -> Bool {
+        Calendar.current.isDateInToday(exercise.lastUpdated)
+    }
+
     /// Get timestamp color
     private func timestampColor(for exercise: Exercise) -> Color {
         themeManager.currentTheme.tertiaryText
     }
 
-    /// Get staleness color (red for 30+ days, orange for 14+ days, nil for recent)
+    /// Get staleness color (red for 30+ days, orange for 14+ days, green for today, nil for recent)
     private func stalenessColor(for exercise: Exercise) -> Color? {
         if isVeryStale(exercise) { return .red }
         if isStale(exercise) { return .orange }
+        if isDoneToday(exercise) { return .green }
         return nil
     }
 

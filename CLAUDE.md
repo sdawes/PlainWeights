@@ -85,6 +85,282 @@ The whole point of PlainWeights is to strip away all unnecessary complexity and 
 - White space that serves readability
 - Clean, minimal backgrounds
 
+## UI Structure & Patterns
+
+This section documents the reusable UI patterns, spacing conventions, and component structures used throughout the app.
+
+### Navigation Structure
+
+**NavigationStack Pattern:**
+```swift
+@State private var navigationPath = NavigationPath()
+
+NavigationStack(path: $navigationPath) {
+    listView
+        .navigationDestination(for: Exercise.self) { exercise in
+            ExerciseDetailView(exercise: exercise)
+        }
+}
+
+// Push navigation by appending to path:
+navigationPath.append(exercise)
+```
+
+**Toolbar Items:**
+```swift
+.toolbar {
+    ToolbarItem(placement: .navigationBarTrailing) {
+        Button { showingSheet = true } label: {
+            Image(systemName: "plus")
+                .font(.body)
+                .fontWeight(.medium)
+        }
+    }
+}
+.navigationBarTitleDisplayMode(.inline)
+```
+- Icons use `.body` font with `.medium` weight
+- No text labels on toolbar buttons
+
+### Standard Spacing Values
+
+| Purpose | Value | Usage |
+|---------|-------|-------|
+| Tight spacing | 4pt | Button groups, pill buttons |
+| Small spacing | 6pt | Section separators |
+| Default gap | 8pt | Between elements |
+| Label to input | 12pt | Form field labels |
+| Content padding | 16pt | Card content, list rows |
+| Sheet padding | 24pt | Outer padding for sheets |
+| Section spacing | 24pt | Between major sections |
+
+**Common Padding Patterns:**
+```swift
+.padding(24)                    // Sheet outer padding
+.padding(.horizontal, 16)       // List row content
+.padding(.vertical, 12)         // Metric cell padding
+.listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+```
+
+### List Styling
+
+**Standard List Configuration:**
+```swift
+List {
+    // Content
+}
+.listStyle(.plain)
+.scrollIndicators(.hidden)
+.listSectionSpacing(6)
+.scrollContentBackground(.hidden)
+.background(AnimatedGradientBackground())
+.scrollDismissesKeyboard(.immediately)
+```
+
+**Row Configuration:**
+```swift
+.listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+.listRowSeparator(.hidden)
+.listRowBackground(Color.clear)
+```
+
+**Separator Styling:**
+```swift
+.listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
+.listRowSeparatorTint(themeManager.currentTheme.borderColor)
+.alignmentGuide(.listRowSeparatorLeading) { _ in 0 }  // Full-width separators
+```
+
+### Sheet/Modal Pattern
+
+All sheets follow this consistent structure:
+
+```swift
+VStack(alignment: .leading, spacing: 24) {
+    // Header with dismiss button
+    HStack {
+        Text("Sheet Title")
+            .font(themeManager.currentTheme.title3Font)
+            .lineLimit(1)
+        Spacer()
+        Button { dismiss() } label: {
+            Image(systemName: "xmark")
+                .font(.title3)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+        }
+        .buttonStyle(.plain)
+    }
+    .padding(.bottom, 8)
+
+    // Scrollable content
+    ScrollView {
+        VStack(alignment: .leading, spacing: 24) {
+            // Form fields / content
+        }
+    }
+
+    Spacer()
+
+    // Bottom CTA button
+    Button(action: saveAction) {
+        Text("Save")
+            .font(themeManager.currentTheme.headlineFont)
+            .foregroundStyle(themeManager.currentTheme.background)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(themeManager.currentTheme.primary.opacity(canSave ? 1 : 0.4))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+    .buttonStyle(.plain)
+    .disabled(!canSave)
+}
+.padding(24)
+.background(themeManager.currentTheme.background)
+```
+
+**Key files:** `AddSetView.swift`, `AddExerciseView.swift`, `SettingsView.swift`
+
+### Button Styles
+
+**Primary Button (Full-width CTA):**
+```swift
+Button(action: action) {
+    Text("Save")
+        .font(themeManager.currentTheme.headlineFont)
+        .foregroundStyle(themeManager.currentTheme.background)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(themeManager.currentTheme.primary.opacity(isEnabled ? 1 : 0.4))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+}
+.buttonStyle(.plain)
+.disabled(!isEnabled)
+```
+
+**Pill Toggle Button:**
+```swift
+Button { selectedType = type } label: {
+    Text(type.rawValue)
+        .font(themeManager.currentTheme.subheadlineFont)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(isSelected ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
+        .foregroundStyle(isSelected ? themeManager.currentTheme.background : themeManager.currentTheme.primaryText)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+}
+.buttonStyle(.plain)
+```
+
+**Icon Button (Toolbar):**
+```swift
+Button { action() } label: {
+    Image(systemName: "plus")
+        .font(.body)
+        .fontWeight(.medium)
+        .foregroundStyle(themeManager.currentTheme.textColor)
+}
+.buttonStyle(.plain)
+.contentShape(Rectangle())  // Increases tap target
+```
+
+### Form Input Fields
+
+**Text Input Field:**
+```swift
+TextField("0", text: $text)
+    .font(themeManager.currentTheme.dataFont(size: 20))
+    .keyboardType(.decimalPad)
+    .focused($focusedField, equals: .weight)
+    .multilineTextAlignment(.center)
+    .padding(16)
+    .frame(height: 56)
+    .background(themeManager.currentTheme.muted)
+    .clipShape(RoundedRectangle(cornerRadius: 12))
+    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1))
+    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(focusedField == .weight ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2))
+```
+
+**Input Field Specs:**
+- Height: 56pt
+- Padding: 16pt
+- Border radius: 12pt
+- Focus indicator: 2pt border
+
+### Search Bar
+
+```swift
+// Only show when data exists
+if !items.isEmpty {
+    listView
+        .searchable(text: $searchText, prompt: "Search by name or tags")
+}
+```
+
+### SF Symbols Usage
+
+**Icon Sizes:**
+| Context | Size |
+|---------|------|
+| Toolbar buttons | `.body` + `.medium` weight |
+| Sheet close button | `.title3` |
+| Floating action button | `.title2` |
+| Status indicators | `.system(size: 14)` |
+| Small badges | `.system(size: 10-13)` |
+
+**Common Icons:**
+```swift
+Image(systemName: "plus")           // Add
+Image(systemName: "xmark")          // Close/dismiss
+Image(systemName: "gearshape")      // Settings
+Image(systemName: "trophy.fill")    // PB indicator
+Image(systemName: "pencil")         // Edit
+Image(systemName: "trash")          // Delete
+Image(systemName: "exclamationmark.circle")  // Warning
+```
+
+### Segmented Picker
+
+```swift
+Picker("Time Range", selection: $selectedRange) {
+    ForEach(Range.allCases) { range in
+        Text(range.rawValue).tag(range)
+    }
+}
+.pickerStyle(.segmented)
+.frame(width: 180)  // Fixed width for consistency
+```
+
+### Empty States
+
+```swift
+VStack(spacing: 12) {
+    // Optional illustration
+    Image(systemName: "tray")
+        .font(.largeTitle)
+        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+    Text("No Items Yet")
+        .font(themeManager.currentTheme.title2Font)
+
+    Text("Add your first item to get started.")
+        .font(themeManager.currentTheme.subheadlineFont)
+        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+}
+```
+
+### Dimensions Reference
+
+| Element | Value |
+|---------|-------|
+| Card border radius | 12pt |
+| Button border radius | 8-12pt |
+| Card border width | 1pt |
+| Input field height | 56pt |
+| Progress bar height | 8pt |
+| Accent strip width | 2pt |
+| Chart height | 150pt |
+| Divider height | 1pt |
+
 ## Core Requirements
 
 ### Technology Stack

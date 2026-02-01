@@ -131,12 +131,6 @@ struct AddExerciseView: View {
                             .strokeBorder(tagFieldFocused ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
                     )
                     .focused($tagFieldFocused)
-                    .onChange(of: tagInput) { _, newValue in
-                        // When space is typed, convert text to tag
-                        if newValue.hasSuffix(" ") {
-                            addTag()
-                        }
-                    }
                     .onSubmit {
                         addTag()
                         // Keep focus for continuous entry

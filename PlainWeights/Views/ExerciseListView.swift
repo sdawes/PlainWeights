@@ -146,18 +146,24 @@ struct FilteredExerciseListView: View {
                                         .foregroundStyle(color)
                                 }
                                 if isDoneToday(exercise) {
-                                    Text("Last updated: Today")
+                                    Text("Last updated: ")
+                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .regular))
+                                        .foregroundStyle(.green)
+                                    + Text("Today")
                                         .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(.green)
                                 } else {
-                                    Text("Last updated: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
+                                    Text("Last updated: ")
+                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .regular))
+                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+                                    + Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
                                         .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
                                 }
                             }
-                            .padding(.top, 10)
+                            .padding(.top, 12)
                         }
-                        .padding(.leading, 8)
+                        .padding(.leading, 14)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                         .onTapGesture {

@@ -393,7 +393,9 @@ struct SetRowView: View {
     }
 
     private func restTimeColor(for seconds: Int) -> Color {
-        themeManager.currentTheme.primaryText
+        if seconds >= 120 { return .red }
+        if seconds >= 60 { return .orange }
+        return themeManager.currentTheme.primaryText
     }
 
     private func captureRestTimeExpiry() {

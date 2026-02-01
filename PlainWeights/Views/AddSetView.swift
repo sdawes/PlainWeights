@@ -127,43 +127,35 @@ struct AddSetView: View {
                         .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
-                    HStack(spacing: 8) {
-                        TextField("0", text: $weightText)
-                            .font(themeManager.currentTheme.dataFont(size: 20))
-                            .keyboardType(.decimalPad)
-                            .focused($focusedField, equals: .weight)
-                            .multilineTextAlignment(.center)
-                            .padding(16)
-                            .frame(height: 56)
-                            .background(themeManager.currentTheme.muted)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .strokeBorder(focusedField == .weight ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
-                            )
-                            .onChange(of: weightText) { _, newValue in
-                                // Allow only digits and one decimal point, max 6 chars (e.g., "100.25")
-                                let filtered = newValue.filter { $0.isNumber || $0 == "." }
-                                let limited = String(filtered.prefix(6))
-                                // Ensure only one decimal point
-                                let parts = limited.split(separator: ".", omittingEmptySubsequences: false)
-                                if parts.count > 2 {
-                                    weightText = String(parts[0]) + "." + String(parts[1])
-                                } else if limited != newValue {
-                                    weightText = limited
-                                }
+                    TextField("0", text: $weightText)
+                        .font(themeManager.currentTheme.dataFont(size: 20))
+                        .keyboardType(.decimalPad)
+                        .focused($focusedField, equals: .weight)
+                        .multilineTextAlignment(.center)
+                        .padding(16)
+                        .frame(height: 56)
+                        .background(themeManager.currentTheme.muted)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(focusedField == .weight ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                        )
+                        .onChange(of: weightText) { _, newValue in
+                            // Allow only digits and one decimal point, max 6 chars (e.g., "100.25")
+                            let filtered = newValue.filter { $0.isNumber || $0 == "." }
+                            let limited = String(filtered.prefix(6))
+                            // Ensure only one decimal point
+                            let parts = limited.split(separator: ".", omittingEmptySubsequences: false)
+                            if parts.count > 2 {
+                                weightText = String(parts[0]) + "." + String(parts[1])
+                            } else if limited != newValue {
+                                weightText = limited
                             }
-
-                        // Stacked +/- buttons (plus on top, minus below)
-                        VStack(spacing: 4) {
-                            StepperButton(systemName: "plus", size: 26) { incrementWeight() }
-                            StepperButton(systemName: "minus", size: 26) { decrementWeight() }
                         }
-                    }
                 }
 
                 // Reps input
@@ -172,38 +164,30 @@ struct AddSetView: View {
                         .font(themeManager.currentTheme.subheadlineFont)
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
-                    HStack(spacing: 8) {
-                        TextField("0", text: $repsText)
-                            .font(themeManager.currentTheme.dataFont(size: 20))
-                            .keyboardType(.numberPad)
-                            .focused($focusedField, equals: .reps)
-                            .multilineTextAlignment(.center)
-                            .padding(16)
-                            .frame(height: 56)
-                            .background(themeManager.currentTheme.muted)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .strokeBorder(focusedField == .reps ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
-                            )
-                            .onChange(of: repsText) { _, newValue in
-                                // Allow only digits, max 3 chars
-                                let filtered = newValue.filter { $0.isNumber }
-                                if filtered != newValue || filtered.count > 3 {
-                                    repsText = String(filtered.prefix(3))
-                                }
+                    TextField("0", text: $repsText)
+                        .font(themeManager.currentTheme.dataFont(size: 20))
+                        .keyboardType(.numberPad)
+                        .focused($focusedField, equals: .reps)
+                        .multilineTextAlignment(.center)
+                        .padding(16)
+                        .frame(height: 56)
+                        .background(themeManager.currentTheme.muted)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(focusedField == .reps ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                        )
+                        .onChange(of: repsText) { _, newValue in
+                            // Allow only digits, max 3 chars
+                            let filtered = newValue.filter { $0.isNumber }
+                            if filtered != newValue || filtered.count > 3 {
+                                repsText = String(filtered.prefix(3))
                             }
-
-                        // Stacked +/- buttons (plus on top, minus below)
-                        VStack(spacing: 4) {
-                            StepperButton(systemName: "plus", size: 26) { incrementReps() }
-                            StepperButton(systemName: "minus", size: 26) { decrementReps() }
                         }
-                    }
                 }
             }
 
@@ -236,34 +220,6 @@ struct AddSetView: View {
                     UIApplication.shared.sendAction(#selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil)
                 }
             }
-        }
-    }
-
-    // MARK: - Stepper Actions
-
-    private func incrementWeight() {
-        let current = Double(weightText) ?? 0
-        weightText = Formatters.formatWeight(current + 1)
-    }
-
-    private func decrementWeight() {
-        let current = Double(weightText) ?? 0
-        if current >= 1 {
-            weightText = Formatters.formatWeight(current - 1)
-        }
-    }
-
-    private func incrementReps() {
-        let current = Int(repsText) ?? 0
-        if current < 999 {
-            repsText = String(current + 1)
-        }
-    }
-
-    private func decrementReps() {
-        let current = Int(repsText) ?? 0
-        if current >= 1 {
-            repsText = String(current - 1)
         }
     }
 

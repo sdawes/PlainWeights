@@ -33,17 +33,21 @@ enum TodaySessionCalculator {
     // MARK: - Today's Metrics
 
     /// Calculate total volume lifted today (updates live as sets are added)
+    /// Excludes warm-up and bonus sets from volume calculation
     static func getTodaysVolume(from sets: [ExerciseSet]) -> Double {
         let todaySets = getTodaysSets(from: sets)
-        return ExerciseVolumeCalculator.calculateVolume(for: todaySets)
+        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        return ExerciseVolumeCalculator.calculateVolume(for: workingSets)
     }
 
     /// Get session metrics for today's session
+    /// Excludes warm-up and bonus sets from metrics calculation
     static func getTodaySessionMetrics(from sets: [ExerciseSet]) -> SessionMetrics? {
         let todaySets = getTodaysSets(from: sets)
-        guard !todaySets.isEmpty else { return nil }
+        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        guard !workingSets.isEmpty else { return nil }
 
-        return ExerciseVolumeCalculator.getSessionMetrics(for: todaySets, date: Date())
+        return ExerciseVolumeCalculator.getSessionMetrics(for: workingSets, date: Date())
     }
 
     /// Get today's maximum weight lifted (for Best mode comparisons)

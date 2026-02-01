@@ -128,14 +128,20 @@ struct FilteredExerciseListView: View {
                                     .padding(.top, 6)
                             }
                             HStack(spacing: 4) {
-                                if let color = stalenessColor(for: exercise) {
+                                if let color = stalenessColor(for: exercise), !isDoneToday(exercise) {
                                     Image(systemName: "exclamationmark.circle")
                                         .font(.system(size: 14))
                                         .foregroundStyle(color)
                                 }
-                                Text("Last: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
-                                    .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                                    .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+                                if isDoneToday(exercise) {
+                                    Text("Today")
+                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                                        .foregroundStyle(.green)
+                                } else {
+                                    Text("Last: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
+                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+                                }
                             }
                             .padding(.top, 10)
                         }

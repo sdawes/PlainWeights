@@ -386,16 +386,6 @@ struct ExerciseDetailView: View {
         comparisonMode == .lastSession ? "Last" : "Best"
     }
 
-    // Active timer set (most recent set that is still timing)
-    private var activeTimerSet: ExerciseSet? {
-        guard let mostRecent = todaySets.first,
-              mostRecent.restSeconds == nil,
-              Date().timeIntervalSince(mostRecent.timestamp) < 180 else {
-            return nil
-        }
-        return mostRecent
-    }
-
     // Calculate session duration in minutes for a set of sets
     // Duration = time from first set to last set + 3 min rest after last set
     private func calculateSessionDuration(for sets: [ExerciseSet]) -> Int? {
@@ -618,19 +608,12 @@ struct ExerciseDetailView: View {
                     .font(.title2)
                     .foregroundStyle(themeManager.currentTheme.background)
             }
-            .frame(width: 48, height: 48)
+            .frame(width: 50, height: 50)
             .background(themeManager.currentTheme.primary)
             .clipShape(Circle())
             .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
             .padding(.trailing, 20)
             .padding(.bottom, 20)
-        }
-        .overlay(alignment: .bottom) {
-            if let activeSet = activeTimerSet {
-                FloatingRestTimer(setTimestamp: activeSet.timestamp)
-                    .offset(y: 6)  // Center aligned with FAB (48pt button + 20pt padding)
-                    .transition(.scale.combined(with: .opacity))
-            }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

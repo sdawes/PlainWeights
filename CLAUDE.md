@@ -298,6 +298,105 @@ private func metricCell(label: String, value: String) -> some View {
 #### Key Files
 - `SessionSummaryView.swift` - Reference implementation with session info card and exercise cards
 
+### Progress Chart Component
+
+The `InlineProgressChart` displays exercise progress over time using Swift Charts with dual Y-axes for weight and reps.
+
+**Location:** `PlainWeights/Views/Components/InlineProgressChart.swift`
+
+#### Structure
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Progress                              [1Y] [3Y] [Max]       │  ← Header + time range picker
+├─────────────────────────────────────────────────────────────┤
+│ 12 ┤                                                    │ 80│  ← Dual Y-axes (reps left, weight right)
+│ 10 ┤      ╭──────╮    🏆                               │ 70│
+│  8 ┤  ╭───╯      ╰────────╮                            │ 60│  ← Weight line (solid) + area gradient
+│  6 ┤──╯                    ╰─ ─ ─ ─                    │ 50│  ← Reps line (dashed)
+│    └────┬────┬────┬────┬────┬────┬────┬────┬────┬─────┘    │
+│       27/1  3/2  10/2 17/2 24/2  3/3  10/3 17/3 24/3       │  ← X-axis dates
+├─────────────────────────────────────────────────────────────┤
+│ ── Weight (kg)    - - Reps                                  │  ← Legend
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Time Range Options
+| Range | Data Filter | Granularity |
+|-------|-------------|-------------|
+| **6M** (default) | Past 6 months | Always daily - shows each session |
+| **1Y** | Past 1 year | Weekly grouping |
+| **3Y** | Past 3 years | Monthly grouping |
+| **Max** | All data | Monthly grouping |
+
+#### Granularity Rules (Performance Optimized)
+```swift
+// Under 6 months of data - always daily for all views
+if dataSpanDays < 180 {
+    granularity = .daily
+} else {
+    // Larger datasets - granularity depends on selected time range
+    switch timeRange {
+    case .sixMonths: granularity = .daily   // 6M always shows daily
+    case .oneYear: granularity = .weekly    // 1Y groups by week
+    case .threeYears, .max: granularity = .monthly  // 3Y/Max groups by month
+    }
+}
+```
+
+#### Visual Styling
+- **Weight line**: Solid, 2px, `chartColor1` (orange in light, blue in dark) + gradient fill
+- **Reps line**: Dashed (5,3), 1.5px, `chartColor2` (teal in light, green in dark), no fill
+- **PB markers**: Vertical rule line + trophy icon at top, using `pbColor` (#faac05 gold)
+- **Grid lines**: Dashed (3,3), 0.5px, `borderColor`
+- **Chart height**: 170pt, Y-axis height: 150pt
+
+#### Reps-Only Exercises
+For bodyweight exercises (weight = 0), the chart adapts:
+- Single Y-axis on left (reps only)
+- Solid line with gradient fill (like weight line styling)
+- Uses `chartColor2` (green/teal)
+
+#### Performance Considerations
+1. **Cached chart data**: Computed in `init` and stored in `@State` to prevent recalculation on every render
+2. **Time filtering**: Cutoff dates limit data loaded (1Y default reduces initial load)
+3. **Adaptive granularity**: Larger datasets auto-aggregate to reduce chart points
+4. **Static computation**: Uses `static func` for data transformation (required for init)
+
+#### Key Code Patterns
+```swift
+// Cache expensive transformations
+@State private var cachedChartData: [ChartDataPoint]
+
+init(sets: [ExerciseSet]) {
+    self.sets = sets
+    _cachedChartData = State(initialValue: Self.computeChartData(from: sets, timeRange: .sixMonths))
+}
+
+// Update cache when data or time range changes
+.onChange(of: sets) { _, _ in
+    cachedChartData = Self.computeChartData(from: sets, timeRange: selectedTimeRange)
+}
+.onChange(of: selectedTimeRange) { _, newRange in
+    withAnimation(.easeInOut(duration: 0.2)) {
+        cachedChartData = Self.computeChartData(from: sets, timeRange: newRange)
+    }
+}
+```
+
+#### Chart Colors (from AppTheme)
+```swift
+// Light theme
+chartColor1: Color(red: 0.92, green: 0.45, blue: 0.18)  // Vibrant orange (weight)
+chartColor2: Color(red: 0.18, green: 0.70, blue: 0.65)  // Vibrant teal (reps)
+
+// Dark theme
+chartColor1: Color(red: 0.45, green: 0.50, blue: 0.95)  // Bright blue/purple (weight)
+chartColor2: Color(red: 0.45, green: 0.82, blue: 0.58)  // Bright green (reps)
+
+// PB indicator (both themes)
+pbColor: Color(red: 0.980, green: 0.675, blue: 0.020)   // Gold #faac05
+```
+
 ### UIKit Policy - CRITICAL
 **NEVER use UIKit unless there is absolutely no SwiftUI alternative to achieve the desired result.**
 

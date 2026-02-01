@@ -12,7 +12,7 @@ import Charts
 // MARK: - Chart Time Range
 
 enum ChartTimeRange: String, CaseIterable, Identifiable {
-    case ninetyDays = "90D"
+    case sixMonths = "6M"
     case oneYear = "1Y"
     case threeYears = "3Y"
     case max = "Max"
@@ -23,7 +23,7 @@ enum ChartTimeRange: String, CaseIterable, Identifiable {
     var cutoffDate: Date? {
         let calendar = Calendar.current
         switch self {
-        case .ninetyDays: return calendar.date(byAdding: .day, value: -90, to: Date())
+        case .sixMonths: return calendar.date(byAdding: .month, value: -6, to: Date())
         case .oneYear: return calendar.date(byAdding: .year, value: -1, to: Date())
         case .threeYears: return calendar.date(byAdding: .year, value: -3, to: Date())
         case .max: return nil
@@ -37,7 +37,7 @@ enum ChartTimeRange: String, CaseIterable, Identifiable {
 
     var granularity: Granularity {
         switch self {
-        case .ninetyDays: return .daily
+        case .sixMonths: return .daily
         case .oneYear: return .weekly
         case .threeYears, .max: return .monthly
         }
@@ -67,8 +67,8 @@ struct InlineProgressChart: View {
     // Animation state - start true so chart appears immediately with container
     @State private var isAnimating = true
 
-    // Time range selection - default to 90 days for performance
-    @State private var selectedTimeRange: ChartTimeRange = .ninetyDays
+    // Time range selection - default to 6 months for daily granularity
+    @State private var selectedTimeRange: ChartTimeRange = .sixMonths
 
     // Cached chart data - computed on init to prevent layout shift
     @State private var cachedChartData: [ChartDataPoint]
@@ -76,7 +76,7 @@ struct InlineProgressChart: View {
     init(sets: [ExerciseSet]) {
         self.sets = sets
         // Compute chart data during init to prevent layout shift on appear
-        _cachedChartData = State(initialValue: Self.computeChartData(from: sets, timeRange: .ninetyDays))
+        _cachedChartData = State(initialValue: Self.computeChartData(from: sets, timeRange: .sixMonths))
     }
 
     // MARK: - Data Transformation
@@ -101,25 +101,29 @@ struct InlineProgressChart: View {
         }
         let dataSpanDays = calendar.dateComponents([.day], from: firstDate, to: lastDate).day ?? 0
 
-        // Choose granularity based on ACTUAL data span, not selected time range
-        // This ensures small datasets look consistent across all time range selections
+        // Choose granularity based on ACTUAL data span
+        // Small datasets always show daily, larger datasets use coarser granularity
         let granularity: ChartTimeRange.Granularity
-        if dataSpanDays < 90 {
-            // Small dataset (< 90 days) - always show daily points
+        if dataSpanDays < 180 {
+            // Under 6 months - always show daily points for all views
             granularity = .daily
         } else if dataSpanDays < 365 {
-            // Medium dataset (< 1 year) - daily for 90D, weekly for longer views
-            granularity = timeRange == .ninetyDays ? .daily : .weekly
-        } else if dataSpanDays < 1095 {
-            // Large dataset (1-3 years) - daily for 90D, weekly for 1Y, monthly for 3Y/Max
+            // 6-12 months - daily for 6M, weekly for others
+            granularity = timeRange == .sixMonths ? .daily : .weekly
+        } else if dataSpanDays < 730 {
+            // 1-2 years - daily for 6M, weekly for 1Y, monthly for 3Y/Max
             switch timeRange {
-            case .ninetyDays: granularity = .daily
+            case .sixMonths: granularity = .daily
             case .oneYear: granularity = .weekly
             case .threeYears, .max: granularity = .monthly
             }
         } else {
-            // Very large dataset (3+ years) - use original time range logic
-            granularity = timeRange.granularity
+            // 2+ years - daily for 6M, weekly for 1Y, monthly for 3Y/Max
+            switch timeRange {
+            case .sixMonths: granularity = .daily
+            case .oneYear: granularity = .weekly
+            case .threeYears, .max: granularity = .monthly
+            }
         }
 
         // Group sets based on granularity (daily, weekly, or monthly)
@@ -315,7 +319,7 @@ struct InlineProgressChart: View {
         Text("No data yet. Log sets to see progress.")
             .font(themeManager.currentTheme.subheadlineFont)
             .foregroundStyle(themeManager.currentTheme.mutedForeground)
-            .frame(height: 140)
+            .frame(height: 150)
             .frame(maxWidth: .infinity)
     }
 
@@ -337,11 +341,11 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: 25, height: 120)
+                .frame(width: 25, height: 130)
 
                 // Main chart
                 chartView
-                    .frame(height: 140)
+                    .frame(height: 150)
             } else {
                 // Dual Y-axes: reps on left, weight on right
                 VStack(alignment: .trailing, spacing: 0) {
@@ -355,11 +359,11 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: 25, height: 120)
+                .frame(width: 25, height: 130)
 
                 // Main chart
                 chartView
-                    .frame(height: 140)
+                    .frame(height: 150)
 
                 // Right Y-axis labels (Weight)
                 VStack(alignment: .leading, spacing: 0) {
@@ -373,7 +377,7 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.currentTheme.chartColor1)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: 35, height: 120)
+                .frame(width: 35, height: 130)
             }
         }
     }

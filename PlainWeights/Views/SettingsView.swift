@@ -195,6 +195,7 @@ struct SettingsView: View {
             Button("Cancel", role: .cancel) { }
             Button("Delete & Generate", role: .destructive) {
                 TestDataGenerator.generateTestData(modelContext: modelContext)
+                dismiss()
             }
         } message: {
             Text("This will DELETE all your existing workout data and replace it with test data. This cannot be undone.")
@@ -203,6 +204,7 @@ struct SettingsView: View {
             Button("Cancel", role: .cancel) { }
             Button("Delete All", role: .destructive) {
                 TestDataGenerator.clearAllData(modelContext: modelContext)
+                dismiss()
             }
         } message: {
             Text("This will DELETE all your workout data including exercises and sets. This cannot be undone.")

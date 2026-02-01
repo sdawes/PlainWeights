@@ -598,6 +598,7 @@ struct ExerciseDetailView: View {
 
         }
         .listStyle(.plain)
+        .scrollIndicators(.hidden)
         .listSectionSpacing(24)
         .environment(\.defaultMinListRowHeight, 1)  // Allow rows to be as short as needed
         .scrollContentBackground(.hidden)

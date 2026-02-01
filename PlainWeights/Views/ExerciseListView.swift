@@ -192,7 +192,7 @@ struct FilteredExerciseListView: View {
                 Button {
                     showingSummary = true
                 } label: {
-                    Image(systemName: "chart.bar.doc.horizontal")
+                    Image(systemName: "trophy")
                         .font(.callout)
                         .fontWeight(.medium)
                 }

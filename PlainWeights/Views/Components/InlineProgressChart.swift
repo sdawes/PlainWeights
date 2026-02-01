@@ -262,7 +262,7 @@ struct InlineProgressChart: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 20) {
             // Header with title and time range picker
             HStack {
                 Text("Progress")
@@ -315,7 +315,7 @@ struct InlineProgressChart: View {
         Text("No data yet. Log sets to see progress.")
             .font(themeManager.currentTheme.subheadlineFont)
             .foregroundStyle(themeManager.currentTheme.mutedForeground)
-            .frame(height: 200)
+            .frame(height: 140)
             .frame(maxWidth: .infinity)
     }
 
@@ -337,11 +337,11 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: 25, height: 180)
+                .frame(width: 25, height: 120)
 
                 // Main chart
                 chartView
-                    .frame(height: 200)
+                    .frame(height: 140)
             } else {
                 // Dual Y-axes: reps on left, weight on right
                 VStack(alignment: .trailing, spacing: 0) {
@@ -355,11 +355,11 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.currentTheme.chartColor2)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: 25, height: 180)
+                .frame(width: 25, height: 120)
 
                 // Main chart
                 chartView
-                    .frame(height: 200)
+                    .frame(height: 140)
 
                 // Right Y-axis labels (Weight)
                 VStack(alignment: .leading, spacing: 0) {
@@ -373,7 +373,7 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.currentTheme.chartColor1)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-                .frame(width: 35, height: 180)
+                .frame(width: 35, height: 120)
             }
         }
     }
@@ -482,18 +482,18 @@ struct InlineProgressChart: View {
             if point.isPB {
                 // Vertical line from top to bottom through the PB point
                 RuleMark(x: .value("Index", point.index))
-                    .foregroundStyle(.red.opacity(0.5))
+                    .foregroundStyle(themeManager.currentTheme.pbColor.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1))
 
-                // "PB" label at top of chart
+                // Trophy icon at top of chart
                 PointMark(
                     x: .value("Index", point.index),
                     y: .value("PB", 1.0)  // Top of normalized chart
                 )
                 .symbol {
-                    Text("PB")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.red)
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(themeManager.currentTheme.pbColor)
                 }
             }
         }

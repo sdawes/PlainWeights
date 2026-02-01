@@ -130,17 +130,14 @@ enum AppTheme: String, CaseIterable {
 
     // MARK: - PB (Personal Best) Color
 
-    /// Gold-yellow color for PB indicators
+    /// Gold color for PB indicators (#faac05)
     var pbColor: Color {
-        switch self {
-        case .light: return Color(red: 0.85, green: 0.65, blue: 0.0)   // Gold-yellow
-        case .dark: return Color(red: 0.9, green: 0.75, blue: 0.1)    // Gold-yellow for dark
-        }
+        Color(red: 0.980, green: 0.675, blue: 0.020)  // #faac05
     }
 
     /// Subtle background tint for PB rows
     var pbBackgroundTint: Color {
-        Color.yellow.opacity(0.12)
+        pbColor.opacity(0.12)
     }
 
     // MARK: - Inter Font

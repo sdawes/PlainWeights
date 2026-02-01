@@ -217,9 +217,14 @@ struct SessionSummaryView: View {
     @ViewBuilder
     private func pbMetricCell(pbCount: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("PBs")
-                .font(themeManager.currentTheme.captionFont)
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            HStack(spacing: 4) {
+                Text("PBs")
+                    .font(themeManager.currentTheme.captionFont)
+                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(themeManager.currentTheme.pbColor)
+            }
             Text(pbCount > 0 ? "\(pbCount)" : "—")
                 .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
                 .monospacedDigit()
@@ -234,7 +239,7 @@ struct SessionSummaryView: View {
             ZStack {
                 themeManager.currentTheme.cardBackgroundColor
                 if pbCount > 0 {
-                    Color.red.opacity(0.1)
+                    themeManager.currentTheme.pbBackgroundTint
                 }
             }
         }
@@ -426,9 +431,9 @@ struct SessionSummaryView: View {
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 if hasPB {
                     Spacer()
-                    Text("PB")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.red)
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(themeManager.currentTheme.pbColor)
                 }
             }
 
@@ -481,7 +486,7 @@ struct SessionSummaryView: View {
             ZStack {
                 themeManager.currentTheme.cardBackgroundColor
                 if hasPB {
-                    Color.red.opacity(0.1)
+                    themeManager.currentTheme.pbBackgroundTint
                 }
             }
         }
@@ -501,9 +506,9 @@ struct SessionSummaryView: View {
                     .foregroundStyle(themeManager.currentTheme.mutedForeground)
                 if hasPB {
                     Spacer()
-                    Text("PB")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.red)
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(themeManager.currentTheme.pbColor)
                 }
             }
             Text("\(reps)")
@@ -533,7 +538,7 @@ struct SessionSummaryView: View {
             ZStack {
                 themeManager.currentTheme.cardBackgroundColor
                 if hasPB {
-                    Color.red.opacity(0.1)
+                    themeManager.currentTheme.pbBackgroundTint
                 }
             }
         }

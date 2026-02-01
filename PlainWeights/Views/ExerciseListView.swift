@@ -146,11 +146,11 @@ struct FilteredExerciseListView: View {
                                         .foregroundStyle(color)
                                 }
                                 if isDoneToday(exercise) {
-                                    Text("Today")
+                                    Text("Last updated: Today")
                                         .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(.green)
                                 } else {
-                                    Text("Last: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
+                                    Text("Last updated: \(Formatters.formatExerciseLastDone(exercise.lastUpdated))")
                                         .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
                                 }

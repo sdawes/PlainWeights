@@ -13,6 +13,7 @@ struct SettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
 
     @State private var showingDeleteAllAlert = false
+    @State private var showingThemePicker = false
 
     #if DEBUG
     @State private var showingGenerateDataAlert = false
@@ -20,11 +21,12 @@ struct SettingsView: View {
     #endif
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
                 Text("Settings")
                     .font(themeManager.currentTheme.title3Font)
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
@@ -33,152 +35,118 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.bottom, 8)
+            .padding(.bottom, 16)
 
-            // Theme section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Theme")
-                    .font(themeManager.currentTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Appearance section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Appearance")
+                            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .padding(.top, 24)
 
-                HStack(spacing: 8) {
-                    // Light pill
-                    Button {
-                        themeManager.currentTheme = .light
-                    } label: {
-                        Label("Light", systemImage: "sun.max.fill")
-                            .font(themeManager.currentTheme.subheadlineFont)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(themeManager.currentTheme == .light ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
-                            .foregroundStyle(themeManager.currentTheme == .light ? .white : themeManager.currentTheme.primaryText)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                    .buttonStyle(.plain)
-
-                    // Dark pill
-                    Button {
-                        themeManager.currentTheme = .dark
-                    } label: {
-                        Label("Dark", systemImage: "moon.fill")
-                            .font(themeManager.currentTheme.subheadlineFont)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(themeManager.currentTheme == .dark ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
-                            .foregroundStyle(themeManager.currentTheme == .dark ? .black : themeManager.currentTheme.primaryText)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-
-            // Display section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Display")
-                    .font(themeManager.currentTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-
-                Toggle("Show charts by default", isOn: Binding(
-                    get: { themeManager.chartVisibleByDefault },
-                    set: { themeManager.chartVisibleByDefault = $0 }
-                ))
-                .font(themeManager.currentTheme.bodyFont)
-                .tint(.green)
-
-                Toggle("Show notes by default", isOn: Binding(
-                    get: { themeManager.notesVisibleByDefault },
-                    set: { themeManager.notesVisibleByDefault = $0 }
-                ))
-                .font(themeManager.currentTheme.bodyFont)
-                .tint(.green)
-            }
-
-            // Data section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Data")
-                    .font(themeManager.currentTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-
-                Button {
-                    showingDeleteAllAlert = true
-                } label: {
-                    HStack {
-                        Image(systemName: "trash")
-                        Text("Delete All Exercises")
-                    }
-                    .font(themeManager.currentTheme.bodyFont)
-                    .foregroundStyle(.red)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(themeManager.currentTheme.muted)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-                .buttonStyle(.plain)
-            }
-
-            #if DEBUG
-            // Developer Tools section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Developer Tools")
-                    .font(themeManager.currentTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-
-                VStack(spacing: 8) {
-                    // Print Data button
-                    Button {
-                        TestDataGenerator.printCurrentData(modelContext: modelContext)
-                    } label: {
-                        HStack {
-                            Image(systemName: "terminal")
-                            Text("Print Data to Console")
+                        settingsRow(
+                            icon: themeManager.currentTheme == .dark ? "moon.fill" : "sun.max.fill",
+                            title: "Theme",
+                            value: themeManager.currentTheme == .dark ? "Dark" : "Light"
+                        ) {
+                            themeManager.currentTheme = themeManager.currentTheme == .dark ? .light : .dark
                         }
-                        .font(themeManager.currentTheme.bodyFont)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
-                        .background(themeManager.currentTheme.muted)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                    .buttonStyle(.plain)
 
-                    // Generate and Clear buttons side by side
-                    HStack(spacing: 8) {
-                        Button {
+                    // Display section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Display")
+                            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                        settingsToggleRow(
+                            icon: "chart.line.uptrend.xyaxis",
+                            title: "Show charts by default",
+                            isOn: Binding(
+                                get: { themeManager.chartVisibleByDefault },
+                                set: { themeManager.chartVisibleByDefault = $0 }
+                            )
+                        )
+
+                        settingsToggleRow(
+                            icon: "note.text",
+                            title: "Show notes by default",
+                            isOn: Binding(
+                                get: { themeManager.notesVisibleByDefault },
+                                set: { themeManager.notesVisibleByDefault = $0 }
+                            )
+                        )
+                    }
+
+                    // Data section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Data")
+                            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                        settingsRow(
+                            icon: "trash",
+                            title: "Delete All Exercises",
+                            value: nil,
+                            isDestructive: true
+                        ) {
+                            showingDeleteAllAlert = true
+                        }
+                    }
+
+                    #if DEBUG
+                    // Developer Tools section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Developer Tools")
+                            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+
+                        settingsRow(
+                            icon: "terminal",
+                            title: "Print Data to Console",
+                            value: nil
+                        ) {
+                            TestDataGenerator.printCurrentData(modelContext: modelContext)
+                        }
+
+                        settingsRow(
+                            icon: "wand.and.stars",
+                            title: "Generate Test Data",
+                            value: nil,
+                            isDestructive: true
+                        ) {
                             showingGenerateDataAlert = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "wand.and.stars")
-                                Text("Generate")
-                            }
-                            .font(themeManager.currentTheme.bodyFont)
-                            .foregroundStyle(.red)
-                            .frame(maxWidth: .infinity)
-                            .padding(12)
-                            .background(themeManager.currentTheme.muted)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
-                        .buttonStyle(.plain)
 
-                        Button {
+                        settingsRow(
+                            icon: "trash",
+                            title: "Clear All Data",
+                            value: nil,
+                            isDestructive: true
+                        ) {
                             showingClearDataAlert = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "trash")
-                                Text("Clear All")
-                            }
-                            .font(themeManager.currentTheme.bodyFont)
-                            .foregroundStyle(.red)
-                            .frame(maxWidth: .infinity)
-                            .padding(12)
-                            .background(themeManager.currentTheme.muted)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
-                        .buttonStyle(.plain)
                     }
+                    #endif
+
+                    Spacer(minLength: 40)
+
+                    // Footer
+                    VStack(spacing: 4) {
+                        Text("PlainWeights v1.0")
+                            .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                        Text("A simple workout tracking tool")
+                            .font(themeManager.currentTheme.interFont(size: 14, weight: .regular))
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 24)
                 }
             }
-            #endif
-
-            Spacer()
+            .scrollIndicators(.hidden)
         }
         .padding(24)
         .background(themeManager.currentTheme.background)
@@ -210,6 +178,77 @@ struct SettingsView: View {
             Text("This will DELETE all your workout data including exercises and sets. This cannot be undone.")
         }
         #endif
+    }
+
+    // MARK: - Settings Row Components
+
+    @ViewBuilder
+    private func settingsRow(
+        icon: String,
+        title: String,
+        value: String?,
+        isDestructive: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                    .foregroundStyle(isDestructive ? .red : themeManager.currentTheme.primaryText)
+                    .frame(width: 24)
+
+                Text(title)
+                    .font(themeManager.currentTheme.interFont(size: 16, weight: .medium))
+                    .foregroundStyle(isDestructive ? .red : themeManager.currentTheme.primaryText)
+
+                Spacer()
+
+                if let value = value {
+                    Text(value)
+                        .font(themeManager.currentTheme.interFont(size: 16, weight: .regular))
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                }
+            }
+            .padding(16)
+            .background(themeManager.currentTheme.cardBackgroundColor)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func settingsToggleRow(
+        icon: String,
+        title: String,
+        isOn: Binding<Bool>
+    ) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .frame(width: 24)
+
+            Text(title)
+                .font(themeManager.currentTheme.interFont(size: 16, weight: .medium))
+                .foregroundStyle(themeManager.currentTheme.primaryText)
+
+            Spacer()
+
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .tint(.green)
+        }
+        .padding(16)
+        .background(themeManager.currentTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+        )
     }
 
     private func deleteAllExercises() {

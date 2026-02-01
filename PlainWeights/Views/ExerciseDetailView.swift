@@ -449,44 +449,47 @@ struct ExerciseDetailView: View {
                 .listRowBackground(Color.clear)
             }
 
-            // Comparison mode toggle
+            // Comparison mode toggle - card style buttons
             Section {
-                HStack(spacing: 4) {
+                HStack(spacing: 12) {
                     ForEach(ComparisonMode.allCases, id: \.self) { mode in
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 comparisonMode = mode
                             }
                         } label: {
-                            Text(mode.rawValue)
-                                .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                                .foregroundStyle(
-                                    comparisonMode == mode
-                                        ? themeManager.currentTheme.primaryText
-                                        : themeManager.currentTheme.mutedForeground
-                                )
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(
-                                    comparisonMode == mode
-                                        ? themeManager.currentTheme.background
-                                        : Color.clear
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 6))
-                                .shadow(
-                                    color: comparisonMode == mode ? .black.opacity(0.08) : .clear,
-                                    radius: 2,
-                                    x: 0,
-                                    y: 1
-                                )
+                            HStack(spacing: 8) {
+                                Image(systemName: mode == .lastSession ? "calendar.badge.clock" : "trophy")
+                                    .font(.system(size: 16))
+                                Text(mode == .lastSession ? "Last" : "Best")
+                                    .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .foregroundStyle(
+                                comparisonMode == mode
+                                    ? themeManager.currentTheme.background
+                                    : themeManager.currentTheme.primaryText
+                            )
+                            .background(
+                                comparisonMode == mode
+                                    ? themeManager.currentTheme.primaryText
+                                    : themeManager.currentTheme.cardBackgroundColor
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .strokeBorder(
+                                        comparisonMode == mode
+                                            ? Color.clear
+                                            : themeManager.currentTheme.borderColor,
+                                        lineWidth: 1
+                                    )
+                            )
                         }
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(4)
-                .frame(maxWidth: .infinity)
-                .background(themeManager.currentTheme.muted)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)

@@ -644,7 +644,7 @@ struct ExerciseDetailView: View {
                     }
                 }) {
                     Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(.callout)
+                        .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(showChart
                             ? themeManager.currentTheme.accent
@@ -656,7 +656,7 @@ struct ExerciseDetailView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showNotes.toggle() }) {
                     Image(systemName: "note.text")
-                        .font(.callout)
+                        .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(showNotes
                             ? themeManager.currentTheme.accent
@@ -668,7 +668,7 @@ struct ExerciseDetailView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingEditSheet = true }) {
                     Image(systemName: "pencil")
-                        .font(.callout)
+                        .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(themeManager.currentTheme.textColor)
                 }

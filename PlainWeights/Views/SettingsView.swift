@@ -65,7 +65,7 @@ struct SettingsView: View {
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(themeManager.currentTheme == .dark ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
-                            .foregroundStyle(themeManager.currentTheme == .dark ? .white : themeManager.currentTheme.primaryText)
+                            .foregroundStyle(themeManager.currentTheme == .dark ? .black : themeManager.currentTheme.primaryText)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
@@ -83,14 +83,14 @@ struct SettingsView: View {
                     set: { themeManager.chartVisibleByDefault = $0 }
                 ))
                 .font(themeManager.currentTheme.bodyFont)
-                .tint(themeManager.currentTheme.primary)
+                .tint(.green)
 
                 Toggle("Show notes by default", isOn: Binding(
                     get: { themeManager.notesVisibleByDefault },
                     set: { themeManager.notesVisibleByDefault = $0 }
                 ))
                 .font(themeManager.currentTheme.bodyFont)
-                .tint(themeManager.currentTheme.primary)
+                .tint(.green)
             }
 
             // Data section

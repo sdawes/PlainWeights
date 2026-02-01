@@ -161,7 +161,7 @@ struct FilteredExerciseListView: View {
                                         .frame(width: 2)
                                 }
                                 Rectangle()
-                                    .fill(stalenessColor(for: exercise)?.opacity(0.05) ?? Color.clear)
+                                    .fill(stalenessColor(for: exercise)?.opacity(themeManager.currentTheme == .dark ? 0.15 : 0.05) ?? Color.clear)
                             }
                         )
                         .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
@@ -172,6 +172,7 @@ struct FilteredExerciseListView: View {
             }
         }
         .listStyle(.plain)
+        .id(themeManager.currentTheme)  // Force list rebuild on theme change
         .scrollIndicators(.hidden)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
@@ -182,7 +183,7 @@ struct FilteredExerciseListView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showingSettings = true } label: {
                     Image(systemName: "gearshape")
-                        .font(.callout)
+                        .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(themeManager.currentTheme.textColor)
                 }
@@ -192,14 +193,14 @@ struct FilteredExerciseListView: View {
                     showingSummary = true
                 } label: {
                     Image(systemName: "trophy")
-                        .font(.callout)
+                        .font(.body)
                         .fontWeight(.medium)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showingAddExercise = true } label: {
                     Image(systemName: "plus")
-                        .font(.callout)
+                        .font(.body)
                         .fontWeight(.medium)
                 }
             }

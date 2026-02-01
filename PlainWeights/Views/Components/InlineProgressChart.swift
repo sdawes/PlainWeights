@@ -94,9 +94,37 @@ struct InlineProgressChart: View {
             workingSets = workingSets.filter { $0.timestamp >= cutoff }
         }
 
+        // Calculate actual data span to determine appropriate granularity
+        let sortedDates = workingSets.map { $0.timestamp }.sorted()
+        guard let firstDate = sortedDates.first, let lastDate = sortedDates.last else {
+            return []
+        }
+        let dataSpanDays = calendar.dateComponents([.day], from: firstDate, to: lastDate).day ?? 0
+
+        // Choose granularity based on ACTUAL data span, not selected time range
+        // This ensures small datasets look consistent across all time range selections
+        let granularity: ChartTimeRange.Granularity
+        if dataSpanDays < 90 {
+            // Small dataset (< 90 days) - always show daily points
+            granularity = .daily
+        } else if dataSpanDays < 365 {
+            // Medium dataset (< 1 year) - daily for 90D, weekly for longer views
+            granularity = timeRange == .ninetyDays ? .daily : .weekly
+        } else if dataSpanDays < 1095 {
+            // Large dataset (1-3 years) - daily for 90D, weekly for 1Y, monthly for 3Y/Max
+            switch timeRange {
+            case .ninetyDays: granularity = .daily
+            case .oneYear: granularity = .weekly
+            case .threeYears, .max: granularity = .monthly
+            }
+        } else {
+            // Very large dataset (3+ years) - use original time range logic
+            granularity = timeRange.granularity
+        }
+
         // Group sets based on granularity (daily, weekly, or monthly)
         let grouped: [Date: [ExerciseSet]]
-        switch timeRange.granularity {
+        switch granularity {
         case .daily:
             grouped = Dictionary(grouping: workingSets) { set in
                 calendar.startOfDay(for: set.timestamp)
@@ -450,15 +478,21 @@ struct InlineProgressChart: View {
                 .interpolationMethod(.monotone)
             }
 
-            // PB star indicator
+            // PB indicator: vertical line through the point + "PB" label at top
             if point.isPB {
+                // Vertical line from top to bottom through the PB point
+                RuleMark(x: .value("Index", point.index))
+                    .foregroundStyle(.red.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1))
+
+                // "PB" label at top of chart
                 PointMark(
                     x: .value("Index", point.index),
-                    y: .value("PB", isRepsOnly ? point.normalizedReps : point.normalizedWeight)
+                    y: .value("PB", 1.0)  // Top of normalized chart
                 )
                 .symbol {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 12))
+                    Text("PB")
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(.red)
                 }
             }

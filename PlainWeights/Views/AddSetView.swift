@@ -180,12 +180,6 @@ struct AddSetView: View {
             }
             .padding(.bottom, 16)
 
-            // Header divider
-            Rectangle()
-                .fill(themeManager.currentTheme.borderColor)
-                .frame(height: 1)
-                .padding(.horizontal, -24)
-
             // Content
             VStack(alignment: .leading, spacing: 24) {
                 // Weight and Reps inputs

@@ -22,7 +22,7 @@ enum AppTheme: String, CaseIterable {
     var primary: Color {
         switch self {
         case .light: return .black
-        case .dark: return .white
+        case .dark: return Color(white: 0.93)  // Slightly softer than pure white
         }
     }
 

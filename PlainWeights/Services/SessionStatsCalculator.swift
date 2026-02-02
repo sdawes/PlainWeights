@@ -10,21 +10,27 @@ import Foundation
 enum SessionStatsCalculator {
 
     /// Calculate session duration in minutes for a given day's sets
+    /// Includes 3-minute rest period after the last set
     static func getSessionDurationMinutes(from sets: [ExerciseSet]) -> Int? {
-        guard sets.count >= 2 else { return nil }
+        guard !sets.isEmpty else { return nil }
         let sorted = sets.sorted { $0.timestamp < $1.timestamp }
         guard let first = sorted.first, let last = sorted.last else { return nil }
-        let duration = last.timestamp.timeIntervalSince(first.timestamp)
-        return max(0, Int(duration / 60))
+
+        // Duration = time between first and last set + 3 min rest after last set
+        let duration = last.timestamp.timeIntervalSince(first.timestamp) + 180
+        return max(1, Int(duration / 60))  // Minimum 1 minute (for single set: ~3 min)
     }
 
     /// Calculate exercise duration in minutes for sets of a single exercise
+    /// Includes 3-minute rest period after the last set
     static func getExerciseDurationMinutes(from sets: [ExerciseSet]) -> Int? {
-        guard sets.count >= 2 else { return nil }
+        guard !sets.isEmpty else { return nil }
         let sorted = sets.sorted { $0.timestamp < $1.timestamp }
         guard let first = sorted.first, let last = sorted.last else { return nil }
-        let duration = last.timestamp.timeIntervalSince(first.timestamp)
-        return max(0, Int(duration / 60))
+
+        // Duration = time between first and last set + 3 min rest after last set
+        let duration = last.timestamp.timeIntervalSince(first.timestamp) + 180
+        return max(1, Int(duration / 60))  // Minimum 1 minute (for single set: ~3 min)
     }
 
     /// Calculate average rest time in seconds for a collection of sets

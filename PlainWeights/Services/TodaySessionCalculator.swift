@@ -79,10 +79,7 @@ enum TodaySessionCalculator {
     }
 
     /// Get session duration in minutes
-    /// Logic:
-    /// - 1 set, < 3 min elapsed: return nil (don't show)
-    /// - 1 set, >= 3 min elapsed: return elapsed time since that set
-    /// - 2+ sets: return time from first set to most recent set
+    /// Duration = time from first set to last set + 3 min rest after last set
     static func getSessionDurationMinutes(from sets: [ExerciseSet]) -> Int? {
         let todaySets = getTodaysSets(from: sets)
         guard !todaySets.isEmpty else { return nil }
@@ -92,19 +89,9 @@ enum TodaySessionCalculator {
 
         guard let start = firstSetTime, let end = lastSetTime else { return nil }
 
-        if todaySets.count == 1 {
-            // Only 1 set - check if 3+ minutes have elapsed
-            let elapsed = Date().timeIntervalSince(start)
-            let elapsedMinutes = Int(elapsed / 60)
-            if elapsedMinutes < 3 {
-                return nil  // Don't show duration yet
-            }
-            return elapsedMinutes  // Show elapsed time since first set
-        } else {
-            // 2+ sets - duration from first to most recent set
-            let duration = end.timeIntervalSince(start)
-            return max(0, Int(duration / 60))
-        }
+        // Duration = time between first and last set + 3 min rest after last set
+        let duration = end.timeIntervalSince(start) + 180
+        return max(1, Int(duration / 60))  // Minimum 1 minute (for single set: ~3 min)
     }
 
     /// Get today's total reps (sum of working sets only - excludes warm-up and bonus)

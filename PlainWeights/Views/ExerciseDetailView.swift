@@ -549,7 +549,7 @@ struct ExerciseDetailView: View {
             if !historicDayGroups.isEmpty {
                 Section {
                     Text("History")
-                        .font(themeManager.currentTheme.interFont(size: 14, weight: .semibold))
+                        .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
                         .foregroundStyle(themeManager.currentTheme.tertiaryText)
                         .padding(.leading, 8)
                         .frame(maxWidth: .infinity, alignment: .leading)

@@ -38,7 +38,7 @@ struct TagPillView: View {
             }
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 3)
+        .padding(.vertical, 4)
         .background(themeManager.currentTheme.muted)
         .clipShape(RoundedRectangle(cornerRadius: 4))
     }

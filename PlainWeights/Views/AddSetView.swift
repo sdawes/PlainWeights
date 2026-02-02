@@ -11,46 +11,107 @@ import SwiftData
 // MARK: - Set Type Enum for UI
 
 enum SetTypeOption: String, CaseIterable, Identifiable {
-    case normal = "Normal"
     case warmup = "Warm-up"
-    case dropset = "Drop Set"
+    case dropset = "Drop"
     case assisted = "Assisted"
     case bonus = "Bonus"
-    case pause = "Pause Rep"
+    case pause = "Pause"
     case timed = "Timed"
 
     var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .warmup: return "flame.fill"
+        case .dropset: return "chevron.down.2"
+        case .assisted: return "hand.raised.fill"
+        case .bonus: return "plus"
+        case .pause: return "pause.fill"
+        case .timed: return "timer"
+        }
+    }
+
+    var accentColor: Color {
+        switch self {
+        case .warmup: return .orange
+        case .dropset: return .blue
+        case .assisted: return Color(red: 1.0, green: 0.2, blue: 0.5)
+        case .bonus: return .green
+        case .pause: return .indigo
+        case .timed: return .gray
+        }
+    }
 }
 
 // MARK: - Set Type Pill Selector
 
 struct SetTypePillSelector: View {
     @Environment(ThemeManager.self) private var themeManager
-    @Binding var selectedType: SetTypeOption
+    @Binding var selectedType: SetTypeOption?
+
+    // 6 special set types in 3 rows of 2
+    private let gridRows: [[SetTypeOption]] = [
+        [.warmup, .bonus],
+        [.dropset, .assisted],
+        [.pause, .timed]
+    ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Set Type")
-                .font(themeManager.currentTheme.subheadlineFont)
+                .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
-            FlowLayout(spacing: 8) {
-                ForEach(SetTypeOption.allCases) { type in
-                    Button {
-                        selectedType = type
-                    } label: {
-                        Text(type.rawValue)
-                            .font(themeManager.currentTheme.subheadlineFont)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(selectedType == type ? themeManager.currentTheme.primary : themeManager.currentTheme.muted)
-                            .foregroundStyle(selectedType == type ? themeManager.currentTheme.background : themeManager.currentTheme.primaryText)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+            VStack(spacing: 8) {
+                ForEach(gridRows, id: \.first) { row in
+                    HStack(spacing: 8) {
+                        ForEach(row) { type in
+                            setTypePill(for: type)
+                                .frame(maxWidth: .infinity)
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func setTypePill(for type: SetTypeOption) -> some View {
+        let isSelected = selectedType == type
+        // Use white text/icon for most colors, black for light backgrounds like orange
+        let selectedForeground: Color = (type == .warmup || type == .bonus) ? .black : .white
+
+        Button {
+            // Toggle: tap selected to deselect, tap unselected to select
+            if isSelected {
+                selectedType = nil
+            } else {
+                selectedType = type
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: type.icon)
+                    .font(.system(size: 14))
+                    .frame(width: 20)
+                Text(type.rawValue)
+                    .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(isSelected ? type.accentColor : themeManager.currentTheme.cardBackgroundColor)
+            .foregroundStyle(isSelected ? selectedForeground : themeManager.currentTheme.primaryText)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(
+                        isSelected ? Color.clear : themeManager.currentTheme.borderColor,
+                        lineWidth: 1
+                    )
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -65,7 +126,7 @@ struct AddSetView: View {
 
     @State private var weightText = ""
     @State private var repsText = ""
-    @State private var selectedType: SetTypeOption = .normal
+    @State private var selectedType: SetTypeOption? = nil
     @FocusState private var focusedField: Field?
 
     enum Field {
@@ -92,14 +153,14 @@ struct AddSetView: View {
         }
     }
 
-    private static func typeFromSet(_ set: ExerciseSet) -> SetTypeOption {
+    private static func typeFromSet(_ set: ExerciseSet) -> SetTypeOption? {
         if set.isWarmUp { return .warmup }
         if set.isBonus { return .bonus }
         if set.isDropSet { return .dropset }
         if set.isAssisted { return .assisted }
         if set.isPauseAtTop { return .pause }
         if set.isTimedSet { return .timed }
-        return .normal
+        return nil  // Normal set = no selection
     }
 
     var body: some View {
@@ -124,7 +185,7 @@ struct AddSetView: View {
                 // Weight input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Weight (kg)")
-                        .font(themeManager.currentTheme.subheadlineFont)
+                        .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
                     TextField("0", text: $weightText)
@@ -134,15 +195,14 @@ struct AddSetView: View {
                         .multilineTextAlignment(.center)
                         .padding(16)
                         .frame(height: 56)
-                        .background(themeManager.currentTheme.muted)
+                        .background(themeManager.currentTheme.cardBackgroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(focusedField == .weight ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                                .strokeBorder(
+                                    focusedField == .weight ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                                    lineWidth: focusedField == .weight ? 2 : 1
+                                )
                         )
                         .onChange(of: weightText) { _, newValue in
                             // Allow only digits and one decimal point, max 6 chars (e.g., "100.25")
@@ -161,7 +221,7 @@ struct AddSetView: View {
                 // Reps input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Reps")
-                        .font(themeManager.currentTheme.subheadlineFont)
+                        .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
                         .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
                     TextField("0", text: $repsText)
@@ -171,15 +231,14 @@ struct AddSetView: View {
                         .multilineTextAlignment(.center)
                         .padding(16)
                         .frame(height: 56)
-                        .background(themeManager.currentTheme.muted)
+                        .background(themeManager.currentTheme.cardBackgroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(focusedField == .reps ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                                .strokeBorder(
+                                    focusedField == .reps ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                                    lineWidth: focusedField == .reps ? 2 : 1
+                                )
                         )
                         .onChange(of: repsText) { _, newValue in
                             // Allow only digits, max 3 chars

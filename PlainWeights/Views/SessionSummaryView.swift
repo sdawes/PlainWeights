@@ -247,7 +247,7 @@ struct SessionSummaryView: View {
 
     private var exercisesHeader: some View {
         Text("Exercises")
-            .font(themeManager.currentTheme.interFont(size: 14, weight: .semibold))
+            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
             .foregroundStyle(themeManager.currentTheme.tertiaryText)
             .padding(.top, 8)
             .padding(.bottom, 4)

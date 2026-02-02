@@ -62,7 +62,7 @@ struct HistoricDayHeader: View {
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.vertical, 12)
 
             // Divider after header
             Rectangle()

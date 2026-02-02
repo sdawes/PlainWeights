@@ -164,7 +164,7 @@ struct AddSetView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
                 Text("\(setToEdit == nil ? "Add Set" : "Edit Set") - \(exercise.name)")
@@ -178,10 +178,18 @@ struct AddSetView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.bottom, 8)
+            .padding(.bottom, 16)
 
-            // Weight and Reps inputs
-            HStack(spacing: 16) {
+            // Header divider
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 1)
+                .padding(.horizontal, -24)
+
+            // Content
+            VStack(alignment: .leading, spacing: 24) {
+                // Weight and Reps inputs
+                HStack(spacing: 16) {
                 // Weight input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Weight (kg)")
@@ -265,6 +273,8 @@ struct AddSetView: View {
             }
             .buttonStyle(.plain)
             .disabled(!canAddSet)
+            }
+            .padding(.top, 24)
 
             Spacer()
         }

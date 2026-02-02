@@ -37,6 +37,12 @@ struct SettingsView: View {
             }
             .padding(.bottom, 16)
 
+            // Header divider
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 1)
+                .padding(.horizontal, -24)
+
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     // Appearance section

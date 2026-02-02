@@ -40,7 +40,7 @@ struct AddExerciseView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 0) {
             // Header (like AddSetView)
             HStack {
                 Text(screenTitle)
@@ -55,7 +55,13 @@ struct AddExerciseView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.bottom, 8)
+            .padding(.bottom, 16)
+
+            // Header divider
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 1)
+                .padding(.horizontal, -24)
 
             // Content
             ScrollView {
@@ -63,6 +69,7 @@ struct AddExerciseView: View {
                     exerciseNameSection
                     tagsSection
                 }
+                .padding(.top, 24)
             }
 
             Spacer()

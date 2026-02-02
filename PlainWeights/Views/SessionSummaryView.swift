@@ -21,6 +21,11 @@ struct SessionSummaryView: View {
                 .padding(.top, 24)
                 .padding(.bottom, 16)
 
+            // Header divider
+            Rectangle()
+                .fill(themeManager.currentTheme.borderColor)
+                .frame(height: 1)
+
             if let day = displayDay {
                 List {
                     // Session info card

@@ -501,20 +501,7 @@ struct InlineProgressChart: View {
                 }
             }
         }
-        .chartXAxis {
-            AxisMarks(values: xAxisIndices) { value in
-                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
-                    .foregroundStyle(themeManager.currentTheme.borderColor)
-                AxisTick()
-                if let index = value.as(Int.self), index < cachedChartData.count {
-                    AxisValueLabel {
-                        Text(formatDateLabel(cachedChartData[index].date))
-                            .font(.system(size: 9))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                    }
-                }
-            }
-        }
+        .chartXAxis(.hidden)
         .chartXScale(domain: 0...(max(cachedChartData.count - 1, 1)))
         .chartYAxis {
             AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in

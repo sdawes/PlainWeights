@@ -203,14 +203,18 @@ struct ComparisonMetricsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Separate header section with muted background
-            Text(headerText)
-                .font(themeManager.currentTheme.interFont(size: 13, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(themeManager.currentTheme.cardHeaderBackground)
+            // Header section
+            HStack(spacing: 8) {
+                Image(systemName: comparisonMode == .lastSession ? "calendar.badge.clock" : "trophy.fill")
+                    .font(.system(size: 14))
+                    .frame(width: 20)
+                Text(headerText)
+                    .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+            }
+            .foregroundStyle(themeManager.currentTheme.primaryText)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
 
             // Divider below header
             Rectangle()

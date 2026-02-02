@@ -24,9 +24,14 @@ struct TodaySessionCard: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header row
             HStack {
-                Text("Today's Sets")
-                    .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                    .foregroundStyle(themeManager.currentTheme.secondaryText)
+                HStack(spacing: 8) {
+                    Image(systemName: "figure.strengthtraining.traditional")
+                        .font(.system(size: 14))
+                        .frame(width: 20)
+                    Text("Today's Sets")
+                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                }
+                .foregroundStyle(themeManager.currentTheme.primaryText)
 
                 Spacer()
 
@@ -60,8 +65,7 @@ struct TodaySessionCard: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(themeManager.currentTheme.cardHeaderBackground)
+            .padding(.vertical, 14)
 
             // Divider
             Rectangle()

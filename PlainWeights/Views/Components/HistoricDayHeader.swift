@@ -31,7 +31,7 @@ struct HistoricDayHeader: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(Formatters.formatFullDayHeader(dayGroup.date))
                     .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                    .foregroundStyle(themeManager.currentTheme.secondaryText)
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
 
                 Spacer()
 
@@ -62,7 +62,7 @@ struct HistoricDayHeader: View {
                 .foregroundStyle(themeManager.currentTheme.tertiaryText)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, 14)
 
             // Divider after header
             Rectangle()
@@ -70,7 +70,7 @@ struct HistoricDayHeader: View {
                 .frame(height: 1)
         }
         .frame(maxWidth: .infinity)
-        .background(themeManager.currentTheme.cardHeaderBackground)
+        .background(themeManager.currentTheme.cardBackgroundColor)
         .clipShape(RoundedCorner(radius: 12, corners: [.topLeft, .topRight]))
         .overlay(
             TopOpenBorder(radius: 12)

@@ -87,18 +87,18 @@ struct AddExerciseView: View {
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
 
             TextField("e.g. Romanian Deadlift", text: $name)
-                .font(themeManager.currentTheme.bodyFont)
+                .font(themeManager.currentTheme.dataFont(size: 20))
                 .foregroundStyle(themeManager.currentTheme.primaryText)
                 .padding(16)
-                .background(themeManager.currentTheme.muted)
+                .frame(height: 56)
+                .background(themeManager.currentTheme.cardBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(nameFieldFocused ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                        .strokeBorder(
+                            nameFieldFocused ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                            lineWidth: nameFieldFocused ? 2 : 1
+                        )
                 )
                 .focused($nameFieldFocused)
                 .onSubmit {
@@ -117,18 +117,18 @@ struct AddExerciseView: View {
 
             HStack(spacing: 8) {
                 TextField("e.g. chest, push, strength", text: $tagInput)
-                    .font(themeManager.currentTheme.bodyFont)
+                    .font(themeManager.currentTheme.dataFont(size: 20))
                     .foregroundStyle(themeManager.currentTheme.primaryText)
                     .padding(16)
-                    .background(themeManager.currentTheme.muted)
+                    .frame(height: 56)
+                    .background(themeManager.currentTheme.cardBackgroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(tagFieldFocused ? themeManager.currentTheme.mutedForeground : Color.clear, lineWidth: 2)
+                            .strokeBorder(
+                                tagFieldFocused ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                                lineWidth: tagFieldFocused ? 2 : 1
+                            )
                     )
                     .focused($tagFieldFocused)
                     .onSubmit {
@@ -140,13 +140,14 @@ struct AddExerciseView: View {
                 Button(action: addTag) {
                     let isDisabled = tagInput.trimmingCharacters(in: .whitespaces).isEmpty
                     Text("Add")
-                        .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                        .font(themeManager.currentTheme.headlineFont)
                         .foregroundStyle(themeManager.currentTheme.background)
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 16)
-                        .background(themeManager.currentTheme.primaryText.opacity(isDisabled ? 0.4 : 1))
+                        .frame(height: 56)
+                        .background(isDisabled ? themeManager.currentTheme.primary.opacity(0.4) : themeManager.currentTheme.primary)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                .buttonStyle(.plain)
                 .disabled(tagInput.trimmingCharacters(in: .whitespaces).isEmpty)
             }
 
@@ -173,9 +174,10 @@ struct AddExerciseView: View {
                 .foregroundStyle(themeManager.currentTheme.background)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(themeManager.currentTheme.primaryText.opacity(name.isEmpty ? 0.4 : 1))
+                .background(name.isEmpty ? themeManager.currentTheme.primary.opacity(0.4) : themeManager.currentTheme.primary)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .buttonStyle(.plain)
         .disabled(name.isEmpty)
     }
 

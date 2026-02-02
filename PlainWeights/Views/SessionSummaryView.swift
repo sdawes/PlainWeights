@@ -32,7 +32,7 @@ struct SessionSummaryView: View {
                     Section {
                         sessionInfoCard(for: day)
                     }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 0, trailing: 16))
+                    .listRowInsets(EdgeInsets(top: 24, leading: 16, bottom: 0, trailing: 16))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
 
@@ -111,10 +111,13 @@ struct SessionSummaryView: View {
 
         VStack(alignment: .leading, spacing: 0) {
             // Header with date and duration
-            HStack {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 14))
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
                 Text(day.date, format: .dateTime.weekday(.wide).month(.wide).day())
                     .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                    .foregroundStyle(themeManager.currentTheme.secondaryText)
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
                 Spacer()
                 if let duration = sessionDuration {
                     Text("\(duration) min")
@@ -123,8 +126,7 @@ struct SessionSummaryView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(themeManager.currentTheme.cardHeaderBackground)
+            .padding(.vertical, 14)
 
             // Divider
             Rectangle()
@@ -196,7 +198,7 @@ struct SessionSummaryView: View {
         .background(themeManager.currentTheme.cardBackgroundColor)
     }
 
-    /// Metric cell that reserves space for delta row (used in exercise cards)
+    /// Metric cell for exercise cards (no delta space needed with inline deltas)
     @ViewBuilder
     private func metricCellWithDeltaSpace(label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -209,9 +211,6 @@ struct SessionSummaryView: View {
                 .foregroundStyle(themeManager.currentTheme.primaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-            // Empty space to match cells with deltas
-            Text(" ")
-                .font(themeManager.currentTheme.dataFont(size: 12))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -222,41 +221,41 @@ struct SessionSummaryView: View {
     @ViewBuilder
     private func pbMetricCell(pbCount: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
-                Text("PBs")
-                    .font(themeManager.currentTheme.captionFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            Text("PBs")
+                .font(themeManager.currentTheme.captionFont)
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            // Value: "3 × 🏆"
+            HStack(alignment: .lastTextBaseline, spacing: 0) {
+                Text("\(pbCount)")
+                    .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                Text(" × ")
+                    .font(themeManager.currentTheme.interFont(size: 14))
+                    .foregroundStyle(.secondary)
                 Image(systemName: "trophy.fill")
-                    .font(.system(size: 10))
+                    .font(.system(size: 16))
                     .foregroundStyle(themeManager.currentTheme.pbColor)
             }
-            Text(pbCount > 0 ? "\(pbCount)" : "—")
-                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                .monospacedDigit()
-                .foregroundStyle(themeManager.currentTheme.primaryText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background {
-            ZStack {
-                themeManager.currentTheme.cardBackgroundColor
-                if pbCount > 0 {
-                    themeManager.currentTheme.pbBackgroundTint
-                }
-            }
-        }
+        .background(themeManager.currentTheme.cardBackgroundColor)
     }
 
     private var exercisesHeader: some View {
-        Text("Exercises")
-            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-            .foregroundStyle(themeManager.currentTheme.tertiaryText)
-            .padding(.top, 8)
-            .padding(.bottom, 4)
-            .padding(.leading, 8)
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Exercises")
+                .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            Text("Delta values compared to last session")
+                .font(themeManager.currentTheme.captionFont)
+                .foregroundStyle(themeManager.currentTheme.tertiaryText)
+        }
+        .padding(.top, 20)
+        .padding(.bottom, 4)
+        .padding(.leading, 8)
     }
 
     @ViewBuilder
@@ -285,10 +284,13 @@ struct SessionSummaryView: View {
 
         VStack(alignment: .leading, spacing: 0) {
             // Header with exercise name and duration
-            HStack {
+            HStack(spacing: 8) {
+                Image(systemName: "dumbbell.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
                 Text(workoutExercise.exercise.name)
                     .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                    .foregroundStyle(themeManager.currentTheme.secondaryText)
+                    .foregroundStyle(themeManager.currentTheme.primaryText)
                 Spacer()
                 if let duration = exerciseDuration {
                     Text("\(duration) min")
@@ -298,8 +300,7 @@ struct SessionSummaryView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(themeManager.currentTheme.cardHeaderBackground)
+            .padding(.vertical, 14)
 
             // Divider below header
             Rectangle()
@@ -419,7 +420,7 @@ struct SessionSummaryView: View {
         }
     }
 
-    /// Max weight metric cell with delta underneath
+    /// Max weight metric cell with inline deltas and accent bar
     @ViewBuilder
     private func maxMetricCellWithDelta(
         weight: Double,
@@ -428,160 +429,198 @@ struct SessionSummaryView: View {
         repsDelta: Int?,
         hasPB: Bool
     ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            // Label row with PB
-            HStack {
-                Text("Max Weight")
-                    .font(themeManager.currentTheme.captionFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                if hasPB {
-                    Spacer()
-                    Image(systemName: "trophy.fill")
-                        .font(.system(size: 11))
-                        .foregroundStyle(themeManager.currentTheme.pbColor)
-                }
+        let accentColor = deltaAccentColor(weightDelta: weightDelta, repsDelta: repsDelta)
+
+        HStack(spacing: 0) {
+            // Left spacer (unshaded)
+            if accentColor != nil {
+                Color.clear.frame(width: 8)
             }
 
-            // Value: "70.5 kg × 12"
-            HStack(alignment: .lastTextBaseline, spacing: 0) {
-                Text(Formatters.formatWeight(weight))
-                    .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                    .monospacedDigit()
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                Text(" kg")
-                    .font(themeManager.currentTheme.interFont(size: 14))
-                    .foregroundStyle(.secondary)
-                Text(" × ")
-                    .font(themeManager.currentTheme.interFont(size: 14))
-                    .foregroundStyle(.secondary)
-                Text("\(reps)")
-                    .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                    .monospacedDigit()
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
-            }
-
-            // Delta row (combined weight and reps deltas)
-            let hasWeightDelta = weightDelta != nil && weightDelta != 0
-            let hasRepsDelta = repsDelta != nil && repsDelta != 0
-            if hasWeightDelta || hasRepsDelta {
-                HStack(spacing: 8) {
-                    if let wDelta = weightDelta, wDelta != 0 {
-                        Text(formatWeightDelta(wDelta))
-                            .font(themeManager.currentTheme.dataFont(size: 12))
-                            .monospacedDigit()
-                            .foregroundStyle(deltaColor(wDelta))
-                    }
-                    if let rDelta = repsDelta, rDelta != 0 {
-                        Text(formatRepsDelta(rDelta) + " reps")
-                            .font(themeManager.currentTheme.dataFont(size: 12))
-                            .monospacedDigit()
-                            .foregroundStyle(deltaColor(Double(rDelta)))
-                    }
+            // Accent bar + shaded content area
+            HStack(spacing: 0) {
+                if let color = accentColor {
+                    Rectangle()
+                        .fill(color)
+                        .frame(width: 3)
                 }
-            } else {
-                // Reserve space for delta row
-                Text(" ")
-                    .font(themeManager.currentTheme.dataFont(size: 12))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    // Label row with PB
+                    HStack {
+                        Text("Max Weight")
+                            .font(themeManager.currentTheme.captionFont)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        if hasPB {
+                            Spacer()
+                            Image(systemName: "trophy.fill")
+                                .font(.system(size: 14))
+                                .foregroundStyle(themeManager.currentTheme.pbColor)
+                        }
+                    }
+
+                    // Value with inline deltas: "45 kg -5.5 × 10 +2"
+                    (
+                        Text(Formatters.formatWeight(weight))
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                        + Text(" kg")
+                            .font(themeManager.currentTheme.dataFont(size: 20))
+                            .foregroundStyle(.secondary)
+                        + Text(weightDelta.flatMap { $0 != 0 ? " \(formatWeightDelta($0))" : nil } ?? "")
+                            .font(themeManager.currentTheme.dataFont(size: 20))
+                            .foregroundStyle(deltaColor(weightDelta ?? 0))
+                        + Text(" × ")
+                            .font(themeManager.currentTheme.dataFont(size: 20))
+                            .foregroundStyle(.secondary)
+                        + Text("\(reps)")
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                        + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
+                            .font(themeManager.currentTheme.dataFont(size: 20))
+                            .foregroundStyle(deltaColor(Double(repsDelta ?? 0)))
+                    )
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                }
+                .padding(.leading, 8)
+                .padding(.trailing, 12)
+                .padding(.vertical, 12)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .background {
+                if let color = accentColor {
+                    color.opacity(0.08)
+                } else {
+                    themeManager.currentTheme.cardBackgroundColor
+                }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background {
-            ZStack {
-                themeManager.currentTheme.cardBackgroundColor
-                if hasPB {
-                    themeManager.currentTheme.pbBackgroundTint
-                }
-            }
-        }
+        .background(themeManager.currentTheme.cardBackgroundColor)
     }
 
-    /// Reps-only metric cell with delta underneath
+    /// Reps-only metric cell with inline delta and accent bar
     @ViewBuilder
     private func repsOnlyMetricCellWithDelta(
         reps: Int,
         repsDelta: Int?,
         hasPB: Bool
     ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("Max Reps")
-                    .font(themeManager.currentTheme.captionFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
-                if hasPB {
-                    Spacer()
-                    Image(systemName: "trophy.fill")
-                        .font(.system(size: 11))
-                        .foregroundStyle(themeManager.currentTheme.pbColor)
-                }
-            }
-            Text("\(reps)")
-                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                .monospacedDigit()
-                .foregroundStyle(themeManager.currentTheme.primaryText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+        let accentColor = deltaAccentColor(weightDelta: nil, repsDelta: repsDelta)
 
-            if let rDelta = repsDelta, rDelta != 0 {
-                Text(formatRepsDelta(rDelta))
-                    .font(themeManager.currentTheme.dataFont(size: 12))
-                    .monospacedDigit()
-                    .foregroundStyle(deltaColor(Double(rDelta)))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            } else {
-                // Reserve space for delta row
-                Text(" ")
-                    .font(themeManager.currentTheme.dataFont(size: 12))
+        HStack(spacing: 0) {
+            // Left spacer (unshaded)
+            if accentColor != nil {
+                Color.clear.frame(width: 8)
             }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background {
-            ZStack {
-                themeManager.currentTheme.cardBackgroundColor
-                if hasPB {
-                    themeManager.currentTheme.pbBackgroundTint
+
+            // Accent bar + shaded content area
+            HStack(spacing: 0) {
+                if let color = accentColor {
+                    Rectangle()
+                        .fill(color)
+                        .frame(width: 3)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Max Reps")
+                            .font(themeManager.currentTheme.captionFont)
+                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        if hasPB {
+                            Spacer()
+                            Image(systemName: "trophy.fill")
+                                .font(.system(size: 14))
+                                .foregroundStyle(themeManager.currentTheme.pbColor)
+                        }
+                    }
+                    // Value with inline delta: "12 +2"
+                    (
+                        Text("\(reps)")
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                        + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
+                            .font(themeManager.currentTheme.dataFont(size: 20))
+                            .foregroundStyle(deltaColor(Double(repsDelta ?? 0)))
+                    )
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                }
+                .padding(.leading, 8)
+                .padding(.trailing, 12)
+                .padding(.vertical, 12)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .background {
+                if let color = accentColor {
+                    color.opacity(0.08)
+                } else {
+                    themeManager.currentTheme.cardBackgroundColor
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(themeManager.currentTheme.cardBackgroundColor)
     }
 
-    /// Volume metric cell with delta underneath
+    /// Volume metric cell with inline delta and accent bar
     @ViewBuilder
     private func volumeMetricCellWithDelta(
         volume: Double,
         volumeDelta: Double?
     ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Volume")
-                .font(themeManager.currentTheme.captionFont)
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
-            HStack(alignment: .lastTextBaseline, spacing: 0) {
-                Text(Formatters.formatVolume(volume))
-                    .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                    .monospacedDigit()
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
-                Text(" kg")
-                    .font(themeManager.currentTheme.interFont(size: 14))
-                    .foregroundStyle(.secondary)
+        let accentColor = deltaAccentColor(weightDelta: volumeDelta, repsDelta: nil)
+
+        HStack(spacing: 0) {
+            // Left spacer (unshaded)
+            if accentColor != nil {
+                Color.clear.frame(width: 8)
             }
 
-            if let vDelta = volumeDelta, vDelta != 0 {
-                Text(formatVolumeDelta(vDelta))
-                    .font(themeManager.currentTheme.dataFont(size: 12))
+            // Accent bar + shaded content area
+            HStack(spacing: 0) {
+                if let color = accentColor {
+                    Rectangle()
+                        .fill(color)
+                        .frame(width: 3)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Total Volume")
+                        .font(themeManager.currentTheme.captionFont)
+                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    // Value with inline delta: "1,250 kg +150"
+                    (
+                        Text(Formatters.formatVolume(volume))
+                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                        + Text(" kg")
+                            .font(themeManager.currentTheme.dataFont(size: 20))
+                            .foregroundStyle(.secondary)
+                        + Text(volumeDelta.flatMap { $0 != 0 ? " \(formatVolumeDelta($0))" : nil } ?? "")
+                            .font(themeManager.currentTheme.dataFont(size: 20))
+                            .foregroundStyle(deltaColor(volumeDelta ?? 0))
+                    )
                     .monospacedDigit()
-                    .foregroundStyle(deltaColor(vDelta))
-            } else {
-                // Reserve space for delta row
-                Text(" ")
-                    .font(themeManager.currentTheme.dataFont(size: 12))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                }
+                .padding(.leading, 8)
+                .padding(.trailing, 12)
+                .padding(.vertical, 12)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .background {
+                if let color = accentColor {
+                    color.opacity(0.08)
+                } else {
+                    themeManager.currentTheme.cardBackgroundColor
+                }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(themeManager.currentTheme.cardBackgroundColor)
     }
@@ -610,5 +649,16 @@ struct SessionSummaryView: View {
         if value > 0 { return .green }
         if value < 0 { return .red }
         return .secondary
+    }
+
+    /// Determine accent bar color based on deltas
+    /// Green if any positive, red if any negative (green takes priority if both)
+    private func deltaAccentColor(weightDelta: Double?, repsDelta: Int?) -> Color? {
+        let hasPositive = (weightDelta ?? 0) > 0 || (repsDelta ?? 0) > 0
+        let hasNegative = (weightDelta ?? 0) < 0 || (repsDelta ?? 0) < 0
+
+        if hasPositive { return .green }
+        if hasNegative { return .red }
+        return nil
     }
 }

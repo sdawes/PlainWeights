@@ -226,26 +226,6 @@ struct SessionSummaryView: View {
         .background(themeManager.currentTheme.cardBackgroundColor)
     }
 
-    /// Metric cell for exercise cards (no delta space needed with inline deltas)
-    @ViewBuilder
-    private func metricCellWithDeltaSpace(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(themeManager.currentTheme.captionFont)
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
-            Text(value)
-                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                .monospacedDigit()
-                .foregroundStyle(themeManager.currentTheme.primaryText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(themeManager.currentTheme.cardBackgroundColor)
-    }
-
     @ViewBuilder
     private func pbMetricCell(pbCount: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -287,7 +267,7 @@ struct SessionSummaryView: View {
     @ViewBuilder
     private func exerciseCard(for workoutExercise: ExerciseDataGrouper.WorkoutExercise, displayedDay: Date) -> some View {
         let hasPB = workoutExercise.sets.contains { $0.isPB }
-        let workingSets = workoutExercise.sets.filter { !$0.isWarmUp && !$0.isBonus }
+        let workingSets = workoutExercise.sets.workingSets
         let maxSet = workingSets.max(by: { $0.weight < $1.weight })
         let exerciseDuration = SessionStatsCalculator.getExerciseDurationMinutes(from: workoutExercise.sets)
         let exerciseAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: workoutExercise.sets)
@@ -332,7 +312,7 @@ struct SessionSummaryView: View {
 
             // Row 1: Sets, Max
             HStack(spacing: 0) {
-                metricCellWithDeltaSpace(label: "Sets", value: "\(workoutExercise.setCount)")
+                metricCell(label: "Sets", value: "\(workoutExercise.setCount)")
 
                 // Vertical divider
                 Rectangle()
@@ -374,7 +354,7 @@ struct SessionSummaryView: View {
                     .fill(themeManager.currentTheme.borderColor)
                     .frame(width: 1)
 
-                metricCellWithDeltaSpace(label: "Avg Rest", value: formatRestTime(exerciseAvgRest))
+                metricCell(label: "Avg Rest", value: formatRestTime(exerciseAvgRest))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

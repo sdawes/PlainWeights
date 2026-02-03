@@ -18,7 +18,7 @@ enum ExerciseMetricsType {
     /// Analyzes working sets (excludes warm-ups) to detect exercise pattern
     static func determine(from sets: [ExerciseSet]) -> ExerciseMetricsType {
         // Only consider working sets for type detection
-        let workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
+        let workingSets = sets.workingSets
 
         // If no working sets, default to combined
         guard !workingSets.isEmpty else { return .combined }

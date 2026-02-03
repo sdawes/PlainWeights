@@ -15,7 +15,7 @@ struct HistoricDayHeader: View {
 
     // Computed properties for display
     private var isWeightedDay: Bool {
-        dayGroup.sets.filter { !$0.isWarmUp && !$0.isBonus }.contains { $0.weight > 0 }
+        dayGroup.sets.workingSets.contains { $0.weight > 0 }
     }
 
     private var volume: Double {

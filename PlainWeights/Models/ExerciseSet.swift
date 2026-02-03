@@ -42,3 +42,29 @@ final class ExerciseSet {
         exercise.lastUpdated = timestamp
     }
 }
+
+// MARK: - Array Extension for Working Sets
+
+extension Array where Element == ExerciseSet {
+    /// Working sets are sets that count towards metrics (excludes warm-up and bonus sets)
+    var workingSets: [ExerciseSet] {
+        filter { !$0.isWarmUp && !$0.isBonus }
+    }
+}
+
+// MARK: - Set Type Color Extension
+
+import SwiftUI
+
+extension ExerciseSet {
+    /// Color associated with the set type (nil for normal working sets)
+    var setTypeColor: Color? {
+        if isWarmUp { return .orange }
+        if isBonus { return .green }
+        if isDropSet { return .blue }
+        if isAssisted { return Color(red: 1.0, green: 0.2, blue: 0.5) }
+        if isTimedSet { return .gray }
+        if isPauseAtTop { return .indigo }
+        return nil
+    }
+}

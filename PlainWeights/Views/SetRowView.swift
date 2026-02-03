@@ -180,15 +180,9 @@ struct SetRowView: View {
         }
     }
 
-    /// Color for set number based on set type
+    /// Color for set number based on set type (uses model's setTypeColor)
     private var setNumberColor: Color {
-        if set.isWarmUp { return .orange }
-        if set.isBonus { return .green }
-        if set.isDropSet { return .blue }
-        if set.isAssisted { return Color(red: 1.0, green: 0.2, blue: 0.5) }
-        if set.isTimedSet { return .gray }
-        if set.isPauseAtTop { return .indigo }
-        return .secondary
+        self.set.setTypeColor ?? .secondary
     }
 
     /// Get the background view for set type with colored left border accent
@@ -197,32 +191,21 @@ struct SetRowView: View {
     private var setTypeRowBackground: some View {
         HStack(spacing: 0) {
             Color.clear.frame(width: 16)  // Match list leading inset
-            if let tintColor = setTypeTintColor {
+            if let tintColor = set.setTypeColor {
                 Rectangle()
                     .fill(tintColor)
                     .frame(width: 2)
             }
             Rectangle()
-                .fill(setTypeTintColor?.opacity(0.05) ?? Color.clear)
+                .fill(set.setTypeColor?.opacity(0.05) ?? Color.clear)
         }
-    }
-
-    /// Get set type tint color (nil for normal sets)
-    private var setTypeTintColor: Color? {
-        if set.isWarmUp { return .orange }
-        if set.isBonus { return .green }
-        if set.isDropSet { return .blue }
-        if set.isAssisted { return Color(red: 1.0, green: 0.2, blue: 0.5) }
-        if set.isTimedSet { return .gray }
-        if set.isPauseAtTop { return .indigo }
-        return nil
     }
 
     /// Tinted background for special set types (warm-up, bonus, etc.)
     /// Shows colored left border + light fill, starting left of set number
     @ViewBuilder
     private var setTypeTintBackground: some View {
-        if let tintColor = setTypeTintColor {
+        if let tintColor = set.setTypeColor {
             let bgOpacity = set.isAssisted ? 0.05 : 0.1  // Lighter background for assisted
             HStack(spacing: 0) {
                 Rectangle()

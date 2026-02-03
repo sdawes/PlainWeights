@@ -87,7 +87,7 @@ struct InlineProgressChart: View {
         dateFormatter.dateFormat = "MMM d"
 
         // Filter out warm-up and bonus sets
-        var workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
+        var workingSets = sets.workingSets
 
         // Apply time range filter
         if let cutoff = timeRange.cutoffDate {
@@ -214,7 +214,7 @@ struct InlineProgressChart: View {
 
     // Check if this is a reps-only exercise (all weights are 0)
     private var isRepsOnly: Bool {
-        let workingSets = sets.filter { !$0.isWarmUp && !$0.isBonus }
+        let workingSets = sets.workingSets
         return workingSets.allSatisfy { $0.weight == 0 }
     }
 

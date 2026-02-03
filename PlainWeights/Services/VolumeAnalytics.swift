@@ -16,7 +16,7 @@ enum VolumeAnalytics {
     /// Calculate total volume for sets from today (excludes warm-up sets)
     static func todayVolume(from sets: [ExerciseSet]) -> Double {
         let todaySets = todaySets(from: sets)
-        return todaySets.filter { !$0.isWarmUp && !$0.isBonus }.reduce(0) { $0 + $1.weight * Double($1.reps) }
+        return todaySets.workingSets.reduce(0) { $0 + $1.weight * Double($1.reps) }
     }
 
     /// Get all sets from today
@@ -56,7 +56,7 @@ enum VolumeAnalytics {
         }
 
         // Filter out warm-up sets for calculations
-        let lastDaySets = allLastDaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        let lastDaySets = allLastDaySets.workingSets
         guard !lastDaySets.isEmpty else { return nil }
 
         // Find max weight from last day
@@ -92,7 +92,7 @@ enum VolumeAnalytics {
         }
 
         // Filter out warm-up sets for calculations
-        let lastDaySets = allLastDaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        let lastDaySets = allLastDaySets.workingSets
         guard !lastDaySets.isEmpty else { return nil }
 
         // Find max weight from last day
@@ -128,7 +128,7 @@ enum VolumeAnalytics {
         }
 
         // Filter out warm-up sets for calculations
-        let lastDaySets = allLastDaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        let lastDaySets = allLastDaySets.workingSets
         guard !lastDaySets.isEmpty else { return nil }
 
         // Find max weight from last day
@@ -148,7 +148,7 @@ enum VolumeAnalytics {
 
     /// Calculate volume for a specific set of exercise sets (excludes warm-up sets)
     static func calculateVolume(for sets: [ExerciseSet]) -> Double {
-        sets.filter { !$0.isWarmUp && !$0.isBonus }.reduce(0) { $0 + $1.weight * Double($1.reps) }
+        sets.workingSets.reduce(0) { $0 + $1.weight * Double($1.reps) }
     }
     
     // MARK: - Progress Calculations

@@ -756,7 +756,7 @@ struct ExerciseDetailView: View {
         cachedBestSessionReps = RepsAnalytics.getBestSessionTotalReps(from: allSets)
 
         // Check if weighted exercise
-        let workingSets = todaysData.filter { !$0.isWarmUp && !$0.isBonus }
+        let workingSets = todaysData.workingSets
         cachedIsWeightedExercise = workingSets.contains { $0.weight > 0 }
     }
 

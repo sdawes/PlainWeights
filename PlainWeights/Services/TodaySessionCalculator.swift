@@ -36,7 +36,7 @@ enum TodaySessionCalculator {
     /// Excludes warm-up and bonus sets from volume calculation
     static func getTodaysVolume(from sets: [ExerciseSet]) -> Double {
         let todaySets = getTodaysSets(from: sets)
-        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        let workingSets = todaySets.workingSets
         return ExerciseVolumeCalculator.calculateVolume(for: workingSets)
     }
 
@@ -44,7 +44,7 @@ enum TodaySessionCalculator {
     /// Excludes warm-up and bonus sets from metrics calculation
     static func getTodaySessionMetrics(from sets: [ExerciseSet]) -> SessionMetrics? {
         let todaySets = getTodaysSets(from: sets)
-        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        let workingSets = todaySets.workingSets
         guard !workingSets.isEmpty else { return nil }
 
         return ExerciseVolumeCalculator.getSessionMetrics(for: workingSets, date: Date())
@@ -53,14 +53,14 @@ enum TodaySessionCalculator {
     /// Get today's maximum weight lifted (for Best mode comparisons)
     static func getTodaysMaxWeight(from sets: [ExerciseSet]) -> Double {
         let todaySets = getTodaysSets(from: sets)
-        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        let workingSets = todaySets.workingSets
         return workingSets.map { $0.weight }.max() ?? 0.0
     }
 
     /// Get today's maximum reps performed (for Best mode comparisons)
     static func getTodaysMaxReps(from sets: [ExerciseSet]) -> Int {
         let todaySets = getTodaysSets(from: sets)
-        let workingSets = todaySets.filter { !$0.isWarmUp && !$0.isBonus }
+        let workingSets = todaySets.workingSets
         return workingSets.map { $0.reps }.max() ?? 0
     }
 
@@ -97,6 +97,6 @@ enum TodaySessionCalculator {
     /// Get today's total reps (sum of working sets only - excludes warm-up and bonus)
     static func getTodaysTotalReps(from sets: [ExerciseSet]) -> Int {
         let todaySets = getTodaysSets(from: sets)
-        return todaySets.filter { !$0.isWarmUp && !$0.isBonus }.reduce(0) { $0 + $1.reps }
+        return todaySets.workingSets.reduce(0) { $0 + $1.reps }
     }
 }

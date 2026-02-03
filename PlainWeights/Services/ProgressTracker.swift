@@ -10,18 +10,6 @@ import SwiftUI
 
 /// Service for tracking progress and determining UI presentation colors/states
 enum ProgressTracker {
-    
-    // MARK: - Color Logic
-
-    /// Determine the fill color for progress bar (uses primary color for black/white theme)
-    static func barFillColor(percentOfLast: Int) -> Color {
-        .primary
-    }
-
-    /// Determine color for gains display (uses primary color for black/white theme)
-    static func gainsColor(gainsPercent: Int) -> Color {
-        .primary
-    }
 
     /// Determine direction and color for volume/reps comparison
     /// - Parameters:
@@ -192,8 +180,6 @@ enum ProgressTracker {
         let percentOfLast: Int
         let gainsPercent: Int
         let showProgressBar: Bool
-        let barFillColor: Color
-        let gainsColor: Color
         let deltaText: String
         let progressLabel: String
         let unit: String
@@ -336,10 +322,6 @@ enum ProgressTracker {
             } else {
                 self.personalRecords = nil
             }
-
-            // Determine colors
-            self.barFillColor = ProgressTracker.barFillColor(percentOfLast: percentOfLast)
-            self.gainsColor = ProgressTracker.gainsColor(gainsPercent: gainsPercent)
         }
     }
     

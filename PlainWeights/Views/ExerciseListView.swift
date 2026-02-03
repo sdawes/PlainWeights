@@ -146,14 +146,14 @@ struct FilteredExerciseListView: View {
                                         .foregroundStyle(color)
                                 }
                                 if isDoneToday(exercise) {
-                                    Text("Last updated: ")
+                                    Text("Last: ")
                                         .font(themeManager.currentTheme.interFont(size: 14, weight: .regular))
                                         .foregroundStyle(.green)
                                     + Text("Today")
                                         .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(.green)
                                 } else {
-                                    Text("Last updated: ")
+                                    Text("Last: ")
                                         .font(themeManager.currentTheme.interFont(size: 14, weight: .regular))
                                         .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
                                     + Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
@@ -177,18 +177,21 @@ struct FilteredExerciseListView: View {
                             }
                         }
                         .listRowBackground(
-                            HStack(spacing: 0) {
-                                Color.clear.frame(width: 16)  // Match list leading inset
-                                // Vertical accent bar - staleness color or dark grey for standard items
-                                Rectangle()
-                                    .fill(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
-                                    .frame(width: 2)
-                                // Background tint - staleness color tint or light grey for standard items
-                                Rectangle()
-                                    .fill(
-                                        stalenessColor(for: exercise)?.opacity(themeManager.currentTheme == .dark ? 0.15 : 0.05)
-                                        ?? themeManager.currentTheme.muted.opacity(0.5)
-                                    )
+                            Group {
+                                if let color = stalenessColor(for: exercise) {
+                                    HStack(spacing: 0) {
+                                        Color.clear.frame(width: 16)  // Match list leading inset
+                                        // Vertical accent bar
+                                        Rectangle()
+                                            .fill(color)
+                                            .frame(width: 2)
+                                        // Background tint
+                                        Rectangle()
+                                            .fill(color.opacity(themeManager.currentTheme == .dark ? 0.15 : 0.05))
+                                    }
+                                } else {
+                                    Color.clear
+                                }
                             }
                         )
                         .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)

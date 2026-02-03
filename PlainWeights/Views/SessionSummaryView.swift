@@ -13,6 +13,12 @@ struct SessionSummaryView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Query private var allSets: [ExerciseSet]
 
+    // Cached previous session metrics to avoid O(n*m) recomputation per exercise
+    @State private var cachedPreviousMetrics: [PersistentIdentifier: PreviousSessionMetrics] = [:]
+
+    // Cached display day - prevents expensive recomputation on every render
+    @State private var cachedDisplayDay: ExerciseDataGrouper.WorkoutDay?
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -21,7 +27,7 @@ struct SessionSummaryView: View {
                 .padding(.top, 24)
                 .padding(.bottom, 16)
 
-            if let day = displayDay {
+            if let day = cachedDisplayDay {
                 List {
                     // Session info card
                     Section {
@@ -66,11 +72,38 @@ struct SessionSummaryView: View {
             }
         }
         .background(AnimatedGradientBackground())
+        .onAppear {
+            updateCaches()
+        }
+        .onChange(of: allSets) { _, _ in
+            updateCaches()
+        }
     }
 
-    // MARK: - Computed Properties
+    // MARK: - Cache Management
 
-    private var displayDay: ExerciseDataGrouper.WorkoutDay? {
+    /// Update all cached values - called on appear and when allSets changes
+    private func updateCaches() {
+        // Compute display day first (expensive operation - only do once)
+        let day = Self.computeDisplayDay(from: allSets)
+        cachedDisplayDay = day
+
+        // Then compute previous metrics using the cached day
+        guard let day else {
+            cachedPreviousMetrics = [:]
+            return
+        }
+        cachedPreviousMetrics = Self.computeAllPreviousSessionMetrics(
+            for: day.exercises,
+            from: allSets,
+            before: day.date
+        )
+    }
+
+    // MARK: - Static Computation Functions
+
+    /// Compute display day from sets - expensive operation, should only be called when data changes
+    private static func computeDisplayDay(from allSets: [ExerciseSet]) -> ExerciseDataGrouper.WorkoutDay? {
         let workoutDays = ExerciseDataGrouper.createWorkoutJournal(from: allSets)
         let todaySets = TodaySessionCalculator.getTodaysSets(from: allSets)
 
@@ -240,13 +273,11 @@ struct SessionSummaryView: View {
     }
 
     private var exercisesHeader: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: 6) {
             Text("Exercises")
                 .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
                 .foregroundStyle(themeManager.currentTheme.mutedForeground)
-            Text("Delta values compared to last session")
-                .font(themeManager.currentTheme.captionFont)
-                .foregroundStyle(themeManager.currentTheme.tertiaryText)
+            InfoButton(text: "Delta values show the difference compared to your last session for each exercise.")
         }
         .padding(.top, 20)
         .padding(.bottom, 4)
@@ -266,11 +297,8 @@ struct SessionSummaryView: View {
         let currentMaxReps = maxSet?.reps ?? workingSets.map { $0.reps }.max() ?? 0
         let currentVolume = workoutExercise.volume
 
-        // Get previous session data for comparison
-        let previousSession = getPreviousSessionMetrics(
-            for: workoutExercise.exercise,
-            before: displayedDay
-        )
+        // Get previous session data for comparison (O(1) lookup from pre-computed cache)
+        let previousSession = cachedPreviousMetrics[workoutExercise.exercise.persistentModelID]
 
         // Calculate deltas
         let weightDelta: Double? = previousSession.map { currentMaxWeight - $0.maxWeight }
@@ -366,37 +394,53 @@ struct SessionSummaryView: View {
         let volume: Double
     }
 
-    /// Get metrics from the previous session for this exercise (before the displayed day)
-    private func getPreviousSessionMetrics(for exercise: Exercise, before displayedDay: Date) -> PreviousSessionMetrics? {
+    /// Compute all previous session metrics in a single pass - O(n) instead of O(n*e)
+    private static func computeAllPreviousSessionMetrics(
+        for exercises: [ExerciseDataGrouper.WorkoutExercise],
+        from allSets: [ExerciseSet],
+        before displayedDay: Date
+    ) -> [PersistentIdentifier: PreviousSessionMetrics] {
         let calendar = Calendar.current
         let displayedDayStart = calendar.startOfDay(for: displayedDay)
 
-        // Get all sets for this exercise before the displayed day
-        let exerciseSets = allSets.filter { set in
-            set.exercise?.persistentModelID == exercise.persistentModelID &&
-            calendar.startOfDay(for: set.timestamp) < displayedDayStart &&
-            !set.isWarmUp && !set.isBonus
+        // Get exercise IDs we care about
+        let exerciseIDs = Set(exercises.map { $0.exercise.persistentModelID })
+
+        // Single pass: filter and group by exercise ID
+        var setsByExercise: [PersistentIdentifier: [ExerciseSet]] = [:]
+        for set in allSets {
+            guard let exerciseID = set.exercise?.persistentModelID,
+                  exerciseIDs.contains(exerciseID),
+                  calendar.startOfDay(for: set.timestamp) < displayedDayStart,
+                  !set.isWarmUp && !set.isBonus else {
+                continue
+            }
+            setsByExercise[exerciseID, default: []].append(set)
         }
 
-        guard !exerciseSets.isEmpty else { return nil }
+        // For each exercise, find most recent day and compute metrics
+        var result: [PersistentIdentifier: PreviousSessionMetrics] = [:]
+        for (exerciseID, exerciseSets) in setsByExercise {
+            // Group by day
+            let grouped = Dictionary(grouping: exerciseSets) { set in
+                calendar.startOfDay(for: set.timestamp)
+            }
 
-        // Group by day and get the most recent
-        let grouped = Dictionary(grouping: exerciseSets) { set in
-            calendar.startOfDay(for: set.timestamp)
+            guard let mostRecentDay = grouped.keys.max(),
+                  let previousDaySets = grouped[mostRecentDay] else {
+                continue
+            }
+
+            // Calculate metrics
+            let maxSet = previousDaySets.max(by: { $0.weight < $1.weight })
+            let maxWeight = maxSet?.weight ?? 0
+            let maxReps = maxSet?.reps ?? previousDaySets.map { $0.reps }.max() ?? 0
+            let volume = previousDaySets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
+
+            result[exerciseID] = PreviousSessionMetrics(maxWeight: maxWeight, maxReps: maxReps, volume: volume)
         }
 
-        guard let mostRecentDay = grouped.keys.max(),
-              let previousDaySets = grouped[mostRecentDay] else {
-            return nil
-        }
-
-        // Calculate metrics from previous session
-        let maxSet = previousDaySets.max(by: { $0.weight < $1.weight })
-        let maxWeight = maxSet?.weight ?? 0
-        let maxReps = maxSet?.reps ?? previousDaySets.map { $0.reps }.max() ?? 0
-        let volume = previousDaySets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
-
-        return PreviousSessionMetrics(maxWeight: maxWeight, maxReps: maxReps, volume: volume)
+        return result
     }
 
     /// Format rest time: "45s" if under 1 min, "1m 30s" if over

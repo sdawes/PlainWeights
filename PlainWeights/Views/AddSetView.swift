@@ -33,12 +33,12 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
 
     var accentColor: Color {
         switch self {
-        case .warmup: return .orange
-        case .dropset: return .blue
-        case .assisted: return Color(red: 1.0, green: 0.2, blue: 0.5)
-        case .bonus: return .green
-        case .pause: return .indigo
-        case .timed: return .gray
+        case .warmup: return AppTheme.warmUpColor
+        case .dropset: return AppTheme.dropSetColor
+        case .assisted: return AppTheme.assistedColor
+        case .bonus: return AppTheme.bonusColor
+        case .pause: return AppTheme.pauseAtTopColor
+        case .timed: return AppTheme.timedSetColor
         }
     }
 }

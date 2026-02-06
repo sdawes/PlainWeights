@@ -58,13 +58,14 @@ import SwiftUI
 
 extension ExerciseSet {
     /// Color associated with the set type (nil for normal working sets)
+    /// Colors are defined in AppTheme as the single source of truth
     var setTypeColor: Color? {
-        if isWarmUp { return .orange }
-        if isBonus { return .green }
-        if isDropSet { return .blue }
-        if isAssisted { return Color(red: 1.0, green: 0.2, blue: 0.5) }
-        if isTimedSet { return .gray }
-        if isPauseAtTop { return .indigo }
+        if isWarmUp { return AppTheme.warmUpColor }
+        if isBonus { return AppTheme.bonusColor }
+        if isDropSet { return AppTheme.dropSetColor }
+        if isAssisted { return AppTheme.assistedColor }
+        if isTimedSet { return AppTheme.timedSetColor }
+        if isPauseAtTop { return AppTheme.pauseAtTopColor }
         return nil
     }
 }

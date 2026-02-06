@@ -51,7 +51,6 @@ struct FilteredExerciseListView: View {
     let searchText: String
     @State private var showingSummary = false
     @State private var showingSettings = false
-    @State private var showingTagAnalysis = false
 
     @State private var exerciseToDelete: Exercise?
 
@@ -220,14 +219,6 @@ struct FilteredExerciseListView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showingTagAnalysis = true } label: {
-                    Image(systemName: "tag")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundStyle(themeManager.currentTheme.textColor)
-                }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     showingSummary = true
                 } label: {
@@ -257,10 +248,6 @@ struct FilteredExerciseListView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
-                .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        }
-        .sheet(isPresented: $showingTagAnalysis) {
-            TagAnalysisView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .alert("Delete Exercise", isPresented: Binding(

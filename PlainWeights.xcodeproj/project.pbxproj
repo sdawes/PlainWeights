@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		1F48B0A42F28B1F200B0E0A8 /* Inter-VariableFont_opsz,wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1F48B0A32F28B1F200B0E0A8 /* Inter-VariableFont_opsz,wght.ttf */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		1FB1C5152E50DA540053C668 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,7 +17,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1F48B0A32F28B1F200B0E0A8 /* Inter-VariableFont_opsz,wght.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-VariableFont_opsz,wght.ttf"; sourceTree = "<group>"; };
 		1FB1C5062E50DA530053C668 /* PlainWeights.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlainWeights.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FB1C5142E50DA540053C668 /* PlainWeightsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlainWeightsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -70,7 +65,6 @@
 			children = (
 				1FB1C5082E50DA530053C668 /* PlainWeights */,
 				1FB1C5072E50DA530053C668 /* Products */,
-				1F48B0A32F28B1F200B0E0A8 /* Inter-VariableFont_opsz,wght.ttf */,
 			);
 			sourceTree = "<group>";
 		};
@@ -172,7 +166,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1F48B0A42F28B1F200B0E0A8 /* Inter-VariableFont_opsz,wght.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

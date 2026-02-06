@@ -140,6 +140,26 @@ enum AppTheme: String, CaseIterable {
         pbColor.opacity(0.12)
     }
 
+    // MARK: - Set Type Colors (static - same across themes)
+
+    /// Color for warm-up sets
+    static var warmUpColor: Color { .orange }
+
+    /// Color for bonus sets
+    static var bonusColor: Color { .green }
+
+    /// Color for drop sets
+    static var dropSetColor: Color { .blue }
+
+    /// Color for assisted sets (pink)
+    static var assistedColor: Color { Color(red: 1.0, green: 0.2, blue: 0.5) }
+
+    /// Color for timed/tempo sets
+    static var timedSetColor: Color { .gray }
+
+    /// Color for pause-at-top sets
+    static var pauseAtTopColor: Color { .indigo }
+
     // MARK: - Inter Font
 
     /// Get the Inter font name for a specific weight

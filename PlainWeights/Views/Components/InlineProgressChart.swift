@@ -44,6 +44,13 @@ enum ChartTimeRange: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Chart Mode
+
+enum ChartMode: String, CaseIterable {
+    case max = "Max"
+    case volume = "Volume"
+}
+
 // MARK: - Chart Data Point
 
 struct ChartDataPoint: Identifiable {
@@ -56,6 +63,11 @@ struct ChartDataPoint: Identifiable {
     let normalizedWeight: Double
     let normalizedReps: Double
     let isPB: Bool
+    // Volume mode data
+    let totalVolume: Double        // sum of (weight × reps) for session
+    let totalReps: Int             // sum of reps for session
+    let normalizedVolume: Double
+    let normalizedTotalReps: Double
 }
 
 // MARK: - Inline Progress Chart
@@ -69,6 +81,9 @@ struct InlineProgressChart: View {
 
     // Time range selection - default to 6 months for daily granularity
     @State private var selectedTimeRange: ChartTimeRange = .sixMonths
+
+    // Chart mode selection - Max (default) shows max weight/reps, Volume shows total
+    @State private var chartMode: ChartMode = .max
 
     // Cached chart data - computed on init to prevent layout shift
     @State private var cachedChartData: [ChartDataPoint]
@@ -147,13 +162,16 @@ struct InlineProgressChart: View {
             }
         }
 
-        // Calculate max weight and reps per period, and check for PB
-        var dataPoints: [(date: Date, maxWeight: Double, maxReps: Int, isPB: Bool)] = []
+        // Calculate max weight and reps per period, total volume/reps, and check for PB
+        var dataPoints: [(date: Date, maxWeight: Double, maxReps: Int, isPB: Bool, totalVolume: Double, totalReps: Int)] = []
         for (date, periodSets) in grouped {
             let maxWeight = periodSets.map { $0.weight }.max() ?? 0
             let maxReps = periodSets.map { $0.reps }.max() ?? 0
             let hasPB = periodSets.contains { $0.isPB }
-            dataPoints.append((date, maxWeight, maxReps, hasPB))
+            // Calculate total volume (sum of weight × reps) and total reps
+            let totalVolume = periodSets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
+            let totalReps = periodSets.reduce(0) { $0 + $1.reps }
+            dataPoints.append((date, maxWeight, maxReps, hasPB, totalVolume, totalReps))
         }
 
         // Sort by date ascending
@@ -175,6 +193,20 @@ struct InlineProgressChart: View {
         let adjustedWeightMin = weightMin - weightPadding
         let adjustedRepsMin = repsMin - repsPadding
 
+        // Volume normalization
+        let volumeMax = dataPoints.map { $0.totalVolume }.max() ?? 1
+        let volumeMin = dataPoints.map { $0.totalVolume }.min() ?? 0
+        let volumePadding = max((volumeMax - volumeMin) * 0.1, 1)
+        let volumeRange = max(volumeMax - volumeMin + volumePadding * 2, 1)
+        let adjustedVolumeMin = volumeMin - volumePadding
+
+        // Total reps normalization
+        let totalRepsMax = Double(dataPoints.map { $0.totalReps }.max() ?? 1)
+        let totalRepsMin = Double(dataPoints.map { $0.totalReps }.min() ?? 0)
+        let totalRepsPadding = max((totalRepsMax - totalRepsMin) * 0.1, 1)
+        let totalRepsRange = max(totalRepsMax - totalRepsMin + totalRepsPadding * 2, 1)
+        let adjustedTotalRepsMin = totalRepsMin - totalRepsPadding
+
         // Create chart data points with normalized values and index
         return dataPoints.enumerated().map { index, point in
             ChartDataPoint(
@@ -185,7 +217,11 @@ struct InlineProgressChart: View {
                 maxReps: point.maxReps,
                 normalizedWeight: (point.maxWeight - adjustedWeightMin) / weightRange,
                 normalizedReps: (Double(point.maxReps) - adjustedRepsMin) / repsRange,
-                isPB: point.isPB
+                isPB: point.isPB,
+                totalVolume: point.totalVolume,
+                totalReps: point.totalReps,
+                normalizedVolume: (point.totalVolume - adjustedVolumeMin) / volumeRange,
+                normalizedTotalReps: (Double(point.totalReps) - adjustedTotalRepsMin) / totalRepsRange
             )
         }
     }
@@ -201,6 +237,23 @@ struct InlineProgressChart: View {
 
     private var repsRange: (min: Int, max: Int) {
         let reps = cachedChartData.map { $0.maxReps }
+        let minVal = reps.min() ?? 0
+        let maxVal = reps.max() ?? 10
+        let padding = max(Int(Double(maxVal - minVal) * 0.1), 1)
+        return (min: max(0, minVal - padding), max: maxVal + padding)
+    }
+
+    // Volume mode ranges
+    private var volumeRange: (min: Double, max: Double) {
+        let volumes = cachedChartData.map { $0.totalVolume }
+        let minVal = volumes.min() ?? 0
+        let maxVal = volumes.max() ?? 100
+        let padding = max((maxVal - minVal) * 0.1, 1)
+        return (min: max(0, minVal - padding), max: maxVal + padding)
+    }
+
+    private var totalRepsRange: (min: Int, max: Int) {
+        let reps = cachedChartData.map { $0.totalReps }
         let minVal = reps.min() ?? 0
         let maxVal = reps.max() ?? 10
         let padding = max(Int(Double(maxVal - minVal) * 0.1), 1)
@@ -267,22 +320,37 @@ struct InlineProgressChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Header with title and time range picker
-            HStack {
-                Text("Progress")
-                    .font(themeManager.currentTheme.headlineFont)
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
+            // Header with title and pickers
+            VStack(spacing: 12) {
+                HStack {
+                    Text("Progress")
+                        .font(themeManager.currentTheme.headlineFont)
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
 
-                Spacer()
+                    Spacer()
 
-                // Time range picker
-                Picker("Time Range", selection: $selectedTimeRange) {
-                    ForEach(ChartTimeRange.allCases) { range in
-                        Text(range.rawValue).tag(range)
+                    // Time range picker
+                    Picker("Time Range", selection: $selectedTimeRange) {
+                        ForEach(ChartTimeRange.allCases) { range in
+                            Text(range.rawValue).tag(range)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .frame(width: 180)
                 }
-                .pickerStyle(.segmented)
-                .frame(width: 180)
+
+                // Mode toggle (Max vs Volume)
+                HStack {
+                    Picker("Mode", selection: $chartMode) {
+                        ForEach(ChartMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 140)
+
+                    Spacer()
+                }
             }
 
             if cachedChartData.isEmpty {
@@ -327,6 +395,15 @@ struct InlineProgressChart: View {
 
     @ViewBuilder
     private var chartWithAxes: some View {
+        if chartMode == .max {
+            maxModeChartWithAxes
+        } else {
+            volumeModeChartWithAxes
+        }
+    }
+
+    @ViewBuilder
+    private var maxModeChartWithAxes: some View {
         HStack(alignment: .center, spacing: 4) {
             if isRepsOnly {
                 // Reps-only: single Y-axis on left for reps (green/teal)
@@ -344,7 +421,7 @@ struct InlineProgressChart: View {
                 .frame(width: 25, height: 130)
 
                 // Main chart
-                chartView
+                maxModeChartView
                     .frame(height: 150)
             } else {
                 // Dual Y-axes: reps on left, weight on right
@@ -362,7 +439,7 @@ struct InlineProgressChart: View {
                 .frame(width: 25, height: 130)
 
                 // Main chart
-                chartView
+                maxModeChartView
                     .frame(height: 150)
 
                 // Right Y-axis labels (Weight)
@@ -382,10 +459,53 @@ struct InlineProgressChart: View {
         }
     }
 
-    // MARK: - Chart View
+    @ViewBuilder
+    private var volumeModeChartWithAxes: some View {
+        HStack(alignment: .center, spacing: 4) {
+            if isRepsOnly {
+                // Reps-only: Y-axis shows total reps
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text("\(totalRepsRange.max)")
+                    Spacer()
+                    Text("\((totalRepsRange.min + totalRepsRange.max) / 2)")
+                    Spacer()
+                    Text("\(totalRepsRange.min)")
+                }
+                .font(themeManager.currentTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(width: 35, height: 130)
+
+                // Bar chart
+                volumeModeChartView
+                    .frame(height: 150)
+            } else {
+                // Weighted: Y-axis shows total volume (kg)
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text(Formatters.formatVolume(volumeRange.max))
+                    Spacer()
+                    Text(Formatters.formatVolume((volumeRange.min + volumeRange.max) / 2))
+                    Spacer()
+                    Text(Formatters.formatVolume(volumeRange.min))
+                }
+                .font(themeManager.currentTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.currentTheme.chartColor1)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(width: 45, height: 130)
+
+                // Bar chart
+                volumeModeChartView
+                    .frame(height: 150)
+            }
+        }
+    }
+
+    // MARK: - Max Mode Chart View
 
     @ViewBuilder
-    private var chartView: some View {
+    private var maxModeChartView: some View {
         Chart(cachedChartData) { point in
             if hasSingleDataPoint {
                 // Single point: show dot at center
@@ -512,18 +632,76 @@ struct InlineProgressChart: View {
         .chartYScale(domain: 0...1)
     }
 
+    // MARK: - Volume Mode Chart View
+
+    @ViewBuilder
+    private var volumeModeChartView: some View {
+        Chart(cachedChartData) { point in
+            if isRepsOnly {
+                // Reps-only: show total reps as bars
+                BarMark(
+                    x: .value("Index", point.index),
+                    y: .value("Total Reps", point.normalizedTotalReps)
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [themeManager.currentTheme.chartColor2,
+                                 themeManager.currentTheme.chartColor2.opacity(0.6)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .cornerRadius(2)
+            } else {
+                // Weighted: show total volume as bars
+                BarMark(
+                    x: .value("Index", point.index),
+                    y: .value("Volume", point.normalizedVolume)
+                )
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [themeManager.currentTheme.chartColor1,
+                                 themeManager.currentTheme.chartColor1.opacity(0.6)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .cornerRadius(2)
+            }
+            // Note: PB indicator intentionally omitted in Volume mode
+            // PB is based on max weight/reps per set, not total session volume
+        }
+        .chartXAxis(.hidden)
+        .chartXScale(domain: -0.5...(Double(max(cachedChartData.count - 1, 0)) + 0.5))
+        .chartYAxis {
+            AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in
+                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
+                    .foregroundStyle(themeManager.currentTheme.borderColor)
+            }
+        }
+        .chartYScale(domain: 0...1)
+    }
+
     // MARK: - Legend View
 
     @ViewBuilder
     private var legendView: some View {
         HStack(spacing: 16) {
-            if isRepsOnly {
-                // Only show reps legend for reps-only exercises (green/teal)
-                legendItem(color: themeManager.currentTheme.chartColor2, label: "Reps", isDashed: false)
+            if chartMode == .max {
+                // Max mode legend
+                if isRepsOnly {
+                    legendItem(color: themeManager.currentTheme.chartColor2, label: "Max Reps", isDashed: false)
+                } else {
+                    legendItem(color: themeManager.currentTheme.chartColor1, label: "Max Weight (kg)", isDashed: false)
+                    legendItem(color: themeManager.currentTheme.chartColor2, label: "Max Reps", isDashed: true)
+                }
             } else {
-                // Show both weight and reps legends
-                legendItem(color: themeManager.currentTheme.chartColor1, label: "Weight (kg)", isDashed: false)
-                legendItem(color: themeManager.currentTheme.chartColor2, label: "Reps", isDashed: true)
+                // Volume mode legend
+                if isRepsOnly {
+                    volumeLegendItem(color: themeManager.currentTheme.chartColor2, label: "Total Reps")
+                } else {
+                    volumeLegendItem(color: themeManager.currentTheme.chartColor1, label: "Volume (kg)")
+                }
             }
         }
         .font(themeManager.currentTheme.captionFont)
@@ -548,6 +726,17 @@ struct InlineProgressChart: View {
                     .fill(color)
                     .frame(width: 16, height: 2)
             }
+            Text(label)
+        }
+    }
+
+    @ViewBuilder
+    private func volumeLegendItem(color: Color, label: String) -> some View {
+        HStack(spacing: 4) {
+            // Bar indicator (small rectangle)
+            RoundedRectangle(cornerRadius: 2)
+                .fill(color)
+                .frame(width: 10, height: 12)
             Text(label)
         }
     }

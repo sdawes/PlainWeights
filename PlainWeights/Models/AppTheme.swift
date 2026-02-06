@@ -128,6 +128,22 @@ enum AppTheme: String, CaseIterable {
         }
     }
 
+    /// Tertiary chart color (for volume mode)
+    var chartColor3: Color {
+        switch self {
+        case .light: return Color(red: 0.65, green: 0.35, blue: 0.75)  // Purple/violet
+        case .dark: return Color(red: 0.85, green: 0.55, blue: 0.65)   // Coral/rose
+        }
+    }
+
+    /// Quaternary chart color (for total reps in volume mode - complements chartColor2)
+    var chartColor4: Color {
+        switch self {
+        case .light: return Color(red: 0.85, green: 0.65, blue: 0.15)  // Golden yellow
+        case .dark: return Color(red: 0.95, green: 0.75, blue: 0.25)   // Bright gold
+        }
+    }
+
     // MARK: - PB (Personal Best) Color
 
     /// Gold color for PB indicators (#faac05)

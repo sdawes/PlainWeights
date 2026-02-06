@@ -260,11 +260,6 @@ struct InlineProgressChart: View {
         return (min: max(0, minVal - padding), max: maxVal + padding)
     }
 
-    // Check if there's only one data point
-    private var hasSingleDataPoint: Bool {
-        cachedChartData.count == 1
-    }
-
     // Check if this is a reps-only exercise (all weights are 0)
     private var isRepsOnly: Bool {
         let workingSets = sets.workingSets
@@ -463,7 +458,7 @@ struct InlineProgressChart: View {
     private var volumeModeChartWithAxes: some View {
         HStack(alignment: .center, spacing: 4) {
             if isRepsOnly {
-                // Reps-only: Y-axis shows total reps
+                // Reps-only: Y-axis shows total reps (golden yellow)
                 VStack(alignment: .trailing, spacing: 0) {
                     Text("\(totalRepsRange.max)")
                     Spacer()
@@ -472,12 +467,12 @@ struct InlineProgressChart: View {
                     Text("\(totalRepsRange.min)")
                 }
                 .font(themeManager.currentTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .foregroundStyle(themeManager.currentTheme.chartColor4)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 35, height: 130)
 
-                // Bar chart
+                // Line chart
                 volumeModeChartView
                     .frame(height: 150)
             } else {
@@ -490,12 +485,12 @@ struct InlineProgressChart: View {
                     Text(Formatters.formatVolume(volumeRange.min))
                 }
                 .font(themeManager.currentTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.currentTheme.chartColor1)
+                .foregroundStyle(themeManager.currentTheme.chartColor3)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 45, height: 130)
 
-                // Bar chart
+                // Line chart
                 volumeModeChartView
                     .frame(height: 150)
             }
@@ -507,37 +502,8 @@ struct InlineProgressChart: View {
     @ViewBuilder
     private var maxModeChartView: some View {
         Chart(cachedChartData) { point in
-            if hasSingleDataPoint {
-                // Single point: show dot at center
-                if isRepsOnly {
-                    // Reps-only: show single reps dot in green/teal
-                    PointMark(
-                        x: .value("Index", point.index),
-                        y: .value("Reps", 0.5)
-                    )
-                    .foregroundStyle(themeManager.currentTheme.chartColor2)
-                    .symbolSize(50)
-                } else {
-                    // Weight and reps: show both dots
-                    PointMark(
-                        x: .value("Index", point.index),
-                        y: .value("Weight", 0.5)
-                    )
-                    .foregroundStyle(themeManager.currentTheme.chartColor1)
-                    .symbolSize(50)
-
-                    PointMark(
-                        x: .value("Index", point.index),
-                        y: .value("Reps", 0.5)
-                    )
-                    .foregroundStyle(themeManager.currentTheme.chartColor2)
-                    .symbolSize(50)
-                }
-            } else if isRepsOnly {
+            if isRepsOnly {
                 // Reps-only: show reps as solid line with gradient (no weight line)
-                // Uses chartColor2 (green/teal) to match the reps color
-
-                // Reps area gradient
                 AreaMark(
                     x: .value("Index", point.index),
                     y: .value("Reps", point.normalizedReps),
@@ -553,7 +519,6 @@ struct InlineProgressChart: View {
                 )
                 .interpolationMethod(.monotone)
 
-                // Reps line (solid)
                 LineMark(
                     x: .value("Index", point.index),
                     y: .value("Reps", point.normalizedReps),
@@ -602,17 +567,15 @@ struct InlineProgressChart: View {
                 .interpolationMethod(.monotone)
             }
 
-            // PB indicator: vertical line through the point + "PB" label at top
+            // PB indicator: vertical line through the point + trophy at top
             if point.isPB {
-                // Vertical line from top to bottom through the PB point
                 RuleMark(x: .value("Index", point.index))
                     .foregroundStyle(themeManager.currentTheme.pbColor.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1))
 
-                // Trophy icon at top of chart
                 PointMark(
                     x: .value("Index", point.index),
-                    y: .value("PB", 1.0)  // Top of normalized chart
+                    y: .value("PB", 1.0)
                 )
                 .symbol {
                     Image(systemName: "trophy.fill")
@@ -638,41 +601,61 @@ struct InlineProgressChart: View {
     private var volumeModeChartView: some View {
         Chart(cachedChartData) { point in
             if isRepsOnly {
-                // Reps-only: show total reps as bars
-                BarMark(
+                // Reps-only: show total reps as line with gradient (golden yellow)
+                AreaMark(
                     x: .value("Index", point.index),
-                    y: .value("Total Reps", point.normalizedTotalReps)
+                    y: .value("Total Reps", point.normalizedTotalReps),
+                    series: .value("Type", "TotalRepsArea")
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [themeManager.currentTheme.chartColor2,
-                                 themeManager.currentTheme.chartColor2.opacity(0.6)],
+                        colors: [themeManager.currentTheme.chartColor4.opacity(0.3),
+                                 themeManager.currentTheme.chartColor4.opacity(0.05)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
-                .cornerRadius(2)
+                .interpolationMethod(.monotone)
+
+                LineMark(
+                    x: .value("Index", point.index),
+                    y: .value("Total Reps", point.normalizedTotalReps),
+                    series: .value("Type", "TotalReps")
+                )
+                .foregroundStyle(themeManager.currentTheme.chartColor4)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.monotone)
             } else {
-                // Weighted: show total volume as bars
-                BarMark(
+                // Weighted: show total volume as line with gradient
+                AreaMark(
                     x: .value("Index", point.index),
-                    y: .value("Volume", point.normalizedVolume)
+                    y: .value("Volume", point.normalizedVolume),
+                    series: .value("Type", "VolumeArea")
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [themeManager.currentTheme.chartColor1,
-                                 themeManager.currentTheme.chartColor1.opacity(0.6)],
+                        colors: [themeManager.currentTheme.chartColor3.opacity(0.3),
+                                 themeManager.currentTheme.chartColor3.opacity(0.05)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
-                .cornerRadius(2)
+                .interpolationMethod(.monotone)
+
+                LineMark(
+                    x: .value("Index", point.index),
+                    y: .value("Volume", point.normalizedVolume),
+                    series: .value("Type", "Volume")
+                )
+                .foregroundStyle(themeManager.currentTheme.chartColor3)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.monotone)
             }
             // Note: PB indicator intentionally omitted in Volume mode
             // PB is based on max weight/reps per set, not total session volume
         }
         .chartXAxis(.hidden)
-        .chartXScale(domain: -0.5...(Double(max(cachedChartData.count - 1, 0)) + 0.5))
+        .chartXScale(domain: 0...(max(cachedChartData.count - 1, 1)))
         .chartYAxis {
             AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
@@ -688,19 +671,19 @@ struct InlineProgressChart: View {
     private var legendView: some View {
         HStack(spacing: 16) {
             if chartMode == .max {
-                // Max mode legend
+                // Max mode legend (line chart)
                 if isRepsOnly {
-                    legendItem(color: themeManager.currentTheme.chartColor2, label: "Max Reps", isDashed: false)
+                    lineLegendItem(color: themeManager.currentTheme.chartColor2, label: "Max Reps", isDashed: false)
                 } else {
-                    legendItem(color: themeManager.currentTheme.chartColor1, label: "Max Weight (kg)", isDashed: false)
-                    legendItem(color: themeManager.currentTheme.chartColor2, label: "Max Reps", isDashed: true)
+                    lineLegendItem(color: themeManager.currentTheme.chartColor1, label: "Max Weight (kg)", isDashed: false)
+                    lineLegendItem(color: themeManager.currentTheme.chartColor2, label: "Max Reps", isDashed: true)
                 }
             } else {
-                // Volume mode legend
+                // Volume mode legend (line chart)
                 if isRepsOnly {
-                    volumeLegendItem(color: themeManager.currentTheme.chartColor2, label: "Total Reps")
+                    lineLegendItem(color: themeManager.currentTheme.chartColor4, label: "Total Reps", isDashed: false)
                 } else {
-                    volumeLegendItem(color: themeManager.currentTheme.chartColor1, label: "Volume (kg)")
+                    lineLegendItem(color: themeManager.currentTheme.chartColor3, label: "Volume (kg)", isDashed: false)
                 }
             }
         }
@@ -709,7 +692,7 @@ struct InlineProgressChart: View {
     }
 
     @ViewBuilder
-    private func legendItem(color: Color, label: String, isDashed: Bool) -> some View {
+    private func lineLegendItem(color: Color, label: String, isDashed: Bool) -> some View {
         HStack(spacing: 4) {
             if isDashed {
                 // Dashed line indicator
@@ -726,17 +709,6 @@ struct InlineProgressChart: View {
                     .fill(color)
                     .frame(width: 16, height: 2)
             }
-            Text(label)
-        }
-    }
-
-    @ViewBuilder
-    private func volumeLegendItem(color: Color, label: String) -> some View {
-        HStack(spacing: 4) {
-            // Bar indicator (small rectangle)
-            RoundedRectangle(cornerRadius: 2)
-                .fill(color)
-                .frame(width: 10, height: 12)
             Text(label)
         }
     }

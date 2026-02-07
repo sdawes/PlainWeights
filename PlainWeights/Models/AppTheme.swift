@@ -136,11 +136,11 @@ enum AppTheme: String, CaseIterable {
         }
     }
 
-    /// Quaternary chart color (for total reps in volume mode - complements chartColor2)
+    /// Quaternary chart color (for total reps in volume mode - reps-only exercises)
     var chartColor4: Color {
         switch self {
-        case .light: return Color(red: 0.85, green: 0.65, blue: 0.15)  // Golden yellow
-        case .dark: return Color(red: 0.95, green: 0.75, blue: 0.25)   // Bright gold
+        case .light: return Color(red: 0.55, green: 0.78, blue: 0.25)  // Lime green
+        case .dark: return Color(red: 0.65, green: 0.85, blue: 0.35)   // Light lime
         }
     }
 

@@ -312,7 +312,7 @@ if !items.isEmpty {
 Image(systemName: "plus")           // Add
 Image(systemName: "xmark")          // Close/dismiss
 Image(systemName: "gearshape")      // Settings
-Image(systemName: "trophy.fill")    // PB indicator
+Image(systemName: "star.fill")      // PB indicator (gold)
 Image(systemName: "pencil")         // Edit
 Image(systemName: "trash")          // Delete
 Image(systemName: "exclamationmark.circle")  // Warning
@@ -622,7 +622,7 @@ if dataSpanDays < 180 {
 #### Visual Styling
 - **Weight line**: Solid, 2px, `chartColor1` (orange in light, blue in dark) + gradient fill
 - **Reps line**: Dashed (5,3), 1.5px, `chartColor2` (teal in light, green in dark), no fill
-- **PB markers**: Vertical rule line + trophy icon at top, using `pbColor` (#faac05 gold)
+- **PB markers**: Vertical rule line + star icon at top, using `pbColor` (#faac05 gold)
 - **Grid lines**: Dashed (3,3), 0.5px, `borderColor`
 - **Chart height**: 170pt, Y-axis height: 150pt
 
@@ -906,6 +906,66 @@ When creating UI elements that may be reused (buttons, inputs, etc.), create the
 - `StepperButton.swift` - +/- buttons for numeric inputs
 - `TagPillView.swift` - Tag display pills
 - `FlowLayout.swift` - Wrapping horizontal layout
+
+### iCloud Sync (CloudKit)
+
+The app uses SwiftData with automatic CloudKit sync. User data is backed up to their iCloud account and restored automatically on reinstall or new device.
+
+**Configuration:**
+- ModelContainer uses `cloudKitDatabase: .automatic`
+- iCloud capability with CloudKit enabled
+- Background Modes with Remote Notifications enabled
+- CloudKit container: `iCloud.com.stevolution.PlainWeights`
+
+**Model Requirements for CloudKit:**
+- All properties must have default values OR be optional
+- All relationships must be optional
+- Cannot use `@Attribute(.unique)`
+- Delete rules cannot be `.deny`
+
+**Key Files:**
+- `PlainWeightsApp.swift` - ModelContainer with CloudKit config
+- `Exercise.swift` - Model with CloudKit-compatible defaults
+- `ExerciseSet.swift` - Model with CloudKit-compatible defaults
+
+**Testing CloudKit:**
+1. Must test on real device (Simulator is unreliable)
+2. Check CloudKit Dashboard: https://icloud.developer.apple.com/dashboard
+3. Look in `com.apple.coredata.cloudkit.zone` for records
+4. Sync can take 30 seconds to several minutes
+
+**Schema Changes After Release:**
+Once deployed to Production, follow "Add-Only, No-Delete, No-Change" principle:
+- Can add new properties/entities
+- Cannot delete or rename existing properties
+- Cannot change property types
+
+---
+
+## Pre-Release Checklist
+
+**Before submitting to App Store, complete these steps:**
+
+### CloudKit Schema Deployment
+1. Go to [CloudKit Dashboard](https://icloud.developer.apple.com/dashboard)
+2. Select container `iCloud.com.stevolution.PlainWeights`
+3. Click **Deploy Schema Changes** to push Development schema to Production
+4. Verify schema deployed successfully
+
+### App Store Connect
+- [ ] App screenshots for all device sizes
+- [ ] App description and keywords
+- [ ] Privacy policy URL
+- [ ] App category set correctly
+- [ ] Version number and build number updated
+
+### Testing
+- [ ] Test on multiple real devices
+- [ ] Test CloudKit sync (delete app, reinstall, verify data restores)
+- [ ] Test both light and dark themes
+- [ ] Test with large datasets (performance)
+
+---
 
 ### Git Workflow
 **CRITICAL: DO NOT commit or push changes unless explicitly requested by the user.**

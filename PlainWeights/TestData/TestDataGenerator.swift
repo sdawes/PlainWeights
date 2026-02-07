@@ -34,7 +34,7 @@ class TestDataGenerator {
         // Collect all sets from all exercises
         var allSets: [(exercise: Exercise, set: ExerciseSet)] = []
         for exercise in exercises {
-            for set in exercise.sets {
+            for set in exercise.sets ?? [] {
                 allSets.append((exercise: exercise, set: set))
             }
         }
@@ -296,7 +296,7 @@ class TestDataGenerator {
         print("            // Recalculate PB flags for all exercises (safety net to ensure correctness)")
         print("            for (_, exercise) in exercises {")
         print("                // Get all sets for this exercise and recalculate PBs")
-        print("                for set in exercise.sets where !set.isWarmUp && !set.isBonus {")
+        print("                for set in (exercise.sets ?? []) where !set.isWarmUp && !set.isBonus {")
         print("                    try ExerciseSetService.detectAndMarkPB(for: set, exercise: exercise, context: modelContext)")
         print("                }")
         print("            }")

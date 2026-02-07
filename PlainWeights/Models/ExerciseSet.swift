@@ -10,9 +10,10 @@ import SwiftData
 
 @Model
 final class ExerciseSet {
-    var timestamp: Date
-    var weight: Double       // kg (or lbs) — Double is fine for 0.25 increments
-    var reps: Int
+    // All properties have defaults for CloudKit compatibility
+    var timestamp: Date = Date()
+    var weight: Double = 0   // kg (or lbs) — Double is fine for 0.25 increments
+    var reps: Int = 0
     var isWarmUp: Bool = false       // flag to exclude from performance calculations
     var isBonus: Bool = false        // flag for bonus/extra sets excluded from metrics (like warm-up)
     var isDropSet: Bool = false      // flag to indicate drop set (included in performance calculations)

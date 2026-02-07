@@ -10,17 +10,19 @@ import SwiftData
 
 @Model
 final class Exercise {
-    var name: String
-    var tags: [String]
+    // All properties have defaults for CloudKit compatibility
+    var name: String = ""
+    var tags: [String] = []
     /// Searchable string of all tags joined by spaces (for SwiftData predicate queries)
-    var tagsSearchable: String
-    var createdDate: Date
-    var lastUpdated: Date
+    var tagsSearchable: String = ""
+    var createdDate: Date = Date()
+    var lastUpdated: Date = Date()
     var note: String?
 
     // Inverse to the child relationship; cascade so sets are removed with the exercise
+    // Optional for CloudKit compatibility
     @Relationship(deleteRule: .cascade, inverse: \ExerciseSet.exercise)
-    var sets: [ExerciseSet] = []
+    var sets: [ExerciseSet]? = []
 
     init(name: String, tags: [String] = [], note: String? = nil, createdDate: Date = .init()) {
         self.name = name

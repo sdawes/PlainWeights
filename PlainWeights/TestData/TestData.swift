@@ -1927,7 +1927,7 @@ class TestData {
             // Recalculate PB flags for all exercises (safety net to ensure correctness)
             for (_, exercise) in exercises {
                 // Get all sets for this exercise and recalculate PBs
-                for set in exercise.sets where !set.isWarmUp && !set.isBonus {
+                for set in (exercise.sets ?? []) where !set.isWarmUp && !set.isBonus {
                     try ExerciseSetService.detectAndMarkPB(for: set, exercise: exercise, context: modelContext)
                 }
             }

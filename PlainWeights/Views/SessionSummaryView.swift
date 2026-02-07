@@ -147,11 +147,9 @@ struct SessionSummaryView: View {
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Spacer()
-                if let duration = sessionDuration {
-                    Text("\(duration) min")
-                        .font(themeManager.effectiveTheme.dataFont(size: 14))
-                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                }
+                Text(formatDuration(sessionDuration))
+                    .font(themeManager.effectiveTheme.dataFont(size: 14))
+                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
@@ -183,7 +181,7 @@ struct SessionSummaryView: View {
             HStack(spacing: 0) {
                 metricCell(
                     label: "Duration",
-                    value: sessionDuration.map { "\($0) min" } ?? "—"
+                    value: formatDuration(sessionDuration)
                 )
                 Rectangle()
                     .fill(themeManager.effectiveTheme.borderColor)
@@ -232,8 +230,8 @@ struct SessionSummaryView: View {
             Text("PBs")
                 .font(themeManager.effectiveTheme.captionFont)
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            // Value: "3 × 🏆"
-            HStack(alignment: .lastTextBaseline, spacing: 0) {
+            // Value: "3 × ⭐"
+            HStack(alignment: .center, spacing: 0) {
                 Text("\(pbCount)")
                     .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
                     .monospacedDigit()
@@ -299,12 +297,10 @@ struct SessionSummaryView: View {
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Spacer()
-                if let duration = exerciseDuration {
-                    Text("\(duration) min")
-                        .font(themeManager.effectiveTheme.dataFont(size: 14))
-                        .monospacedDigit()
-                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                }
+                Text(formatDuration(exerciseDuration))
+                    .font(themeManager.effectiveTheme.dataFont(size: 14))
+                    .monospacedDigit()
+                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
@@ -443,6 +439,22 @@ struct SessionSummaryView: View {
                 return "\(mins)m"
             } else {
                 return "\(mins)m \(secs)s"
+            }
+        }
+    }
+
+    /// Format session/exercise duration: "45 min" if under 1 hr, "1 hr 2 min" if over
+    private func formatDuration(_ minutes: Int?) -> String {
+        guard let minutes = minutes else { return "—" }
+        if minutes < 60 {
+            return "\(minutes) min"
+        } else {
+            let hrs = minutes / 60
+            let mins = minutes % 60
+            if mins == 0 {
+                return "\(hrs) hr"
+            } else {
+                return "\(hrs) hr \(mins) min"
             }
         }
     }

@@ -62,7 +62,7 @@ struct SetRowView: View {
                     // Col 2: PB indicator or spacer
                     if set.isPB {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 13))
+                            .font(.system(size: 15))
                             .foregroundStyle(themeManager.effectiveTheme.pbColor)
                             .frame(width: 24, alignment: .leading)
                             .offset(x: -2)
@@ -364,11 +364,10 @@ struct SetRowView: View {
             } else {
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
-                        .font(.caption)
-                        .fontWeight(.bold)
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(color)
                     Text(Formatters.formatDuration(elapsed))
-                        .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .bold))
+                        .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .bold))
                         .foregroundStyle(color)
                 }
             }

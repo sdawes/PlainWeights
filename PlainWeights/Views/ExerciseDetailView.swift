@@ -111,7 +111,7 @@ struct ExerciseDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .id("top")
             }
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+            .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
 

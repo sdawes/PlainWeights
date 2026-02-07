@@ -202,6 +202,7 @@ struct FilteredExerciseListView: View {
             }
         }
         .listStyle(.plain)
+        .contentMargins(.top, 12, for: .scrollContent)
         .id(themeManager.currentTheme)  // Force list rebuild on theme change
         .scrollIndicators(.hidden)
         .listSectionSpacing(6)

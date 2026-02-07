@@ -72,7 +72,7 @@ struct RetroLifterView: View {
 
     private func colorForPixel(_ value: Int) -> Color {
         switch value {
-        case 1, 2: return color ?? themeManager.currentTheme.textColor  // Man & Barbell
+        case 1, 2: return color ?? themeManager.effectiveTheme.textColor  // Man & Barbell
         default: return .clear // Background
         }
     }

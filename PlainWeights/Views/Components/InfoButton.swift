@@ -18,13 +18,13 @@ struct InfoButton: View {
         } label: {
             Image(systemName: "info.circle")
                 .font(.system(size: 14))
-                .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
         }
         .buttonStyle(.plain)
         .popover(isPresented: $showPopover) {
             Text(text)
-                .font(themeManager.currentTheme.subheadlineFont)
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .font(themeManager.effectiveTheme.subheadlineFont)
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .padding(12)
                 .presentationCompactAdaptation(.popover)
         }

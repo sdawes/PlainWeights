@@ -16,13 +16,13 @@ struct SheetHeader: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(themeManager.currentTheme.title3Font)
+                .font(themeManager.effectiveTheme.title3Font)
                 .lineLimit(lineLimit)
             Spacer()
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
                     .font(.title3)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
             .buttonStyle(.plain)
         }

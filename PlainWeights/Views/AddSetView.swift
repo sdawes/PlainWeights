@@ -59,8 +59,8 @@ struct SetTypePillSelector: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Set Type")
-                .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
             VStack(spacing: 8) {
                 ForEach(gridRows, id: \.first) { row in
@@ -94,19 +94,19 @@ struct SetTypePillSelector: View {
                     .font(.system(size: 14))
                     .frame(width: 20)
                 Text(type.rawValue)
-                    .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                 Spacer()
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .background(isSelected ? type.accentColor : themeManager.currentTheme.cardBackgroundColor)
-            .foregroundStyle(isSelected ? selectedForeground : themeManager.currentTheme.primaryText)
+            .background(isSelected ? type.accentColor : themeManager.effectiveTheme.cardBackgroundColor)
+            .foregroundStyle(isSelected ? selectedForeground : themeManager.effectiveTheme.primaryText)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(
-                        isSelected ? Color.clear : themeManager.currentTheme.borderColor,
+                        isSelected ? Color.clear : themeManager.effectiveTheme.borderColor,
                         lineWidth: 1
                     )
             )
@@ -168,13 +168,13 @@ struct AddSetView: View {
             // Header
             HStack {
                 Text("\(setToEdit == nil ? "Add Set" : "Edit Set") - \(exercise.name)")
-                    .font(themeManager.currentTheme.title3Font)
+                    .font(themeManager.effectiveTheme.title3Font)
                     .lineLimit(1)
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.title3)
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
                 .buttonStyle(.plain)
             }
@@ -187,22 +187,22 @@ struct AddSetView: View {
                 // Weight input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Weight (kg)")
-                        .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                     TextField("0", text: $weightText)
-                        .font(themeManager.currentTheme.dataFont(size: 20))
+                        .font(themeManager.effectiveTheme.dataFont(size: 20))
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .weight)
                         .multilineTextAlignment(.center)
                         .padding(16)
                         .frame(height: 56)
-                        .background(themeManager.currentTheme.cardBackgroundColor)
+                        .background(themeManager.effectiveTheme.cardBackgroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
                                 .strokeBorder(
-                                    focusedField == .weight ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                                    focusedField == .weight ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
                                     lineWidth: focusedField == .weight ? 2 : 1
                                 )
                         )
@@ -223,22 +223,22 @@ struct AddSetView: View {
                 // Reps input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Reps")
-                        .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                     TextField("0", text: $repsText)
-                        .font(themeManager.currentTheme.dataFont(size: 20))
+                        .font(themeManager.effectiveTheme.dataFont(size: 20))
                         .keyboardType(.numberPad)
                         .focused($focusedField, equals: .reps)
                         .multilineTextAlignment(.center)
                         .padding(16)
                         .frame(height: 56)
-                        .background(themeManager.currentTheme.cardBackgroundColor)
+                        .background(themeManager.effectiveTheme.cardBackgroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
                                 .strokeBorder(
-                                    focusedField == .reps ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                                    focusedField == .reps ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
                                     lineWidth: focusedField == .reps ? 2 : 1
                                 )
                         )
@@ -258,11 +258,11 @@ struct AddSetView: View {
             // Save button
             Button(action: addSet) {
                 Text(setToEdit == nil ? "Save Set" : "Update Set")
-                    .font(themeManager.currentTheme.headlineFont)
-                    .foregroundStyle(themeManager.currentTheme.background)
+                    .font(themeManager.effectiveTheme.headlineFont)
+                    .foregroundStyle(themeManager.effectiveTheme.background)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(canAddSet ? themeManager.currentTheme.primary : themeManager.currentTheme.primary.opacity(0.4))
+                    .background(canAddSet ? themeManager.effectiveTheme.primary : themeManager.effectiveTheme.primary.opacity(0.4))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
@@ -273,7 +273,7 @@ struct AddSetView: View {
             Spacer()
         }
         .padding(24)
-        .background(themeManager.currentTheme.background)
+        .background(themeManager.effectiveTheme.background)
         .onAppear {
             focusedField = .weight
         }

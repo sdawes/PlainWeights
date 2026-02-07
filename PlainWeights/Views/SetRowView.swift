@@ -45,7 +45,7 @@ struct SetRowView: View {
             // Divider at top (between rows, not first row after header)
             if cardPosition != nil && !isFirstInCard {
                 Rectangle()
-                    .fill(themeManager.currentTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.borderColor)
                     .frame(height: 1)
             }
 
@@ -54,7 +54,7 @@ struct SetRowView: View {
                 HStack(spacing: 0) {
                     // Col 1: Set number (left-aligned, positioned after the set type border)
                     Text("\(setNumber)")
-                        .font(themeManager.currentTheme.dataFont(size: 17, weight: .medium))
+                        .font(themeManager.effectiveTheme.dataFont(size: 17, weight: .medium))
                         .foregroundStyle(setNumberColor)
                         .frame(width: 24, alignment: .leading)
                         .padding(.leading, 22)  // 16pt spacer + 2pt border + 4pt gap
@@ -63,7 +63,7 @@ struct SetRowView: View {
                     if set.isPB {
                         Image(systemName: "star.fill")
                             .font(.system(size: 13))
-                            .foregroundStyle(themeManager.currentTheme.pbColor)
+                            .foregroundStyle(themeManager.effectiveTheme.pbColor)
                             .frame(width: 24, alignment: .leading)
                             .offset(x: -2)
                     } else {
@@ -74,23 +74,23 @@ struct SetRowView: View {
                     // Weight × Reps
                     HStack(alignment: .lastTextBaseline, spacing: 0) {
                         Text(Formatters.formatWeight(set.weight))
-                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
+                            .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .medium))
                             .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
 
                         Text(" kg")
-                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .font(themeManager.effectiveTheme.interFont(size: 14))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
 
                         Text(" × ")
-                            .font(themeManager.currentTheme.interFont(size: 14))
+                            .font(themeManager.effectiveTheme.interFont(size: 14))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
 
                         Text("\(set.reps)")
-                            .font(themeManager.currentTheme.dataFont(size: 20, weight: .medium))
+                            .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .medium))
                             .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
@@ -119,14 +119,14 @@ struct SetRowView: View {
         .onTapGesture {
             onTap()
         }
-        .background(cardPosition != nil ? themeManager.currentTheme.cardBackgroundColor : Color.clear)
+        .background(cardPosition != nil ? themeManager.effectiveTheme.cardBackgroundColor : Color.clear)
         .clipShape(cardPosition != nil ? RoundedCorner(radius: 12, corners: cardCorners) : RoundedCorner(radius: 0, corners: []))
         .overlay(cardBorderOverlay)
         .listRowBackground(rowBackground)
         .listRowInsets(cardPosition != nil ? EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16) : EdgeInsets())
         .listRowSeparator(cardPosition != nil ? .hidden : (isFirst ? .hidden : .visible), edges: .top)
         .listRowSeparator(cardPosition != nil ? .hidden : (isLast ? .hidden : .visible), edges: .bottom)
-        .listRowSeparatorTint(themeManager.currentTheme.borderColor)
+        .listRowSeparatorTint(themeManager.effectiveTheme.borderColor)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
                 onDelete()
@@ -166,16 +166,16 @@ struct SetRowView: View {
             switch position {
             case .top:
                 TopOpenBorder(radius: 12)
-                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
             case .middle:
                 SidesOnlyBorder()
-                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
             case .bottom:
                 BottomOpenBorder(radius: 12)
-                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
             case .single:
                 RoundedCorner(radius: 12, corners: .allCorners)
-                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
             }
         }
     }
@@ -251,7 +251,7 @@ struct SetRowView: View {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 14))
                 Text("Warm")
-                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.orange)
         case "bonus":
@@ -259,7 +259,7 @@ struct SetRowView: View {
                 Image(systemName: "plus")
                     .font(.system(size: 14, weight: .bold))
                 Text("Bonus")
-                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.green)
         case "dropset":
@@ -267,7 +267,7 @@ struct SetRowView: View {
                 Image(systemName: "chevron.down.2")
                     .font(.system(size: 14, weight: .bold))
                 Text("Drop")
-                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.blue)
         case "assisted":
@@ -275,7 +275,7 @@ struct SetRowView: View {
                 Image(systemName: "hand.raised.fill")
                     .font(.system(size: 14))
                 Text("Assist")
-                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(Color(red: 1.0, green: 0.2, blue: 0.5))
         case "pause":
@@ -283,7 +283,7 @@ struct SetRowView: View {
                 Image(systemName: "pause.fill")
                     .font(.system(size: 14))
                 Text("Pause")
-                    .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.indigo)
         case "timed":
@@ -292,10 +292,10 @@ struct SetRowView: View {
                     .font(.system(size: 14))
                 if set.tempoSeconds > 0 {
                     Text("\(set.tempoSeconds)s")
-                        .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
+                        .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                 } else {
                     Text("Timed")
-                        .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
+                        .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
                 }
             }
             .foregroundStyle(.gray)
@@ -326,8 +326,8 @@ struct SetRowView: View {
             staticRestTimeView(seconds: 180)
         } else {
             Text(Formatters.formatTimeHM(set.timestamp))
-                .font(themeManager.currentTheme.dataFont(size: 12))
-                .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                .font(themeManager.effectiveTheme.dataFont(size: 12))
+                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
         }
     }
 
@@ -336,10 +336,10 @@ struct SetRowView: View {
         HStack(spacing: 4) {
             Image(systemName: "timer")
                 .font(.caption)
-                .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
             Text(Formatters.formatDuration(Double(seconds)))
-                .font(themeManager.currentTheme.dataFont(size: 12))
-                .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                .font(themeManager.effectiveTheme.dataFont(size: 12))
+                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
         }
     }
 
@@ -353,10 +353,10 @@ struct SetRowView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
                         .font(.caption)
-                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     Text("3:00")
-                        .font(themeManager.currentTheme.dataFont(size: 12))
-                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                        .font(themeManager.effectiveTheme.dataFont(size: 12))
+                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                 }
                 .onAppear {
                     captureRestTimeExpiry()
@@ -368,7 +368,7 @@ struct SetRowView: View {
                         .fontWeight(.bold)
                         .foregroundStyle(color)
                     Text(Formatters.formatDuration(elapsed))
-                        .font(themeManager.currentTheme.dataFont(size: 12, weight: .bold))
+                        .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .bold))
                         .foregroundStyle(color)
                 }
             }
@@ -378,7 +378,7 @@ struct SetRowView: View {
     private func restTimeColor(for seconds: Int) -> Color {
         if seconds >= 120 { return .red }
         if seconds >= 60 { return .orange }
-        return themeManager.currentTheme.primaryText
+        return themeManager.effectiveTheme.primaryText
     }
 
     private func captureRestTimeExpiry() {

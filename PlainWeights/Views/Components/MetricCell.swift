@@ -20,14 +20,14 @@ struct MetricCell<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
-                .font(themeManager.currentTheme.captionFont)
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                .font(themeManager.effectiveTheme.captionFont)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             content
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(themeManager.currentTheme.cardBackgroundColor)
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
     }
 }
 
@@ -46,9 +46,9 @@ struct MetricCellValueText: View {
 
     var body: some View {
         Text(value)
-            .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
+            .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
             .monospacedDigit()
-            .foregroundStyle(themeManager.currentTheme.primaryText)
+            .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .lineLimit(1)
             .minimumScaleFactor(0.7)
     }

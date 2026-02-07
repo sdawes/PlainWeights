@@ -44,14 +44,14 @@ struct AddExerciseView: View {
             // Header (like AddSetView)
             HStack {
                 Text(screenTitle)
-                    .font(themeManager.currentTheme.title3Font)
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                    .font(themeManager.effectiveTheme.title3Font)
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     .lineLimit(1)
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.title3)
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
                 .buttonStyle(.plain)
             }
@@ -72,7 +72,7 @@ struct AddExerciseView: View {
             addButton
         }
         .padding(24)
-        .background(themeManager.currentTheme.background)
+        .background(themeManager.effectiveTheme.background)
         .onAppear {
             // Auto-focus name field when view appears
             nameFieldFocused = true
@@ -84,20 +84,20 @@ struct AddExerciseView: View {
     private var exerciseNameSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Exercise Name")
-                .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
             TextField("e.g. Romanian Deadlift", text: $name)
-                .font(themeManager.currentTheme.dataFont(size: 20))
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .font(themeManager.effectiveTheme.dataFont(size: 20))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .padding(16)
                 .frame(height: 56)
-                .background(themeManager.currentTheme.cardBackgroundColor)
+                .background(themeManager.effectiveTheme.cardBackgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(
-                            nameFieldFocused ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                            nameFieldFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
                             lineWidth: nameFieldFocused ? 2 : 1
                         )
                 )
@@ -113,21 +113,21 @@ struct AddExerciseView: View {
     private var tagsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Tags (optional)")
-                .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
             HStack(spacing: 8) {
                 TextField("e.g. chest, push, strength", text: $tagInput)
-                    .font(themeManager.currentTheme.dataFont(size: 20))
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                    .font(themeManager.effectiveTheme.dataFont(size: 20))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     .padding(16)
                     .frame(height: 56)
-                    .background(themeManager.currentTheme.cardBackgroundColor)
+                    .background(themeManager.effectiveTheme.cardBackgroundColor)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .strokeBorder(
-                                tagFieldFocused ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                                tagFieldFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
                                 lineWidth: tagFieldFocused ? 2 : 1
                             )
                     )
@@ -141,11 +141,11 @@ struct AddExerciseView: View {
                 Button(action: addTag) {
                     let isDisabled = tagInput.trimmingCharacters(in: .whitespaces).isEmpty
                     Text("Add")
-                        .font(themeManager.currentTheme.headlineFont)
-                        .foregroundStyle(themeManager.currentTheme.background)
+                        .font(themeManager.effectiveTheme.headlineFont)
+                        .foregroundStyle(themeManager.effectiveTheme.background)
                         .padding(.horizontal, 16)
                         .frame(height: 56)
-                        .background(isDisabled ? themeManager.currentTheme.primary.opacity(0.4) : themeManager.currentTheme.primary)
+                        .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
@@ -171,11 +171,11 @@ struct AddExerciseView: View {
     private var addButton: some View {
         Button(action: saveExercise) {
             Text(isEditMode ? "Save Changes" : "Add Exercise")
-                .font(themeManager.currentTheme.headlineFont)
-                .foregroundStyle(themeManager.currentTheme.background)
+                .font(themeManager.effectiveTheme.headlineFont)
+                .foregroundStyle(themeManager.effectiveTheme.background)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(name.isEmpty ? themeManager.currentTheme.primary.opacity(0.4) : themeManager.currentTheme.primary)
+                .background(name.isEmpty ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)

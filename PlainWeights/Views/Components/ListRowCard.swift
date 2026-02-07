@@ -24,11 +24,11 @@ struct ListRowCardBackground: View {
     let position: ListRowCardPosition
 
     var body: some View {
-        themeManager.currentTheme.cardBackgroundColor
+        themeManager.effectiveTheme.cardBackgroundColor
             .clipShape(RoundedCorner(radius: 12, corners: corners))
             .overlay(
                 RoundedCorner(radius: 12, corners: corners)
-                    .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
             )
     }
 

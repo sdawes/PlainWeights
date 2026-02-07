@@ -24,14 +24,14 @@ struct TagPillView: View {
     var body: some View {
         HStack(spacing: 4) {
             Text(displayTag)
-                .font(themeManager.currentTheme.interFont(size: 12, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
             if let onRemove = onRemove {
                 Button(action: onRemove) {
                     Image(systemName: "xmark")
                         .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground.opacity(0.7))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.7))
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
@@ -39,7 +39,7 @@ struct TagPillView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(themeManager.currentTheme.muted)
+        .background(themeManager.effectiveTheme.muted)
         .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }

@@ -101,8 +101,8 @@ struct ExerciseDetailView: View {
             Section {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(exercise.name)
-                        .font(themeManager.currentTheme.title2Font)
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                        .font(themeManager.effectiveTheme.title2Font)
+                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     if !exercise.tags.isEmpty {
                         TagPillsRow(tags: exercise.tags)
                     }
@@ -148,19 +148,19 @@ struct ExerciseDetailView: View {
                                 Image(systemName: mode == .lastSession ? "calendar.badge.clock" : "star.fill")
                                     .font(.system(size: 16))
                                 Text(mode == .lastSession ? "Last" : "Best")
-                                    .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
+                                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .foregroundStyle(
                                 comparisonMode == mode
-                                    ? themeManager.currentTheme.background
-                                    : themeManager.currentTheme.primaryText
+                                    ? themeManager.effectiveTheme.background
+                                    : themeManager.effectiveTheme.primaryText
                             )
                             .background(
                                 comparisonMode == mode
-                                    ? themeManager.currentTheme.primaryText
-                                    : themeManager.currentTheme.cardBackgroundColor
+                                    ? themeManager.effectiveTheme.primaryText
+                                    : themeManager.effectiveTheme.cardBackgroundColor
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .overlay(
@@ -168,7 +168,7 @@ struct ExerciseDetailView: View {
                                     .strokeBorder(
                                         comparisonMode == mode
                                             ? Color.clear
-                                            : themeManager.currentTheme.borderColor,
+                                            : themeManager.effectiveTheme.borderColor,
                                         lineWidth: 1
                                     )
                             )
@@ -235,8 +235,8 @@ struct ExerciseDetailView: View {
             if !historicDayGroups.isEmpty {
                 Section {
                     Text("History")
-                        .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                        .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                         .padding(.leading, 8)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -292,8 +292,8 @@ struct ExerciseDetailView: View {
                         HStack {
                             Spacer()
                             Text("See older sessions (\(remainingCount) more)")
-                                .font(themeManager.currentTheme.subheadlineFont)
-                                .foregroundStyle(themeManager.currentTheme.primary)
+                                .font(themeManager.effectiveTheme.subheadlineFont)
+                                .foregroundStyle(themeManager.effectiveTheme.primary)
                             Spacer()
                         }
                         .padding(.vertical, 12)
@@ -323,10 +323,10 @@ struct ExerciseDetailView: View {
             }) {
                 Image(systemName: "plus")
                     .font(.title2)
-                    .foregroundStyle(themeManager.currentTheme.background)
+                    .foregroundStyle(themeManager.effectiveTheme.background)
             }
             .frame(width: 50, height: 50)
-            .background(themeManager.currentTheme.primary)
+            .background(themeManager.effectiveTheme.primary)
             .clipShape(Circle())
             .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
             .padding(.trailing, 20)
@@ -347,8 +347,8 @@ struct ExerciseDetailView: View {
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(showChart
-                            ? themeManager.currentTheme.accent
-                            : themeManager.currentTheme.textColor)
+                            ? themeManager.effectiveTheme.accent
+                            : themeManager.effectiveTheme.textColor)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
@@ -359,8 +359,8 @@ struct ExerciseDetailView: View {
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(showNotes
-                            ? themeManager.currentTheme.accent
-                            : themeManager.currentTheme.textColor)
+                            ? themeManager.effectiveTheme.accent
+                            : themeManager.effectiveTheme.textColor)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
@@ -370,7 +370,7 @@ struct ExerciseDetailView: View {
                     Image(systemName: "pencil")
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundStyle(themeManager.currentTheme.textColor)
+                        .foregroundStyle(themeManager.effectiveTheme.textColor)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())

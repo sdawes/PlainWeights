@@ -48,19 +48,19 @@ struct VolumeProgressBar: View {
                     if isRepsOnly {
                         (
                             Text("\(Int(currentVolume))")
-                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .bold))
+                                .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
                             + Text(" reps")
-                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .medium))
+                                .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
                         )
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     } else {
                         (
                             Text(Formatters.formatVolume(currentVolume))
-                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .bold))
+                                .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
                             + Text(" kg")
-                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .medium))
+                                .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
                         )
-                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     }
                 }
             }
@@ -70,7 +70,7 @@ struct VolumeProgressBar: View {
                 ZStack(alignment: .leading) {
                     // Background track
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(themeManager.currentTheme.muted)
+                        .fill(themeManager.effectiveTheme.muted)
                         .frame(height: 8)
 
                     // Progress fill
@@ -90,12 +90,12 @@ struct VolumeProgressBar: View {
                 // Target label - simplified format
                 if isRepsOnly {
                     Text("\(targetLabel): \(Int(targetVolume)) reps")
-                        .font(themeManager.currentTheme.interFont(size: 12))
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .font(themeManager.effectiveTheme.interFont(size: 12))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 } else {
                     Text("\(targetLabel): \(Formatters.formatVolume(targetVolume))")
-                        .font(themeManager.currentTheme.interFont(size: 12))
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .font(themeManager.effectiveTheme.interFont(size: 12))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
 
                 Spacer()
@@ -104,11 +104,11 @@ struct VolumeProgressBar: View {
                 if delta != 0 {
                     if isRepsOnly {
                         Text(delta > 0 ? "+\(Int(delta)) reps" : "\(Int(delta)) reps")
-                            .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
+                            .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(progressColor)
                     } else {
                         Text(delta > 0 ? "+\(Formatters.formatVolume(delta))" : "\(Formatters.formatVolume(delta))")
-                            .font(themeManager.currentTheme.dataFont(size: 12, weight: .medium))
+                            .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(progressColor)
                     }
                 }

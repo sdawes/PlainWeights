@@ -348,11 +348,11 @@ struct InlineProgressChart: View {
             }
         }
         .padding(16)
-        .background(themeManager.currentTheme.cardBackgroundColor)
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
         )
         .onChange(of: sets) { _, _ in
             cachedState = Self.computeChartState(from: sets, timeRange: selectedTimeRange)
@@ -369,8 +369,8 @@ struct InlineProgressChart: View {
     @ViewBuilder
     private var emptyState: some View {
         Text("No data yet. Log sets to see progress.")
-            .font(themeManager.currentTheme.subheadlineFont)
-            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+            .font(themeManager.effectiveTheme.subheadlineFont)
+            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             .frame(height: 150)
             .frame(maxWidth: .infinity)
     }
@@ -398,8 +398,8 @@ struct InlineProgressChart: View {
                     Spacer()
                     Text("\(cachedState.repsRange.min)")
                 }
-                .font(themeManager.currentTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .font(themeManager.effectiveTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.effectiveTheme.chartColor2)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 25, height: 130)
@@ -416,8 +416,8 @@ struct InlineProgressChart: View {
                     Spacer()
                     Text("\(cachedState.repsRange.min)")
                 }
-                .font(themeManager.currentTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .font(themeManager.effectiveTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.effectiveTheme.chartColor2)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 25, height: 130)
@@ -434,8 +434,8 @@ struct InlineProgressChart: View {
                     Spacer()
                     Text(Formatters.formatWeight(cachedState.weightRange.min))
                 }
-                .font(themeManager.currentTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.currentTheme.chartColor1)
+                .font(themeManager.effectiveTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.effectiveTheme.chartColor1)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 35, height: 130)
@@ -455,8 +455,8 @@ struct InlineProgressChart: View {
                     Spacer()
                     Text("\(cachedState.totalRepsRange.min)")
                 }
-                .font(themeManager.currentTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.currentTheme.chartColor4)
+                .font(themeManager.effectiveTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.effectiveTheme.chartColor4)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 35, height: 130)
@@ -473,8 +473,8 @@ struct InlineProgressChart: View {
                     Spacer()
                     Text(Formatters.formatVolume(cachedState.volumeRange.min))
                 }
-                .font(themeManager.currentTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.currentTheme.chartColor3)
+                .font(themeManager.effectiveTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.effectiveTheme.chartColor3)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 45, height: 130)
@@ -500,8 +500,8 @@ struct InlineProgressChart: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [themeManager.currentTheme.chartColor2.opacity(0.3),
-                                 themeManager.currentTheme.chartColor2.opacity(0.05)],
+                        colors: [themeManager.effectiveTheme.chartColor2.opacity(0.3),
+                                 themeManager.effectiveTheme.chartColor2.opacity(0.05)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -513,7 +513,7 @@ struct InlineProgressChart: View {
                     y: .value("Reps", point.normalizedReps),
                     series: .value("Type", "Reps")
                 )
-                .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .foregroundStyle(themeManager.effectiveTheme.chartColor2)
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
             } else {
@@ -527,8 +527,8 @@ struct InlineProgressChart: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [themeManager.currentTheme.chartColor1.opacity(0.3),
-                                 themeManager.currentTheme.chartColor1.opacity(0.05)],
+                        colors: [themeManager.effectiveTheme.chartColor1.opacity(0.3),
+                                 themeManager.effectiveTheme.chartColor1.opacity(0.05)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -541,7 +541,7 @@ struct InlineProgressChart: View {
                     y: .value("Weight", point.normalizedWeight),
                     series: .value("Type", "Weight")
                 )
-                .foregroundStyle(themeManager.currentTheme.chartColor1)
+                .foregroundStyle(themeManager.effectiveTheme.chartColor1)
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
 
@@ -551,7 +551,7 @@ struct InlineProgressChart: View {
                     y: .value("Reps", point.normalizedReps),
                     series: .value("Type", "Reps")
                 )
-                .foregroundStyle(themeManager.currentTheme.chartColor2)
+                .foregroundStyle(themeManager.effectiveTheme.chartColor2)
                 .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
                 .interpolationMethod(.monotone)
             }
@@ -559,7 +559,7 @@ struct InlineProgressChart: View {
             // PB indicator: vertical line through the point + star at top
             if point.isPB {
                 RuleMark(x: .value("Index", point.index))
-                    .foregroundStyle(themeManager.currentTheme.pbColor.opacity(0.5))
+                    .foregroundStyle(themeManager.effectiveTheme.pbColor.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1))
 
                 PointMark(
@@ -569,7 +569,7 @@ struct InlineProgressChart: View {
                 .symbol {
                     Image(systemName: "star.fill")
                         .font(.system(size: 10))
-                        .foregroundStyle(themeManager.currentTheme.pbColor)
+                        .foregroundStyle(themeManager.effectiveTheme.pbColor)
                 }
             }
         }
@@ -578,7 +578,7 @@ struct InlineProgressChart: View {
         .chartYAxis {
             AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
-                    .foregroundStyle(themeManager.currentTheme.borderColor)
+                    .foregroundStyle(themeManager.effectiveTheme.borderColor)
             }
         }
         .chartYScale(domain: 0...1)
@@ -598,8 +598,8 @@ struct InlineProgressChart: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [themeManager.currentTheme.chartColor4.opacity(0.3),
-                                 themeManager.currentTheme.chartColor4.opacity(0.05)],
+                        colors: [themeManager.effectiveTheme.chartColor4.opacity(0.3),
+                                 themeManager.effectiveTheme.chartColor4.opacity(0.05)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -611,7 +611,7 @@ struct InlineProgressChart: View {
                     y: .value("Total Reps", point.normalizedTotalReps),
                     series: .value("Type", "TotalReps")
                 )
-                .foregroundStyle(themeManager.currentTheme.chartColor4)
+                .foregroundStyle(themeManager.effectiveTheme.chartColor4)
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
             } else {
@@ -623,8 +623,8 @@ struct InlineProgressChart: View {
                 )
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [themeManager.currentTheme.chartColor3.opacity(0.3),
-                                 themeManager.currentTheme.chartColor3.opacity(0.05)],
+                        colors: [themeManager.effectiveTheme.chartColor3.opacity(0.3),
+                                 themeManager.effectiveTheme.chartColor3.opacity(0.05)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -636,7 +636,7 @@ struct InlineProgressChart: View {
                     y: .value("Volume", point.normalizedVolume),
                     series: .value("Type", "Volume")
                 )
-                .foregroundStyle(themeManager.currentTheme.chartColor3)
+                .foregroundStyle(themeManager.effectiveTheme.chartColor3)
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
             }
@@ -648,7 +648,7 @@ struct InlineProgressChart: View {
         .chartYAxis {
             AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
-                    .foregroundStyle(themeManager.currentTheme.borderColor)
+                    .foregroundStyle(themeManager.effectiveTheme.borderColor)
             }
         }
         .chartYScale(domain: 0...1)
@@ -662,22 +662,22 @@ struct InlineProgressChart: View {
             if chartMode == .max {
                 // Max mode legend (line chart)
                 if cachedState.isRepsOnly {
-                    lineLegendItem(color: themeManager.currentTheme.chartColor2, label: "Max Reps", isDashed: false)
+                    lineLegendItem(color: themeManager.effectiveTheme.chartColor2, label: "Max Reps", isDashed: false)
                 } else {
-                    lineLegendItem(color: themeManager.currentTheme.chartColor1, label: "Max Weight (kg)", isDashed: false)
-                    lineLegendItem(color: themeManager.currentTheme.chartColor2, label: "Max Reps", isDashed: true)
+                    lineLegendItem(color: themeManager.effectiveTheme.chartColor1, label: "Max Weight (kg)", isDashed: false)
+                    lineLegendItem(color: themeManager.effectiveTheme.chartColor2, label: "Max Reps", isDashed: true)
                 }
             } else {
                 // Volume mode legend (line chart)
                 if cachedState.isRepsOnly {
-                    lineLegendItem(color: themeManager.currentTheme.chartColor4, label: "Total Reps", isDashed: false)
+                    lineLegendItem(color: themeManager.effectiveTheme.chartColor4, label: "Total Reps", isDashed: false)
                 } else {
-                    lineLegendItem(color: themeManager.currentTheme.chartColor3, label: "Volume (kg)", isDashed: false)
+                    lineLegendItem(color: themeManager.effectiveTheme.chartColor3, label: "Volume (kg)", isDashed: false)
                 }
             }
         }
-        .font(themeManager.currentTheme.captionFont)
-        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+        .font(themeManager.effectiveTheme.captionFont)
+        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
     }
 
     @ViewBuilder

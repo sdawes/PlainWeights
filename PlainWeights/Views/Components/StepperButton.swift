@@ -23,13 +23,13 @@ struct StepperButton: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: size * 0.5, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .frame(width: size, height: size)
-                .background(themeManager.currentTheme.muted)
+                .background(themeManager.effectiveTheme.muted)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                        .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)

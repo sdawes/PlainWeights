@@ -29,9 +29,9 @@ struct TodaySessionCard: View {
                         .font(.system(size: 14))
                         .frame(width: 20)
                     Text("Today's Sets")
-                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                 }
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
                 Spacer()
 
@@ -42,26 +42,26 @@ struct TodaySessionCard: View {
                         if isWeightedExercise {
                             (
                                 Text(Formatters.formatVolume(volume))
-                                    .font(themeManager.currentTheme.dataFont(size: 15, weight: .bold))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
                                 + Text(" kg")
-                                    .font(themeManager.currentTheme.dataFont(size: 15, weight: .medium))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
                             )
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                            .foregroundStyle(themeManager.effectiveTheme.primaryText)
                         } else {
                             (
                                 Text("\(totalReps)")
-                                    .font(themeManager.currentTheme.dataFont(size: 15, weight: .bold))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
                                 + Text(" reps")
-                                    .font(themeManager.currentTheme.dataFont(size: 15, weight: .medium))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
                             )
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                            .foregroundStyle(themeManager.effectiveTheme.primaryText)
                         }
 
                         // Duration
                         if let mins = durationMinutes {
                             Text("\(mins) min")
-                                .font(themeManager.currentTheme.dataFont(size: 13))
-                                .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                                .font(themeManager.effectiveTheme.dataFont(size: 13))
+                                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                         }
                     }
                 }
@@ -71,15 +71,15 @@ struct TodaySessionCard: View {
 
             // Divider
             Rectangle()
-                .fill(themeManager.currentTheme.borderColor)
+                .fill(themeManager.effectiveTheme.borderColor)
                 .frame(height: 1)
 
             // Content area
             if setCount == 0 {
                 // No sets logged yet
                 Text("No sets logged yet")
-                    .font(themeManager.currentTheme.interFont(size: 14))
-                    .foregroundStyle(themeManager.currentTheme.tertiaryText)
+                    .font(themeManager.effectiveTheme.interFont(size: 14))
+                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(16)
             } else if !isWeightedExercise && comparisonReps > 0 {
@@ -105,13 +105,13 @@ struct TodaySessionCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     // Empty progress bar
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(themeManager.currentTheme.muted)
+                        .fill(themeManager.effectiveTheme.muted)
                         .frame(height: 8)
 
                     // Explanatory text
                     Text("Next session will compare to this one")
-                        .font(themeManager.currentTheme.captionFont)
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .font(themeManager.effectiveTheme.captionFont)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
                 .padding(16)
             }
@@ -119,11 +119,11 @@ struct TodaySessionCard: View {
             // Bottom divider (when sets follow below)
             if hasSetsBelow {
                 Rectangle()
-                    .fill(themeManager.currentTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.borderColor)
                     .frame(height: 1)
             }
         }
-        .background(themeManager.currentTheme.cardBackgroundColor)
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedCorner(radius: 12, corners: hasSetsBelow ? [.topLeft, .topRight] : .allCorners))
         .overlay(borderOverlay)
     }
@@ -132,10 +132,10 @@ struct TodaySessionCard: View {
     private var borderOverlay: some View {
         if hasSetsBelow {
             TopOpenBorder(radius: 12)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
         } else {
             RoundedCorner(radius: 12, corners: .allCorners)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
         }
     }
 }

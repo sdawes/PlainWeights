@@ -19,6 +19,14 @@ final class ThemeManager {
         }
     }
 
+    /// The system's current color scheme (updated by root view)
+    var systemColorScheme: ColorScheme = .light
+
+    /// The effective theme to use for colors (resolves .system to actual theme)
+    var effectiveTheme: AppTheme {
+        currentTheme.effectiveTheme(for: systemColorScheme)
+    }
+
     var chartVisibleByDefault: Bool {
         didSet {
             UserDefaults.standard.set(chartVisibleByDefault, forKey: Self.chartVisibleKey)
@@ -32,8 +40,8 @@ final class ThemeManager {
     }
 
     init() {
-        let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.light.rawValue
-        self.currentTheme = AppTheme(rawValue: savedTheme) ?? .light
+        let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.system.rawValue
+        self.currentTheme = AppTheme(rawValue: savedTheme) ?? .system
 
         // Chart visibility - defaults to false (hidden)
         self.chartVisibleByDefault = UserDefaults.standard.object(forKey: Self.chartVisibleKey) as? Bool ?? false

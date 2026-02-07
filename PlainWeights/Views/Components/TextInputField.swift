@@ -17,17 +17,17 @@ struct TextInputField: View {
 
     var body: some View {
         TextField(placeholder, text: $text)
-            .font(themeManager.currentTheme.dataFont(size: 20))
+            .font(themeManager.effectiveTheme.dataFont(size: 20))
             .keyboardType(keyboardType)
             .multilineTextAlignment(textAlignment)
             .padding(16)
             .frame(height: 56)
-            .background(themeManager.currentTheme.cardBackgroundColor)
+            .background(themeManager.effectiveTheme.cardBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(
-                        isFocused ? themeManager.currentTheme.primaryText : themeManager.currentTheme.borderColor,
+                        isFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
                         lineWidth: isFocused ? 2 : 1
                     )
             )

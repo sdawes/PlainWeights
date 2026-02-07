@@ -208,16 +208,16 @@ struct ComparisonMetricsCard: View {
                     .font(.system(size: 14))
                     .frame(width: 20)
                 Text(headerText)
-                    .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
             }
-            .foregroundStyle(themeManager.currentTheme.primaryText)
+            .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
             // Divider below header
             Rectangle()
-                .fill(themeManager.currentTheme.borderColor)
+                .fill(themeManager.effectiveTheme.borderColor)
                 .frame(height: 1)
 
             if let metrics = currentMetrics {
@@ -240,7 +240,7 @@ struct ComparisonMetricsCard: View {
 
                 // Divider above comparison row
                 Rectangle()
-                    .fill(themeManager.currentTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.borderColor)
                     .frame(height: 1)
 
                 // Comparison row - colored background cells (show '-' when no working sets)
@@ -249,22 +249,22 @@ struct ComparisonMetricsCard: View {
                     comparisonCell(direction: hasWorkingSets ? repsDirection : nil, value: hasWorkingSets ? repsDelta : nil, isReps: true)
                     comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil)
                 }
-                .background(themeManager.currentTheme.borderColor)
+                .background(themeManager.effectiveTheme.borderColor)
             } else {
                 // Empty state
                 Text("No data yet")
-                    .font(themeManager.currentTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                    .font(themeManager.effectiveTheme.subheadlineFont)
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 16)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(themeManager.currentTheme.cardBackgroundColor)
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.currentTheme.borderColor, lineWidth: 1)
+                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
         )
         .animation(.easeInOut(duration: 0.2), value: comparisonMode)
         .onChange(of: sets) { _, _ in
@@ -281,11 +281,11 @@ struct ComparisonMetricsCard: View {
     private func metricColumn(label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
-                .font(themeManager.currentTheme.captionFont)
-                .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                .font(themeManager.effectiveTheme.captionFont)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             Text(value)
-                .font(themeManager.currentTheme.dataFont(size: 20, weight: .semibold))
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
         }
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -302,7 +302,7 @@ struct ComparisonMetricsCard: View {
                 let prefix = direction == .up ? "+" : ""
                 HStack {
                     Text("\(prefix)\(displayValue)")
-                        .font(themeManager.currentTheme.dataFont(size: 14, weight: .bold))
+                        .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .bold))
                         .foregroundStyle(.white)
                     Spacer()
                 }
@@ -313,13 +313,13 @@ struct ComparisonMetricsCard: View {
                 // No data - show dash
                 HStack {
                     Text("—")
-                        .font(themeManager.currentTheme.interFont(size: 14))
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground.opacity(0.3))
+                        .font(themeManager.effectiveTheme.interFont(size: 14))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.3))
                     Spacer()
                 }
                 .padding(.horizontal, 16)
                 .frame(height: 40)
-                .background(themeManager.currentTheme.cardBackgroundColor)
+                .background(themeManager.effectiveTheme.cardBackgroundColor)
             }
         }
     }

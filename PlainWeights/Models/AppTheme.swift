@@ -12,16 +12,27 @@ import SwiftUI
 enum AppTheme: String, CaseIterable {
     case light = "Light"
     case dark = "Dark"
+    case system = "System"
 
     var displayName: String {
         rawValue
+    }
+
+    /// Returns the effective theme for color resolution
+    /// When .system is selected, pass in the current system colorScheme
+    func effectiveTheme(for systemScheme: ColorScheme) -> AppTheme {
+        switch self {
+        case .light: return .light
+        case .dark: return .dark
+        case .system: return systemScheme == .dark ? .dark : .light
+        }
     }
 
     // MARK: - Primary Color (used for text, symbols, progress)
 
     var primary: Color {
         switch self {
-        case .light: return .black
+        case .light, .system: return .black
         case .dark: return Color(white: 0.93)  // Slightly softer than pure white
         }
     }
@@ -44,7 +55,7 @@ enum AppTheme: String, CaseIterable {
 
     var background: Color {
         switch self {
-        case .light: return .white
+        case .light, .system: return .white
         case .dark: return .black
         }
     }
@@ -62,14 +73,14 @@ enum AppTheme: String, CaseIterable {
 
     var muted: Color {
         switch self {
-        case .light: return Color(red: 0.93, green: 0.93, blue: 0.94) // #ececf0
+        case .light, .system: return Color(red: 0.93, green: 0.93, blue: 0.94) // #ececf0
         case .dark: return Color(red: 0.16, green: 0.16, blue: 0.16)  // #2a2a2a
         }
     }
 
     var mutedForeground: Color {
         switch self {
-        case .light: return Color(red: 0.44, green: 0.44, blue: 0.51) // #717182
+        case .light, .system: return Color(red: 0.44, green: 0.44, blue: 0.51) // #717182
         case .dark: return Color(red: 0.63, green: 0.63, blue: 0.63)  // #a0a0a0
         }
     }
@@ -94,10 +105,12 @@ enum AppTheme: String, CaseIterable {
 
     // MARK: - Color Scheme
 
-    var colorScheme: ColorScheme {
+    /// Returns the color scheme to apply, or nil to follow system
+    var colorScheme: ColorScheme? {
         switch self {
         case .light: return .light
         case .dark: return .dark
+        case .system: return nil  // nil = follow system setting
         }
     }
 
@@ -115,7 +128,7 @@ enum AppTheme: String, CaseIterable {
     /// Primary chart color (for weight line)
     var chartColor1: Color {
         switch self {
-        case .light: return Color(red: 0.92, green: 0.45, blue: 0.18)  // Vibrant orange
+        case .light, .system: return Color(red: 0.92, green: 0.45, blue: 0.18)  // Vibrant orange
         case .dark: return Color(red: 0.45, green: 0.50, blue: 0.95)   // Bright blue/purple
         }
     }
@@ -123,7 +136,7 @@ enum AppTheme: String, CaseIterable {
     /// Secondary chart color (for reps line)
     var chartColor2: Color {
         switch self {
-        case .light: return Color(red: 0.18, green: 0.70, blue: 0.65)  // Vibrant teal
+        case .light, .system: return Color(red: 0.18, green: 0.70, blue: 0.65)  // Vibrant teal
         case .dark: return Color(red: 0.45, green: 0.82, blue: 0.58)   // Bright green
         }
     }
@@ -131,7 +144,7 @@ enum AppTheme: String, CaseIterable {
     /// Tertiary chart color (for volume mode)
     var chartColor3: Color {
         switch self {
-        case .light: return Color(red: 0.65, green: 0.35, blue: 0.75)  // Purple/violet
+        case .light, .system: return Color(red: 0.65, green: 0.35, blue: 0.75)  // Purple/violet
         case .dark: return Color(red: 0.85, green: 0.55, blue: 0.65)   // Coral/rose
         }
     }
@@ -139,7 +152,7 @@ enum AppTheme: String, CaseIterable {
     /// Quaternary chart color (for total reps in volume mode - reps-only exercises)
     var chartColor4: Color {
         switch self {
-        case .light: return Color(red: 0.55, green: 0.78, blue: 0.25)  // Lime green
+        case .light, .system: return Color(red: 0.55, green: 0.78, blue: 0.25)  // Lime green
         case .dark: return Color(red: 0.65, green: 0.85, blue: 0.35)   // Light lime
         }
     }

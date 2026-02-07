@@ -94,7 +94,7 @@ struct FilteredExerciseListView: View {
 
     /// Get timestamp color
     private func timestampColor(for exercise: Exercise) -> Color {
-        themeManager.currentTheme.tertiaryText
+        themeManager.effectiveTheme.tertiaryText
     }
 
     /// Get staleness color (red for 30+ days, orange for 14+ days, green for today, nil for recent)
@@ -113,15 +113,15 @@ struct FilteredExerciseListView: View {
                 Section {
                     HStack {
                         Text("Add first exercise using the + above")
-                            .font(themeManager.currentTheme.subheadlineFont)
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .font(themeManager.effectiveTheme.subheadlineFont)
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                         Spacer()
 
                         // Curved arrow pointing up toward + button
                         Image(systemName: "arrow.turn.right.up")
                             .font(.title3)
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 8)
@@ -133,8 +133,8 @@ struct FilteredExerciseListView: View {
                     ForEach(Array(exercises.enumerated()), id: \.element.persistentModelID) { index, exercise in
                         VStack(alignment: .leading, spacing: 0) {
                             Text(exercise.name)
-                                .font(themeManager.currentTheme.interFont(size: 18, weight: .semibold))
-                                .foregroundStyle(themeManager.currentTheme.primaryText)
+                                .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
+                                .foregroundStyle(themeManager.effectiveTheme.primaryText)
                             if !exercise.tags.isEmpty {
                                 TagPillsRow(tags: exercise.tags)
                                     .padding(.top, 6)
@@ -147,18 +147,18 @@ struct FilteredExerciseListView: View {
                                 }
                                 if isDoneToday(exercise) {
                                     Text("Last: ")
-                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .regular))
+                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
                                         .foregroundStyle(.green)
                                     + Text("Today")
-                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
+                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(.green)
                                 } else {
                                     Text("Last: ")
-                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .regular))
-                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.effectiveTheme.mutedForeground)
                                     + Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
-                                        .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.currentTheme.mutedForeground)
+                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.effectiveTheme.mutedForeground)
                                 }
                             }
                             .padding(.top, 12)
@@ -195,7 +195,7 @@ struct FilteredExerciseListView: View {
                             }
                         )
                         .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
-                        .listRowSeparatorTint(themeManager.currentTheme.borderColor)
+                        .listRowSeparatorTint(themeManager.effectiveTheme.borderColor)
                         .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
                     }
                 }
@@ -215,7 +215,7 @@ struct FilteredExerciseListView: View {
                     Image(systemName: "gearshape")
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundStyle(themeManager.currentTheme.textColor)
+                        .foregroundStyle(themeManager.effectiveTheme.textColor)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {

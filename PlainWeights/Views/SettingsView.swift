@@ -25,13 +25,13 @@ struct SettingsView: View {
             // Header
             HStack {
                 Text("Settings")
-                    .font(themeManager.currentTheme.title3Font)
-                    .foregroundStyle(themeManager.currentTheme.primaryText)
+                    .font(themeManager.effectiveTheme.title3Font)
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.title3)
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
                 .buttonStyle(.plain)
             }
@@ -42,24 +42,18 @@ struct SettingsView: View {
                     // Appearance section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Appearance")
-                            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                             .padding(.top, 24)
 
-                        settingsRow(
-                            icon: themeManager.currentTheme == .dark ? "moon.fill" : "sun.max.fill",
-                            title: "Theme",
-                            value: themeManager.currentTheme == .dark ? "Dark" : "Light"
-                        ) {
-                            themeManager.currentTheme = themeManager.currentTheme == .dark ? .light : .dark
-                        }
+                        themePickerRow()
                     }
 
                     // Display section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Display")
-                            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                         settingsToggleRow(
                             icon: "chart.line.uptrend.xyaxis",
@@ -83,8 +77,8 @@ struct SettingsView: View {
                     // Data section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Data")
-                            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                         settingsRow(
                             icon: "trash",
@@ -100,8 +94,8 @@ struct SettingsView: View {
                     // Developer Tools section
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Developer Tools")
-                            .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                         settingsRow(
                             icon: "terminal",
@@ -136,11 +130,11 @@ struct SettingsView: View {
                     // Footer
                     VStack(spacing: 4) {
                         Text("PlainWeights v1.0")
-                            .font(themeManager.currentTheme.interFont(size: 14, weight: .medium))
-                            .foregroundStyle(themeManager.currentTheme.primaryText)
+                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.primaryText)
                         Text("A simple workout tracking tool")
-                            .font(themeManager.currentTheme.interFont(size: 14, weight: .regular))
-                            .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 24)
@@ -149,7 +143,7 @@ struct SettingsView: View {
             .scrollIndicators(.hidden)
         }
         .padding(24)
-        .background(themeManager.currentTheme.background)
+        .background(themeManager.effectiveTheme.background)
         .alert("Delete All Exercises?", isPresented: $showingDeleteAllAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete Everything", role: .destructive) {
@@ -183,6 +177,48 @@ struct SettingsView: View {
     // MARK: - Settings Row Components
 
     @ViewBuilder
+    private func themePickerRow() -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: themeIcon)
+                .font(.system(size: 18))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                .frame(width: 24)
+
+            Text("Theme")
+                .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+            Spacer()
+
+            Picker("", selection: Binding(
+                get: { themeManager.currentTheme },
+                set: { themeManager.currentTheme = $0 }
+            )) {
+                ForEach(AppTheme.allCases, id: \.self) { theme in
+                    Text(theme.displayName).tag(theme)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(themeManager.effectiveTheme.mutedForeground)
+        }
+        .padding(16)
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
+        )
+    }
+
+    private var themeIcon: String {
+        switch themeManager.currentTheme {
+        case .light: return "sun.max.fill"
+        case .dark: return "moon.fill"
+        case .system: return "circle.lefthalf.filled"
+        }
+    }
+
+    @ViewBuilder
     private func settingsRow(
         icon: String,
         title: String,
@@ -194,27 +230,27 @@ struct SettingsView: View {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 18))
-                    .foregroundStyle(isDestructive ? .red : themeManager.currentTheme.primaryText)
+                    .foregroundStyle(isDestructive ? .red : themeManager.effectiveTheme.primaryText)
                     .frame(width: 24)
 
                 Text(title)
-                    .font(themeManager.currentTheme.interFont(size: 16, weight: .medium))
-                    .foregroundStyle(isDestructive ? .red : themeManager.currentTheme.primaryText)
+                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
+                    .foregroundStyle(isDestructive ? .red : themeManager.effectiveTheme.primaryText)
 
                 Spacer()
 
                 if let value = value {
                     Text(value)
-                        .font(themeManager.currentTheme.interFont(size: 16, weight: .regular))
-                        .foregroundStyle(themeManager.currentTheme.mutedForeground)
+                        .font(themeManager.effectiveTheme.interFont(size: 16, weight: .regular))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
             }
             .padding(16)
-            .background(themeManager.currentTheme.cardBackgroundColor)
+            .background(themeManager.effectiveTheme.cardBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                    .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -229,12 +265,12 @@ struct SettingsView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .frame(width: 24)
 
             Text(title)
-                .font(themeManager.currentTheme.interFont(size: 16, weight: .medium))
-                .foregroundStyle(themeManager.currentTheme.primaryText)
+                .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
             Spacer()
 
@@ -243,11 +279,11 @@ struct SettingsView: View {
                 .tint(.green)
         }
         .padding(16)
-        .background(themeManager.currentTheme.cardBackgroundColor)
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(themeManager.currentTheme.borderColor, lineWidth: 1)
+                .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
         )
     }
 

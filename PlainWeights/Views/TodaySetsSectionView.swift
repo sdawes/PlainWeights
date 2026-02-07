@@ -20,7 +20,7 @@ struct TodaySetsSectionView: View {
         ForEach(todaySets, id: \.persistentModelID) { set in
             HStack(alignment: .bottom) {
                 Text(ExerciseSetFormatters.formatSet(set))
-                    .font(themeManager.currentTheme.bodyFont)
+                    .font(themeManager.effectiveTheme.bodyFont)
                     .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 
                 Spacer()
@@ -52,7 +52,7 @@ struct TodaySetsSectionView: View {
                 if set.isTimedSet {
                     if set.tempoSeconds > 0 {
                         Text("\(set.tempoSeconds)")
-                            .font(themeManager.currentTheme.dataFont(size: 14))
+                            .font(themeManager.effectiveTheme.dataFont(size: 14))
                             .foregroundStyle(.primary)
                     } else {
                         Image(systemName: "timer")
@@ -64,11 +64,11 @@ struct TodaySetsSectionView: View {
                 if set.isPB {
                     Image(systemName: "star.fill")
                         .font(.system(size: 14))
-                        .foregroundStyle(themeManager.currentTheme.pbColor)
+                        .foregroundStyle(themeManager.effectiveTheme.pbColor)
                 }
 
                 Text(Formatters.formatTimeHM(set.timestamp))
-                    .font(themeManager.currentTheme.dataFont(size: 12))
+                    .font(themeManager.effectiveTheme.dataFont(size: 12))
                     .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())

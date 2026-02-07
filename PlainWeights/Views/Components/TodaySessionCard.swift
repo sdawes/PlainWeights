@@ -35,33 +35,35 @@ struct TodaySessionCard: View {
 
                 Spacer()
 
-                // Only show stats when sets exist
+                // Stats: running total + duration
                 if setCount > 0 {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 12) {
+                        // Running total (bold styling)
                         if isWeightedExercise {
-                            HStack(spacing: 2) {
+                            (
                                 Text(Formatters.formatVolume(volume))
-                                    .font(themeManager.currentTheme.dataFont(size: 13, weight: .semibold))
-                                Text("kg")
-                                    .font(themeManager.currentTheme.dataFont(size: 13))
-                            }
+                                    .font(themeManager.currentTheme.dataFont(size: 15, weight: .bold))
+                                + Text(" kg")
+                                    .font(themeManager.currentTheme.dataFont(size: 15, weight: .medium))
+                            )
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
                         } else {
-                            HStack(spacing: 2) {
+                            (
                                 Text("\(totalReps)")
-                                    .font(themeManager.currentTheme.dataFont(size: 13, weight: .semibold))
-                                Text("reps")
-                                    .font(themeManager.currentTheme.dataFont(size: 13))
-                            }
+                                    .font(themeManager.currentTheme.dataFont(size: 15, weight: .bold))
+                                + Text(" reps")
+                                    .font(themeManager.currentTheme.dataFont(size: 15, weight: .medium))
+                            )
+                            .foregroundStyle(themeManager.currentTheme.primaryText)
                         }
 
+                        // Duration
                         if let mins = durationMinutes {
-                            Text("•")
                             Text("\(mins) min")
                                 .font(themeManager.currentTheme.dataFont(size: 13))
+                                .foregroundStyle(themeManager.currentTheme.tertiaryText)
                         }
                     }
-                    .font(themeManager.currentTheme.interFont(size: 13))
-                    .foregroundStyle(themeManager.currentTheme.tertiaryText)
                 }
             }
             .padding(.horizontal, 16)
@@ -99,8 +101,8 @@ struct TodaySessionCard: View {
                 )
                 .padding(16)
             } else {
-                // Show empty progress bar with explanation when no comparison data
-                VStack(alignment: .leading, spacing: 8) {
+                // Empty progress bar when no comparison data
+                VStack(alignment: .leading, spacing: 6) {
                     // Empty progress bar
                     RoundedRectangle(cornerRadius: 4)
                         .fill(themeManager.currentTheme.muted)

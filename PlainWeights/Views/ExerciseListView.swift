@@ -222,7 +222,7 @@ struct FilteredExerciseListView: View {
                 Button {
                     showingSummary = true
                 } label: {
-                    Image(systemName: "trophy")
+                    Image(systemName: "star.fill")
                         .font(.body)
                         .fontWeight(.medium)
                 }

@@ -15,6 +15,7 @@ struct VolumeProgressBar: View {
     let targetVolume: Double
     let targetLabel: String  // "Last" or "Best"
     let isRepsOnly: Bool  // True for bodyweight exercises (compare reps, not volume)
+    var showCurrentValue: Bool = false  // Whether to show current value above the bar
 
     // Computed color based on comparison
     private var progressColor: Color {
@@ -40,6 +41,30 @@ struct VolumeProgressBar: View {
 
     var body: some View {
         VStack(spacing: 6) {
+            // Current value label (right-aligned, above bar)
+            if showCurrentValue {
+                HStack {
+                    Spacer()
+                    if isRepsOnly {
+                        (
+                            Text("\(Int(currentVolume))")
+                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .bold))
+                            + Text(" reps")
+                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .medium))
+                        )
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                    } else {
+                        (
+                            Text(Formatters.formatVolume(currentVolume))
+                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .bold))
+                            + Text(" kg")
+                                .font(themeManager.currentTheme.dataFont(size: 15, weight: .medium))
+                        )
+                        .foregroundStyle(themeManager.currentTheme.primaryText)
+                    }
+                }
+            }
+
             // Progress bar
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {

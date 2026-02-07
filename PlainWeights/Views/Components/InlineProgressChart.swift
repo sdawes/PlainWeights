@@ -556,7 +556,7 @@ struct InlineProgressChart: View {
                 .interpolationMethod(.monotone)
             }
 
-            // PB indicator: vertical line through the point + trophy at top
+            // PB indicator: vertical line through the point + star at top
             if point.isPB {
                 RuleMark(x: .value("Index", point.index))
                     .foregroundStyle(themeManager.currentTheme.pbColor.opacity(0.5))
@@ -567,7 +567,7 @@ struct InlineProgressChart: View {
                     y: .value("PB", 1.0)
                 )
                 .symbol {
-                    Image(systemName: "trophy.fill")
+                    Image(systemName: "star.fill")
                         .font(.system(size: 10))
                         .foregroundStyle(themeManager.currentTheme.pbColor)
                 }

@@ -204,7 +204,7 @@ struct ComparisonMetricsCard: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header section
             HStack(spacing: 8) {
-                Image(systemName: comparisonMode == .lastSession ? "calendar.badge.clock" : "trophy.fill")
+                Image(systemName: comparisonMode == .lastSession ? "calendar.badge.clock" : "star.fill")
                     .font(.system(size: 14))
                     .frame(width: 20)
                 Text(headerText)

@@ -241,7 +241,7 @@ struct SessionSummaryView: View {
                 Text(" × ")
                     .font(themeManager.currentTheme.interFont(size: 14))
                     .foregroundStyle(.secondary)
-                Image(systemName: "trophy.fill")
+                Image(systemName: "star.fill")
                     .font(.system(size: 16))
                     .foregroundStyle(themeManager.currentTheme.pbColor)
             }
@@ -274,7 +274,11 @@ struct SessionSummaryView: View {
 
         // Current session values
         let currentMaxWeight = maxSet?.weight ?? 0
-        let currentMaxReps = maxSet?.reps ?? workingSets.map { $0.reps }.max() ?? 0
+        // For weighted exercises: reps from the heaviest set
+        // For reps-only exercises: actual max reps across all sets
+        let currentMaxReps = currentMaxWeight > 0
+            ? (maxSet?.reps ?? 0)
+            : (workingSets.map { $0.reps }.max() ?? 0)
         let currentVolume = workoutExercise.volume
 
         // Get previous session data for comparison (O(1) lookup from pre-computed cache)
@@ -414,7 +418,11 @@ struct SessionSummaryView: View {
             // Calculate metrics
             let maxSet = previousDaySets.max(by: { $0.weight < $1.weight })
             let maxWeight = maxSet?.weight ?? 0
-            let maxReps = maxSet?.reps ?? previousDaySets.map { $0.reps }.max() ?? 0
+            // For weighted exercises: reps from the heaviest set
+            // For reps-only exercises: actual max reps across all sets
+            let maxReps = maxWeight > 0
+                ? (maxSet?.reps ?? 0)
+                : (previousDaySets.map { $0.reps }.max() ?? 0)
             let volume = previousDaySets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
 
             result[exerciseID] = PreviousSessionMetrics(maxWeight: maxWeight, maxReps: maxReps, volume: volume)
@@ -472,7 +480,7 @@ struct SessionSummaryView: View {
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         if hasPB {
                             Spacer()
-                            Image(systemName: "trophy.fill")
+                            Image(systemName: "star.fill")
                                 .font(.system(size: 14))
                                 .foregroundStyle(themeManager.currentTheme.pbColor)
                         }
@@ -550,7 +558,7 @@ struct SessionSummaryView: View {
                             .foregroundStyle(themeManager.currentTheme.mutedForeground)
                         if hasPB {
                             Spacer()
-                            Image(systemName: "trophy.fill")
+                            Image(systemName: "star.fill")
                                 .font(.system(size: 14))
                                 .foregroundStyle(themeManager.currentTheme.pbColor)
                         }

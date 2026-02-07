@@ -145,7 +145,7 @@ struct ExerciseDetailView: View {
                             }
                         } label: {
                             HStack(spacing: 8) {
-                                Image(systemName: mode == .lastSession ? "calendar.badge.clock" : "trophy")
+                                Image(systemName: mode == .lastSession ? "calendar.badge.clock" : "star.fill")
                                     .font(.system(size: 16))
                                 Text(mode == .lastSession ? "Last" : "Best")
                                     .font(themeManager.currentTheme.interFont(size: 15, weight: .medium))

@@ -57,15 +57,15 @@ struct SetRowView: View {
                         .font(themeManager.effectiveTheme.dataFont(size: 17, weight: .medium))
                         .foregroundStyle(setNumberColor)
                         .frame(width: 24, alignment: .leading)
-                        .padding(.leading, 22)  // 16pt spacer + 2pt border + 4pt gap
+                        .padding(.leading, 19)  // 16pt spacer + 2pt border + 1pt gap
 
                     // Col 2: PB indicator or spacer
                     if set.isPB {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 15))
+                            .font(.system(size: 17))
                             .foregroundStyle(themeManager.effectiveTheme.pbColor)
                             .frame(width: 24, alignment: .leading)
-                            .offset(x: -2)
+                            .offset(x: -3)
                     } else {
                         Spacer()
                             .frame(width: 24)

@@ -284,7 +284,7 @@ struct ComparisonMetricsCard: View {
                 .font(themeManager.effectiveTheme.captionFont)
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             Text(value)
-                .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
+                .font(themeManager.effectiveTheme.dataFont(size: 22, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
         }
         .padding(.horizontal, 16)

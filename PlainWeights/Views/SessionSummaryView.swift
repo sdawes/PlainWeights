@@ -207,19 +207,25 @@ struct SessionSummaryView: View {
 
     @ViewBuilder
     private func metricCell(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(themeManager.effectiveTheme.captionFont)
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            Text(value)
-                .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
-                .monospacedDigit()
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+        HStack(spacing: 0) {
+            // Left spacer (matches delta cells: 8pt spacer + 3pt bar space)
+            Color.clear.frame(width: 11)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label)
+                    .font(themeManager.effectiveTheme.captionFont)
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                Text(value)
+                    .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .padding(.leading, 8)
+            .padding(.trailing, 16)
+            .padding(.vertical, 12)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
     }
@@ -471,10 +477,8 @@ struct SessionSummaryView: View {
         let accentColor = deltaAccentColor(weightDelta: weightDelta, repsDelta: repsDelta)
 
         HStack(spacing: 0) {
-            // Left spacer (unshaded)
-            if accentColor != nil {
-                Color.clear.frame(width: 8)
-            }
+            // Left spacer (always present for consistent alignment)
+            Color.clear.frame(width: 8)
 
             // Accent bar + shaded content area
             HStack(spacing: 0) {
@@ -482,6 +486,9 @@ struct SessionSummaryView: View {
                     Rectangle()
                         .fill(color)
                         .frame(width: 3)
+                } else {
+                    // Reserve space for accent bar even when not present
+                    Color.clear.frame(width: 3)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -550,10 +557,8 @@ struct SessionSummaryView: View {
         let accentColor = deltaAccentColor(weightDelta: nil, repsDelta: repsDelta)
 
         HStack(spacing: 0) {
-            // Left spacer (unshaded)
-            if accentColor != nil {
-                Color.clear.frame(width: 8)
-            }
+            // Left spacer (always present for consistent alignment)
+            Color.clear.frame(width: 8)
 
             // Accent bar + shaded content area
             HStack(spacing: 0) {
@@ -561,6 +566,9 @@ struct SessionSummaryView: View {
                     Rectangle()
                         .fill(color)
                         .frame(width: 3)
+                } else {
+                    // Reserve space for accent bar even when not present
+                    Color.clear.frame(width: 3)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -614,10 +622,8 @@ struct SessionSummaryView: View {
         let accentColor = deltaAccentColor(weightDelta: volumeDelta, repsDelta: nil)
 
         HStack(spacing: 0) {
-            // Left spacer (unshaded)
-            if accentColor != nil {
-                Color.clear.frame(width: 8)
-            }
+            // Left spacer (always present for consistent alignment)
+            Color.clear.frame(width: 8)
 
             // Accent bar + shaded content area
             HStack(spacing: 0) {
@@ -625,6 +631,9 @@ struct SessionSummaryView: View {
                     Rectangle()
                         .fill(color)
                         .frame(width: 3)
+                } else {
+                    // Reserve space for accent bar even when not present
+                    Color.clear.frame(width: 3)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {

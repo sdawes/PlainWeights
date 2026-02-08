@@ -46,11 +46,13 @@ struct FilteredExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     @Query private var exercises: [Exercise]
+    @Query private var allSets: [ExerciseSet]
     @Binding var showingAddExercise: Bool
     @Binding var navigationPath: NavigationPath
     let searchText: String
     @State private var showingSummary = false
     @State private var showingSettings = false
+    @State private var showingNoSessionAlert = false
 
     @State private var exerciseToDelete: Exercise?
 
@@ -113,7 +115,7 @@ struct FilteredExerciseListView: View {
                 Section {
                     HStack {
                         Text("Add first exercise using the + above")
-                            .font(themeManager.effectiveTheme.subheadlineFont)
+                            .font(themeManager.effectiveTheme.bodyFont)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                         Spacer()
@@ -122,6 +124,7 @@ struct FilteredExerciseListView: View {
                         Image(systemName: "arrow.turn.right.up")
                             .font(.title3)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                            .padding(.trailing, 5)
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 8)
@@ -203,7 +206,7 @@ struct FilteredExerciseListView: View {
         }
         .listStyle(.plain)
         .contentMargins(.top, 12, for: .scrollContent)
-        .id(themeManager.currentTheme)  // Force list rebuild on theme change
+        .id(themeManager.effectiveTheme)  // Force list rebuild on theme change (uses effectiveTheme to handle System mode)
         .scrollIndicators(.hidden)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
@@ -221,9 +224,13 @@ struct FilteredExerciseListView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    showingSummary = true
+                    if allSets.isEmpty {
+                        showingNoSessionAlert = true
+                    } else {
+                        showingSummary = true
+                    }
                 } label: {
-                    Image(systemName: "star.fill")
+                    Image(systemName: "star")
                         .font(.body)
                         .fontWeight(.medium)
                 }
@@ -268,6 +275,11 @@ struct FilteredExerciseListView: View {
             if let exercise = exerciseToDelete {
                 Text("This will permanently delete \"\(exercise.name)\" and all its sets. This action cannot be undone.")
             }
+        }
+        .alert("No Session Data", isPresented: $showingNoSessionAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Complete your first workout to see a session summary.")
         }
     }
 

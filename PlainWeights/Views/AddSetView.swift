@@ -128,8 +128,9 @@ struct AddSetView: View {
     @State private var repsText = ""
     @State private var selectedType: SetTypeOption? = nil
     @FocusState private var focusedField: Field?
+    @AppStorage("lastEditedSetField") private var lastEditedField: String = "weight"
 
-    enum Field {
+    enum Field: String {
         case weight, reps
     }
 
@@ -275,10 +276,14 @@ struct AddSetView: View {
         .padding(24)
         .background(themeManager.effectiveTheme.background)
         .onAppear {
-            focusedField = .weight
+            // Focus the last edited field
+            focusedField = Field(rawValue: lastEditedField) ?? .weight
         }
         .onChange(of: focusedField) { _, newValue in
-            if newValue != nil {
+            if let field = newValue {
+                // Remember which field was focused
+                lastEditedField = field.rawValue
+                // Select all text in the field
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                     UIApplication.shared.sendAction(#selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil)
                 }

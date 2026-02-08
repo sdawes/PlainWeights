@@ -153,7 +153,7 @@ enum AppTheme: String, CaseIterable {
     var chartColor4: Color {
         switch self {
         case .light, .system: return Color(red: 0.55, green: 0.78, blue: 0.25)  // Lime green
-        case .dark: return Color(red: 0.65, green: 0.85, blue: 0.35)   // Light lime
+        case .dark: return Color(red: 0.95, green: 0.85, blue: 0.55)   // Pastel yellow
         }
     }
 

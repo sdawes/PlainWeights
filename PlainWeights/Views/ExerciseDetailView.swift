@@ -30,6 +30,7 @@ struct ExerciseDetailView: View {
     @State private var todaySets: [ExerciseSet] = []
     @State private var historicDayGroups: [ExerciseDataGrouper.DayGroup] = []
     @State private var visibleHistoricDaysCount: Int = 10  // Pagination - show 10 days initially
+    @State private var previousTodaySetsCount: Int = 0  // Track for auto-scroll on new set
     @State private var cachedTodaysVolume: Double = 0
     @State private var cachedTodaysTotalReps: Int = 0
     @State private var cachedSessionDuration: Int? = nil
@@ -227,6 +228,7 @@ struct ExerciseDetailView: View {
                             cardPosition: isLast ? .bottom : .middle,
                             isFirstInCard: index == 0
                         )
+                        .id(index == 0 ? "latestSet" : nil)
                     }
                 }
             }
@@ -407,9 +409,20 @@ struct ExerciseDetailView: View {
             showChart = themeManager.chartVisibleByDefault
             showNotes = themeManager.notesVisibleByDefault
             updateCachedData()
+            previousTodaySetsCount = todaySets.count
         }
-        .onChange(of: sets) { _, _ in
+        .onChange(of: sets) { _, newSets in
+            let oldCount = previousTodaySetsCount
             updateCachedData()
+            // Scroll to show latest set when a new set is added
+            if todaySets.count > oldCount {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        scrollProxy.scrollTo("latestSet", anchor: .center)
+                    }
+                }
+            }
+            previousTodaySetsCount = todaySets.count
         }
         } // ScrollViewReader
     }

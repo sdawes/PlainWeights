@@ -73,13 +73,13 @@ struct SetRowView: View {
 
                     // Weight × Reps
                     HStack(alignment: .lastTextBaseline, spacing: 0) {
-                        Text(Formatters.formatWeight(set.weight))
+                        Text(Formatters.formatWeight(themeManager.displayWeight(set.weight)))
                             .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .medium))
                             .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
 
-                        Text(" kg")
+                        Text(" \(themeManager.weightUnit.displayName)")
                             .font(themeManager.effectiveTheme.interFont(size: 14))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)

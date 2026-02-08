@@ -55,9 +55,9 @@ struct VolumeProgressBar: View {
                         .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     } else {
                         (
-                            Text(Formatters.formatVolume(currentVolume))
+                            Text(Formatters.formatVolume(themeManager.displayWeight(currentVolume)))
                                 .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
-                            + Text(" kg")
+                            + Text(" \(themeManager.weightUnit.displayName)")
                                 .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
                         )
                         .foregroundStyle(themeManager.effectiveTheme.primaryText)
@@ -93,7 +93,7 @@ struct VolumeProgressBar: View {
                         .font(themeManager.effectiveTheme.interFont(size: 12))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 } else {
-                    Text("\(targetLabel): \(Formatters.formatVolume(targetVolume))")
+                    Text("\(targetLabel): \(Formatters.formatVolume(themeManager.displayWeight(targetVolume))) \(themeManager.weightUnit.displayName)")
                         .font(themeManager.effectiveTheme.interFont(size: 12))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
@@ -107,7 +107,8 @@ struct VolumeProgressBar: View {
                             .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(progressColor)
                     } else {
-                        Text(delta > 0 ? "+\(Formatters.formatVolume(delta))" : "\(Formatters.formatVolume(delta))")
+                        let displayDelta = themeManager.displayWeight(delta)
+                        Text(delta > 0 ? "+\(Formatters.formatVolume(displayDelta))" : "\(Formatters.formatVolume(displayDelta))")
                             .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(progressColor)
                     }

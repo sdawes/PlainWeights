@@ -886,7 +886,7 @@ struct InlineProgressChart: View {
                         lineLegendItem(color: themeManager.effectiveTheme.chartColor2.opacity(0.6), label: "Trend", isDashed: false)
                     }
                 } else {
-                    lineLegendItem(color: themeManager.effectiveTheme.chartColor1, label: "Max Weight (kg)", isDashed: false)
+                    lineLegendItem(color: themeManager.effectiveTheme.chartColor1, label: "Max Weight (\(themeManager.weightUnit.displayName))", isDashed: false)
                     lineLegendItem(color: themeManager.effectiveTheme.chartColor2, label: "Max Reps", isDashed: true)
                     if showTrendLine, cachedState.regressionSlope != nil {
                         lineLegendItem(color: themeManager.effectiveTheme.chartColor1.opacity(0.6), label: "Trend", isDashed: false)
@@ -900,7 +900,7 @@ struct InlineProgressChart: View {
                         lineLegendItem(color: themeManager.effectiveTheme.chartColor4.opacity(0.6), label: "Trend", isDashed: false)
                     }
                 } else {
-                    lineLegendItem(color: themeManager.effectiveTheme.chartColor3, label: "Volume (kg)", isDashed: false)
+                    lineLegendItem(color: themeManager.effectiveTheme.chartColor3, label: "Volume (\(themeManager.weightUnit.displayName))", isDashed: false)
                     if showTrendLine, cachedState.volumeRegressionSlope != nil {
                         lineLegendItem(color: themeManager.effectiveTheme.chartColor3.opacity(0.6), label: "Trend", isDashed: false)
                     }

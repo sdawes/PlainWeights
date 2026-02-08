@@ -41,9 +41,9 @@ struct TodaySessionCard: View {
                         // Running total (bold styling)
                         if isWeightedExercise {
                             (
-                                Text(Formatters.formatVolume(volume))
+                                Text(Formatters.formatVolume(themeManager.displayWeight(volume)))
                                     .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
-                                + Text(" kg")
+                                + Text(" \(themeManager.weightUnit.displayName)")
                                     .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
                             )
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)

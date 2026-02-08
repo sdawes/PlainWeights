@@ -61,6 +61,22 @@ enum Formatters {
         }
     }
 
+    /// Format weight value in specified unit with unit suffix (e.g., "100 kg" or "220 lbs")
+    /// - Parameters:
+    ///   - kg: Weight value in kilograms (storage unit)
+    ///   - unit: The unit to display in
+    /// - Returns: Formatted string with unit suffix
+    static func formatWeightWithUnit(_ kg: Double, unit: WeightUnit) -> String {
+        let displayValue = unit.fromKg(kg)
+        return "\(formatWeight(displayValue)) \(unit.displayName)"
+    }
+
+    /// Format volume value in specified unit with unit suffix (e.g., "1,250 kg" or "2,756 lbs")
+    static func formatVolumeWithUnit(_ kg: Double, unit: WeightUnit) -> String {
+        let displayValue = unit.fromKg(kg)
+        return "\(formatVolume(displayValue)) \(unit.displayName)"
+    }
+
     // MARK: - Relative Date Formatting
 
     /// Cached relative date formatter
@@ -187,17 +203,19 @@ enum Formatters {
     }
     
     // MARK: - Progress Text Formatting
-    
+
     /// Format delta text with percentage and comparison date
     static func formatDeltaText(
         todayVolume: Double,
-        lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int, isDropSet: Bool, isPauseAtTop: Bool, isTimedSet: Bool, tempoSeconds: Int, isPB: Bool)?
+        lastCompletedDayInfo: (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int, isDropSet: Bool, isPauseAtTop: Bool, isTimedSet: Bool, tempoSeconds: Int, isPB: Bool)?,
+        unit: WeightUnit = .kg
     ) -> String {
         guard let lastInfo = lastCompletedDayInfo else {
             return "Baseline day"
         }
 
         let delta = todayVolume - lastInfo.volume
+        let displayDelta = unit.fromKg(delta)
         let sign = delta >= 0 ? "+" : ""
         let dateFormatted = formatDeltaDate(lastInfo.date)
 
@@ -210,6 +228,6 @@ enum Formatters {
             percentPart = ""
         }
 
-        return "\(sign)\(formatVolume(delta)) kg\(percentPart) vs \(dateFormatted)"
+        return "\(sign)\(formatVolume(displayDelta)) \(unit.displayName)\(percentPart) vs \(dateFormatted)"
     }
 }

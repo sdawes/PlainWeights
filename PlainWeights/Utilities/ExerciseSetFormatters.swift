@@ -11,17 +11,19 @@ enum ExerciseSetFormatters {
 
     // MARK: - Set Display Formatting
 
-    /// Format a single exercise set - always shows "XX kg x YY reps" format
-    static func formatSet(_ set: ExerciseSet) -> String {
-        // Always show full format: "XX kg x YY reps" (even when 0)
-        return "\(Formatters.formatWeight(set.weight)) kg × \(set.reps) reps"
+    /// Format a single exercise set - always shows "XX kg/lbs x YY reps" format
+    static func formatSet(_ set: ExerciseSet, unit: WeightUnit) -> String {
+        // Always show full format: "XX kg/lbs x YY reps" (even when 0)
+        let displayWeight = unit.fromKg(set.weight)
+        return "\(Formatters.formatWeight(displayWeight)) \(unit.displayName) × \(set.reps) reps"
     }
 
-    /// Format last max weight display - always shows weight in kg
-    /// The "Last max weight" field should always display kg, never reps
-    static func formatLastMaxWeight(weight: Double, reps: Int) -> String {
-        // Always show weight in kg format, regardless of exercise type
-        return "\(Formatters.formatWeight(weight)) kg"
+    /// Format last max weight display - always shows weight in current unit
+    /// The "Last max weight" field should always display weight, never reps
+    static func formatLastMaxWeight(weight: Double, reps: Int, unit: WeightUnit) -> String {
+        // Always show weight in current unit format, regardless of exercise type
+        let displayWeight = unit.fromKg(weight)
+        return "\(Formatters.formatWeight(displayWeight)) \(unit.displayName)"
     }
 
     /// Format the max weight details line
@@ -30,21 +32,23 @@ enum ExerciseSetFormatters {
         return "\(reps) reps • \(sets) sets"
     }
 
-    /// Format session total - always in kg for consistency
-    static func formatSessionTotal(volume: Double, exerciseType: ExerciseMetricsType) -> String {
-        return "\(Formatters.formatVolume(volume)) kg"
+    /// Format session total - in current unit for consistency
+    static func formatSessionTotal(volume: Double, exerciseType: ExerciseMetricsType, unit: WeightUnit) -> String {
+        let displayVolume = unit.fromKg(volume)
+        return "\(Formatters.formatVolume(displayVolume)) \(unit.displayName)"
     }
 
-    /// Format progress display value - always in kg for consistency
-    static func formatProgressValue(volume: Double, exerciseType: ExerciseMetricsType) -> String {
-        return "\(Formatters.formatVolume(volume)) kg"
+    /// Format progress display value - in current unit for consistency
+    static func formatProgressValue(volume: Double, exerciseType: ExerciseMetricsType, unit: WeightUnit) -> String {
+        let displayVolume = unit.fromKg(volume)
+        return "\(Formatters.formatVolume(displayVolume)) \(unit.displayName)"
     }
 
     // MARK: - Historic Set Display
 
     /// Format historic set for list display with warm-up indicator
-    static func formatHistoricSet(_ set: ExerciseSet) -> String {
-        let baseFormat = formatSet(set)
+    static func formatHistoricSet(_ set: ExerciseSet, unit: WeightUnit) -> String {
+        let baseFormat = formatSet(set, unit: unit)
         return set.isWarmUp ? "\(baseFormat) (warm-up)" : baseFormat
     }
 

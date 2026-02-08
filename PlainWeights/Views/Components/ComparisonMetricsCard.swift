@@ -225,7 +225,7 @@ struct ComparisonMetricsCard: View {
                 HStack(spacing: 0) {
                     metricColumn(
                         label: comparisonMode == .lastSession ? "Max Weight" : "Weight",
-                        value: Formatters.formatWeight(metrics.maxWeight)
+                        value: Formatters.formatWeight(themeManager.displayWeight(metrics.maxWeight))
                     )
                     metricColumn(
                         label: "Reps",
@@ -233,7 +233,7 @@ struct ComparisonMetricsCard: View {
                     )
                     metricColumn(
                         label: "Total",
-                        value: Formatters.formatVolume(metrics.totalVolume)
+                        value: Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume))
                     )
                 }
                 .padding(.vertical, 12)
@@ -298,7 +298,7 @@ struct ComparisonMetricsCard: View {
         Group {
             if hasTodaySets, let direction = direction, let value = value, direction != .same {
                 // Up or down - colored background with white text
-                let displayValue = isReps ? "\(Int(value))" : Formatters.formatWeight(value)
+                let displayValue = isReps ? "\(Int(value))" : Formatters.formatWeight(themeManager.displayWeight(value))
                 let prefix = direction == .up ? "+" : ""
                 HStack {
                     Text("\(prefix)\(displayValue)")

@@ -19,7 +19,7 @@ struct TodaySetsSectionView: View {
     var body: some View {
         ForEach(todaySets, id: \.persistentModelID) { set in
             HStack(alignment: .bottom) {
-                Text(ExerciseSetFormatters.formatSet(set))
+                Text(ExerciseSetFormatters.formatSet(set, unit: themeManager.weightUnit))
                     .font(themeManager.effectiveTheme.bodyFont)
                     .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
 

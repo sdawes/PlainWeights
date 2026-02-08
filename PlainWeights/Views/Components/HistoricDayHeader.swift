@@ -38,9 +38,9 @@ struct HistoricDayHeader: View {
                 HStack(spacing: 6) {
                     if isWeightedDay {
                         HStack(spacing: 2) {
-                            Text(Formatters.formatVolume(volume))
+                            Text(Formatters.formatVolume(themeManager.displayWeight(volume)))
                                 .font(themeManager.effectiveTheme.dataFont(size: 13, weight: .semibold))
-                            Text("kg")
+                            Text(themeManager.weightUnit.displayName)
                                 .font(themeManager.effectiveTheme.dataFont(size: 13))
                         }
                     } else {

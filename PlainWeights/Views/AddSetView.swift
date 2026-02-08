@@ -127,6 +127,7 @@ struct AddSetView: View {
     @State private var weightText = ""
     @State private var repsText = ""
     @State private var selectedType: SetTypeOption? = nil
+    @State private var hasConvertedInitialWeight = false
     @FocusState private var focusedField: Field?
     @AppStorage("lastEditedSetField") private var lastEditedField: String = "weight"
 
@@ -187,7 +188,7 @@ struct AddSetView: View {
                 HStack(spacing: 16) {
                 // Weight input
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Weight (kg)")
+                    Text("Weight (\(themeManager.weightUnit.displayName))")
                         .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
@@ -276,6 +277,14 @@ struct AddSetView: View {
         .padding(24)
         .background(themeManager.effectiveTheme.background)
         .onAppear {
+            // Convert initial weight from kg to display unit (only once)
+            if !hasConvertedInitialWeight {
+                if let kgValue = Double(weightText), kgValue > 0 {
+                    let displayValue = themeManager.displayWeight(kgValue)
+                    weightText = Formatters.formatWeight(displayValue)
+                }
+                hasConvertedInitialWeight = true
+            }
             // Focus the last edited field
             focusedField = Field(rawValue: lastEditedField) ?? .weight
         }
@@ -298,12 +307,15 @@ struct AddSetView: View {
     }
 
     private func addSet() {
-        guard let (weight, reps) = ExerciseSetService.validateInput(
+        guard let (displayWeight, reps) = ExerciseSetService.validateInput(
             weightText: weightText,
             repsText: repsText
         ) else {
             return
         }
+
+        // Convert display weight back to kg for storage
+        let weight = themeManager.toKg(displayWeight)
 
         // Convert selectedType to boolean flags
         let isWarmUp = selectedType == .warmup

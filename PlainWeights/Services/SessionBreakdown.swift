@@ -57,15 +57,22 @@ enum SessionBreakdown {
 struct WeightGroup {
     let weight: Double
     let reps: [Int]
-    
+
+    /// Get description with default kg unit (use description(unit:) for dynamic units)
     var description: String {
+        return description(unit: .kg)
+    }
+
+    /// Get description with specified unit
+    func description(unit: WeightUnit) -> String {
         let repsString = reps.map(String.init).joined(separator: ", ")
         let setCount = reps.count
-        
+        let displayWeight = unit.fromKg(weight)
+
         if setCount == 1 {
-            return "1 set × \(Formatters.formatWeight(weight)) kg (\(repsString) reps)"
+            return "1 set × \(Formatters.formatWeight(displayWeight)) \(unit.displayName) (\(repsString) reps)"
         } else {
-            return "\(setCount) sets × \(Formatters.formatWeight(weight)) kg (\(repsString) reps)"
+            return "\(setCount) sets × \(Formatters.formatWeight(displayWeight)) \(unit.displayName) (\(repsString) reps)"
         }
     }
 }

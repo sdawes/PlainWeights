@@ -169,7 +169,7 @@ struct SessionSummaryView: View {
                 Rectangle()
                     .fill(themeManager.effectiveTheme.borderColor)
                     .frame(width: 1)
-                metricCell(label: "Volume", value: "\(Formatters.formatVolume(day.totalVolume)) kg")
+                metricCell(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(day.totalVolume))) \(themeManager.weightUnit.displayName)")
             }
 
             // Divider between rows
@@ -507,10 +507,10 @@ struct SessionSummaryView: View {
 
                     // Value with inline deltas: "45 kg -5.5 × 10 +2"
                     (
-                        Text(Formatters.formatWeight(weight))
+                        Text(Formatters.formatWeight(themeManager.displayWeight(weight)))
                             .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                        + Text(" kg")
+                        + Text(" \(themeManager.weightUnit.displayName)")
                             .font(themeManager.effectiveTheme.dataFont(size: 14))
                             .foregroundStyle(.secondary)
                         + Text(weightDelta.flatMap { $0 != 0 ? " \(formatWeightDelta($0))" : nil } ?? "")
@@ -642,10 +642,10 @@ struct SessionSummaryView: View {
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                     // Value with inline delta: "1,250 kg +150"
                     (
-                        Text(Formatters.formatVolume(volume))
+                        Text(Formatters.formatVolume(themeManager.displayWeight(volume)))
                             .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                        + Text(" kg")
+                        + Text(" \(themeManager.weightUnit.displayName)")
                             .font(themeManager.effectiveTheme.dataFont(size: 14))
                             .foregroundStyle(.secondary)
                         + Text(volumeDelta.flatMap { $0 != 0 ? " \(formatVolumeDelta($0))" : nil } ?? "")
@@ -678,7 +678,7 @@ struct SessionSummaryView: View {
     private func formatWeightDelta(_ delta: Double) -> String {
         if delta == 0 { return "" }
         let sign = delta > 0 ? "+" : ""
-        return "\(sign)\(Formatters.formatWeight(delta))"
+        return "\(sign)\(Formatters.formatWeight(themeManager.displayWeight(delta)))"
     }
 
     private func formatRepsDelta(_ delta: Int) -> String {
@@ -690,7 +690,7 @@ struct SessionSummaryView: View {
     private func formatVolumeDelta(_ delta: Double) -> String {
         if delta == 0 { return "" }
         let sign = delta > 0 ? "+" : ""
-        return "\(sign)\(Formatters.formatVolume(delta))"
+        return "\(sign)\(Formatters.formatVolume(themeManager.displayWeight(delta)))"
     }
 
     private func deltaColor(_ value: Double) -> Color {

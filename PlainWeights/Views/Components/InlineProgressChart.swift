@@ -80,6 +80,12 @@ struct CachedChartState {
     let repsRange: (min: Int, max: Int)
     let volumeRange: (min: Double, max: Double)
     let totalRepsRange: (min: Int, max: Int)
+    // Linear regression for weight trend line
+    let regressionSlope: Double?
+    let regressionIntercept: Double?
+    // Linear regression for volume trend line
+    let volumeRegressionSlope: Double?
+    let volumeRegressionIntercept: Double?
 
     static let empty = CachedChartState(
         dataPoints: [],
@@ -87,7 +93,11 @@ struct CachedChartState {
         weightRange: (min: 0, max: 100),
         repsRange: (min: 0, max: 10),
         volumeRange: (min: 0, max: 100),
-        totalRepsRange: (min: 0, max: 10)
+        totalRepsRange: (min: 0, max: 10),
+        regressionSlope: nil,
+        regressionIntercept: nil,
+        volumeRegressionSlope: nil,
+        volumeRegressionIntercept: nil
     )
 }
 
@@ -106,6 +116,9 @@ struct InlineProgressChart: View {
     // Chart mode selection - Max (default) shows max weight/reps, Volume shows total
     @State private var chartMode: ChartMode = .max
 
+    // Trend line toggle
+    @State private var showTrendLine: Bool = true
+
     // Cached chart state - computed on init to prevent layout shift
     @State private var cachedState: CachedChartState
 
@@ -113,6 +126,47 @@ struct InlineProgressChart: View {
         self.sets = sets
         // Compute chart state during init to prevent layout shift on appear
         _cachedState = State(initialValue: Self.computeChartState(from: sets, timeRange: .sixMonths))
+    }
+
+    // MARK: - Linear Regression
+
+    /// Calculate linear regression for normalized weight values
+    /// Returns (slope, intercept) for y = slope * x + intercept
+    private static func calculateLinearRegression(points: [ChartDataPoint]) -> (slope: Double, intercept: Double)? {
+        guard points.count >= 2 else { return nil }
+
+        let n = Double(points.count)
+        let sumX = points.enumerated().reduce(0.0) { $0 + Double($1.offset) }
+        let sumY = points.reduce(0.0) { $0 + $1.normalizedWeight }
+        let sumXY = points.enumerated().reduce(0.0) { $0 + Double($1.offset) * $1.element.normalizedWeight }
+        let sumX2 = points.enumerated().reduce(0.0) { $0 + Double($1.offset) * Double($1.offset) }
+
+        let denominator = n * sumX2 - sumX * sumX
+        guard denominator != 0 else { return nil }
+
+        let slope = (n * sumXY - sumX * sumY) / denominator
+        let intercept = (sumY - slope * sumX) / n
+
+        return (slope, intercept)
+    }
+
+    /// Calculate linear regression for normalized volume values
+    private static func calculateVolumeRegression(points: [ChartDataPoint]) -> (slope: Double, intercept: Double)? {
+        guard points.count >= 2 else { return nil }
+
+        let n = Double(points.count)
+        let sumX = points.enumerated().reduce(0.0) { $0 + Double($1.offset) }
+        let sumY = points.reduce(0.0) { $0 + $1.normalizedVolume }
+        let sumXY = points.enumerated().reduce(0.0) { $0 + Double($1.offset) * $1.element.normalizedVolume }
+        let sumX2 = points.enumerated().reduce(0.0) { $0 + Double($1.offset) * Double($1.offset) }
+
+        let denominator = n * sumX2 - sumX * sumX
+        guard denominator != 0 else { return nil }
+
+        let slope = (n * sumXY - sumX * sumY) / denominator
+        let intercept = (sumY - slope * sumX) / n
+
+        return (slope, intercept)
     }
 
     // MARK: - Data Transformation
@@ -255,13 +309,22 @@ struct InlineProgressChart: View {
         let displayVolumeRange = (min: max(0, volumeMin - volumePadding), max: volumeMax + volumePadding)
         let displayTotalRepsRange = (min: max(0, Int(totalRepsMin) - Int(totalRepsPadding)), max: Int(totalRepsMax) + Int(totalRepsPadding))
 
+        // Calculate linear regression for weight trend line (only if not reps-only)
+        let regression = isRepsOnly ? nil : calculateLinearRegression(points: dataPoints)
+        // Calculate linear regression for volume trend line (only if not reps-only)
+        let volumeRegression = isRepsOnly ? nil : calculateVolumeRegression(points: dataPoints)
+
         return CachedChartState(
             dataPoints: dataPoints,
             isRepsOnly: isRepsOnly,
             weightRange: displayWeightRange,
             repsRange: displayRepsRange,
             volumeRange: displayVolumeRange,
-            totalRepsRange: displayTotalRepsRange
+            totalRepsRange: displayTotalRepsRange,
+            regressionSlope: regression?.slope,
+            regressionIntercept: regression?.intercept,
+            volumeRegressionSlope: volumeRegression?.slope,
+            volumeRegressionIntercept: volumeRegression?.intercept
         )
     }
 
@@ -314,7 +377,7 @@ struct InlineProgressChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Pickers row (Mode + Time Range)
+            // Pickers row (Mode + Trend Toggle + Time Range)
             HStack {
                 // Mode toggle (Max vs Volume)
                 Picker("Mode", selection: $chartMode) {
@@ -326,6 +389,26 @@ struct InlineProgressChart: View {
                 .frame(width: 120)
 
                 Spacer()
+
+                // Trend line toggle button
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showTrendLine.toggle()
+                    }
+                } label: {
+                    Image(systemName: "line.diagonal")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(showTrendLine ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.mutedForeground)
+                        .frame(width: 28, height: 28)
+                        .background(showTrendLine ? themeManager.effectiveTheme.borderColor : themeManager.effectiveTheme.cardBackgroundColor)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
+                .padding(.trailing, 5)
 
                 // Time range picker
                 Picker("Time Range", selection: $selectedTimeRange) {
@@ -554,6 +637,26 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.effectiveTheme.chartColor2)
                 .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
                 .interpolationMethod(.monotone)
+
+                // Linear regression trend line (only draw at first and last points)
+                if showTrendLine,
+                   let slope = cachedState.regressionSlope,
+                   let intercept = cachedState.regressionIntercept,
+                   cachedState.dataPoints.count >= 2 {
+                    let lastIndex = cachedState.dataPoints.count - 1
+                    if point.index == 0 || point.index == lastIndex {
+                        let trendY = slope * Double(point.index) + intercept
+                        // Clamp to chart bounds
+                        let clampedY = max(0, min(1, trendY))
+                        LineMark(
+                            x: .value("Index", point.index),
+                            y: .value("Trend", clampedY),
+                            series: .value("Type", "Trend")
+                        )
+                        .foregroundStyle(themeManager.effectiveTheme.chartColor1.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1.5))
+                    }
+                }
             }
 
             // PB indicator: vertical line through the point + star at top
@@ -639,6 +742,26 @@ struct InlineProgressChart: View {
                 .foregroundStyle(themeManager.effectiveTheme.chartColor3)
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
+
+                // Linear regression trend line for volume (only draw at first and last points)
+                if showTrendLine,
+                   let slope = cachedState.volumeRegressionSlope,
+                   let intercept = cachedState.volumeRegressionIntercept,
+                   cachedState.dataPoints.count >= 2 {
+                    let lastIndex = cachedState.dataPoints.count - 1
+                    if point.index == 0 || point.index == lastIndex {
+                        let trendY = slope * Double(point.index) + intercept
+                        // Clamp to chart bounds
+                        let clampedY = max(0, min(1, trendY))
+                        LineMark(
+                            x: .value("Index", point.index),
+                            y: .value("VolumeTrend", clampedY),
+                            series: .value("Type", "VolumeTrend")
+                        )
+                        .foregroundStyle(themeManager.effectiveTheme.chartColor3.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1.5))
+                    }
+                }
             }
             // Note: PB indicator intentionally omitted in Volume mode
             // PB is based on max weight/reps per set, not total session volume
@@ -666,6 +789,9 @@ struct InlineProgressChart: View {
                 } else {
                     lineLegendItem(color: themeManager.effectiveTheme.chartColor1, label: "Max Weight (kg)", isDashed: false)
                     lineLegendItem(color: themeManager.effectiveTheme.chartColor2, label: "Max Reps", isDashed: true)
+                    if showTrendLine, cachedState.regressionSlope != nil {
+                        lineLegendItem(color: themeManager.effectiveTheme.chartColor1.opacity(0.6), label: "Trend", isDashed: false)
+                    }
                 }
             } else {
                 // Volume mode legend (line chart)
@@ -673,6 +799,9 @@ struct InlineProgressChart: View {
                     lineLegendItem(color: themeManager.effectiveTheme.chartColor4, label: "Total Reps", isDashed: false)
                 } else {
                     lineLegendItem(color: themeManager.effectiveTheme.chartColor3, label: "Volume (kg)", isDashed: false)
+                    if showTrendLine, cachedState.volumeRegressionSlope != nil {
+                        lineLegendItem(color: themeManager.effectiveTheme.chartColor3.opacity(0.6), label: "Trend", isDashed: false)
+                    }
                 }
             }
         }

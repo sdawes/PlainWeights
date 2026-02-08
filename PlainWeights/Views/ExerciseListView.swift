@@ -53,7 +53,6 @@ struct FilteredExerciseListView: View {
     @State private var showingSummary = false
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
-    @State private var showingTagAnalytics = false
 
     @State private var exerciseToDelete: Exercise?
 
@@ -216,14 +215,6 @@ struct FilteredExerciseListView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showingTagAnalytics = true } label: {
-                    Image(systemName: "tag")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundStyle(themeManager.effectiveTheme.textColor)
-                }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showingSettings = true } label: {
                     Image(systemName: "gearshape")
                         .font(.body)
@@ -265,10 +256,6 @@ struct FilteredExerciseListView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
-                .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        }
-        .sheet(isPresented: $showingTagAnalytics) {
-            TagAnalyticsView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .alert("Delete Exercise", isPresented: Binding(

@@ -259,7 +259,7 @@ struct SessionSummaryView: View {
     private var exercisesHeader: some View {
         HStack(spacing: 6) {
             Text("Exercises")
-                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                .font(themeManager.effectiveTheme.interFont(size: 17, weight: .medium))
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             InfoButton(text: "Delta values show the difference compared to your last session for each exercise.")
         }
@@ -296,9 +296,6 @@ struct SessionSummaryView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header with exercise name and duration
             HStack(spacing: 8) {
-                Image(systemName: "dumbbell.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Text(workoutExercise.exercise.name)
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)

@@ -178,6 +178,7 @@ struct ExerciseDetailView: View {
                     }
                 }
             }
+            .id("comparisonButtons")
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
@@ -305,6 +306,14 @@ struct ExerciseDetailView: View {
                 }
             }
 
+            // Bottom spacer to allow scrolling latest set lower on screen
+            Section {
+                Spacer()
+                    .frame(height: 300)
+            }
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+
         }
         .listStyle(.plain)
         .scrollIndicators(.hidden)
@@ -416,9 +425,9 @@ struct ExerciseDetailView: View {
             updateCachedData()
             // Scroll to show latest set when a new set is added
             if todaySets.count > oldCount {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        scrollProxy.scrollTo("latestSet", anchor: .center)
+                        scrollProxy.scrollTo("comparisonButtons", anchor: .top)
                     }
                 }
             }

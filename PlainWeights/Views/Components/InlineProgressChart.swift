@@ -127,7 +127,7 @@ struct InlineProgressChart: View {
     @State private var chartMode: ChartMode = .max
 
     // Trend line toggle
-    @State private var showTrendLine: Bool = true
+    @State private var showTrendLine: Bool = false
 
     // Cached chart state - computed on init to prevent layout shift
     @State private var cachedState: CachedChartState
@@ -711,7 +711,7 @@ struct InlineProgressChart: View {
                     series: .value("Type", "Reps")
                 )
                 .foregroundStyle(themeManager.effectiveTheme.chartColor2)
-                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
+                .lineStyle(StrokeStyle(lineWidth: 1.0, dash: [5, 3]))
                 .interpolationMethod(.monotone)
 
                 // Linear regression trend line (only draw at first and last points)

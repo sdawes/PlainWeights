@@ -152,7 +152,7 @@ enum AppTheme: String, CaseIterable {
     /// Quaternary chart color (for total reps in volume mode - reps-only exercises)
     var chartColor4: Color {
         switch self {
-        case .light, .system: return Color(red: 0.55, green: 0.78, blue: 0.25)  // Lime green
+        case .light, .system: return Color(red: 0.20, green: 0.40, blue: 0.75)  // Deep blue
         case .dark: return Color(red: 0.95, green: 0.85, blue: 0.55)   // Pastel yellow
         }
     }

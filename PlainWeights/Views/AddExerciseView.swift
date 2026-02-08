@@ -16,6 +16,7 @@ struct AddExerciseView: View {
     @State private var name = ""
     @State private var tags: [String] = []
     @State private var tagInput = ""
+    @State private var isDuplicateName: Bool = false
     @FocusState private var nameFieldFocused: Bool
     @FocusState private var tagFieldFocused: Bool
 
@@ -105,6 +106,15 @@ struct AddExerciseView: View {
                 .onSubmit {
                     tagFieldFocused = true
                 }
+                .onChange(of: name) { _, _ in
+                    checkForDuplicate()
+                }
+
+            if isDuplicateName {
+                Text("An exercise with this name already exists")
+                    .font(themeManager.effectiveTheme.captionFont)
+                    .foregroundStyle(.red)
+            }
         }
     }
 
@@ -169,20 +179,29 @@ struct AddExerciseView: View {
     // MARK: - Add Button
 
     private var addButton: some View {
-        Button(action: saveExercise) {
+        let isDisabled = name.isEmpty || isDuplicateName
+        return Button(action: saveExercise) {
             Text(isEditMode ? "Save Changes" : "Add Exercise")
                 .font(themeManager.effectiveTheme.headlineFont)
                 .foregroundStyle(themeManager.effectiveTheme.background)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(name.isEmpty ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
+                .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
-        .disabled(name.isEmpty)
+        .disabled(isDisabled)
     }
 
     // MARK: - Actions
+
+    private func checkForDuplicate() {
+        isDuplicateName = ExerciseService.nameExists(
+            name,
+            excluding: exerciseToEdit,
+            context: modelContext
+        )
+    }
 
     private func addTag() {
         let trimmed = tagInput.trimmingCharacters(in: .whitespaces).lowercased()

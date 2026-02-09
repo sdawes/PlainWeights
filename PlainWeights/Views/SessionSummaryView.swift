@@ -292,16 +292,16 @@ struct SessionSummaryView: View {
     private func exerciseCard(for workoutExercise: ExerciseDataGrouper.WorkoutExercise, displayedDay: Date) -> some View {
         let hasPB = workoutExercise.sets.contains { $0.isPB }
         let workingSets = workoutExercise.sets.workingSets
-        let maxSet = workingSets.max(by: { $0.weight < $1.weight })
         let exerciseDuration = SessionStatsCalculator.getExerciseDurationMinutes(from: workoutExercise.sets)
         let exerciseAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: workoutExercise.sets)
 
         // Current session values
-        let currentMaxWeight = maxSet?.weight ?? 0
-        // For weighted exercises: reps from the heaviest set
+        // Find max weight first
+        let currentMaxWeight = workingSets.map { $0.weight }.max() ?? 0
+        // For weighted exercises: max reps at the max weight
         // For reps-only exercises: actual max reps across all sets
         let currentMaxReps = currentMaxWeight > 0
-            ? (maxSet?.reps ?? 0)
+            ? (workingSets.filter { $0.weight == currentMaxWeight }.map { $0.reps }.max() ?? 0)
             : (workingSets.map { $0.reps }.max() ?? 0)
         let currentVolume = workoutExercise.volume
 
@@ -435,12 +435,12 @@ struct SessionSummaryView: View {
             }
 
             // Calculate metrics
-            let maxSet = previousDaySets.max(by: { $0.weight < $1.weight })
-            let maxWeight = maxSet?.weight ?? 0
-            // For weighted exercises: reps from the heaviest set
+            // Find max weight first
+            let maxWeight = previousDaySets.map { $0.weight }.max() ?? 0
+            // For weighted exercises: max reps at the max weight
             // For reps-only exercises: actual max reps across all sets
             let maxReps = maxWeight > 0
-                ? (maxSet?.reps ?? 0)
+                ? (previousDaySets.filter { $0.weight == maxWeight }.map { $0.reps }.max() ?? 0)
                 : (previousDaySets.map { $0.reps }.max() ?? 0)
             let volume = previousDaySets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
 

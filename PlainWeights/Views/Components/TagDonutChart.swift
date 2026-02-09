@@ -89,7 +89,7 @@ struct TagDonutChart: View {
                         if item.percentage >= minPercentageForLabel {
                             let internalPos = position(center: center, radius: ringMidRadius, angleDegrees: angles.midAngle)
                             Text(String(format: "%.0f%%", item.percentage))
-                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .font(.system(size: 10, weight: .regular))
                                 .foregroundStyle(.white)
                                 .position(internalPos)
                         }

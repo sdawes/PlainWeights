@@ -8,6 +8,11 @@
 import SwiftUI
 import SwiftData
 
+// Navigation destination type for Session Summary
+enum SessionDestination: Hashable {
+    case summary
+}
+
 struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allExercises: [Exercise]
@@ -20,6 +25,12 @@ struct ExerciseListView: View {
             filteredListView
                 .navigationDestination(for: Exercise.self) { exercise in
                     ExerciseDetailView(exercise: exercise)
+                }
+                .navigationDestination(for: SessionDestination.self) { destination in
+                    switch destination {
+                    case .summary:
+                        SessionSummaryView()
+                    }
                 }
         }
     }
@@ -50,7 +61,6 @@ struct FilteredExerciseListView: View {
     @Binding var showingAddExercise: Bool
     @Binding var navigationPath: NavigationPath
     let searchText: String
-    @State private var showingSummary = false
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
 
@@ -227,7 +237,7 @@ struct FilteredExerciseListView: View {
                     if allSets.isEmpty {
                         showingNoSessionAlert = true
                     } else {
-                        showingSummary = true
+                        navigationPath.append(SessionDestination.summary)
                     }
                 } label: {
                     Image(systemName: "star")
@@ -249,10 +259,6 @@ struct FilteredExerciseListView: View {
                 navigationPath.append(newExercise)
             }
             .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        }
-        .sheet(isPresented: $showingSummary) {
-            SessionSummaryView()
-                .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()

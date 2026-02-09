@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 
 struct SessionSummaryView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     @Query private var allSets: [ExerciseSet]
@@ -22,12 +21,6 @@ struct SessionSummaryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            headerView
-                .padding(.horizontal, 24)
-                .padding(.top, 24)
-                .padding(.bottom, 16)
-
             if let day = cachedDisplayDay {
                 List {
                     // Session info card
@@ -49,7 +42,7 @@ struct SessionSummaryView: View {
                                 .padding(.bottom, 4)
                                 .padding(.leading, 8)
 
-                            TagDonutChart(data: tagDistribution)
+                            TagDistributionBar(data: tagDistribution)
                                 .frame(maxWidth: .infinity)
                         }
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
@@ -75,6 +68,7 @@ struct SessionSummaryView: View {
                 .listStyle(.plain)
                 .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
+                .contentMargins(.top, 12, for: .scrollContent)
             } else {
                 // Empty state
                 Spacer()
@@ -92,6 +86,8 @@ struct SessionSummaryView: View {
             }
         }
         .background(AnimatedGradientBackground())
+        .navigationTitle("Session Summary")
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             updateCaches()
         }
@@ -135,20 +131,6 @@ struct SessionSummaryView: View {
     }
 
     // MARK: - View Components
-
-    private var headerView: some View {
-        HStack {
-            Text("Session Summary")
-                .font(themeManager.effectiveTheme.title3Font)
-            Spacer()
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.title3)
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            }
-            .buttonStyle(.plain)
-        }
-    }
 
     @ViewBuilder
     private func sessionInfoCard(for day: ExerciseDataGrouper.WorkoutDay) -> some View {

@@ -54,8 +54,8 @@ struct TagAnalyticsView: View {
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    // Donut chart with labels
-                    TagDonutChart(data: tagDistribution)
+                    // Distribution bar chart
+                    TagDistributionBar(data: tagDistribution)
                         .frame(maxWidth: .infinity)
 
                     // Color legend
@@ -75,7 +75,7 @@ struct TagAnalyticsView: View {
             ForEach(Array(tagDistribution.enumerated()), id: \.element.tag) { index, item in
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(TagDonutChart.color(for: index))
+                        .fill(TagDistributionBar.color(for: index))
                         .frame(width: 10, height: 10)
                     Text(item.tag)
                         .font(.system(size: 13, weight: .medium))

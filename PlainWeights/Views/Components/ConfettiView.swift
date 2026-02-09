@@ -102,6 +102,7 @@ struct PBCelebrationOverlay: View {
 
 extension Notification.Name {
     static let pbAchieved = Notification.Name("pbAchieved")
+    static let setDataChanged = Notification.Name("setDataChanged")
 }
 
 // MARK: - Preview

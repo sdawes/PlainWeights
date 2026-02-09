@@ -62,10 +62,10 @@ struct SetRowView: View {
                     // Col 2: PB indicator or spacer
                     if set.isPB {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 17))
+                            .font(.system(size: 16))
                             .foregroundStyle(themeManager.effectiveTheme.pbColor)
                             .frame(width: 24, alignment: .leading)
-                            .offset(x: -3)
+                            .offset(x: -4)
                     } else {
                         Spacer()
                             .frame(width: 24)
@@ -180,33 +180,44 @@ struct SetRowView: View {
         }
     }
 
-    /// Color for set number based on set type (uses model's setTypeColor)
+    /// Effective tint color - PB takes precedence over set type
+    private var effectiveTintColor: Color? {
+        if set.isPB {
+            return themeManager.effectiveTheme.pbColor
+        }
+        return set.setTypeColor
+    }
+
+    /// Color for set number based on set type (PB takes precedence)
     private var setNumberColor: Color {
-        self.set.setTypeColor ?? .secondary
+        effectiveTintColor ?? .secondary
     }
 
     /// Get the background view for set type with colored left border accent
     /// Mimics the staleness indicator pattern from ExerciseListView
+    /// PB styling takes precedence over other set types
     @ViewBuilder
     private var setTypeRowBackground: some View {
         HStack(spacing: 0) {
             Color.clear.frame(width: 16)  // Match list leading inset
-            if let tintColor = set.setTypeColor {
+            if let tintColor = effectiveTintColor {
                 Rectangle()
                     .fill(tintColor)
                     .frame(width: 2)
             }
             Rectangle()
-                .fill(set.setTypeColor?.opacity(0.05) ?? Color.clear)
+                .fill(effectiveTintColor?.opacity(set.isPB ? 0.08 : 0.05) ?? Color.clear)
         }
     }
 
-    /// Tinted background for special set types (warm-up, bonus, etc.)
+    /// Tinted background for special set types (warm-up, bonus, etc.) and PBs
     /// Shows colored left border + light fill, starting left of set number
+    /// PB styling takes precedence over other set types
     @ViewBuilder
     private var setTypeTintBackground: some View {
-        if let tintColor = set.setTypeColor {
-            let bgOpacity = set.isAssisted ? 0.05 : 0.1  // Lighter background for assisted
+        if let tintColor = effectiveTintColor {
+            // PB uses 0.08, assisted uses 0.05, others use 0.1
+            let bgOpacity = set.isPB ? 0.08 : (set.isAssisted ? 0.05 : 0.1)
             HStack(spacing: 0) {
                 Rectangle()
                     .fill(tintColor)

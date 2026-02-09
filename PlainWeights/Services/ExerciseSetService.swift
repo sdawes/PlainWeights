@@ -28,6 +28,15 @@ enum ExerciseSetService {
         }
     }
 
+    // MARK: - Data Change Notification
+
+    /// Post notification when set data changes (for live UI updates)
+    private static func notifySetDataChanged() {
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .setDataChanged, object: nil)
+        }
+    }
+
     // MARK: - Add Set
 
     /// Add a new exercise set to the database
@@ -83,6 +92,9 @@ enum ExerciseSetService {
 
         // Detect and mark PB after adding the set
         try detectAndMarkPB(for: set, exercise: exercise, context: context)
+
+        // Notify observers that set data changed
+        notifySetDataChanged()
     }
 
     // MARK: - Rest Time Capture
@@ -156,6 +168,9 @@ enum ExerciseSetService {
         if wasPB, let exercise = exercise {
             try recalculatePB(for: exercise, context: context)
         }
+
+        // Notify observers that set data changed
+        notifySetDataChanged()
     }
 
     /// Recalculate PB for an exercise after a PB set is deleted
@@ -244,6 +259,9 @@ enum ExerciseSetService {
         if let exercise = set.exercise {
             try detectAndMarkPB(for: set, exercise: exercise, context: context)
         }
+
+        // Notify observers that set data changed
+        notifySetDataChanged()
     }
 
     // MARK: - Toggle Warm-Up
@@ -263,6 +281,9 @@ enum ExerciseSetService {
         if let exercise = set.exercise {
             try detectAndMarkPB(for: set, exercise: exercise, context: context)
         }
+
+        // Notify observers that set data changed
+        notifySetDataChanged()
     }
 
     // MARK: - Toggle Drop Set
@@ -277,6 +298,9 @@ enum ExerciseSetService {
     ) throws {
         set.isDropSet.toggle()
         try context.save()
+
+        // Notify observers that set data changed
+        notifySetDataChanged()
     }
 
     // MARK: - PB Detection

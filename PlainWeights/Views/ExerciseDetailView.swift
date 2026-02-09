@@ -433,6 +433,11 @@ struct ExerciseDetailView: View {
             }
             previousTodaySetsCount = todaySets.count
         }
+        .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in
+            // Refresh when set properties change (warm-up, bonus, etc.)
+            // @Query doesn't always detect property changes within objects
+            updateCachedData()
+        }
         } // ScrollViewReader
     }
 

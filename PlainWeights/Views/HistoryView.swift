@@ -18,12 +18,38 @@ enum HistoryTimePeriod: String, CaseIterable {
 
 /// Aggregate metrics for a time period summary
 private struct PeriodMetrics {
-    let sessionCount: Int       // Unique workout days
+    let dayCount: Int           // Unique workout days
     let setCount: Int           // Working sets only
     let totalVolume: Double     // Sum of weight × reps
     let pbCount: Int            // Sets where isPB == true
 
-    static let empty = PeriodMetrics(sessionCount: 0, setCount: 0, totalVolume: 0, pbCount: 0)
+    static let empty = PeriodMetrics(dayCount: 0, setCount: 0, totalVolume: 0, pbCount: 0)
+}
+
+/// Lightweight exercise summary for period view
+private struct PeriodExerciseSummary: Identifiable {
+    let id: PersistentIdentifier
+    let name: String
+    let hasPB: Bool
+
+    init(from workoutExercise: ExerciseDataGrouper.WorkoutExercise) {
+        self.id = workoutExercise.id
+        self.name = workoutExercise.exercise.name
+        self.hasPB = workoutExercise.sets.workingSets.contains { $0.isPB }
+    }
+}
+
+/// Day summary for period view
+private struct PeriodDaySummary: Identifiable {
+    let id: Date
+    let date: Date
+    let exercises: [PeriodExerciseSummary]
+
+    init(from workoutDay: ExerciseDataGrouper.WorkoutDay) {
+        self.id = workoutDay.date
+        self.date = workoutDay.date
+        self.exercises = workoutDay.exercises.map { PeriodExerciseSummary(from: $0) }
+    }
 }
 
 struct HistoryView: View {
@@ -42,6 +68,12 @@ struct HistoryView: View {
 
     // Cached period metrics for summary view (Week/Month/Year/12 Mo)
     @State private var cachedPeriodMetrics: PeriodMetrics = .empty
+
+    // Cached workout days for period summary exercise list
+    @State private var cachedPeriodDays: [PeriodDaySummary] = []
+
+    // Pagination for period summary exercise list
+    @State private var visiblePeriodDaysCount: Int = 5
 
     var body: some View {
         VStack(spacing: 0) {
@@ -67,14 +99,40 @@ struct HistoryView: View {
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
+            // Always refresh when view becomes visible (handles navigation back)
             updateCaches()
         }
-        .onChange(of: allSets) { _, _ in
+        .onChange(of: dataChangeToken) { _, _ in
+            // Refresh when set properties change while view is visible
             updateCaches()
         }
         .onChange(of: selectedPeriod) { _, _ in
+            visiblePeriodDaysCount = 5  // Reset pagination when switching periods
             updateCaches()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in
+            // Refresh caches when sets are edited from any view
+            updateCaches()
+        }
+    }
+
+    // MARK: - Data Change Detection
+
+    /// Lightweight fingerprint that changes when any set property affecting calculations changes
+    /// This triggers cache refresh when sets are edited (not just added/removed)
+    private var dataChangeToken: Int {
+        var token = allSets.count
+        for set in allSets {
+            // Combine properties that affect volume, PB counts, and filtering
+            // Using &+ for wrapping addition to avoid overflow
+            token = token &+ set.timestamp.hashValue
+            token = token &+ Int(set.weight * 10)  // Keep 1 decimal precision
+            token = token &+ set.reps
+            token = token &+ (set.isWarmUp ? 0x1000 : 0)
+            token = token &+ (set.isBonus ? 0x2000 : 0)
+            token = token &+ (set.isPB ? 0x4000 : 0)
+        }
+        return token
     }
 
     // MARK: - Last Session Detail View
@@ -131,6 +189,7 @@ struct HistoryView: View {
                 .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
                 .contentMargins(.top, 12, for: .scrollContent)
+                .id(selectedPeriod)  // Force scroll to top when period changes
             } else {
                 // Empty state
                 Spacer()
@@ -152,19 +211,62 @@ struct HistoryView: View {
 
     @ViewBuilder
     private var periodSummaryView: some View {
-        if cachedPeriodMetrics.sessionCount > 0 {
+        if cachedPeriodMetrics.dayCount > 0 {
             List {
+                // Summary card section
                 Section {
                     periodSummaryCard
                 }
                 .listRowInsets(EdgeInsets(top: 24, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
+
+                // Exercise list by day (paginated)
+                let visibleDays = Array(cachedPeriodDays.prefix(visiblePeriodDaysCount))
+                let hasMoreDays = cachedPeriodDays.count > visiblePeriodDaysCount
+                let remainingCount = cachedPeriodDays.count - visiblePeriodDaysCount
+
+                ForEach(visibleDays) { daySummary in
+                    Section {
+                        periodDayHeader(for: daySummary.date)
+
+                        ForEach(Array(daySummary.exercises.enumerated()), id: \.element.id) { index, exercise in
+                            periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0)
+                        }
+                    }
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
+
+                // "See more days" button when more history exists
+                if hasMoreDays {
+                    Section {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                visiblePeriodDaysCount += 10
+                            }
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Text("See more days (\(remainingCount) more)")
+                                    .font(themeManager.effectiveTheme.subheadlineFont)
+                                    .foregroundStyle(themeManager.effectiveTheme.primary)
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                        }
+                    }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
             }
             .listStyle(.plain)
             .scrollIndicators(.hidden)
             .scrollContentBackground(.hidden)
             .contentMargins(.top, 12, for: .scrollContent)
+            .id(selectedPeriod)  // Force scroll to top when period changes
         } else {
             // Empty state for period
             Spacer()
@@ -203,9 +305,9 @@ struct HistoryView: View {
                 .fill(themeManager.effectiveTheme.borderColor)
                 .frame(height: 1)
 
-            // Row 1: Sessions, Sets
+            // Row 1: Workout Days, Sets
             HStack(spacing: 0) {
-                metricCell(label: "Sessions", value: "\(cachedPeriodMetrics.sessionCount)")
+                metricCell(label: "Workout Days", value: "\(cachedPeriodMetrics.dayCount)")
                 Rectangle()
                     .fill(themeManager.effectiveTheme.borderColor)
                     .frame(width: 1)
@@ -260,6 +362,81 @@ struct HistoryView: View {
         }
     }
 
+    @ViewBuilder
+    private func periodDayHeader(for date: Date) -> some View {
+        HStack {
+            Text(date, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
+                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            Spacer()
+        }
+        .padding(.top, 20)
+        .padding(.bottom, 8)
+        .padding(.leading, 8)
+    }
+
+    @ViewBuilder
+    private func periodExerciseRow(number: Int, name: String, hasPB: Bool, isFirst: Bool) -> some View {
+        VStack(spacing: 0) {
+            // Divider at top (not for first row)
+            if !isFirst {
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(height: 1)
+                    .padding(.leading, 8)
+            }
+
+            HStack(spacing: 0) {
+                // Left spacer
+                Color.clear.frame(width: 8)
+
+                // Accent bar + content area
+                HStack(spacing: 0) {
+                    // Yellow accent bar for PB rows
+                    if hasPB {
+                        Rectangle()
+                            .fill(themeManager.effectiveTheme.pbColor)
+                            .frame(width: 3)
+                    } else {
+                        Color.clear.frame(width: 3)
+                    }
+
+                    HStack(spacing: 0) {
+                        // Number (styled like set rows)
+                        Text("\(number)")
+                            .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                            .frame(width: 20, alignment: .leading)
+                            .padding(.leading, 6)
+
+                        // Exercise name (regular weight, not bold)
+                        Text(name)
+                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .regular))
+                            .foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+                        Spacer()
+
+                        if hasPB {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 12))
+                                .foregroundStyle(themeManager.effectiveTheme.pbColor)
+                        }
+                    }
+                    .padding(.vertical, 6)
+                    .padding(.trailing, 8)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background {
+                    if hasPB {
+                        themeManager.effectiveTheme.pbColor.opacity(0.08)
+                    } else {
+                        Color.clear
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Cache Management
 
     /// Update all cached values - called on appear and when data/period changes
@@ -283,6 +460,9 @@ struct HistoryView: View {
             // Compute period summary metrics
             let filteredSets = Self.filterSets(allSets, for: selectedPeriod)
             cachedPeriodMetrics = Self.computePeriodMetrics(from: filteredSets)
+
+            // Compute workout days for exercise list
+            cachedPeriodDays = Self.computePeriodDays(from: filteredSets)
         }
     }
 
@@ -327,7 +507,7 @@ struct HistoryView: View {
         let pbs = workingSets.filter { $0.isPB }.count
 
         return PeriodMetrics(
-            sessionCount: uniqueDays.count,
+            dayCount: uniqueDays.count,
             setCount: workingSets.count,
             totalVolume: volume,
             pbCount: pbs
@@ -344,6 +524,13 @@ struct HistoryView: View {
         } else {
             return workoutDays.first { Calendar.current.isDateInToday($0.date) }
         }
+    }
+
+    /// Compute workout days from filtered sets for period summary
+    /// Returns days in reverse chronological order (most recent first)
+    private static func computePeriodDays(from sets: [ExerciseSet]) -> [PeriodDaySummary] {
+        let workoutDays = ExerciseDataGrouper.createWorkoutJournal(from: sets)
+        return workoutDays.map { PeriodDaySummary(from: $0) }
     }
 
     // MARK: - View Components
@@ -450,26 +637,52 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func pbMetricCell(pbCount: Int) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("PBs")
-                .font(themeManager.effectiveTheme.captionFont)
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            // Value: "3 × ⭐"
-            HStack(alignment: .center, spacing: 0) {
-                Text("\(pbCount)")
-                    .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
-                    .monospacedDigit()
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                Text(" × ")
-                    .font(themeManager.effectiveTheme.interFont(size: 14))
-                    .foregroundStyle(.secondary)
-                Image(systemName: "star.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(themeManager.effectiveTheme.pbColor)
+        HStack(spacing: 0) {
+            // Left spacer
+            Color.clear.frame(width: 8)
+
+            // Accent bar + content area
+            HStack(spacing: 0) {
+                // Yellow accent bar when there are PBs
+                if pbCount > 0 {
+                    Rectangle()
+                        .fill(themeManager.effectiveTheme.pbColor)
+                        .frame(width: 3)
+                } else {
+                    Color.clear.frame(width: 3)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("PBs")
+                        .font(themeManager.effectiveTheme.captionFont)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    // Value: "3 × ⭐"
+                    HStack(alignment: .center, spacing: 0) {
+                        Text("\(pbCount)")
+                            .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
+                            .monospacedDigit()
+                            .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                        Text(" × ")
+                            .font(themeManager.effectiveTheme.interFont(size: 14))
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(themeManager.effectiveTheme.pbColor)
+                    }
+                }
+                .padding(.leading, 8)
+                .padding(.trailing, 16)
+                .padding(.vertical, 12)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .background {
+                if pbCount > 0 {
+                    themeManager.effectiveTheme.pbColor.opacity(0.08)
+                } else {
+                    themeManager.effectiveTheme.cardBackgroundColor
+                }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
     }

@@ -75,6 +75,9 @@ struct HistoryView: View {
     // Pagination for period summary exercise list
     @State private var visiblePeriodDaysCount: Int = 5
 
+    // Cached tag distribution for period summary
+    @State private var cachedPeriodTagDistribution: [(tag: String, percentage: Double)] = []
+
     var body: some View {
         VStack(spacing: 0) {
             // Time period picker
@@ -220,6 +223,24 @@ struct HistoryView: View {
                 .listRowInsets(EdgeInsets(top: 24, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
+
+                // Tag distribution chart (only if setting enabled and there are tagged exercises)
+                if themeManager.tagBreakdownVisible && !cachedPeriodTagDistribution.isEmpty {
+                    Section {
+                        Text("Tag Breakdown")
+                            .font(themeManager.effectiveTheme.interFont(size: 17, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                            .padding(.top, 20)
+                            .padding(.bottom, 4)
+                            .padding(.leading, 8)
+
+                        TagDistributionBar(data: cachedPeriodTagDistribution)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                }
 
                 // Exercise list by day (paginated)
                 let visibleDays = Array(cachedPeriodDays.prefix(visiblePeriodDaysCount))
@@ -463,6 +484,9 @@ struct HistoryView: View {
 
             // Compute workout days for exercise list
             cachedPeriodDays = Self.computePeriodDays(from: filteredSets)
+
+            // Compute tag distribution for the period
+            cachedPeriodTagDistribution = ExerciseService.tagDistribution(from: filteredSets)
         }
     }
 

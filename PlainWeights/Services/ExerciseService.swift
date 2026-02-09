@@ -14,7 +14,7 @@ enum ExerciseService {
     // MARK: - Tag Analytics
 
     /// Calculate tag distribution percentages for exercises done today
-    /// Each exercise contributes equally (1.0), split among its tags
+    /// Weighted by set count: exercises with more sets contribute more to tag percentages
     static func todayTagDistribution(context: ModelContext) -> [(tag: String, percentage: Double)] {
         // Get today's date range
         let calendar = Calendar.current
@@ -30,34 +30,79 @@ enum ExerciseService {
 
         let todaySets = (try? context.fetch(descriptor)) ?? []
 
-        // Get unique exercises done today (that have tags)
-        var uniqueExercises: [Exercise] = []
-        var seenIDs = Set<PersistentIdentifier>()
+        // Count sets per exercise and collect exercises with tags
+        var setCountByExercise: [PersistentIdentifier: Int] = [:]
+        var exercisesByID: [PersistentIdentifier: Exercise] = [:]
+
         for set in todaySets {
-            if let exercise = set.exercise,
-               !exercise.tags.isEmpty,
-               !seenIDs.contains(exercise.persistentModelID) {
-                seenIDs.insert(exercise.persistentModelID)
-                uniqueExercises.append(exercise)
-            }
+            guard let exercise = set.exercise, !exercise.tags.isEmpty else { continue }
+            let id = exercise.persistentModelID
+            setCountByExercise[id, default: 0] += 1
+            exercisesByID[id] = exercise
         }
 
-        guard !uniqueExercises.isEmpty else { return [] }
+        guard !exercisesByID.isEmpty else { return [] }
 
-        // Calculate tag weights
+        // Calculate tag weights (weighted by set count, split among tags)
         var tagWeights: [String: Double] = [:]
-        for exercise in uniqueExercises {
-            let weight = 1.0 / Double(exercise.tags.count)
+        var totalSets: Double = 0
+
+        for (id, exercise) in exercisesByID {
+            let setCount = Double(setCountByExercise[id] ?? 0)
+            totalSets += setCount
+            let weightPerTag = setCount / Double(exercise.tags.count)
             for tag in exercise.tags {
-                tagWeights[tag, default: 0] += weight
+                tagWeights[tag, default: 0] += weightPerTag
             }
         }
+
+        guard totalSets > 0 else { return [] }
 
         // Convert to percentages
-        let totalWeight = Double(uniqueExercises.count)
         return tagWeights
-            .map { (tag: $0.key, percentage: ($0.value / totalWeight) * 100) }
+            .map { (tag: $0.key, percentage: ($0.value / totalSets) * 100) }
             .sorted { $0.percentage > $1.percentage }
+    }
+
+    /// Calculate tag distribution percentages for a given set of exercises
+    /// Weighted by set count: exercises with more sets contribute more to tag percentages
+    /// - Parameter sets: Array of ExerciseSets to analyze
+    /// - Returns: Sorted array of (tag, percentage) tuples
+    static func tagDistribution(from sets: [ExerciseSet]) -> [(tag: String, percentage: Double)] {
+        // Count sets per exercise and collect exercises with tags
+        var setCountByExercise: [PersistentIdentifier: Int] = [:]
+        var exercisesByID: [PersistentIdentifier: Exercise] = [:]
+
+        for set in sets {
+            guard let exercise = set.exercise, !exercise.tags.isEmpty else { continue }
+            let id = exercise.persistentModelID
+            setCountByExercise[id, default: 0] += 1
+            exercisesByID[id] = exercise
+        }
+
+        guard !exercisesByID.isEmpty else { return [] }
+
+        // Calculate tag weights (weighted by set count, split among tags)
+        var tagWeights: [String: Double] = [:]
+        var totalSets: Double = 0
+
+        for (id, exercise) in exercisesByID {
+            let setCount = Double(setCountByExercise[id] ?? 0)
+            totalSets += setCount
+            let weightPerTag = setCount / Double(exercise.tags.count)
+            for tag in exercise.tags {
+                tagWeights[tag, default: 0] += weightPerTag
+            }
+        }
+
+        guard totalSets > 0 else { return [] }
+
+        // Convert to percentages
+        let distribution = tagWeights.map { tag, weight in
+            (tag: tag, percentage: (weight / totalSets) * 100)
+        }
+
+        return distribution.sorted { $0.percentage > $1.percentage }
     }
 
     // MARK: - Duplicate Name Check

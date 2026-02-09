@@ -13,6 +13,7 @@ final class ThemeManager {
     private static let chartVisibleKey = "chartVisibleByDefault"
     private static let notesVisibleKey = "notesVisibleByDefault"
     private static let weightUnitKey = "weightUnit"
+    private static let tagBreakdownVisibleKey = "tagBreakdownVisible"
 
     var currentTheme: AppTheme {
         didSet {
@@ -46,6 +47,12 @@ final class ThemeManager {
         }
     }
 
+    var tagBreakdownVisible: Bool {
+        didSet {
+            UserDefaults.standard.set(tagBreakdownVisible, forKey: Self.tagBreakdownVisibleKey)
+        }
+    }
+
     init() {
         let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.system.rawValue
         self.currentTheme = AppTheme(rawValue: savedTheme) ?? .system
@@ -59,6 +66,9 @@ final class ThemeManager {
 
         // Notes visibility - defaults to false (hidden)
         self.notesVisibleByDefault = UserDefaults.standard.object(forKey: Self.notesVisibleKey) as? Bool ?? false
+
+        // Tag breakdown visibility - defaults to true (visible)
+        self.tagBreakdownVisible = UserDefaults.standard.object(forKey: Self.tagBreakdownVisibleKey) as? Bool ?? true
     }
 
     // MARK: - Weight Conversion Helpers

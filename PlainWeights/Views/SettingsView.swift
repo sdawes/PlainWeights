@@ -56,6 +56,13 @@ struct SettingsView: View {
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                         weightUnitPickerRow()
+                    }
+
+                    // Charts section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Charts")
+                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                         settingsToggleRow(
                             icon: "chart.line.uptrend.xyaxis",
@@ -72,6 +79,15 @@ struct SettingsView: View {
                             isOn: Binding(
                                 get: { themeManager.notesVisibleByDefault },
                                 set: { themeManager.notesVisibleByDefault = $0 }
+                            )
+                        )
+
+                        settingsToggleRow(
+                            icon: "tag",
+                            title: "Show tag breakdown",
+                            isOn: Binding(
+                                get: { themeManager.tagBreakdownVisible },
+                                set: { themeManager.tagBreakdownVisible = $0 }
                             )
                         )
                     }

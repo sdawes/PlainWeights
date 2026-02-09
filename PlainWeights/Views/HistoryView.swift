@@ -1,14 +1,14 @@
 //
-//  SessionSummaryView.swift
+//  HistoryView.swift
 //  PlainWeights
 //
-//  Session summary view showing workout stats and exercises
+//  History view showing workout stats and exercises
 //
 
 import SwiftUI
 import SwiftData
 
-struct SessionSummaryView: View {
+struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     @Query private var allSets: [ExerciseSet]
@@ -31,23 +31,25 @@ struct SessionSummaryView: View {
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
 
-                    // Tag distribution chart (only if there are tagged exercises)
-                    let tagDistribution = ExerciseService.todayTagDistribution(context: modelContext)
-                    if !tagDistribution.isEmpty {
-                        Section {
-                            Text("Tag Distribution")
-                                .font(themeManager.effectiveTheme.interFont(size: 17, weight: .medium))
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                                .padding(.top, 20)
-                                .padding(.bottom, 4)
-                                .padding(.leading, 8)
+                    // Tag distribution chart (only if setting enabled and there are tagged exercises)
+                    if themeManager.tagBreakdownVisible {
+                        let tagDistribution = ExerciseService.todayTagDistribution(context: modelContext)
+                        if !tagDistribution.isEmpty {
+                            Section {
+                                Text("Tag Breakdown")
+                                    .font(themeManager.effectiveTheme.interFont(size: 17, weight: .medium))
+                                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                                    .padding(.top, 20)
+                                    .padding(.bottom, 4)
+                                    .padding(.leading, 8)
 
-                            TagDistributionBar(data: tagDistribution)
-                                .frame(maxWidth: .infinity)
+                                TagDistributionBar(data: tagDistribution)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                         }
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
                     }
 
                     // Exercises section
@@ -86,7 +88,7 @@ struct SessionSummaryView: View {
             }
         }
         .background(AnimatedGradientBackground())
-        .navigationTitle("Session Summary")
+        .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             updateCaches()

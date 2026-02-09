@@ -8,9 +8,9 @@
 import SwiftUI
 import SwiftData
 
-// Navigation destination type for Session Summary
-enum SessionDestination: Hashable {
-    case summary
+// Navigation destination type for History
+enum HistoryDestination: Hashable {
+    case history
 }
 
 struct ExerciseListView: View {
@@ -26,10 +26,10 @@ struct ExerciseListView: View {
                 .navigationDestination(for: Exercise.self) { exercise in
                     ExerciseDetailView(exercise: exercise)
                 }
-                .navigationDestination(for: SessionDestination.self) { destination in
+                .navigationDestination(for: HistoryDestination.self) { destination in
                     switch destination {
-                    case .summary:
-                        SessionSummaryView()
+                    case .history:
+                        HistoryView()
                     }
                 }
         }
@@ -237,7 +237,7 @@ struct FilteredExerciseListView: View {
                     if allSets.isEmpty {
                         showingNoSessionAlert = true
                     } else {
-                        navigationPath.append(SessionDestination.summary)
+                        navigationPath.append(HistoryDestination.history)
                     }
                 } label: {
                     Image(systemName: "star")

@@ -8,10 +8,31 @@
 import SwiftUI
 import SwiftData
 
+enum HistoryTimePeriod: String, CaseIterable {
+    case lastSession = "Last"
+    case week = "Week"          // Calendar week (Mon → today)
+    case month = "Month"        // Calendar month (1st → today)
+    case year = "Year"          // Calendar year (Jan 1 → today)
+    case rolling12Months = "12 Mo"  // Rolling 365 days
+}
+
+/// Aggregate metrics for a time period summary
+private struct PeriodMetrics {
+    let sessionCount: Int       // Unique workout days
+    let setCount: Int           // Working sets only
+    let totalVolume: Double     // Sum of weight × reps
+    let pbCount: Int            // Sets where isPB == true
+
+    static let empty = PeriodMetrics(sessionCount: 0, setCount: 0, totalVolume: 0, pbCount: 0)
+}
+
 struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     @Query private var allSets: [ExerciseSet]
+
+    // Selected time period
+    @State private var selectedPeriod: HistoryTimePeriod = .lastSession
 
     // Cached previous session metrics to avoid O(n*m) recomputation per exercise
     @State private var cachedPreviousMetrics: [PersistentIdentifier: PreviousSessionMetrics] = [:]
@@ -19,10 +40,49 @@ struct HistoryView: View {
     // Cached display day - prevents expensive recomputation on every render
     @State private var cachedDisplayDay: ExerciseDataGrouper.WorkoutDay?
 
+    // Cached period metrics for summary view (Week/Month/Year/12 Mo)
+    @State private var cachedPeriodMetrics: PeriodMetrics = .empty
+
     var body: some View {
         VStack(spacing: 0) {
-            if let day = cachedDisplayDay {
-                List {
+            // Time period picker
+            Picker("Time Period", selection: $selectedPeriod) {
+                ForEach(HistoryTimePeriod.allCases, id: \.self) { period in
+                    Text(period.rawValue).tag(period)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            if selectedPeriod == .lastSession {
+                // Detailed last session view
+                lastSessionDetailView
+            } else {
+                // Period summary view
+                periodSummaryView
+            }
+        }
+        .background(AnimatedGradientBackground())
+        .navigationTitle("History")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            updateCaches()
+        }
+        .onChange(of: allSets) { _, _ in
+            updateCaches()
+        }
+        .onChange(of: selectedPeriod) { _, _ in
+            updateCaches()
+        }
+    }
+
+    // MARK: - Last Session Detail View
+
+    @ViewBuilder
+    private var lastSessionDetailView: some View {
+        if let day = cachedDisplayDay {
+            List {
                     // Session info card
                     Section {
                         sessionInfoCard(for: day)
@@ -87,38 +147,192 @@ struct HistoryView: View {
                 Spacer()
             }
         }
-        .background(AnimatedGradientBackground())
-        .navigationTitle("History")
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            updateCaches()
+
+    // MARK: - Period Summary View
+
+    @ViewBuilder
+    private var periodSummaryView: some View {
+        if cachedPeriodMetrics.sessionCount > 0 {
+            List {
+                Section {
+                    periodSummaryCard
+                }
+                .listRowInsets(EdgeInsets(top: 24, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+            }
+            .listStyle(.plain)
+            .scrollIndicators(.hidden)
+            .scrollContentBackground(.hidden)
+            .contentMargins(.top, 12, for: .scrollContent)
+        } else {
+            // Empty state for period
+            Spacer()
+            VStack(spacing: 12) {
+                RetroLifterView(pixelSize: 5)
+
+                Text("No Workouts")
+                    .font(themeManager.effectiveTheme.title2Font)
+
+                Text("No workouts recorded for this time period.")
+                    .font(themeManager.effectiveTheme.subheadlineFont)
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            }
+            Spacer()
         }
-        .onChange(of: allSets) { _, _ in
-            updateCaches()
+    }
+
+    @ViewBuilder
+    private var periodSummaryCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header with period description
+            HStack(spacing: 8) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 14))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                Text(periodDescription)
+                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            // Divider
+            Rectangle()
+                .fill(themeManager.effectiveTheme.borderColor)
+                .frame(height: 1)
+
+            // Row 1: Sessions, Sets
+            HStack(spacing: 0) {
+                metricCell(label: "Sessions", value: "\(cachedPeriodMetrics.sessionCount)")
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(width: 1)
+                metricCell(label: "Sets", value: "\(cachedPeriodMetrics.setCount)")
+            }
+
+            // Divider between rows
+            Rectangle()
+                .fill(themeManager.effectiveTheme.borderColor)
+                .frame(height: 1)
+
+            // Row 2: Volume, PBs
+            HStack(spacing: 0) {
+                metricCell(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(cachedPeriodMetrics.totalVolume))) \(themeManager.weightUnit.displayName)")
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(width: 1)
+                pbMetricCell(pbCount: cachedPeriodMetrics.pbCount)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
+        )
+    }
+
+    /// Description of the current time period
+    private var periodDescription: String {
+        let calendar = Calendar.current
+        let now = Date()
+
+        switch selectedPeriod {
+        case .lastSession:
+            return "" // Not used for last session
+        case .week:
+            // "This Week (Mon - Today)"
+            return "This Week"
+        case .month:
+            // "February 2025"
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMMM yyyy"
+            return formatter.string(from: now)
+        case .year:
+            // "2025"
+            return "\(calendar.component(.year, from: now))"
+        case .rolling12Months:
+            // "Past 12 Months"
+            return "Past 12 Months"
         }
     }
 
     // MARK: - Cache Management
 
-    /// Update all cached values - called on appear and when allSets changes
+    /// Update all cached values - called on appear and when data/period changes
     private func updateCaches() {
-        // Compute display day first (expensive operation - only do once)
-        let day = Self.computeDisplayDay(from: allSets)
-        cachedDisplayDay = day
+        if selectedPeriod == .lastSession {
+            // Compute display day for detailed view
+            let day = Self.computeDisplayDay(from: allSets)
+            cachedDisplayDay = day
 
-        // Then compute previous metrics using the cached day
-        guard let day else {
-            cachedPreviousMetrics = [:]
-            return
+            // Then compute previous metrics using the cached day
+            guard let day else {
+                cachedPreviousMetrics = [:]
+                return
+            }
+            cachedPreviousMetrics = Self.computeAllPreviousSessionMetrics(
+                for: day.exercises,
+                from: allSets,
+                before: day.date
+            )
+        } else {
+            // Compute period summary metrics
+            let filteredSets = Self.filterSets(allSets, for: selectedPeriod)
+            cachedPeriodMetrics = Self.computePeriodMetrics(from: filteredSets)
         }
-        cachedPreviousMetrics = Self.computeAllPreviousSessionMetrics(
-            for: day.exercises,
-            from: allSets,
-            before: day.date
-        )
     }
 
     // MARK: - Static Computation Functions
+
+    /// Filter sets by time period (calendar-based for Week/Month/Year, rolling for 12 Mo)
+    private static func filterSets(_ sets: [ExerciseSet], for period: HistoryTimePeriod) -> [ExerciseSet] {
+        let calendar = Calendar.current
+        let now = Date()
+
+        switch period {
+        case .lastSession:
+            return sets // Not used - handled by computeDisplayDay
+        case .week:
+            // Monday of current week (ISO 8601: Monday = 2)
+            var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+            components.weekday = 2 // Monday
+            let monday = calendar.date(from: components) ?? now
+            return sets.filter { $0.timestamp >= calendar.startOfDay(for: monday) }
+        case .month:
+            // 1st of current month
+            let firstOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+            return sets.filter { $0.timestamp >= firstOfMonth }
+        case .year:
+            // Jan 1 of current year
+            let firstOfYear = calendar.date(from: calendar.dateComponents([.year], from: now))!
+            return sets.filter { $0.timestamp >= firstOfYear }
+        case .rolling12Months:
+            // Past 365 days
+            let cutoff = calendar.date(byAdding: .day, value: -365, to: now)!
+            return sets.filter { $0.timestamp >= cutoff }
+        }
+    }
+
+    /// Compute aggregate metrics for a collection of sets
+    private static func computePeriodMetrics(from sets: [ExerciseSet]) -> PeriodMetrics {
+        let workingSets = sets.workingSets
+        let calendar = Calendar.current
+
+        let uniqueDays = Set(workingSets.map { calendar.startOfDay(for: $0.timestamp) })
+        let volume = workingSets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
+        let pbs = workingSets.filter { $0.isPB }.count
+
+        return PeriodMetrics(
+            sessionCount: uniqueDays.count,
+            setCount: workingSets.count,
+            totalVolume: volume,
+            pbCount: pbs
+        )
+    }
 
     /// Compute display day from sets - expensive operation, should only be called when data changes
     private static func computeDisplayDay(from allSets: [ExerciseSet]) -> ExerciseDataGrouper.WorkoutDay? {

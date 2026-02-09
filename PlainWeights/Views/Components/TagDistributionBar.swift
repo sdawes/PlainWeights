@@ -115,7 +115,7 @@ struct TagDistributionBar: View {
                 if isExpanded {
                     VStack(spacing: 0) {
                         ForEach(Array(extraItems.enumerated()), id: \.element.tag) { index, item in
-                            let actualIndex = maxVisibleItems + index
+                            let actualIndex = alwaysVisibleItems.count + index
                             let isLast = index == extraItems.count - 1
 
                             tagRow(

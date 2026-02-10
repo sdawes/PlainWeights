@@ -44,4 +44,16 @@ extension Exercise {
     func bumpUpdated() {
         lastUpdated = Date()
     }
+
+    /// The date of the most recent set (actual workout activity)
+    /// Returns nil if no sets exist
+    var lastWorkoutDate: Date? {
+        sets?.compactMap { $0.timestamp }.max()
+    }
+
+    /// Whether this exercise was actually worked out today (has sets from today)
+    var wasWorkedOutToday: Bool {
+        guard let lastWorkout = lastWorkoutDate else { return false }
+        return Calendar.current.isDateInToday(lastWorkout)
+    }
 }

@@ -66,6 +66,16 @@ struct FilteredExerciseListView: View {
 
     @State private var exerciseToDelete: Exercise?
 
+    /// Exercises sorted by actual workout date (not metadata changes)
+    /// Exercises with no sets go to the bottom
+    private var sortedExercises: [Exercise] {
+        exercises.sorted { a, b in
+            let aDate = a.lastWorkoutDate ?? .distantPast
+            let bDate = b.lastWorkoutDate ?? .distantPast
+            return aDate > bDate
+        }
+    }
+
     init(searchText: String, showingAddExercise: Binding<Bool>, navigationPath: Binding<NavigationPath>) {
         self.searchText = searchText
         self._showingAddExercise = showingAddExercise
@@ -88,20 +98,25 @@ struct FilteredExerciseListView: View {
     }
 
     /// Check if exercise hasn't been done in over 2 weeks (orange)
+    /// Uses lastWorkoutDate (actual sets) not lastUpdated (metadata changes)
     private func isStale(_ exercise: Exercise) -> Bool {
+        guard let lastWorkout = exercise.lastWorkoutDate else { return true } // No sets = stale
         let twoWeeksAgo = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
-        return exercise.lastUpdated < twoWeeksAgo
+        return lastWorkout < twoWeeksAgo
     }
 
     /// Check if exercise hasn't been done in over 1 month (red)
+    /// Uses lastWorkoutDate (actual sets) not lastUpdated (metadata changes)
     private func isVeryStale(_ exercise: Exercise) -> Bool {
+        guard let lastWorkout = exercise.lastWorkoutDate else { return true } // No sets = very stale
         let oneMonthAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        return exercise.lastUpdated < oneMonthAgo
+        return lastWorkout < oneMonthAgo
     }
 
     /// Check if exercise was done today (green)
+    /// Uses lastWorkoutDate (actual sets) not lastUpdated (metadata changes)
     private func isDoneToday(_ exercise: Exercise) -> Bool {
-        Calendar.current.isDateInToday(exercise.lastUpdated)
+        exercise.wasWorkedOutToday
     }
 
     /// Get timestamp color
@@ -109,8 +124,10 @@ struct FilteredExerciseListView: View {
         themeManager.effectiveTheme.tertiaryText
     }
 
-    /// Get staleness color (red for 30+ days, orange for 14+ days, green for today, nil for recent)
+    /// Get staleness color (red for 30+ days, orange for 14+ days, green for today, nil for recent/no sets)
     private func stalenessColor(for exercise: Exercise) -> Color? {
+        // No color for exercises with no sets yet
+        guard exercise.lastWorkoutDate != nil else { return nil }
         if isVeryStale(exercise) { return .red }
         if isStale(exercise) { return .orange }
         if isDoneToday(exercise) { return .green }
@@ -143,7 +160,7 @@ struct FilteredExerciseListView: View {
                 .listRowSeparator(.hidden)
             } else {
                 Section {
-                    ForEach(Array(exercises.enumerated()), id: \.element.persistentModelID) { index, exercise in
+                    ForEach(Array(sortedExercises.enumerated()), id: \.element.persistentModelID) { index, exercise in
                         VStack(alignment: .leading, spacing: 0) {
                             Text(exercise.name)
                                 .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
@@ -165,13 +182,18 @@ struct FilteredExerciseListView: View {
                                     + Text("Today")
                                         .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(.green)
-                                } else {
+                                } else if let lastWorkout = exercise.lastWorkoutDate {
                                     Text("Last: ")
                                         .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
                                         .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.effectiveTheme.mutedForeground)
-                                    + Text(Formatters.formatExerciseLastDone(exercise.lastUpdated))
+                                    + Text(Formatters.formatExerciseLastDone(lastWorkout))
                                         .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                                         .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.effectiveTheme.mutedForeground)
+                                } else {
+                                    // No sets recorded yet
+                                    Text("No sets recorded")
+                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                                 }
                             }
                             .padding(.top, 12)

@@ -124,14 +124,14 @@ struct FilteredExerciseListView: View {
                 // Simple inline hint when no exercises exist
                 Section {
                     HStack {
-                        Text("Add first exercise using the + above")
+                        Text("Tap + to add your first exercise")
                             .font(themeManager.effectiveTheme.bodyFont)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                         Spacer()
 
-                        // Curved arrow pointing up toward + button
-                        Image(systemName: "arrow.turn.right.up")
+                        // Arrow pointing down-right toward FAB
+                        Image(systemName: "arrow.down.right")
                             .font(.title3)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                             .padding(.trailing, 5)
@@ -223,15 +223,20 @@ struct FilteredExerciseListView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showingSettings = true } label: {
-                    Image(systemName: "gearshape")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundStyle(themeManager.effectiveTheme.textColor)
-                }
+        .overlay(alignment: .bottomTrailing) {
+            Button(action: { showingAddExercise = true }) {
+                Image(systemName: "plus")
+                    .font(.title2)
+                    .foregroundStyle(themeManager.effectiveTheme.background)
             }
+            .frame(width: 50, height: 50)
+            .background(themeManager.effectiveTheme.primary)
+            .clipShape(Circle())
+            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+            .padding(.trailing, 20)
+            .padding(.bottom, 20)
+        }
+        .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     if allSets.isEmpty {
@@ -240,16 +245,17 @@ struct FilteredExerciseListView: View {
                         navigationPath.append(HistoryDestination.history)
                     }
                 } label: {
-                    Image(systemName: "star")
+                    Image(systemName: "clock.arrow.circlepath")
                         .font(.body)
                         .fontWeight(.medium)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showingAddExercise = true } label: {
-                    Image(systemName: "plus")
+                Button { showingSettings = true } label: {
+                    Image(systemName: "gearshape")
                         .font(.body)
                         .fontWeight(.medium)
+                        .foregroundStyle(themeManager.effectiveTheme.textColor)
                 }
             }
         }

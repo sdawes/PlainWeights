@@ -602,7 +602,7 @@ struct HistoryView: View {
                 .fill(themeManager.effectiveTheme.borderColor)
                 .frame(height: 1)
 
-            // Row 1: Exercises, Sets, Volume
+            // Row 1: Exercises, Sets, PBs
             HStack(spacing: 0) {
                 metricCell(label: "Exercises", value: "\(day.exerciseCount)")
                 Rectangle()
@@ -612,7 +612,7 @@ struct HistoryView: View {
                 Rectangle()
                     .fill(themeManager.effectiveTheme.borderColor)
                     .frame(width: 1)
-                metricCell(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(day.totalVolume))) \(themeManager.weightUnit.displayName)")
+                pbMetricCell(pbCount: pbCount)
             }
 
             // Divider between rows
@@ -620,12 +620,9 @@ struct HistoryView: View {
                 .fill(themeManager.effectiveTheme.borderColor)
                 .frame(height: 1)
 
-            // Row 2: Duration, Avg Rest, PBs
+            // Row 2: Volume, Avg Rest
             HStack(spacing: 0) {
-                metricCell(
-                    label: "Duration",
-                    value: formatDuration(sessionDuration)
-                )
+                metricCell(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(day.totalVolume))) \(themeManager.weightUnit.displayName)")
                 Rectangle()
                     .fill(themeManager.effectiveTheme.borderColor)
                     .frame(width: 1)
@@ -633,10 +630,6 @@ struct HistoryView: View {
                     label: "Avg Rest",
                     value: sessionAvgRest.map { formatRestTime($0) } ?? "—"
                 )
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
-                    .frame(width: 1)
-                pbMetricCell(pbCount: pbCount)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

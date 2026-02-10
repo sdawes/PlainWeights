@@ -13,20 +13,25 @@ struct InlineNotesComponent: View {
     let onSave: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Notes")
-                .font(themeManager.effectiveTheme.headlineFont)
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+        ZStack(alignment: .topLeading) {
+            // Placeholder text
+            if noteText.isEmpty {
+                Text("Add notes about form, cues, or tips...")
+                    .font(themeManager.effectiveTheme.bodyFont)
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 20)
+                    .allowsHitTesting(false)
+            }
 
+            // Text editor
             TextEditor(text: $noteText)
                 .font(themeManager.effectiveTheme.bodyFont)
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .scrollContentBackground(.hidden)
                 .frame(minHeight: 80, maxHeight: 150)
                 .padding(12)
-                .background(themeManager.effectiveTheme.muted)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(

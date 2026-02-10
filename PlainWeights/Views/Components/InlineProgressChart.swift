@@ -565,13 +565,13 @@ struct InlineProgressChart: View {
                 maxModeChartView
                     .frame(height: 150)
 
-                // Right Y-axis labels (Weight)
+                // Right Y-axis labels (Weight) - converted to user's preferred unit
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(Formatters.formatWeight(cachedState.weightRange.max))
+                    Text(Formatters.formatWeight(themeManager.displayWeight(cachedState.weightRange.max)))
                     Spacer()
-                    Text(Formatters.formatWeight((cachedState.weightRange.min + cachedState.weightRange.max) / 2))
+                    Text(Formatters.formatWeight(themeManager.displayWeight((cachedState.weightRange.min + cachedState.weightRange.max) / 2)))
                     Spacer()
-                    Text(Formatters.formatWeight(cachedState.weightRange.min))
+                    Text(Formatters.formatWeight(themeManager.displayWeight(cachedState.weightRange.min)))
                 }
                 .font(themeManager.effectiveTheme.dataFont(size: 10))
                 .foregroundStyle(themeManager.effectiveTheme.chartColor1)
@@ -604,13 +604,13 @@ struct InlineProgressChart: View {
                 volumeModeChartView
                     .frame(height: 150)
             } else {
-                // Weighted: Y-axis shows total volume (kg)
+                // Weighted: Y-axis shows total volume - converted to user's preferred unit
                 VStack(alignment: .trailing, spacing: 0) {
-                    Text(Formatters.formatVolume(cachedState.volumeRange.max))
+                    Text(Formatters.formatVolume(themeManager.displayWeight(cachedState.volumeRange.max)))
                     Spacer()
-                    Text(Formatters.formatVolume((cachedState.volumeRange.min + cachedState.volumeRange.max) / 2))
+                    Text(Formatters.formatVolume(themeManager.displayWeight((cachedState.volumeRange.min + cachedState.volumeRange.max) / 2)))
                     Spacer()
-                    Text(Formatters.formatVolume(cachedState.volumeRange.min))
+                    Text(Formatters.formatVolume(themeManager.displayWeight(cachedState.volumeRange.min)))
                 }
                 .font(themeManager.effectiveTheme.dataFont(size: 10))
                 .foregroundStyle(themeManager.effectiveTheme.chartColor3)

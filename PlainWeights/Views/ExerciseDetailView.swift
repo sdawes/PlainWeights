@@ -121,6 +121,7 @@ struct ExerciseDetailView: View {
                 Section {
                     InlineNotesComponent(noteText: $noteText, onSave: updateNote)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 }
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -365,7 +366,11 @@ struct ExerciseDetailView: View {
                 .contentShape(Rectangle())
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showNotes.toggle() }) {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showNotes.toggle()
+                    }
+                }) {
                     Image(systemName: "tag")
                         .font(.body)
                         .fontWeight(.medium)

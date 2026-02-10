@@ -181,9 +181,9 @@ struct HistoryView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
 
-                        ForEach(day.exercises, id: \.id) { exercise in
-                            exerciseCard(for: exercise, displayedDay: day.date)
-                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        ForEach(Array(day.exercises.enumerated()), id: \.element.id) { index, exercise in
+                            compactExerciseRow(for: exercise, displayedDay: day.date, isFirst: index == 0)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
                         }
@@ -247,6 +247,19 @@ struct HistoryView: View {
                 let visibleDays = Array(cachedPeriodDays.prefix(visiblePeriodDaysCount))
                 let hasMoreDays = cachedPeriodDays.count > visiblePeriodDaysCount
                 let remainingCount = cachedPeriodDays.count - visiblePeriodDaysCount
+
+                // Exercises label (once, above all days)
+                Section {
+                    Text("Exercises")
+                        .font(themeManager.effectiveTheme.interFont(size: 17, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .padding(.top, 16)
+                        .padding(.bottom, 10)
+                        .padding(.leading, 8)
+                }
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
 
                 ForEach(visibleDays) { daySummary in
                     Section {
@@ -719,8 +732,8 @@ struct HistoryView: View {
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             InfoButton(text: "Delta values show the difference compared to your last session for each exercise.")
         }
-        .padding(.top, 20)
-        .padding(.bottom, 4)
+        .padding(.top, 16)
+        .padding(.bottom, 10)
         .padding(.leading, 8)
     }
 
@@ -823,6 +836,141 @@ struct HistoryView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
         )
+    }
+
+    /// Compact two-line exercise row for Last session view
+    @ViewBuilder
+    private func compactExerciseRow(for workoutExercise: ExerciseDataGrouper.WorkoutExercise, displayedDay: Date, isFirst: Bool) -> some View {
+        let hasPB = workoutExercise.sets.contains { $0.isPB }
+        let workingSets = workoutExercise.sets.workingSets
+        let exerciseAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: workoutExercise.sets)
+
+        // Current session values
+        let currentMaxWeight = workingSets.map { $0.weight }.max() ?? 0
+        let currentMaxReps = currentMaxWeight > 0
+            ? (workingSets.filter { $0.weight == currentMaxWeight }.map { $0.reps }.max() ?? 0)
+            : (workingSets.map { $0.reps }.max() ?? 0)
+        let currentVolume = workoutExercise.volume
+
+        // Get previous session data for comparison
+        let previousSession = cachedPreviousMetrics[workoutExercise.exercise.persistentModelID]
+
+        // Calculate deltas
+        let weightDelta: Double? = previousSession.map { currentMaxWeight - $0.maxWeight }
+        let repsDelta: Int? = previousSession.map { currentMaxReps - $0.maxReps }
+        let volumeDelta: Double? = previousSession.map { currentVolume - $0.volume }
+
+        // Determine accent color: PB takes priority (gold), then delta direction
+        let accentColor: Color? = hasPB
+            ? themeManager.effectiveTheme.pbColor
+            : deltaAccentColor(weightDelta: weightDelta, repsDelta: repsDelta)
+
+        VStack(spacing: 0) {
+            // Divider at top (not for first row)
+            if !isFirst {
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(height: 1)
+            }
+
+            HStack(spacing: 0) {
+                // Accent bar (3px)
+                if let color = accentColor {
+                    Rectangle()
+                        .fill(color)
+                        .frame(width: 3)
+                } else {
+                    Color.clear.frame(width: 3)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    // Line 1: Name + Rest Time + PB
+                    HStack(spacing: 6) {
+                        Text(workoutExercise.exercise.name)
+                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                            .lineLimit(1)
+
+                        Spacer()
+
+                        Text("Avg rest: \(formatRestTime(exerciseAvgRest))")
+                            .font(themeManager.effectiveTheme.interFont(size: 12, weight: .regular))
+                            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+
+                        if hasPB {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 12))
+                                .foregroundStyle(themeManager.effectiveTheme.pbColor)
+                        }
+                    }
+
+                    // Line 2: Sets + Weight × Reps (with inline deltas) + Volume
+                    HStack(spacing: 0) {
+                        // Sets count
+                        Text("\(workoutExercise.setCount) sets")
+                            .font(themeManager.effectiveTheme.interFont(size: 12, weight: .semibold))
+                            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                            .monospacedDigit()
+
+                        Text("  ·  ")
+                            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+
+                        // Weight with delta
+                        if currentMaxWeight > 0 {
+                            (
+                                Text("\(Formatters.formatWeight(themeManager.displayWeight(currentMaxWeight)))")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .semibold))
+                                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                                + Text(" \(themeManager.weightUnit.displayName)")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 11))
+                                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                                + Text(weightDelta.flatMap { $0 != 0 ? " \(formatWeightDelta($0))" : nil } ?? "")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 12))
+                                    .foregroundStyle(deltaColor(weightDelta ?? 0))
+                                + Text("  ×  ")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 14))
+                                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                                + Text("\(currentMaxReps)")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .semibold))
+                                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                                + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 12))
+                                    .foregroundStyle(deltaColor(Double(repsDelta ?? 0)))
+                            )
+                        } else {
+                            // Reps-only exercise
+                            (
+                                Text("\(currentMaxReps) reps")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .semibold))
+                                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                                + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 12))
+                                    .foregroundStyle(deltaColor(Double(repsDelta ?? 0)))
+                            )
+                        }
+
+                        Spacer()
+
+                        // Total volume (right side)
+                        Text("Vol: \(Formatters.formatVolume(themeManager.displayWeight(currentVolume)))")
+                            .font(themeManager.effectiveTheme.interFont(size: 12, weight: .semibold))
+                            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                            .monospacedDigit()
+                    }
+                    .monospacedDigit()
+                }
+                .padding(.leading, 10)
+                .padding(.trailing, 12)
+                .padding(.vertical, 10)
+            }
+            .background {
+                if let color = accentColor {
+                    color.opacity(themeManager.currentTheme == .dark ? 0.12 : 0.06)
+                } else {
+                    Color.clear
+                }
+            }
+        }
     }
 
     // MARK: - Previous Session Comparison

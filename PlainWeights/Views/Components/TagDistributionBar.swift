@@ -18,6 +18,9 @@ struct TagDistributionBar: View {
     // Track expanded state
     @State private var isExpanded = false
 
+    // Animation progress for bar roll-out effect (0 to 1)
+    @State private var animationProgress: Double = 0
+
     // Color palette for chart segments
     static let chartColors: [Color] = [
         Color(red: 0.93, green: 0.47, blue: 0.20),  // Orange
@@ -132,6 +135,19 @@ struct TagDistributionBar: View {
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
+        .onAppear {
+            animationProgress = 0
+            withAnimation(.easeOut(duration: 0.6)) {
+                animationProgress = 1
+            }
+        }
+        .onChange(of: data.map { $0.tag }) { _, _ in
+            // Reset and replay animation when data changes
+            animationProgress = 0
+            withAnimation(.easeOut(duration: 0.6)) {
+                animationProgress = 1
+            }
+        }
     }
 
     @ViewBuilder
@@ -147,7 +163,7 @@ struct TagDistributionBar: View {
 
                 // Bar area - all bars start from left, width proportional to percentage
                 GeometryReader { geometry in
-                    let barWidth = geometry.size.width * (percentage / maxPercentage)
+                    let barWidth = geometry.size.width * (percentage / maxPercentage) * animationProgress
 
                     HStack(spacing: 0) {
                         // Colored vertical bar (left edge)

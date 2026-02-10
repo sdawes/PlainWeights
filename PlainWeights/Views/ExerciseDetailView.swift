@@ -366,7 +366,7 @@ struct ExerciseDetailView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showNotes.toggle() }) {
-                    Image(systemName: "note.text")
+                    Image(systemName: "tag")
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(showNotes

@@ -18,8 +18,8 @@ struct TagDistributionBar: View {
     // Track expanded state
     @State private var isExpanded = false
 
-    // Animation progress for bar roll-out effect (0 to 1)
-    @State private var animationProgress: Double = 0
+    // Animation progress for bar roll-out effect (0 to 1) - per row for stagger
+    @State private var animationProgress: [Int: Double] = [:]
 
     // Color palette for chart segments
     static let chartColors: [Color] = [
@@ -69,7 +69,8 @@ struct TagDistributionBar: View {
                     tag: item.tag,
                     percentage: item.percentage,
                     color: Self.color(for: index),
-                    isLast: isLast
+                    isLast: isLast,
+                    rowIndex: index
                 )
             }
             .animation(nil, value: isExpanded)
@@ -125,7 +126,8 @@ struct TagDistributionBar: View {
                                 tag: item.tag,
                                 percentage: item.percentage,
                                 color: Self.color(for: actualIndex),
-                                isLast: isLast
+                                isLast: isLast,
+                                rowIndex: actualIndex
                             )
                         }
                     }
@@ -136,22 +138,30 @@ struct TagDistributionBar: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
         .onAppear {
-            animationProgress = 0
-            withAnimation(.easeOut(duration: 0.6)) {
-                animationProgress = 1
-            }
+            triggerStaggeredAnimation()
         }
         .onChange(of: data.map { $0.tag }) { _, _ in
-            // Reset and replay animation when data changes
-            animationProgress = 0
-            withAnimation(.easeOut(duration: 0.6)) {
-                animationProgress = 1
+            triggerStaggeredAnimation()
+        }
+    }
+
+    private func triggerStaggeredAnimation() {
+        // Reset all progress
+        animationProgress = [:]
+
+        // Stagger each row's animation
+        for index in 0..<data.count {
+            let delay = Double(index) * 0.08
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.easeOut(duration: 0.5)) {
+                    animationProgress[index] = 1
+                }
             }
         }
     }
 
     @ViewBuilder
-    private func tagRow(tag: String, percentage: Double, color: Color, isLast: Bool) -> some View {
+    private func tagRow(tag: String, percentage: Double, color: Color, isLast: Bool, rowIndex: Int) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
                 // Tag name
@@ -163,7 +173,8 @@ struct TagDistributionBar: View {
 
                 // Bar area - all bars start from left, width proportional to percentage
                 GeometryReader { geometry in
-                    let barWidth = geometry.size.width * (percentage / maxPercentage) * animationProgress
+                    let progress = animationProgress[rowIndex] ?? 0
+                    let barWidth = geometry.size.width * (percentage / maxPercentage) * progress
 
                     HStack(spacing: 0) {
                         // Colored vertical bar (left edge)
@@ -176,7 +187,7 @@ struct TagDistributionBar: View {
                             .font(themeManager.effectiveTheme.dataFont(size: 14))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
                             .monospacedDigit()
-                            .padding(.leading, 6)
+                            .padding(.leading, 10)
 
                         Spacer(minLength: 0)
                     }

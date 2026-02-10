@@ -88,7 +88,7 @@ struct HistoryView: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, 8)
 
             if selectedPeriod == .lastSession {
                 // Detailed last session view
@@ -148,7 +148,7 @@ struct HistoryView: View {
                     Section {
                         sessionInfoCard(for: day)
                     }
-                    .listRowInsets(EdgeInsets(top: 24, leading: 16, bottom: 0, trailing: 16))
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
 
@@ -221,7 +221,7 @@ struct HistoryView: View {
                 Section {
                     periodSummaryCard
                 }
-                .listRowInsets(EdgeInsets(top: 24, leading: 16, bottom: 0, trailing: 16))
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
 
@@ -282,17 +282,21 @@ struct HistoryView: View {
                                 visiblePeriodDaysCount += 10
                             }
                         } label: {
-                            HStack {
-                                Spacer()
-                                Text("See more days (\(remainingCount) more)")
-                                    .font(themeManager.effectiveTheme.subheadlineFont)
+                            HStack(spacing: 6) {
+                                Text("See \(remainingCount) more days")
+                                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                                     .foregroundStyle(themeManager.effectiveTheme.primary)
-                                Spacer()
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(themeManager.effectiveTheme.primary)
                             }
+                            .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
+                            .background(themeManager.effectiveTheme.primary.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .listRowInsets(EdgeInsets(top: 16, leading: 24, bottom: 8, trailing: 24))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
                 }
@@ -324,11 +328,8 @@ struct HistoryView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header with period description
             HStack(spacing: 8) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 14))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Text(periodDescription)
-                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .semibold))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Spacer()
             }
@@ -583,11 +584,8 @@ struct HistoryView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header with date and duration
             HStack(spacing: 8) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 14))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                Text(day.date, format: .dateTime.weekday(.wide).month(.wide).day())
-                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                Text(day.date, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
+                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .semibold))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Spacer()
                 Text(formatDuration(sessionDuration))
@@ -719,15 +717,12 @@ struct HistoryView: View {
     }
 
     private var exercisesHeader: some View {
-        HStack(spacing: 6) {
-            Text("Exercises")
-                .font(themeManager.effectiveTheme.interFont(size: 17, weight: .medium))
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            InfoButton(text: "Delta values show the difference compared to your last session for each exercise.")
-        }
-        .padding(.top, 16)
-        .padding(.bottom, 10)
-        .padding(.leading, 8)
+        Text("Exercises")
+            .font(themeManager.effectiveTheme.interFont(size: 17, weight: .medium))
+            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            .padding(.top, 16)
+            .padding(.bottom, 10)
+            .padding(.leading, 8)
     }
 
     @ViewBuilder
@@ -902,39 +897,63 @@ struct HistoryView: View {
                     HStack(spacing: 0) {
                         // Weight with delta
                         if currentMaxWeight > 0 {
-                            (
-                                Text("\(Formatters.formatWeight(themeManager.displayWeight(currentMaxWeight)))")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
-                                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                                + Text(" \(themeManager.weightUnit.displayName)")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 12))
-                                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                                + Text(weightDelta.flatMap { $0 != 0 ? " \(formatWeightDelta($0))" : nil } ?? "")
+                            // Weight value - fixed width for alignment
+                            Text("\(Formatters.formatWeight(themeManager.displayWeight(currentMaxWeight)))")
+                                .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
+                                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                                .monospacedDigit()
+                                .frame(minWidth: 32, alignment: .trailing)
+
+                            // Unit
+                            Text(" \(themeManager.weightUnit.displayName)")
+                                .font(themeManager.effectiveTheme.dataFont(size: 12))
+                                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+
+                            // Weight delta (fixed width for alignment)
+                            if let delta = weightDelta, delta != 0 {
+                                Text(" \(formatWeightDelta(delta))")
                                     .font(themeManager.effectiveTheme.dataFont(size: 13))
-                                    .foregroundStyle(deltaColor(weightDelta ?? 0))
-                                + Text("  ×  ")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 16))
-                                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                                + Text("\(currentMaxReps)")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
-                                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                                + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
+                                    .foregroundStyle(deltaColor(delta))
+                                    .monospacedDigit()
+                            }
+
+                            // × symbol
+                            Text("  ×  ")
+                                .font(themeManager.effectiveTheme.dataFont(size: 16))
+                                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+
+                            // Reps value - fixed width for alignment
+                            Text("\(currentMaxReps)")
+                                .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
+                                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                                .monospacedDigit()
+                                .frame(minWidth: 20, alignment: .trailing)
+
+                            // Reps delta
+                            if let delta = repsDelta, delta != 0 {
+                                Text(" \(formatRepsDelta(delta))")
                                     .font(themeManager.effectiveTheme.dataFont(size: 13))
-                                    .foregroundStyle(deltaColor(Double(repsDelta ?? 0)))
-                            )
+                                    .foregroundStyle(deltaColor(Double(delta)))
+                                    .monospacedDigit()
+                            }
                         } else {
                             // Reps-only exercise
-                            (
-                                Text("\(currentMaxReps)")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
-                                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                                + Text(" reps")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 12))
-                                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                                + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
+                            Text("\(currentMaxReps)")
+                                .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
+                                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                                .monospacedDigit()
+                                .frame(minWidth: 20, alignment: .trailing)
+
+                            Text(" reps")
+                                .font(themeManager.effectiveTheme.dataFont(size: 12))
+                                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+
+                            if let delta = repsDelta, delta != 0 {
+                                Text(" \(formatRepsDelta(delta))")
                                     .font(themeManager.effectiveTheme.dataFont(size: 13))
-                                    .foregroundStyle(deltaColor(Double(repsDelta ?? 0)))
-                            )
+                                    .foregroundStyle(deltaColor(Double(delta)))
+                                    .monospacedDigit()
+                            }
                         }
 
                         Spacer()
@@ -945,7 +964,6 @@ struct HistoryView: View {
                             .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                             .monospacedDigit()
                     }
-                    .monospacedDigit()
                 }
                 .padding(.leading, 10)
                 .padding(.trailing, 12)

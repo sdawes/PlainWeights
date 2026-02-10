@@ -11,8 +11,14 @@ enum WeightUnit: String, CaseIterable {
     case kg = "kg"
     case lbs = "lbs"
 
+    /// Unit suffix for display (e.g., "60kg" or "132lbs")
     var displayName: String {
         rawValue
+    }
+
+    /// Whether this is a metric unit
+    var isMetric: Bool {
+        self == .kg
     }
 
     /// Conversion factor from kg to this unit

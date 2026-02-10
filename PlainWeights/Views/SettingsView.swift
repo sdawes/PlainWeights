@@ -238,35 +238,14 @@ struct SettingsView: View {
 
     @ViewBuilder
     private func weightUnitPickerRow() -> some View {
-        Button {
-            // Toggle between kg and lbs
-            themeManager.weightUnit = themeManager.weightUnit == .kg ? .lbs : .kg
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "scalemass")
-                    .font(.system(size: 18))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                    .frame(width: 24)
-
-                Text("Weight Unit")
-                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-
-                Spacer()
-
-                Text(themeManager.weightUnit.displayName)
-                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .regular))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            }
-            .padding(16)
-            .background(themeManager.effectiveTheme.cardBackgroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
+        settingsToggleRow(
+            icon: "scalemass",
+            title: "Metric measurements",
+            isOn: Binding(
+                get: { themeManager.weightUnit.isMetric },
+                set: { themeManager.weightUnit = $0 ? .kg : .lbs }
             )
-        }
-        .buttonStyle(.plain)
+        )
     }
 
     @ViewBuilder

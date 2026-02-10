@@ -883,8 +883,8 @@ struct HistoryView: View {
                     Color.clear.frame(width: 3)
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    // Line 1: Name + Rest Time + PB
+                VStack(alignment: .leading, spacing: 6) {
+                    // Line 1: Name + Sets + Rest Time + PB
                     HStack(spacing: 6) {
                         Text(workoutExercise.exercise.name)
                             .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
@@ -893,9 +893,10 @@ struct HistoryView: View {
 
                         Spacer()
 
-                        Text("Avg rest: \(formatRestTime(exerciseAvgRest))")
+                        Text("\(workoutExercise.setCount) sets · \(formatRestTime(exerciseAvgRest))")
                             .font(themeManager.effectiveTheme.interFont(size: 12, weight: .regular))
                             .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                            .monospacedDigit()
 
                         if hasPB {
                             Image(systemName: "star.fill")
@@ -904,47 +905,41 @@ struct HistoryView: View {
                         }
                     }
 
-                    // Line 2: Sets + Weight × Reps (with inline deltas) + Volume
+                    // Line 2: Weight × Reps (with inline deltas) + Volume
                     HStack(spacing: 0) {
-                        // Sets count
-                        Text("\(workoutExercise.setCount) sets")
-                            .font(themeManager.effectiveTheme.interFont(size: 12, weight: .semibold))
-                            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                            .monospacedDigit()
-
-                        Text("  ·  ")
-                            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-
                         // Weight with delta
                         if currentMaxWeight > 0 {
                             (
                                 Text("\(Formatters.formatWeight(themeManager.displayWeight(currentMaxWeight)))")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .semibold))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
                                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                                 + Text(" \(themeManager.weightUnit.displayName)")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 11))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 12))
                                     .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                                 + Text(weightDelta.flatMap { $0 != 0 ? " \(formatWeightDelta($0))" : nil } ?? "")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 12))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 13))
                                     .foregroundStyle(deltaColor(weightDelta ?? 0))
                                 + Text("  ×  ")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 14))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 16))
                                     .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                                 + Text("\(currentMaxReps)")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .semibold))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
                                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                                 + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 12))
+                                    .font(themeManager.effectiveTheme.dataFont(size: 13))
                                     .foregroundStyle(deltaColor(Double(repsDelta ?? 0)))
                             )
                         } else {
                             // Reps-only exercise
                             (
-                                Text("\(currentMaxReps) reps")
-                                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .semibold))
+                                Text("\(currentMaxReps)")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 16, weight: .semibold))
                                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                                + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
+                                + Text(" reps")
                                     .font(themeManager.effectiveTheme.dataFont(size: 12))
+                                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                                + Text(repsDelta.flatMap { $0 != 0 ? " \(formatRepsDelta($0))" : nil } ?? "")
+                                    .font(themeManager.effectiveTheme.dataFont(size: 13))
                                     .foregroundStyle(deltaColor(Double(repsDelta ?? 0)))
                             )
                         }
@@ -953,7 +948,7 @@ struct HistoryView: View {
 
                         // Total volume (right side)
                         Text("Vol: \(Formatters.formatVolume(themeManager.displayWeight(currentVolume)))")
-                            .font(themeManager.effectiveTheme.interFont(size: 12, weight: .semibold))
+                            .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                             .monospacedDigit()
                     }

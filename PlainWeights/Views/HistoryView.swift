@@ -154,7 +154,8 @@ struct HistoryView: View {
 
                     // Tag distribution chart (only if setting enabled and there are tagged exercises)
                     if themeManager.tagBreakdownVisible {
-                        let tagDistribution = ExerciseService.todayTagDistribution(context: modelContext)
+                        let daySets = day.exercises.flatMap { $0.sets }
+                        let tagDistribution = ExerciseService.tagDistribution(from: daySets)
                         if !tagDistribution.isEmpty {
                             Section {
                                 Text("Tag Breakdown")

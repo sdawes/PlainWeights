@@ -12,12 +12,6 @@ struct TagDistributionBar: View {
 
     let data: [(tag: String, percentage: Double)]
 
-    // Minimum percentage to show as its own row (below this gets collapsed)
-    private let minPercentageToShow: Double = 8
-
-    // Track expanded state
-    @State private var isExpanded = false
-
     // Animation progress for bar roll-out effect (0 to 1) - per row for stagger
     @State private var animationProgress: [Int: Double] = [:]
 
@@ -34,36 +28,14 @@ struct TagDistributionBar: View {
         chartColors[index % chartColors.count]
     }
 
-    // Always visible items (>= 5%)
-    private var alwaysVisibleItems: [(tag: String, percentage: Double)] {
-        data.filter { $0.percentage >= minPercentageToShow }
-    }
-
-    // Extra items shown when expanded (< 5%)
-    private var extraItems: [(tag: String, percentage: Double)] {
-        data.filter { $0.percentage < minPercentageToShow }
-    }
-
-    private var collapsedPercentage: Double {
-        extraItems.reduce(0) { $0 + $1.percentage }
-    }
-
-    // Use max of individual percentages only (stable regardless of expand state)
     private var maxPercentage: Double {
         data.map { $0.percentage }.max() ?? 1
     }
 
-    private var hasMoreItems: Bool {
-        !extraItems.isEmpty
-    }
-
     var body: some View {
         VStack(spacing: 0) {
-            // Always visible rows (first 5) - no animation
-            ForEach(Array(alwaysVisibleItems.enumerated()), id: \.element.tag) { index, item in
-                // Last row hides divider if there are no more items, OR if there are more items (toggle provides divider)
-                let isLastVisible = index == alwaysVisibleItems.count - 1
-                let isLast = isLastVisible
+            ForEach(Array(data.enumerated()), id: \.element.tag) { index, item in
+                let isLast = index == data.count - 1
 
                 tagRow(
                     tag: item.tag,
@@ -72,67 +44,6 @@ struct TagDistributionBar: View {
                     isLast: isLast,
                     rowIndex: index
                 )
-            }
-            .animation(nil, value: isExpanded)
-
-            // Expandable section
-            if hasMoreItems {
-                // Toggle row - always present, changes between "+X more" and "Show less"
-                VStack(spacing: 0) {
-                    // Divider above toggle
-                    Rectangle()
-                        .fill(themeManager.effectiveTheme.borderColor)
-                        .frame(height: 1)
-
-                    // Toggle button
-                    HStack {
-                        if isExpanded {
-                            Spacer()
-                            Text("Show less")
-                                .font(themeManager.effectiveTheme.interFont(size: 13, weight: .medium))
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            Image(systemName: "chevron.up")
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            Spacer()
-                        } else {
-                            Text("+\(extraItems.count) more")
-                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            Spacer()
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        }
-                    }
-                    .padding(.vertical, 10)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                            isExpanded.toggle()
-                        }
-                    }
-                }
-                .animation(nil, value: isExpanded)
-
-                // Extra rows - appear below with animation
-                if isExpanded {
-                    VStack(spacing: 0) {
-                        ForEach(Array(extraItems.enumerated()), id: \.element.tag) { index, item in
-                            let actualIndex = alwaysVisibleItems.count + index
-                            let isLast = index == extraItems.count - 1
-
-                            tagRow(
-                                tag: item.tag,
-                                percentage: item.percentage,
-                                color: Self.color(for: actualIndex),
-                                isLast: isLast,
-                                rowIndex: actualIndex
-                            )
-                        }
-                    }
-                    .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
-                }
             }
         }
         .padding(.vertical, 12)

@@ -63,8 +63,13 @@ struct FilteredExerciseListView: View {
     let searchText: String
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
-
     @State private var exerciseToDelete: Exercise?
+
+    // MARK: - Cached Staleness Data (for scroll performance)
+    /// Pre-computed staleness colors to avoid expensive Calendar operations during scroll
+    @State private var cachedStalenessColors: [PersistentIdentifier: Color?] = [:]
+    /// Pre-computed "done today" flags
+    @State private var cachedDoneToday: Set<PersistentIdentifier> = []
 
     /// Exercises sorted by actual workout date (not metadata changes)
     /// Exercises with no sets go to the bottom
@@ -134,6 +139,28 @@ struct FilteredExerciseListView: View {
         return nil
     }
 
+    /// Pre-computed opacity for staleness background tint
+    private var stalenessOpacity: Double {
+        themeManager.currentTheme == .dark ? 0.15 : 0.05
+    }
+
+    /// Rebuild the staleness cache - call when exercises change
+    private func rebuildStalenessCache() {
+        var colors: [PersistentIdentifier: Color?] = [:]
+        var doneToday: Set<PersistentIdentifier> = []
+
+        for exercise in exercises {
+            let id = exercise.persistentModelID
+            colors[id] = stalenessColor(for: exercise)
+            if isDoneToday(exercise) {
+                doneToday.insert(id)
+            }
+        }
+
+        cachedStalenessColors = colors
+        cachedDoneToday = doneToday
+    }
+
     var body: some View {
         List {
             // Exercises section
@@ -170,12 +197,16 @@ struct FilteredExerciseListView: View {
                                     .padding(.top, 6)
                             }
                             HStack(spacing: 4) {
-                                if let color = stalenessColor(for: exercise), !isDoneToday(exercise) {
+                                let exerciseId = exercise.persistentModelID
+                                let isDoneToday = cachedDoneToday.contains(exerciseId)
+                                let color = cachedStalenessColors[exerciseId] ?? nil
+
+                                if let color = color, !isDoneToday {
                                     Image(systemName: "exclamationmark.circle")
                                         .font(.system(size: 14))
                                         .foregroundStyle(color)
                                 }
-                                if isDoneToday(exercise) {
+                                if isDoneToday {
                                     Text("Last: ")
                                         .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
                                         .foregroundStyle(.green)
@@ -185,10 +216,10 @@ struct FilteredExerciseListView: View {
                                 } else if let lastWorkout = exercise.lastWorkoutDate {
                                     Text("Last: ")
                                         .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.effectiveTheme.mutedForeground)
+                                        .foregroundStyle(color ?? themeManager.effectiveTheme.mutedForeground)
                                     + Text(Formatters.formatExerciseLastDone(lastWorkout))
                                         .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                                        .foregroundStyle(stalenessColor(for: exercise) ?? themeManager.effectiveTheme.mutedForeground)
+                                        .foregroundStyle(color ?? themeManager.effectiveTheme.mutedForeground)
                                 } else {
                                     // No sets recorded yet
                                     Text("No sets recorded")
@@ -213,7 +244,7 @@ struct FilteredExerciseListView: View {
                         }
                         .listRowBackground(
                             Group {
-                                if let color = stalenessColor(for: exercise) {
+                                if let color = cachedStalenessColors[exercise.persistentModelID] ?? nil {
                                     HStack(spacing: 0) {
                                         Color.clear.frame(width: 16)  // Match list leading inset
                                         // Vertical accent bar
@@ -222,7 +253,7 @@ struct FilteredExerciseListView: View {
                                             .frame(width: 2)
                                         // Background tint
                                         Rectangle()
-                                            .fill(color.opacity(themeManager.currentTheme == .dark ? 0.15 : 0.05))
+                                            .fill(color.opacity(stalenessOpacity))
                                     }
                                 } else {
                                     Color.clear
@@ -238,7 +269,6 @@ struct FilteredExerciseListView: View {
         }
         .listStyle(.plain)
         .contentMargins(.top, 12, for: .scrollContent)
-        .id(themeManager.effectiveTheme)  // Force list rebuild on theme change (uses effectiveTheme to handle System mode)
         .scrollIndicators(.hidden)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
@@ -314,6 +344,12 @@ struct FilteredExerciseListView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("Complete your first workout to see a session summary.")
+        }
+        .onAppear {
+            rebuildStalenessCache()
+        }
+        .onChange(of: exercises) { _, _ in
+            rebuildStalenessCache()
         }
     }
 

@@ -291,6 +291,14 @@ struct FilteredExerciseListView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
+                Button { showingSettings = true } label: {
+                    Image(systemName: "gearshape")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundStyle(themeManager.effectiveTheme.textColor)
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     if allSets.isEmpty {
                         showingNoSessionAlert = true
@@ -301,14 +309,6 @@ struct FilteredExerciseListView: View {
                     Image(systemName: "clock.arrow.circlepath")
                         .font(.body)
                         .fontWeight(.medium)
-                }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showingSettings = true } label: {
-                    Image(systemName: "gearshape")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundStyle(themeManager.effectiveTheme.textColor)
                 }
             }
         }

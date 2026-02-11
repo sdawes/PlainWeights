@@ -87,23 +87,27 @@ struct TagDistributionBar: View {
                     let progress = animationProgress[rowIndex] ?? 0
                     let barWidth = geometry.size.width * (percentage / maxPercentage) * progress
 
-                    HStack(spacing: 0) {
-                        // Colored vertical bar (left edge)
-                        Rectangle()
-                            .fill(color)
-                            .frame(width: 3)
+                    ZStack(alignment: .leading) {
+                        // Bar background (clipped to barWidth)
+                        HStack(spacing: 0) {
+                            // Colored vertical bar (left edge)
+                            Rectangle()
+                                .fill(color)
+                                .frame(width: 3)
 
-                        // % value inside shaded area
+                            // Shaded background area
+                            Rectangle()
+                                .fill(color.opacity(themeManager.currentTheme == .dark ? 0.2 : 0.12))
+                        }
+                        .frame(width: barWidth, height: geometry.size.height)
+
+                        // % value overlaid on top (not clipped by bar width)
                         Text("\(Int(percentage))%")
                             .font(themeManager.effectiveTheme.dataFont(size: 14))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
                             .monospacedDigit()
-                            .padding(.leading, 10)
-
-                        Spacer(minLength: 0)
+                            .padding(.leading, 13)  // 3px bar + 10px padding
                     }
-                    .frame(width: barWidth, height: geometry.size.height)
-                    .background(color.opacity(themeManager.currentTheme == .dark ? 0.2 : 0.12))
                 }
                 .frame(height: 28)
             }

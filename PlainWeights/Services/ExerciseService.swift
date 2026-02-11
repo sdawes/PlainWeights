@@ -44,15 +44,29 @@ enum ExerciseService {
         guard !exercisesByID.isEmpty else { return [] }
 
         // Calculate tag weights (weighted by set count, split among tags)
+        // Secondary tags are weighted at 33% of primary tags (1/3)
+        let secondaryWeight = 0.33
         var tagWeights: [String: Double] = [:]
         var totalSets: Double = 0
 
         for (id, exercise) in exercisesByID {
             let setCount = Double(setCountByExercise[id] ?? 0)
             totalSets += setCount
-            let weightPerTag = setCount / Double(exercise.tags.count)
+
+            // Calculate effective tag count (primaries at 1.0, secondaries at 0.3)
+            let effectiveTagCount = Double(exercise.tags.count) +
+                                    Double(exercise.secondaryTags.count) * secondaryWeight
+
+            let baseWeightPerTag = setCount / effectiveTagCount
+
+            // Primary tags at full weight
             for tag in exercise.tags {
-                tagWeights[tag, default: 0] += weightPerTag
+                tagWeights[tag, default: 0] += baseWeightPerTag
+            }
+
+            // Secondary tags at reduced weight
+            for tag in exercise.secondaryTags {
+                tagWeights[tag, default: 0] += baseWeightPerTag * secondaryWeight
             }
         }
 
@@ -83,15 +97,29 @@ enum ExerciseService {
         guard !exercisesByID.isEmpty else { return [] }
 
         // Calculate tag weights (weighted by set count, split among tags)
+        // Secondary tags are weighted at 33% of primary tags (1/3)
+        let secondaryWeight = 0.33
         var tagWeights: [String: Double] = [:]
         var totalSets: Double = 0
 
         for (id, exercise) in exercisesByID {
             let setCount = Double(setCountByExercise[id] ?? 0)
             totalSets += setCount
-            let weightPerTag = setCount / Double(exercise.tags.count)
+
+            // Calculate effective tag count (primaries at 1.0, secondaries at 0.3)
+            let effectiveTagCount = Double(exercise.tags.count) +
+                                    Double(exercise.secondaryTags.count) * secondaryWeight
+
+            let baseWeightPerTag = setCount / effectiveTagCount
+
+            // Primary tags at full weight
             for tag in exercise.tags {
-                tagWeights[tag, default: 0] += weightPerTag
+                tagWeights[tag, default: 0] += baseWeightPerTag
+            }
+
+            // Secondary tags at reduced weight
+            for tag in exercise.secondaryTags {
+                tagWeights[tag, default: 0] += baseWeightPerTag * secondaryWeight
             }
         }
 

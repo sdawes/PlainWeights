@@ -707,15 +707,18 @@ struct HistoryView: View {
     @ViewBuilder
     private func pbMetricCell(pbCount: Int) -> some View {
         HStack(spacing: 0) {
-            // Accent bar + content area (flush left with cell divider)
+            // Left spacer to inset accent bar
+            Color.clear.frame(width: 8)
+
+            // Accent bar + content area
             HStack(spacing: 0) {
                 // Yellow accent bar when there are PBs
                 if pbCount > 0 {
                     Rectangle()
                         .fill(themeManager.effectiveTheme.pbColor)
-                        .frame(width: 2)
+                        .frame(width: 3)
                 } else {
-                    Color.clear.frame(width: 2)
+                    Color.clear.frame(width: 3)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {

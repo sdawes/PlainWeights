@@ -22,16 +22,17 @@ struct TagPillView: View {
         return lowercased
     }
 
-    // Secondary tags use greyer/darker styling
+    // Primary tags: standard grey
+    // Secondary tags: lighter grey
     private var pillBackground: Color {
         isSecondary
-            ? themeManager.effectiveTheme.borderColor
+            ? themeManager.effectiveTheme.muted.opacity(0.5)
             : themeManager.effectiveTheme.muted
     }
 
     private var textColor: Color {
         isSecondary
-            ? themeManager.effectiveTheme.tertiaryText
+            ? themeManager.effectiveTheme.mutedForeground.opacity(0.6)
             : themeManager.effectiveTheme.mutedForeground
     }
 

@@ -16,9 +16,12 @@ struct AddExerciseView: View {
     @State private var name = ""
     @State private var tags: [String] = []
     @State private var tagInput = ""
+    @State private var secondaryTags: [String] = []
+    @State private var secondaryTagInput = ""
     @State private var isDuplicateName: Bool = false
     @FocusState private var nameFieldFocused: Bool
     @FocusState private var tagFieldFocused: Bool
+    @FocusState private var secondaryTagFieldFocused: Bool
 
     // Optional exercise for edit mode
     let exerciseToEdit: Exercise?
@@ -37,6 +40,7 @@ struct AddExerciseView: View {
         if let exercise = exerciseToEdit {
             _name = State(initialValue: exercise.name)
             _tags = State(initialValue: exercise.tags)
+            _secondaryTags = State(initialValue: exercise.secondaryTags)
         }
     }
 
@@ -63,6 +67,7 @@ struct AddExerciseView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     exerciseNameSection
                     tagsSection
+                    secondaryTagsSection
                 }
                 .padding(.top, 24)
             }
@@ -122,7 +127,7 @@ struct AddExerciseView: View {
 
     private var tagsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Tags (optional)")
+            Text("Primary Tags (optional)")
                 .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
@@ -176,6 +181,64 @@ struct AddExerciseView: View {
         }
     }
 
+    // MARK: - Secondary Tags Section
+
+    private var secondaryTagsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Secondary Tags (optional)")
+                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+
+            HStack(spacing: 8) {
+                TextField("e.g. triceps, shoulders", text: $secondaryTagInput)
+                    .font(themeManager.effectiveTheme.dataFont(size: 20))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    .padding(16)
+                    .frame(height: 56)
+                    .background(themeManager.effectiveTheme.cardBackgroundColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(
+                                secondaryTagFieldFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
+                                lineWidth: secondaryTagFieldFocused ? 2 : 1
+                            )
+                    )
+                    .focused($secondaryTagFieldFocused)
+                    .onSubmit {
+                        addSecondaryTag()
+                        // Keep focus for continuous entry
+                        secondaryTagFieldFocused = true
+                    }
+
+                Button(action: addSecondaryTag) {
+                    let isDisabled = secondaryTagInput.trimmingCharacters(in: .whitespaces).isEmpty
+                    Text("Add")
+                        .font(themeManager.effectiveTheme.headlineFont)
+                        .foregroundStyle(themeManager.effectiveTheme.background)
+                        .padding(.horizontal, 16)
+                        .frame(height: 56)
+                        .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+                .disabled(secondaryTagInput.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+
+            // Secondary tag pills (grey styling)
+            if !secondaryTags.isEmpty {
+                FlowLayout(spacing: 8) {
+                    ForEach(secondaryTags, id: \.self) { tag in
+                        TagPillView(tag: tag, isSecondary: true) {
+                            withAnimation { secondaryTags.removeAll { $0 == tag } }
+                        }
+                    }
+                }
+                .padding(.top, 8)
+            }
+        }
+    }
+
     // MARK: - Add Button
 
     private var addButton: some View {
@@ -213,22 +276,39 @@ struct AddExerciseView: View {
         tagInput = ""
     }
 
+    private func addSecondaryTag() {
+        let trimmed = secondaryTagInput.trimmingCharacters(in: .whitespaces).lowercased()
+        if !trimmed.isEmpty && !secondaryTags.contains(trimmed) && secondaryTags.count < 10 {
+            withAnimation {
+                secondaryTags.append(trimmed)
+            }
+        }
+        secondaryTagInput = ""
+    }
+
     private func saveExercise() {
-        // Include any text still in the input field as a tag
+        // Include any text still in the input fields as tags
         var finalTags = tags
         let trimmedInput = tagInput.trimmingCharacters(in: .whitespaces).lowercased()
         if !trimmedInput.isEmpty && !finalTags.contains(trimmedInput) {
             finalTags.append(trimmedInput)
         }
 
+        var finalSecondaryTags = secondaryTags
+        let trimmedSecondaryInput = secondaryTagInput.trimmingCharacters(in: .whitespaces).lowercased()
+        if !trimmedSecondaryInput.isEmpty && !finalSecondaryTags.contains(trimmedSecondaryInput) {
+            finalSecondaryTags.append(trimmedSecondaryInput)
+        }
+
         if let exercise = exerciseToEdit {
             // Edit mode: update existing exercise
             exercise.name = name
             exercise.setTags(finalTags)
+            exercise.setSecondaryTags(finalSecondaryTags)
             exercise.bumpUpdated()
         } else {
             // Create mode: insert new exercise
-            let newExercise = Exercise(name: name, tags: finalTags)
+            let newExercise = Exercise(name: name, tags: finalTags, secondaryTags: finalSecondaryTags)
             modelContext.insert(newExercise)
             onExerciseCreated?(newExercise)
         }

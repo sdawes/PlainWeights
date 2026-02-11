@@ -95,7 +95,8 @@ struct FilteredExerciseListView: View {
             _exercises = Query(
                 filter: #Predicate<Exercise> { exercise in
                     exercise.name.localizedStandardContains(searchText) ||
-                    exercise.tagsSearchable.localizedStandardContains(searchText)
+                    exercise.tagsSearchable.localizedStandardContains(searchText) ||
+                    exercise.secondaryTagsSearchable.localizedStandardContains(searchText)
                 },
                 sort: [SortDescriptor(\.lastUpdated, order: .reverse)]
             )
@@ -192,8 +193,8 @@ struct FilteredExerciseListView: View {
                             Text(exercise.name)
                                 .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
                                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                            if !exercise.tags.isEmpty {
-                                TagPillsRow(tags: exercise.tags)
+                            if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
+                                TagPillsRow(tags: exercise.tags, secondaryTags: exercise.secondaryTags)
                                     .padding(.top, 6)
                             }
                             HStack(spacing: 4) {

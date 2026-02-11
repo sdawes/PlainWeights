@@ -10,6 +10,7 @@ import SwiftUI
 struct TagPillView: View {
     @Environment(ThemeManager.self) private var themeManager
     let tag: String
+    var isSecondary: Bool = false
     var onRemove: (() -> Void)?
 
     // Truncate very long tags and ensure lowercase
@@ -21,17 +22,30 @@ struct TagPillView: View {
         return lowercased
     }
 
+    // Secondary tags use greyer/darker styling
+    private var pillBackground: Color {
+        isSecondary
+            ? themeManager.effectiveTheme.borderColor
+            : themeManager.effectiveTheme.muted
+    }
+
+    private var textColor: Color {
+        isSecondary
+            ? themeManager.effectiveTheme.tertiaryText
+            : themeManager.effectiveTheme.mutedForeground
+    }
+
     var body: some View {
         HStack(spacing: 4) {
             Text(displayTag)
                 .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                .foregroundStyle(textColor)
 
             if let onRemove = onRemove {
                 Button(action: onRemove) {
                     Image(systemName: "xmark")
                         .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.7))
+                        .foregroundStyle(textColor.opacity(0.7))
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
@@ -39,7 +53,7 @@ struct TagPillView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(themeManager.effectiveTheme.muted)
+        .background(pillBackground)
         .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
@@ -47,14 +61,20 @@ struct TagPillView: View {
 /// Display-only version without remove button (for lists)
 struct TagPillsRow: View {
     let tags: [String]
+    var secondaryTags: [String] = []
 
     var body: some View {
-        if tags.isEmpty {
+        if tags.isEmpty && secondaryTags.isEmpty {
             EmptyView()
         } else {
             FlowLayout(spacing: 4) {
+                // Primary tags
                 ForEach(tags, id: \.self) { tag in
                     TagPillView(tag: tag)
+                }
+                // Secondary tags (grey styling)
+                ForEach(secondaryTags, id: \.self) { tag in
+                    TagPillView(tag: tag, isSecondary: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

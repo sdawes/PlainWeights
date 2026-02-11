@@ -131,7 +131,7 @@ class TestDataGenerator {
         print("        }")
         print("")
         print("        // Exercise definitions with notes and timestamps")
-        print("        let exerciseData: [(name: String, tags: [String], note: String?, createdDate: Date, lastUpdated: Date)] = [")
+        print("        let exerciseData: [(name: String, tags: [String], secondaryTags: [String], note: String?, createdDate: Date, lastUpdated: Date)] = [")
         for exercise in exercises {
             let calendar = Calendar.current
 
@@ -151,16 +151,17 @@ class TestDataGenerator {
             let lMin = calendar.component(.minute, from: exercise.lastUpdated)
             let lS = calendar.component(.second, from: exercise.lastUpdated)
 
+            let tagsString = exercise.tags.map { "\"\($0)\"" }.joined(separator: ", ")
+            let secondaryTagsString = exercise.secondaryTags.map { "\"\($0)\"" }.joined(separator: ", ")
+
             if let note = exercise.note, !note.isEmpty {
                 // Escape quotes and newlines in note text
                 let escapedNote = note
                     .replacingOccurrences(of: "\"", with: "\\\"")
                     .replacingOccurrences(of: "\n", with: ", ")
-                let tagsString = exercise.tags.map { "\"\($0)\"" }.joined(separator: ", ")
-                print("    (name: \"\(exercise.name)\", tags: [\(tagsString)], note: \"\(escapedNote)\", createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
+                print("    (name: \"\(exercise.name)\", tags: [\(tagsString)], secondaryTags: [\(secondaryTagsString)], note: \"\(escapedNote)\", createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
             } else {
-                let tagsString = exercise.tags.map { "\"\($0)\"" }.joined(separator: ", ")
-                print("    (name: \"\(exercise.name)\", tags: [\(tagsString)], note: nil as String?, createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
+                print("    (name: \"\(exercise.name)\", tags: [\(tagsString)], secondaryTags: [\(secondaryTagsString)], note: nil as String?, createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
             }
         }
         print("        ]")
@@ -168,7 +169,7 @@ class TestDataGenerator {
         print("        // Create exercises")
         print("        var exercises: [String: Exercise] = [:]")
         print("        for data in exerciseData {")
-        print("            let exercise = Exercise(name: data.name, tags: data.tags, note: data.note, createdDate: data.createdDate)")
+        print("            let exercise = Exercise(name: data.name, tags: data.tags, secondaryTags: data.secondaryTags, note: data.note, createdDate: data.createdDate)")
         print("            exercise.lastUpdated = data.lastUpdated")
         print("            exercises[data.name] = exercise")
         print("            modelContext.insert(exercise)")

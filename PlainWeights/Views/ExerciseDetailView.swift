@@ -104,8 +104,8 @@ struct ExerciseDetailView: View {
                     Text(exercise.name)
                         .font(themeManager.effectiveTheme.title2Font)
                         .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                    if !exercise.tags.isEmpty {
-                        TagPillsRow(tags: exercise.tags)
+                    if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
+                        TagPillsRow(tags: exercise.tags, secondaryTags: exercise.secondaryTags)
                     }
                 }
                 .padding(.leading, 8)

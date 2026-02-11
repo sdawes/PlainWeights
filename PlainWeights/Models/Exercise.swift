@@ -15,6 +15,10 @@ final class Exercise {
     var tags: [String] = []
     /// Searchable string of all tags joined by spaces (for SwiftData predicate queries)
     var tagsSearchable: String = ""
+    /// Secondary tags for secondary muscle groups (displayed in grey)
+    var secondaryTags: [String] = []
+    /// Searchable string of secondary tags joined by spaces
+    var secondaryTagsSearchable: String = ""
     var createdDate: Date = Date()
     var lastUpdated: Date = Date()
     var note: String?
@@ -24,10 +28,12 @@ final class Exercise {
     @Relationship(deleteRule: .cascade, inverse: \ExerciseSet.exercise)
     var sets: [ExerciseSet]? = []
 
-    init(name: String, tags: [String] = [], note: String? = nil, createdDate: Date = .init()) {
+    init(name: String, tags: [String] = [], secondaryTags: [String] = [], note: String? = nil, createdDate: Date = .init()) {
         self.name = name
         self.tags = tags
         self.tagsSearchable = tags.joined(separator: " ")
+        self.secondaryTags = secondaryTags
+        self.secondaryTagsSearchable = secondaryTags.joined(separator: " ")
         self.note = note
         self.createdDate = createdDate
         self.lastUpdated = createdDate // Initialize with creation date
@@ -37,6 +43,12 @@ final class Exercise {
     func setTags(_ newTags: [String]) {
         tags = newTags
         tagsSearchable = newTags.joined(separator: " ")
+    }
+
+    /// Update secondary tags and keep searchable string in sync
+    func setSecondaryTags(_ newTags: [String]) {
+        secondaryTags = newTags
+        secondaryTagsSearchable = newTags.joined(separator: " ")
     }
 }
 

@@ -48,7 +48,7 @@ struct ExerciseListView: View {
             listView
         } else {
             listView
-                .searchable(text: $searchText, prompt: "Search by name or tags")
+                .searchable(text: $searchText, prompt: "Search exercises")
         }
     }
 }
@@ -94,9 +94,7 @@ struct FilteredExerciseListView: View {
         } else {
             _exercises = Query(
                 filter: #Predicate<Exercise> { exercise in
-                    exercise.name.localizedStandardContains(searchText) ||
-                    exercise.tagsSearchable.localizedStandardContains(searchText) ||
-                    exercise.secondaryTagsSearchable.localizedStandardContains(searchText)
+                    exercise.name.localizedStandardContains(searchText)
                 },
                 sort: [SortDescriptor(\.lastUpdated, order: .reverse)]
             )
@@ -190,7 +188,7 @@ struct FilteredExerciseListView: View {
                 Section {
                     ForEach(Array(sortedExercises.enumerated()), id: \.element.persistentModelID) { index, exercise in
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(exercise.name)
+                            Text(highlightedName(exercise.name))
                                 .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
                                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
                             if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
@@ -366,5 +364,26 @@ struct FilteredExerciseListView: View {
                 print("Failed to delete exercise: \(error)")
             }
         }
+    }
+
+    /// Create highlighted text with search matches in yellow
+    private func highlightedName(_ name: String) -> AttributedString {
+        var attributedString = AttributedString(name)
+
+        guard !searchText.isEmpty else { return attributedString }
+
+        // Find range of search text (case-insensitive)
+        if let range = name.localizedStandardRange(of: searchText) {
+            // Convert String.Index range to AttributedString.Index range
+            let start = AttributedString.Index(range.lowerBound, within: attributedString)
+            let end = AttributedString.Index(range.upperBound, within: attributedString)
+
+            if let start = start, let end = end {
+                attributedString[start..<end].backgroundColor = .yellow
+                attributedString[start..<end].foregroundColor = .black
+            }
+        }
+
+        return attributedString
     }
 }

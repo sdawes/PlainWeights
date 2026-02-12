@@ -11,6 +11,7 @@ import SwiftData
 @Model
 final class ExerciseSet {
     // All properties have defaults for CloudKit compatibility
+    // Note: #Index on timestamp would improve query performance but requires iOS 18+
     var timestamp: Date = Date()
     var weight: Double = 0   // kg (or lbs) — Double is fine for 0.25 increments
     var reps: Int = 0

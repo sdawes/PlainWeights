@@ -293,18 +293,23 @@ struct ExerciseDetailView: View {
                             visibleHistoricDaysCount += 10
                         }
                     } label: {
-                        HStack {
-                            Spacer()
-                            Text("See older sessions (\(remainingCount) more)")
-                                .font(themeManager.effectiveTheme.subheadlineFont)
+                        HStack(spacing: 6) {
+                            Text("See \(remainingCount) more sessions")
+                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                                 .foregroundStyle(themeManager.effectiveTheme.primary)
-                            Spacer()
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(themeManager.effectiveTheme.primary)
                         }
+                        .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
+                        .background(themeManager.effectiveTheme.primary.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
                 }
+                .listRowInsets(EdgeInsets(top: 16, leading: 24, bottom: 8, trailing: 24))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
 
             // Bottom spacer to allow scrolling latest set lower on screen

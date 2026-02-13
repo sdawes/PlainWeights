@@ -358,7 +358,6 @@ struct SetRowView: View {
     private var liveTimerView: some View {
         TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
             let elapsed = context.date.timeIntervalSince(set.timestamp)
-            let color = restTimeColor(for: Int(elapsed))
 
             if elapsed >= 180 {
                 HStack(spacing: 4) {
@@ -369,17 +368,18 @@ struct SetRowView: View {
                         .font(themeManager.effectiveTheme.dataFont(size: 12))
                         .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                 }
-                .onAppear {
+                .task {
+                    // Only capture once when timer expires
                     captureRestTimeExpiry()
                 }
             } else {
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(color)
+                        .foregroundStyle(restTimeColor(for: Int(elapsed)))
                     Text(Formatters.formatDuration(elapsed))
                         .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .bold))
-                        .foregroundStyle(color)
+                        .foregroundStyle(restTimeColor(for: Int(elapsed)))
                 }
             }
         }

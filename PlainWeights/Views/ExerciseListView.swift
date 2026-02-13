@@ -57,7 +57,6 @@ struct FilteredExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     @Query private var exercises: [Exercise]
-    @Query private var allSets: [ExerciseSet]
     @Binding var showingAddExercise: Bool
     @Binding var navigationPath: NavigationPath
     let searchText: String
@@ -145,14 +144,33 @@ struct FilteredExerciseListView: View {
 
     /// Rebuild the staleness cache - call when exercises change
     private func rebuildStalenessCache() {
+        // Reuse calendar instance and pre-compute thresholds
+        let calendar = Calendar.current
+        let now = Date()
+        let twoWeeksAgo = calendar.date(byAdding: .day, value: -14, to: now) ?? now
+        let oneMonthAgo = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+        let today = calendar.startOfDay(for: now)
+        
         var colors: [PersistentIdentifier: Color?] = [:]
         var doneToday: Set<PersistentIdentifier> = []
 
         for exercise in exercises {
             let id = exercise.persistentModelID
-            colors[id] = stalenessColor(for: exercise)
-            if isDoneToday(exercise) {
-                doneToday.insert(id)
+            
+            // Compute staleness color
+            if let lastWorkout = exercise.lastWorkoutDate {
+                if lastWorkout < oneMonthAgo {
+                    colors[id] = .red
+                } else if lastWorkout < twoWeeksAgo {
+                    colors[id] = .orange
+                } else if calendar.startOfDay(for: lastWorkout) == today {
+                    colors[id] = .green
+                    doneToday.insert(id)
+                } else {
+                    colors[id] = nil
+                }
+            } else {
+                colors[id] = nil
             }
         }
 
@@ -266,6 +284,7 @@ struct FilteredExerciseListView: View {
                 }
             }
         }
+        .id(themeManager.systemColorScheme) // Force List re-render on theme change
         .listStyle(.plain)
         .contentMargins(.top, 12, for: .scrollContent)
         .scrollIndicators(.hidden)
@@ -298,7 +317,9 @@ struct FilteredExerciseListView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    if allSets.isEmpty {
+                    // Check if any exercise has sets
+                    let hasSets = exercises.contains { !($0.sets?.isEmpty ?? true) }
+                    if !hasSets {
                         showingNoSessionAlert = true
                     } else {
                         navigationPath.append(HistoryDestination.history)

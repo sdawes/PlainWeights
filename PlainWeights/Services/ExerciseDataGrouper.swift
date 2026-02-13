@@ -82,12 +82,22 @@ enum ExerciseDataGrouper {
 
     /// Create structured day groups with metadata
     static func createDayGroups(from sets: [ExerciseSet]) -> [DayGroup] {
-        let dayGroups = groupSetsByDay(sets)
+        let calendar = Calendar.current
+        
+        // Group by day in a single pass
+        var dayGroups: [Date: [ExerciseSet]] = [:]
+        dayGroups.reserveCapacity(sets.count / 10) // Estimate capacity
+        
+        for set in sets {
+            let day = calendar.startOfDay(for: set.timestamp)
+            dayGroups[day, default: []].append(set)
+        }
+        
+        // Sort each day's sets and create DayGroup objects
         return dayGroups.map { date, daySets in
-            // Defensive sorting: ensure within-group ordering regardless of input
             let sortedSets = daySets.sorted { $0.timestamp > $1.timestamp }
             return DayGroup(date: date, sets: sortedSets)
-        }
+        }.sorted { $0.date > $1.date }  // Most recent first
     }
 
     /// Separate today's sets from historic sets for better UX during active workouts
@@ -95,17 +105,32 @@ enum ExerciseDataGrouper {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
-        // Split sets into today vs historic
-        let todaySets = sets.filter { calendar.startOfDay(for: $0.timestamp) == today }
-        let historicSets = sets.filter { calendar.startOfDay(for: $0.timestamp) != today }
+        // Split and group in a single pass
+        var todaySets: [ExerciseSet] = []
+        var historicGroups: [Date: [ExerciseSet]] = [:]
+        
+        todaySets.reserveCapacity(20) // Typical workout size
+        historicGroups.reserveCapacity(sets.count / 10)
 
-        // Sort today's sets by timestamp (most recent first)
-        let sortedTodaySets = todaySets.sorted { $0.timestamp > $1.timestamp }
+        for set in sets {
+            let setDay = calendar.startOfDay(for: set.timestamp)
+            if setDay == today {
+                todaySets.append(set)
+            } else {
+                historicGroups[setDay, default: []].append(set)
+            }
+        }
+
+        // Sort today's sets
+        todaySets.sort { $0.timestamp > $1.timestamp }
 
         // Create day groups for historic sets
-        let historicGroups = createDayGroups(from: historicSets)
+        let historicDayGroups = historicGroups.map { date, daySets in
+            let sortedSets = daySets.sorted { $0.timestamp > $1.timestamp }
+            return DayGroup(date: date, sets: sortedSets)
+        }.sorted { $0.date > $1.date }
 
-        return (todaySets: sortedTodaySets, historicGroups: historicGroups)
+        return (todaySets: todaySets, historicGroups: historicDayGroups)
     }
 
     // MARK: - Workout Journal Grouping

@@ -331,42 +331,34 @@ enum ExerciseSetService {
             predicate: #Predicate<ExerciseSet> { set in
                 set.exercise?.persistentModelID == exerciseID && !set.isWarmUp && !set.isBonus
             },
-            sortBy: [SortDescriptor(\.timestamp)]
+            sortBy: [SortDescriptor(\.weight, order: .reverse), SortDescriptor(\.reps, order: .reverse), SortDescriptor(\.timestamp)]
         )
 
         let allWorkingSets = try context.fetch(descriptor)
 
-        // Find max weight
-        guard let maxWeight = allWorkingSets.map({ $0.weight }).max() else {
-            // No sets exist, make this one the PB
+        guard !allWorkingSets.isEmpty else {
+            // This should never happen since newSet should be in the results
             newSet.isPB = true
             triggerPBCelebration()
             try context.save()
             return
         }
 
-        // Get all sets at max weight
-        let setsAtMaxWeight = allWorkingSets.filter { $0.weight == maxWeight }
+        // First set is the PB due to sort order
+        let currentPB = allWorkingSets[0]
 
-        // Find max reps at max weight
-        guard let maxReps = setsAtMaxWeight.map({ $0.reps }).max() else { return }
-
-        // Get all sets at max weight and max reps
-        let bestSets = setsAtMaxWeight.filter { $0.reps == maxReps }
-
-        // Earliest timestamp wins (first achiever keeps PB)
-        guard let currentPB = bestSets.min(by: { $0.timestamp < $1.timestamp }) else { return }
-
-        // Clear all PB flags first
+        // Clear all PB flags first (batch update)
         for set in allWorkingSets {
-            set.isPB = false
+            if set.isPB {
+                set.isPB = false
+            }
         }
 
         // Mark the winner
         currentPB.isPB = true
 
         // Trigger celebration only if the new set is the PB
-        if currentPB.id == newSet.id {
+        if currentPB.persistentModelID == newSet.persistentModelID {
             triggerPBCelebration()
         }
 

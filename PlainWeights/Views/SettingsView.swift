@@ -219,6 +219,7 @@ struct SettingsView: View {
             .pickerStyle(.menu)
             .tint(themeManager.effectiveTheme.mutedForeground)
         }
+        .frame(minHeight: 31)  // Match Toggle height for consistent card sizes
         .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))

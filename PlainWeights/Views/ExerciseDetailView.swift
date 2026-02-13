@@ -321,6 +321,7 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
 
         }
+        .id(themeManager.systemColorScheme) // Force List re-render on theme change
         .listStyle(.plain)
         .scrollIndicators(.hidden)
         .listSectionSpacing(24)

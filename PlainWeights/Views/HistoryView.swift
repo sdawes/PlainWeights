@@ -111,8 +111,8 @@ struct HistoryView: View {
             // Always refresh when view becomes visible (handles navigation back)
             updateCaches()
         }
-        .onChange(of: dataChangeToken) { _, _ in
-            // Refresh when set properties change while view is visible
+        .onChange(of: allSets.count) { _, _ in
+            // Refresh when sets are added/removed
             updateCaches()
         }
         .onChange(of: selectedPeriod) { _, _ in
@@ -123,25 +123,6 @@ struct HistoryView: View {
             // Refresh caches when sets are edited from any view
             updateCaches()
         }
-    }
-
-    // MARK: - Data Change Detection
-
-    /// Lightweight fingerprint that changes when any set property affecting calculations changes
-    /// This triggers cache refresh when sets are edited (not just added/removed)
-    private var dataChangeToken: Int {
-        var token = allSets.count
-        for set in allSets {
-            // Combine properties that affect volume, PB counts, and filtering
-            // Using &+ for wrapping addition to avoid overflow
-            token = token &+ set.timestamp.hashValue
-            token = token &+ Int(set.weight * 10)  // Keep 1 decimal precision
-            token = token &+ set.reps
-            token = token &+ (set.isWarmUp ? 0x1000 : 0)
-            token = token &+ (set.isBonus ? 0x2000 : 0)
-            token = token &+ (set.isPB ? 0x4000 : 0)
-        }
-        return token
     }
 
     // MARK: - Last Session Detail View
@@ -203,6 +184,7 @@ struct HistoryView: View {
                         }
                     }
                 }
+                .id(themeManager.systemColorScheme) // Force List re-render on theme change
                 .listStyle(.plain)
                 .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
@@ -321,6 +303,7 @@ struct HistoryView: View {
                     .listRowBackground(Color.clear)
                 }
             }
+            .id("\(selectedPeriod.rawValue)-\(themeManager.systemColorScheme)") // Force scroll to top when period changes & re-render on theme change
             .listStyle(.plain)
             .scrollIndicators(.hidden)
             .scrollContentBackground(.hidden)

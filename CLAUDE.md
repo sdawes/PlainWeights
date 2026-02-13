@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### `acp` - Add, Commit, and Push
 When the user says **"acp"**, immediately run `git add .`, commit with an appropriate message, and push to remote. No permission needed - just do it.
 
-**After pushing, always show a summary of recent commits** using `git log --oneline -5` formatted as a table:
+**After pushing, show only the commit(s) just made** in a table:
 ```
 | Hash | Message |
 |------|---------|

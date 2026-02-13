@@ -408,3 +408,4 @@ struct FilteredExerciseListView: View {
         return attributedString
     }
 }
+

@@ -409,3 +409,31 @@ struct FilteredExerciseListView: View {
     }
 }
 
+// MARK: - Preview
+
+#Preview {
+    let container = try! ModelContainer(
+        for: Exercise.self, ExerciseSet.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    
+    // Create 3 simple exercises
+    let bench = Exercise(name: "Bench Press", tags: ["Chest"])
+    let squat = Exercise(name: "Squat", tags: ["Legs"])
+    let deadlift = Exercise(name: "Deadlift", tags: ["Back"])
+    
+    container.mainContext.insert(bench)
+    container.mainContext.insert(squat)
+    container.mainContext.insert(deadlift)
+    
+    // Add a set to bench press so it shows "Last: Today"
+    let set = ExerciseSet(timestamp: Date(), weight: 100, reps: 8, exercise: bench)
+    container.mainContext.insert(set)
+    
+    return ExerciseListView()
+        .modelContainer(container)
+        .environment(ThemeManager())
+}
+
+
+

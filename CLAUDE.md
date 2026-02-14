@@ -6,6 +6,18 @@ Project-specific guidance for Claude Code (claude.ai/code)
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Commands
+
+### `acp` - Add, Commit, and Push
+When the user says **"acp"**, immediately run `git add .`, commit with an appropriate message, and push to remote. No permission needed - just do it.
+
+**After pushing, show only the commit(s) just made** in a table:
+```
+| Hash | Message |
+|------|---------|
+| abc1234 | Commit message here |
+```
+
 ## Troubleshooting
 
 ### Device Debugging Issues (White Screen / LLDB Hang)

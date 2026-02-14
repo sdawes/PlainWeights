@@ -436,7 +436,8 @@ struct ExerciseDetailView: View {
             updateCachedData()
             // Scroll to show latest set when a new set is added
             if todaySets.count > oldCount {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(150))
                     withAnimation(.easeInOut(duration: 0.3)) {
                         scrollProxy.scrollTo("comparisonButtons", anchor: .top)
                     }

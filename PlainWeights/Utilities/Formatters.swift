@@ -53,11 +53,11 @@ enum Formatters {
     /// Format weight value, showing decimals only when needed (e.g., "100", "100.5", or "100.25")
     static func formatWeight(_ value: Double) -> String {
         if value.truncatingRemainder(dividingBy: 1) == 0 {
-            return String(format: "%.0f", value)
+            return value.formatted(.number.precision(.fractionLength(0)))
         } else if (value * 10).truncatingRemainder(dividingBy: 1) == 0 {
-            return String(format: "%.1f", value)
+            return value.formatted(.number.precision(.fractionLength(1)))
         } else {
-            return String(format: "%.2f", value)
+            return value.formatted(.number.precision(.fractionLength(2)))
         }
     }
 
@@ -142,7 +142,8 @@ enum Formatters {
     static func formatDuration(_ seconds: TimeInterval) -> String {
         let minutes = Int(seconds) / 60
         let remainingSeconds = Int(seconds) % 60
-        return String(format: "%d:%02d", minutes, remainingSeconds)
+        let paddedSeconds = remainingSeconds < 10 ? "0\(remainingSeconds)" : "\(remainingSeconds)"
+        return "\(minutes):\(paddedSeconds)"
     }
 
     /// Format exercise last done date with smart relative display

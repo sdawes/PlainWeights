@@ -174,7 +174,7 @@ struct HistoryView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
 
-                        ForEach(Array(day.exercises.enumerated()), id: \.element.id) { index, exercise in
+                        ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
                             let hasPB = exercise.sets.contains { $0.isPB }
                             let deltas = cachedExerciseDeltas[exercise.exercise.persistentModelID]
                             periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
@@ -267,7 +267,7 @@ struct HistoryView: View {
                     Section {
                         periodDayHeader(for: daySummary.date)
 
-                        ForEach(Array(daySummary.exercises.enumerated()), id: \.element.id) { index, exercise in
+                        ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
                             periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0)
                         }
                     }

@@ -34,7 +34,7 @@ struct TagDistributionBar: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(Array(data.enumerated()), id: \.element.tag) { index, item in
+            ForEach(data.enumerated(), id: \.element.tag) { index, item in
                 let isLast = index == data.count - 1
 
                 tagRow(
@@ -63,7 +63,8 @@ struct TagDistributionBar: View {
         // Stagger each row's animation
         for index in 0..<data.count {
             let delay = Double(index) * 0.08
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(Int(delay * 1000)))
                 withAnimation(.easeOut(duration: 0.5)) {
                     animationProgress[index] = 1
                 }

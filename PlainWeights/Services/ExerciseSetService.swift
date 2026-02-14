@@ -23,7 +23,7 @@ enum ExerciseSetService {
         generator.notificationOccurred(.success)
 
         // Post notification for confetti animation
-        DispatchQueue.main.async {
+        Task { @MainActor in
             NotificationCenter.default.post(name: .pbAchieved, object: nil)
         }
     }
@@ -32,7 +32,7 @@ enum ExerciseSetService {
 
     /// Post notification when set data changes (for live UI updates)
     private static func notifySetDataChanged() {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             NotificationCenter.default.post(name: .setDataChanged, object: nil)
         }
     }

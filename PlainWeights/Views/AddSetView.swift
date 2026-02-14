@@ -293,7 +293,8 @@ struct AddSetView: View {
                 // Remember which field was focused
                 lastEditedField = field.rawValue
                 // Select all text in the field
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(50))
                     UIApplication.shared.sendAction(#selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil)
                 }
             }

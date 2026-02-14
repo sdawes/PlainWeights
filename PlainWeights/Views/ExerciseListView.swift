@@ -204,7 +204,7 @@ struct FilteredExerciseListView: View {
                 .listRowSeparator(.hidden)
             } else {
                 Section {
-                    ForEach(Array(sortedExercises.enumerated()), id: \.element.persistentModelID) { index, exercise in
+                    ForEach(sortedExercises.enumerated(), id: \.element.persistentModelID) { index, exercise in
                         VStack(alignment: .leading, spacing: 0) {
                             Text(highlightedName(exercise.name))
                                 .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))

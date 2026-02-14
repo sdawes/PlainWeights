@@ -72,7 +72,7 @@ struct TagAnalyticsView: View {
     private var legendView: some View {
         // Compact color legend in a flow layout
         FlowLayout(spacing: 12) {
-            ForEach(Array(tagDistribution.enumerated()), id: \.element.tag) { index, item in
+            ForEach(tagDistribution.enumerated(), id: \.element.tag) { index, item in
                 HStack(spacing: 6) {
                     Circle()
                         .fill(TagDistributionBar.color(for: index))

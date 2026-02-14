@@ -90,7 +90,8 @@ struct PBCelebrationOverlay: View {
                 .ignoresSafeArea()
                 .onAppear {
                     // Auto-dismiss after animation completes
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(2.5))
                         isShowing = false
                     }
                 }

@@ -668,6 +668,19 @@ chartColor2: Color(red: 0.45, green: 0.82, blue: 0.58)  // Bright green (reps)
 pbColor: Color(red: 0.980, green: 0.675, blue: 0.020)   // Gold #faac05
 ```
 
+### SwiftUI API Preferences
+**Always use `foregroundStyle()` instead of `foregroundColor()`** - the latter is deprecated.
+
+```swift
+// ✅ CORRECT
+.foregroundStyle(.red)
+.foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+// ❌ WRONG (deprecated)
+.foregroundColor(.red)
+.foregroundColor(themeManager.effectiveTheme.primaryText)
+```
+
 ### UIKit Policy - CRITICAL
 **NEVER use UIKit unless there is absolutely no SwiftUI alternative to achieve the desired result.**
 

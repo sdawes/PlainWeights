@@ -15,7 +15,7 @@ enum IconComponents {
         Button(action: action) {
             Image(systemName: "trash")
                 .font(.callout.bold())
-                .foregroundColor(.red)
+                .foregroundStyle(.red)
         }
     }
 }

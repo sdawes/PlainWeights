@@ -101,8 +101,9 @@ enum ExerciseDataHelper {
         let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
 
         // Calculate weight-only volume for last session (shows 0 kg for bodyweight exercises)
-        let lastSessionWeightVolume = lastDayInfo != nil ?
-            ExerciseVolumeCalculator.calculateWeightVolume(for: lastDayInfo!.sets) : 0.0
+        let lastSessionWeightVolume = lastDayInfo.map {
+            ExerciseVolumeCalculator.calculateWeightVolume(for: $0.sets)
+        } ?? 0.0
 
         // Calculate total reps volume for last session
         let lastSessionRepsVolume = RepsAnalytics.getLastSessionTotalRepsVolume(from: sets)

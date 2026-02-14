@@ -137,7 +137,7 @@ enum ExerciseVolumeCalculator {
 
         let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
         if timeElapsed > 0.016 { // More than one frame (60fps)
-            logger.warning("Slow getSessionMetrics: \(String(format: "%.2f", timeElapsed * 1000))ms for \(sets.count) sets")
+            logger.warning("Slow getSessionMetrics: \((timeElapsed * 1000).formatted(.number.precision(.fractionLength(2))))ms for \(sets.count) sets")
         }
 
         return SessionMetrics(

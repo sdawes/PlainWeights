@@ -157,8 +157,8 @@ class TestDataGenerator {
             if let note = exercise.note, !note.isEmpty {
                 // Escape quotes and newlines in note text
                 let escapedNote = note
-                    .replacingOccurrences(of: "\"", with: "\\\"")
-                    .replacingOccurrences(of: "\n", with: ", ")
+                    .replacing("\"", with: "\\\"")
+                    .replacing("\n", with: ", ")
                 print("    (name: \"\(exercise.name)\", tags: [\(tagsString)], secondaryTags: [\(secondaryTagsString)], note: \"\(escapedNote)\", createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")
             } else {
                 print("    (name: \"\(exercise.name)\", tags: [\(tagsString)], secondaryTags: [\(secondaryTagsString)], note: nil as String?, createdDate: date(\(cY), \(cM), \(cD), \(cH), \(cMin), \(cS)), lastUpdated: date(\(lY), \(lM), \(lD), \(lH), \(lMin), \(lS))),")

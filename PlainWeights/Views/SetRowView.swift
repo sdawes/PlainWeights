@@ -368,8 +368,7 @@ struct SetRowView: View {
                         .font(themeManager.effectiveTheme.dataFont(size: 12))
                         .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                 }
-                .task {
-                    // Only capture once when timer expires
+                .onAppear {
                     captureRestTimeExpiry()
                 }
             } else {

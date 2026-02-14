@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 @Observable
 final class ThemeManager {
     private static let themeKey = "selectedTheme"

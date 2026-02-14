@@ -48,23 +48,11 @@ struct TagDistributionBar: View {
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 16)
-        .onAppear {
-            triggerStaggeredAnimation()
-        }
-        .onChange(of: data.map { $0.tag }) { _, _ in
-            triggerStaggeredAnimation()
-        }
-    }
-
-    private func triggerStaggeredAnimation() {
-        // Reset all progress
-        animationProgress = [:]
-
-        // Stagger each row's animation
-        for index in 0..<data.count {
-            let delay = Double(index) * 0.08
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(Int(delay * 1000)))
+        .task(id: data.map(\.tag)) {
+            animationProgress = [:]
+            for index in 0..<data.count {
+                try? await Task.sleep(for: .milliseconds(index * 80))
+                guard !Task.isCancelled else { return }
                 withAnimation(.easeOut(duration: 0.5)) {
                     animationProgress[index] = 1
                 }

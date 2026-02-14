@@ -409,12 +409,6 @@ struct FilteredExerciseListView: View {
     }
 }
 
-// MARK: - Preview
-
-#Preview(traits: .modifier(ExerciseListPreviewData())) {
-    ExerciseListView()
-        .environment(ThemeManager())
-}
 
 
 

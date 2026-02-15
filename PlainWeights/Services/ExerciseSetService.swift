@@ -128,11 +128,28 @@ enum ExerciseSetService {
             return
         }
 
+        // Don't overwrite a manually captured rest time (user tapped timer to stop it)
+        guard previousSet.restSeconds == nil else { return }
+
         // Calculate rest time in seconds
         let restTime = Int(currentTimestamp.timeIntervalSince(previousSet.timestamp))
 
         // Cap at 180 seconds (3 minutes)
         previousSet.restSeconds = min(restTime, 180)
+        try context.save()
+    }
+
+    /// Manually capture rest time (user tapped the timer to stop it)
+    /// - Parameters:
+    ///   - set: The set to update
+    ///   - seconds: Elapsed seconds to capture
+    ///   - context: SwiftData model context
+    static func captureRestTime(
+        for set: ExerciseSet,
+        seconds: Int,
+        context: ModelContext
+    ) throws {
+        set.restSeconds = min(seconds, 180)
         try context.save()
     }
 

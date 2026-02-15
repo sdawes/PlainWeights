@@ -330,6 +330,10 @@ struct SetRowView: View {
             staticRestTimeView(seconds: restSeconds)
         } else if showTimer && !hasExceededRestTime {
             liveTimerView
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    captureRestTimeManually()
+                }
         } else if showTimer && hasExceededRestTime {
             staticRestTimeView(seconds: 180)
                 .onAppear {
@@ -391,6 +395,12 @@ struct SetRowView: View {
         if seconds >= 120 { return .red }
         if seconds >= 60 { return .orange }
         return themeManager.effectiveTheme.primaryText
+    }
+
+    private func captureRestTimeManually() {
+        guard set.restSeconds == nil else { return }
+        let elapsed = Int(Date().timeIntervalSince(set.timestamp))
+        try? ExerciseSetService.captureRestTime(for: set, seconds: elapsed, context: modelContext)
     }
 
     private func captureRestTimeExpiry() {

@@ -191,8 +191,8 @@ struct FilteredExerciseListView: View {
 
                         Spacer()
 
-                        // Arrow pointing down-right toward FAB
-                        Image(systemName: "arrow.down.right")
+                        // Arrow pointing right-then-down toward FAB
+                        Image(systemName: "arrow.turn.right.down")
                             .font(.title3)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                             .padding(.trailing, 5)

@@ -12,6 +12,9 @@ struct InlineNotesComponent: View {
     @Binding var noteText: String
     let onSave: () -> Void
 
+    // Debounce save to avoid database write on every keystroke
+    @State private var saveTask: Task<Void, Never>?
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             // Placeholder text
@@ -39,7 +42,18 @@ struct InlineNotesComponent: View {
                 .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
         )
         .onChange(of: noteText) { _, _ in
-            onSave()  // Auto-save on every change
+            // Cancel previous pending save and start a new debounce timer
+            saveTask?.cancel()
+            saveTask = Task {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled else { return }
+                onSave()
+            }
+        }
+        .onDisappear {
+            // Flush any pending save when leaving the view
+            saveTask?.cancel()
+            onSave()
         }
     }
 }

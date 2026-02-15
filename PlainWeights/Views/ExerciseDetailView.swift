@@ -334,11 +334,11 @@ struct ExerciseDetailView: View {
         .contentMargins(.top, 0, for: .scrollContent)
         .overlay(alignment: .bottomTrailing) {
             Button(action: {
-                let lastWorkingSet = sets.first(where: { !$0.isWarmUp && !$0.isBonus })
+                let lastSet = sets.first
                 addSetConfig = .previous(
                     exercise: exercise,
-                    weight: lastWorkingSet?.weight,
-                    reps: lastWorkingSet?.reps
+                    weight: lastSet?.weight,
+                    reps: lastSet?.reps
                 )
             }) {
                 Image(systemName: "plus")

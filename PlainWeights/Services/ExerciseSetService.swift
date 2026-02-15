@@ -44,24 +44,24 @@ enum ExerciseSetService {
     ///   - weight: Weight in kg
     ///   - reps: Number of repetitions
     ///   - isWarmUp: Whether this is a warm-up set
-    ///   - isBonus: Whether this is a bonus set (excluded from metrics like warm-up)
     ///   - isDropSet: Whether this is a drop set
     ///   - isAssisted: Whether this is an assisted set (e.g., spotter help)
     ///   - isPauseAtTop: Whether this is a pause at top set
     ///   - isTimedSet: Whether this is a timed/tempo set
     ///   - tempoSeconds: Tempo duration in seconds (only used when isTimedSet is true)
+    ///   - isToFailure: Whether this set was taken to muscular failure
     ///   - exercise: Parent exercise
     ///   - context: SwiftData model context
     static func addSet(
         weight: Double,
         reps: Int,
         isWarmUp: Bool = false,
-        isBonus: Bool = false,
         isDropSet: Bool = false,
         isAssisted: Bool = false,
         isPauseAtTop: Bool = false,
         isTimedSet: Bool = false,
         tempoSeconds: Int = 0,
+        isToFailure: Bool = false,
         to exercise: Exercise,
         context: ModelContext
     ) throws {
@@ -75,12 +75,12 @@ enum ExerciseSetService {
             weight: weight,
             reps: reps,
             isWarmUp: isWarmUp,
-            isBonus: isBonus,
             isDropSet: isDropSet,
             isAssisted: isAssisted,
             isPauseAtTop: isPauseAtTop,
             isTimedSet: isTimedSet,
             tempoSeconds: tempoSeconds,
+            isToFailure: isToFailure,
             exercise: exercise
         )
 
@@ -210,7 +210,7 @@ enum ExerciseSetService {
         // Find new PB among working sets only
         let workingDescriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
-                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp && !set.isBonus
+                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp
             }
         )
         let allWorkingSets = try context.fetch(workingDescriptor)
@@ -241,24 +241,24 @@ enum ExerciseSetService {
     ///   - weight: New weight in kg
     ///   - reps: New number of repetitions
     ///   - isWarmUp: Whether this is a warm-up set
-    ///   - isBonus: Whether this is a bonus set (excluded from metrics like warm-up)
     ///   - isDropSet: Whether this is a drop set
     ///   - isAssisted: Whether this is an assisted set (e.g., spotter help)
     ///   - isPauseAtTop: Whether this is a pause at top set
     ///   - isTimedSet: Whether this is a timed/tempo set
     ///   - tempoSeconds: Tempo duration in seconds (only used when isTimedSet is true)
+    ///   - isToFailure: Whether this set was taken to muscular failure
     ///   - context: SwiftData model context
     static func updateSet(
         _ set: ExerciseSet,
         weight: Double,
         reps: Int,
         isWarmUp: Bool,
-        isBonus: Bool,
         isDropSet: Bool,
         isAssisted: Bool,
         isPauseAtTop: Bool,
         isTimedSet: Bool,
         tempoSeconds: Int,
+        isToFailure: Bool,
         context: ModelContext
     ) throws {
         // Validation
@@ -274,16 +274,16 @@ enum ExerciseSetService {
         set.weight = weight
         set.reps = reps
         set.isWarmUp = isWarmUp
-        set.isBonus = isBonus
         set.isDropSet = isDropSet
         set.isAssisted = isAssisted
         set.isPauseAtTop = isPauseAtTop
         set.isTimedSet = isTimedSet
         set.tempoSeconds = tempoSeconds
+        set.isToFailure = isToFailure
 
         try context.save()
 
-        // Recalculate PBs since values or warm-up/bonus status may have changed
+        // Recalculate PBs since values or warm-up status may have changed
         if let exercise = set.exercise {
             try detectAndMarkPB(for: set, exercise: exercise, context: context)
         }
@@ -339,7 +339,7 @@ enum ExerciseSetService {
     /// 1. Weight takes precedence (highest weight wins)
     /// 2. If multiple sets at same max weight, highest reps wins
     /// 3. If same weight AND reps, earliest timestamp keeps PB
-    /// 4. Warm-up and bonus sets are excluded from PB consideration
+    /// 4. Warm-up sets are excluded from PB consideration
     ///
     /// - Parameters:
     ///   - newSet: The newly added set to evaluate
@@ -350,8 +350,8 @@ enum ExerciseSetService {
         exercise: Exercise,
         context: ModelContext
     ) throws {
-        // Only working sets can be PBs (exclude warm-ups and bonus sets)
-        guard !newSet.isWarmUp && !newSet.isBonus else {
+        // Only working sets can be PBs (exclude warm-ups)
+        guard !newSet.isWarmUp else {
             // Recalculate to clear any stale PB flags (including on this set)
             try recalculatePB(for: exercise, context: context)
             return
@@ -373,7 +373,7 @@ enum ExerciseSetService {
         // Find PB among working sets only
         let descriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
-                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp && !set.isBonus
+                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp
             },
             sortBy: [SortDescriptor(\.weight, order: .reverse), SortDescriptor(\.reps, order: .reverse), SortDescriptor(\.timestamp)]
         )

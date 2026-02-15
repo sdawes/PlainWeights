@@ -212,7 +212,7 @@ struct ComparisonMetricsCard: View {
 
     // Check if today has working sets (derived - cheap)
     private var hasWorkingSets: Bool {
-        todaysSets.contains { !$0.isWarmUp && !$0.isBonus }
+        todaysSets.contains { !$0.isWarmUp }
     }
 
     var body: some View {

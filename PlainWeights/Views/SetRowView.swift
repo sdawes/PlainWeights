@@ -75,7 +75,7 @@ struct SetRowView: View {
                     HStack(alignment: .lastTextBaseline, spacing: 0) {
                         Text(Formatters.formatWeight(themeManager.displayWeight(set.weight)))
                             .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .medium))
-                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                            .foregroundStyle(set.isWarmUp ? .secondary : .primary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
 
@@ -91,7 +91,7 @@ struct SetRowView: View {
 
                         Text("\(set.reps)")
                             .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .medium))
-                            .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                            .foregroundStyle(set.isWarmUp ? .secondary : .primary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                     }
@@ -212,7 +212,7 @@ struct SetRowView: View {
         }
     }
 
-    /// Tinted background for special set types (warm-up, bonus, etc.) and PBs
+    /// Tinted background for special set types (warm-up, failure, etc.) and PBs
     /// Shows colored left border + light fill, starting left of set number
     /// PB styling takes precedence over other set types
     @ViewBuilder
@@ -238,7 +238,7 @@ struct SetRowView: View {
     @ViewBuilder
     private var badgesView: some View {
         // Only show first badge to keep row clean
-        // Priority order: warm-up → bonus → drop → pause → timed
+        // Priority order: warm-up → failure → drop → pause → timed
         if let firstBadge = userBadges.first {
             badgeCircle(for: firstBadge)
         } else {
@@ -249,7 +249,7 @@ struct SetRowView: View {
     private var userBadges: [String] {
         var badges: [String] = []
         if set.isWarmUp { badges.append("warmup") }
-        if set.isBonus { badges.append("bonus") }
+        if set.isToFailure { badges.append("failure") }
         if set.isDropSet { badges.append("dropset") }
         if set.isAssisted { badges.append("assisted") }
         if set.isPauseAtTop { badges.append("pause") }
@@ -268,14 +268,14 @@ struct SetRowView: View {
                     .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
             }
             .foregroundStyle(.orange)
-        case "bonus":
+        case "failure":
             HStack(spacing: 4) {
-                Image(systemName: "plus")
-                    .font(.system(size: 14, weight: .bold))
-                Text("Bonus")
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 14))
+                Text("Fail")
                     .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
             }
-            .foregroundStyle(.green)
+            .foregroundStyle(.red)
         case "dropset":
             HStack(spacing: 4) {
                 Image(systemName: "chevron.down.2")

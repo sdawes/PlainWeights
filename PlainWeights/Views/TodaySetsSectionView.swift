@@ -21,7 +21,7 @@ struct TodaySetsSectionView: View {
             HStack(alignment: .bottom) {
                 Text(ExerciseSetFormatters.formatSet(set, unit: themeManager.weightUnit))
                     .font(themeManager.effectiveTheme.bodyFont)
-                    .foregroundStyle((set.isWarmUp || set.isBonus) ? .secondary : .primary)
+                    .foregroundStyle(set.isWarmUp ? .secondary : .primary)
 
                 Spacer()
 
@@ -31,10 +31,10 @@ struct TodaySetsSectionView: View {
                         .foregroundStyle(.primary)
                 }
 
-                if set.isBonus {
-                    Image(systemName: "star.fill")
+                if set.isToFailure {
+                    Image(systemName: "bolt.fill")
                         .font(.system(size: 14))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.red)
                 }
 
                 if set.isDropSet {

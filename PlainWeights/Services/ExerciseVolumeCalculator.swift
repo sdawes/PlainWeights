@@ -64,7 +64,7 @@ enum ExerciseVolumeCalculator {
 
         // Single pass to calculate volume
         for set in sets {
-            guard !set.isWarmUp && !set.isBonus else { continue }
+            guard !set.isWarmUp else { continue }
 
             // Only calculate volume when both weight and reps are present
             if set.weight > 0 && set.reps > 0 {
@@ -84,7 +84,7 @@ enum ExerciseVolumeCalculator {
 
         // Single pass to calculate weight-based volume
         for set in sets {
-            guard !set.isWarmUp && !set.isBonus else { continue }
+            guard !set.isWarmUp else { continue }
 
             // Only calculate volume when both weight and reps are present
             if set.weight > 0 && set.reps > 0 {
@@ -109,7 +109,7 @@ enum ExerciseVolumeCalculator {
 
         // Single pass through sets to calculate all metrics
         for set in sets {
-            guard !set.isWarmUp && !set.isBonus else { continue }
+            guard !set.isWarmUp else { continue }
 
             totalSets += 1
 

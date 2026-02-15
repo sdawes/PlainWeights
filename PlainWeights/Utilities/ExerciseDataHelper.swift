@@ -44,9 +44,9 @@ enum ExerciseDataHelper {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
-        // Get sets from before today, excluding warm-ups and bonus sets for calculations
+        // Get sets from before today, excluding warm-ups for calculations
         let historicalSets = sets.filter { set in
-            calendar.startOfDay(for: set.timestamp) < today && !set.isWarmUp && !set.isBonus
+            calendar.startOfDay(for: set.timestamp) < today && !set.isWarmUp
         }
 
         guard !historicalSets.isEmpty else { return nil }

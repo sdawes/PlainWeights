@@ -184,8 +184,8 @@ enum AppTheme: String, CaseIterable {
     /// Color for warm-up sets
     static var warmUpColor: Color { .orange }
 
-    /// Color for bonus sets
-    static var bonusColor: Color { .green }
+    /// Color for to-failure sets
+    static var failureColor: Color { .red }
 
     /// Color for drop sets
     static var dropSetColor: Color { .blue }

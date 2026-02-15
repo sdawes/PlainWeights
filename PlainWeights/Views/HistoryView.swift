@@ -950,7 +950,7 @@ struct HistoryView: View {
         var index: [PersistentIdentifier: [ExerciseSet]] = [:]
         for set in allSets {
             guard let exerciseID = set.exercise?.persistentModelID,
-                  !set.isWarmUp && !set.isBonus else { continue }
+                  !set.isWarmUp else { continue }
             index[exerciseID, default: []].append(set)
         }
         return index

@@ -227,7 +227,7 @@ struct ExerciseDetailView: View {
                             isLast: isLast,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            allSets: (set.isWarmUp || set.isBonus) ? nil : Array(sets),
+                            allSets: set.isWarmUp ? nil : Array(sets),
                             showTimer: index == 0,
                             cardPosition: isLast ? .bottom : .middle,
                             isFirstInCard: index == 0
@@ -448,7 +448,7 @@ struct ExerciseDetailView: View {
             previousTodaySetsCount = todaySets.count
         }
         .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in
-            // Refresh when set properties change (warm-up, bonus, etc.)
+            // Refresh when set properties change (warm-up, to-failure, etc.)
             // @Query doesn't always detect property changes within objects
             updateCachedData()
         }

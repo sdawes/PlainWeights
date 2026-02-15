@@ -14,7 +14,7 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
     case warmup = "Warm-up"
     case dropset = "Drop"
     case assisted = "Assisted"
-    case bonus = "Bonus"
+    case toFailure = "To Failure"
     case pause = "Pause"
     case timed = "Timed"
 
@@ -25,7 +25,7 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
         case .warmup: return "flame.fill"
         case .dropset: return "chevron.down.2"
         case .assisted: return "hand.raised.fill"
-        case .bonus: return "plus"
+        case .toFailure: return "bolt.fill"
         case .pause: return "pause.fill"
         case .timed: return "timer"
         }
@@ -36,7 +36,7 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
         case .warmup: return AppTheme.warmUpColor
         case .dropset: return AppTheme.dropSetColor
         case .assisted: return AppTheme.assistedColor
-        case .bonus: return AppTheme.bonusColor
+        case .toFailure: return AppTheme.failureColor
         case .pause: return AppTheme.pauseAtTopColor
         case .timed: return AppTheme.timedSetColor
         }
@@ -51,7 +51,7 @@ struct SetTypePillSelector: View {
 
     // 6 special set types in 3 rows of 2
     private let gridRows: [[SetTypeOption]] = [
-        [.warmup, .bonus],
+        [.warmup, .toFailure],
         [.dropset, .assisted],
         [.pause, .timed]
     ]
@@ -79,7 +79,7 @@ struct SetTypePillSelector: View {
     private func setTypePill(for type: SetTypeOption) -> some View {
         let isSelected = selectedType == type
         // Use white text/icon for most colors, black for light backgrounds like orange
-        let selectedForeground: Color = (type == .warmup || type == .bonus) ? .black : .white
+        let selectedForeground: Color = type == .warmup ? .black : .white
 
         Button {
             // Toggle: tap selected to deselect, tap unselected to select
@@ -157,7 +157,7 @@ struct AddSetView: View {
 
     private static func typeFromSet(_ set: ExerciseSet) -> SetTypeOption? {
         if set.isWarmUp { return .warmup }
-        if set.isBonus { return .bonus }
+        if set.isToFailure { return .toFailure }
         if set.isDropSet { return .dropset }
         if set.isAssisted { return .assisted }
         if set.isPauseAtTop { return .pause }
@@ -320,11 +320,11 @@ struct AddSetView: View {
 
         // Convert selectedType to boolean flags
         let isWarmUp = selectedType == .warmup
-        let isBonus = selectedType == .bonus
         let isDropSet = selectedType == .dropset
         let isAssisted = selectedType == .assisted
         let isPauseAtTop = selectedType == .pause
         let isTimedSet = selectedType == .timed
+        let isToFailure = selectedType == .toFailure
 
         do {
             if let setToEdit = setToEdit {
@@ -334,12 +334,12 @@ struct AddSetView: View {
                     weight: weight,
                     reps: reps,
                     isWarmUp: isWarmUp,
-                    isBonus: isBonus,
                     isDropSet: isDropSet,
                     isAssisted: isAssisted,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
                     tempoSeconds: 0,
+                    isToFailure: isToFailure,
                     context: context
                 )
             } else {
@@ -348,12 +348,12 @@ struct AddSetView: View {
                     weight: weight,
                     reps: reps,
                     isWarmUp: isWarmUp,
-                    isBonus: isBonus,
                     isDropSet: isDropSet,
                     isAssisted: isAssisted,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
                     tempoSeconds: 0,
+                    isToFailure: isToFailure,
                     to: exercise,
                     context: context
                 )

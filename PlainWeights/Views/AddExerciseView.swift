@@ -19,6 +19,7 @@ struct AddExerciseView: View {
     @State private var secondaryTags: [String] = []
     @State private var secondaryTagInput = ""
     @State private var isDuplicateName: Bool = false
+    @State private var tagSuggestions: [String] = []
     @FocusState private var nameFieldFocused: Bool
     @FocusState private var tagFieldFocused: Bool
     @FocusState private var secondaryTagFieldFocused: Bool
@@ -83,6 +84,7 @@ struct AddExerciseView: View {
                             input: $tagInput,
                             isFocused: $tagFieldFocused,
                             isSecondary: false,
+                            suggestions: tagSuggestions,
                             onSubmit: { tagFieldFocused = true }
                         )
 
@@ -93,6 +95,7 @@ struct AddExerciseView: View {
                             input: $secondaryTagInput,
                             isFocused: $secondaryTagFieldFocused,
                             isSecondary: true,
+                            suggestions: tagSuggestions,
                             onSubmit: { secondaryTagFieldFocused = true }
                         )
                         .id("secondaryTags")
@@ -132,6 +135,7 @@ struct AddExerciseView: View {
         .background(themeManager.effectiveTheme.background)
         .onAppear {
             nameFieldFocused = true
+            tagSuggestions = ExerciseService.allUniqueTags(context: modelContext)
         }
     }
 

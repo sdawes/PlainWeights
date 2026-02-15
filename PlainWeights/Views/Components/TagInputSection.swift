@@ -2,7 +2,7 @@
 //  TagInputSection.swift
 //  PlainWeights
 //
-//  Reusable tag input with text field, add button, and tag pills.
+//  Reusable tag input with text field, add button, autocomplete suggestions, and tag pills.
 //
 
 import SwiftUI
@@ -16,7 +16,18 @@ struct TagInputSection: View {
     @Binding var input: String
     var isFocused: FocusState<Bool>.Binding
     let isSecondary: Bool
+    var suggestions: [String] = []
     var onSubmit: () -> Void = {}
+
+    /// Filtered suggestions: match input, exclude already-added tags, max 5
+    private var filteredSuggestions: [String] {
+        let trimmed = input.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return [] }
+        return suggestions
+            .filter { $0.localizedStandardContains(trimmed) && !tags.contains($0) }
+            .prefix(5)
+            .map { $0 }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -59,6 +70,30 @@ struct TagInputSection: View {
                 .disabled(input.trimmingCharacters(in: .whitespaces).isEmpty)
             }
 
+            // Autocomplete suggestions
+            if !filteredSuggestions.isEmpty {
+                FlowLayout(spacing: 6) {
+                    ForEach(filteredSuggestions, id: \.self) { suggestion in
+                        Button {
+                            selectSuggestion(suggestion)
+                        } label: {
+                            Text(suggestion)
+                                .font(themeManager.effectiveTheme.interFont(size: 14))
+                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(themeManager.effectiveTheme.muted.opacity(0.3))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
             if !tags.isEmpty {
                 FlowLayout(spacing: 8) {
                     ForEach(tags, id: \.self) { tag in
@@ -78,6 +113,14 @@ struct TagInputSection: View {
             withAnimation {
                 tags.append(trimmed)
             }
+        }
+        input = ""
+    }
+
+    private func selectSuggestion(_ suggestion: String) {
+        guard !tags.contains(suggestion) && tags.count < 10 else { return }
+        withAnimation {
+            tags.append(suggestion)
         }
         input = ""
     }

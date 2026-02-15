@@ -133,6 +133,23 @@ enum ExerciseService {
         return distribution.sorted { $0.percentage > $1.percentage }
     }
 
+    // MARK: - Tag Suggestions
+
+    /// Fetch all unique tags across all exercises, sorted alphabetically
+    /// Returns combined set of primary and secondary tags (tags are often used in both)
+    static func allUniqueTags(context: ModelContext) -> [String] {
+        let descriptor = FetchDescriptor<Exercise>()
+        let exercises = (try? context.fetch(descriptor)) ?? []
+
+        var allTags = Set<String>()
+        for exercise in exercises {
+            allTags.formUnion(exercise.tags)
+            allTags.formUnion(exercise.secondaryTags)
+        }
+
+        return allTags.sorted()
+    }
+
     // MARK: - Duplicate Name Check
 
     /// Check if an exercise name already exists (case-insensitive)

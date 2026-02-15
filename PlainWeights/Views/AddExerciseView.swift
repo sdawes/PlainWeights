@@ -63,39 +63,53 @@ struct AddExerciseView: View {
             .padding(.bottom, 16)
 
             // Content
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    ExerciseNameField(
-                        name: $name,
-                        isFocused: $nameFieldFocused,
-                        isDuplicate: isDuplicateName,
-                        onSubmit: { tagFieldFocused = true }
-                    )
-                    .onChange(of: name) { _, _ in
-                        checkForDuplicate()
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        ExerciseNameField(
+                            name: $name,
+                            isFocused: $nameFieldFocused,
+                            isDuplicate: isDuplicateName,
+                            onSubmit: { tagFieldFocused = true }
+                        )
+                        .onChange(of: name) { _, _ in
+                            checkForDuplicate()
+                        }
+
+                        TagInputSection(
+                            title: "Primary Tags (optional)",
+                            placeholder: "e.g. chest, push, strength",
+                            tags: $tags,
+                            input: $tagInput,
+                            isFocused: $tagFieldFocused,
+                            isSecondary: false,
+                            onSubmit: { tagFieldFocused = true }
+                        )
+
+                        TagInputSection(
+                            title: "Secondary Tags (optional)",
+                            placeholder: "e.g. triceps, shoulders",
+                            tags: $secondaryTags,
+                            input: $secondaryTagInput,
+                            isFocused: $secondaryTagFieldFocused,
+                            isSecondary: true,
+                            onSubmit: { secondaryTagFieldFocused = true }
+                        )
+                        .id("secondaryTags")
                     }
-
-                    TagInputSection(
-                        title: "Primary Tags (optional)",
-                        placeholder: "e.g. chest, push, strength",
-                        tags: $tags,
-                        input: $tagInput,
-                        isFocused: $tagFieldFocused,
-                        isSecondary: false,
-                        onSubmit: { tagFieldFocused = true }
-                    )
-
-                    TagInputSection(
-                        title: "Secondary Tags (optional)",
-                        placeholder: "e.g. triceps, shoulders",
-                        tags: $secondaryTags,
-                        input: $secondaryTagInput,
-                        isFocused: $secondaryTagFieldFocused,
-                        isSecondary: true,
-                        onSubmit: { secondaryTagFieldFocused = true }
-                    )
+                    .padding(.top, 24)
                 }
-                .padding(.top, 24)
+                .scrollDismissesKeyboard(.immediately)
+                .onChange(of: secondaryTagFieldFocused) { _, focused in
+                    if focused {
+                        withAnimation { proxy.scrollTo("secondaryTags", anchor: .bottom) }
+                    }
+                }
+                .onChange(of: secondaryTags) { _, _ in
+                    if secondaryTagFieldFocused {
+                        withAnimation { proxy.scrollTo("secondaryTags", anchor: .bottom) }
+                    }
+                }
             }
 
             Spacer()

@@ -39,6 +39,7 @@ struct ExerciseDetailView: View {
     @State private var cachedBestSessionVolume: Double = 0
     @State private var cachedLastSessionReps: Int = 0
     @State private var cachedBestSessionReps: Int = 0
+    @State private var cachedExerciseTypeChanged: Bool = false
 
     // Simple getters for cached values
     private var todaysVolume: Double { cachedTodaysVolume }
@@ -207,7 +208,8 @@ struct ExerciseDetailView: View {
                     isWeightedExercise: isWeightedExercise,
                     totalReps: todaysTotalReps,
                     setCount: todaySets.count,
-                    hasSetsBelow: !todaySets.isEmpty
+                    hasSetsBelow: !todaySets.isEmpty,
+                    exerciseTypeChanged: cachedExerciseTypeChanged
                 )
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
@@ -479,6 +481,15 @@ struct ExerciseDetailView: View {
         // Check if weighted exercise
         let workingSets = todaysData.workingSets
         cachedIsWeightedExercise = workingSets.contains { $0.weight > 0 }
+
+        // Detect exercise type transition (e.g., bodyweight → weighted or vice versa)
+        if !workingSets.isEmpty, let lastSets = ExerciseDataHelper.getLastCompletedDaySets(from: allSets) {
+            let todayType = ExerciseMetricsType.determine(from: workingSets)
+            let lastType = ExerciseMetricsType.determine(from: lastSets)
+            cachedExerciseTypeChanged = todayType != lastType
+        } else {
+            cachedExerciseTypeChanged = false
+        }
     }
 
     private func deleteSet(_ set: ExerciseSet) {

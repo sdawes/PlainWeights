@@ -78,29 +78,44 @@ struct ComparisonMetricsCard: View {
         // Last mode indicators
         var lastModeIndicators: ProgressTracker.LastModeIndicators? = nil
         if comparisonMode == .lastSession, let lastMetrics = lastSessionMetrics, !todaysSets.isEmpty {
-            let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: sets)
-            let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: sets)
-            let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
-            let exerciseType = ExerciseMetricsType.determine(from: sets)
+            // Detect exercise type transition (e.g., bodyweight → weighted)
+            let todayType = ExerciseMetricsType.determine(from: todaysSets)
+            let lastSessionSets = ExerciseDataHelper.getLastCompletedDaySets(from: sets) ?? []
+            let lastType = ExerciseMetricsType.determine(from: lastSessionSets)
 
-            lastModeIndicators = ProgressTracker.LastModeIndicators.compare(
-                todaysMaxWeight: todaysMaxWeight,
-                todaysMaxReps: todaysMaxReps,
-                todaysVolume: todaysVolume,
-                lastSessionMaxWeight: lastMetrics.maxWeight,
-                lastSessionMaxReps: lastMetrics.maxReps,
-                lastSessionVolume: lastMetrics.totalVolume,
-                exerciseType: exerciseType
-            )
+            // Skip delta comparison when exercise type changed (misleading numbers)
+            if todayType == lastType {
+                let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: sets)
+                let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: sets)
+                let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
+
+                lastModeIndicators = ProgressTracker.LastModeIndicators.compare(
+                    todaysMaxWeight: todaysMaxWeight,
+                    todaysMaxReps: todaysMaxReps,
+                    todaysVolume: todaysVolume,
+                    lastSessionMaxWeight: lastMetrics.maxWeight,
+                    lastSessionMaxReps: lastMetrics.maxReps,
+                    lastSessionVolume: lastMetrics.totalVolume,
+                    exerciseType: todayType
+                )
+            }
         }
 
         // Best mode indicators
         var bestModeIndicators: ProgressTracker.BestModeIndicators? = nil
-        if comparisonMode == .allTimeBest {
-            bestModeIndicators = ProgressTracker.calculateBestModeIndicators(
-                todaySets: todaysSets,
-                bestMetrics: bestMetrics
-            )
+        if comparisonMode == .allTimeBest, !todaysSets.isEmpty {
+            // Detect exercise type transition for best mode too
+            let todayType = ExerciseMetricsType.determine(from: todaysSets)
+            let bestIsBodyweight = bestMetrics?.isBodyweight ?? false
+            let bestType: ExerciseMetricsType = bestIsBodyweight ? .repsOnly : .combined
+
+            // Skip delta comparison when exercise type changed
+            if todayType == bestType {
+                bestModeIndicators = ProgressTracker.calculateBestModeIndicators(
+                    todaySets: todaysSets,
+                    bestMetrics: bestMetrics
+                )
+            }
         }
 
         return ComputedMetrics(

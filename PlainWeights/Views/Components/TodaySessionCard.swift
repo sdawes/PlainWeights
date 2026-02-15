@@ -19,6 +19,7 @@ struct TodaySessionCard: View {
     let totalReps: Int
     let setCount: Int
     let hasSetsBelow: Bool  // If true, only top corners rounded; if false, all corners
+    var exerciseTypeChanged: Bool = false  // True when exercise switched between bodyweight and weighted
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -109,9 +110,15 @@ struct TodaySessionCard: View {
                         .frame(height: 8)
 
                     // Explanatory text
-                    Text("Next session will compare to this one")
-                        .font(themeManager.effectiveTheme.captionFont)
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    if exerciseTypeChanged {
+                        Text("Switched to weighted — comparison starts next session")
+                            .font(themeManager.effectiveTheme.captionFont)
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    } else {
+                        Text("Next session will compare to this one")
+                            .font(themeManager.effectiveTheme.captionFont)
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    }
                 }
                 .padding(16)
             }

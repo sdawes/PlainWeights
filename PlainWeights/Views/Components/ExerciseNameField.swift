@@ -11,7 +11,7 @@ struct ExerciseNameField: View {
     @Environment(ThemeManager.self) private var themeManager
 
     @Binding var name: String
-    let isFocused: Bool
+    var isFocused: FocusState<Bool>.Binding
     let isDuplicate: Bool
     var onSubmit: () -> Void = {}
 
@@ -22,6 +22,7 @@ struct ExerciseNameField: View {
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
             TextField("e.g. Romanian Deadlift", text: $name)
+                .focused(isFocused)
                 .font(themeManager.effectiveTheme.dataFont(size: 20))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .padding(16)
@@ -31,8 +32,8 @@ struct ExerciseNameField: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(
-                            isFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
-                            lineWidth: isFocused ? 2 : 1
+                            isFocused.wrappedValue ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
+                            lineWidth: isFocused.wrappedValue ? 2 : 1
                         )
                 )
                 .onSubmit(onSubmit)

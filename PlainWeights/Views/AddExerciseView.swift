@@ -67,11 +67,10 @@ struct AddExerciseView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     ExerciseNameField(
                         name: $name,
-                        isFocused: nameFieldFocused,
+                        isFocused: $nameFieldFocused,
                         isDuplicate: isDuplicateName,
                         onSubmit: { tagFieldFocused = true }
                     )
-                    .focused($nameFieldFocused)
                     .onChange(of: name) { _, _ in
                         checkForDuplicate()
                     }
@@ -81,22 +80,20 @@ struct AddExerciseView: View {
                         placeholder: "e.g. chest, push, strength",
                         tags: $tags,
                         input: $tagInput,
-                        isFocused: tagFieldFocused,
+                        isFocused: $tagFieldFocused,
                         isSecondary: false,
                         onSubmit: { tagFieldFocused = true }
                     )
-                    .focused($tagFieldFocused)
 
                     TagInputSection(
                         title: "Secondary Tags (optional)",
                         placeholder: "e.g. triceps, shoulders",
                         tags: $secondaryTags,
                         input: $secondaryTagInput,
-                        isFocused: secondaryTagFieldFocused,
+                        isFocused: $secondaryTagFieldFocused,
                         isSecondary: true,
                         onSubmit: { secondaryTagFieldFocused = true }
                     )
-                    .focused($secondaryTagFieldFocused)
                 }
                 .padding(.top, 24)
             }

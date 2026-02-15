@@ -14,7 +14,7 @@ struct TagInputSection: View {
     let placeholder: String
     @Binding var tags: [String]
     @Binding var input: String
-    let isFocused: Bool
+    var isFocused: FocusState<Bool>.Binding
     let isSecondary: Bool
     var onSubmit: () -> Void = {}
 
@@ -26,6 +26,7 @@ struct TagInputSection: View {
 
             HStack(spacing: 8) {
                 TextField(placeholder, text: $input)
+                    .focused(isFocused)
                     .font(themeManager.effectiveTheme.dataFont(size: 20))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     .padding(16)
@@ -35,8 +36,8 @@ struct TagInputSection: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .strokeBorder(
-                                isFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
-                                lineWidth: isFocused ? 2 : 1
+                                isFocused.wrappedValue ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
+                                lineWidth: isFocused.wrappedValue ? 2 : 1
                             )
                     )
                     .onSubmit {

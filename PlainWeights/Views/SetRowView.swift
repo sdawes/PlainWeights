@@ -205,8 +205,10 @@ struct SetRowView: View {
                     .fill(tintColor)
                     .frame(width: 2)
             }
+            let dark = themeManager.effectiveTheme.isDark
+            let bgOpacity = set.isPB ? (dark ? 0.15 : 0.08) : (dark ? 0.10 : 0.05)
             Rectangle()
-                .fill(effectiveTintColor?.opacity(set.isPB ? 0.08 : 0.05) ?? Color.clear)
+                .fill(effectiveTintColor?.opacity(bgOpacity) ?? Color.clear)
         }
     }
 
@@ -216,8 +218,9 @@ struct SetRowView: View {
     @ViewBuilder
     private var setTypeTintBackground: some View {
         if let tintColor = effectiveTintColor {
-            // PB uses 0.08, assisted uses 0.05, others use 0.1
-            let bgOpacity = set.isPB ? 0.08 : (set.isAssisted ? 0.05 : 0.1)
+            // Higher opacities in dark mode for visibility on black background
+            let dark = themeManager.effectiveTheme.isDark
+            let bgOpacity = set.isPB ? (dark ? 0.15 : 0.08) : (set.isAssisted ? (dark ? 0.10 : 0.05) : (dark ? 0.18 : 0.1))
             HStack(spacing: 0) {
                 Rectangle()
                     .fill(tintColor)

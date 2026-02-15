@@ -91,6 +91,16 @@ enum AppTheme: String, CaseIterable {
         muted.opacity(0.5)  // Was 0.3, now one step darker/lighter
     }
 
+    // MARK: - Dark Mode Detection
+
+    /// Whether this theme uses a dark background (for adjusting tint opacities)
+    var isDark: Bool {
+        switch self {
+        case .dark: return true
+        case .light, .system: return false
+        }
+    }
+
     // MARK: - Accent Color
 
     var accent: Color {
@@ -164,9 +174,9 @@ enum AppTheme: String, CaseIterable {
         Color(red: 0.980, green: 0.675, blue: 0.020)  // #faac05
     }
 
-    /// Subtle background tint for PB rows
+    /// Subtle background tint for PB rows (stronger in dark mode for visibility)
     var pbBackgroundTint: Color {
-        pbColor.opacity(0.12)
+        pbColor.opacity(isDark ? 0.20 : 0.12)
     }
 
     // MARK: - Set Type Colors (static - same across themes)

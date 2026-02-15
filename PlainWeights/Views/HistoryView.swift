@@ -483,7 +483,7 @@ struct HistoryView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background {
                     if hasPB {
-                        themeManager.effectiveTheme.pbColor.opacity(0.08)
+                        themeManager.effectiveTheme.pbColor.opacity(themeManager.effectiveTheme.isDark ? 0.15 : 0.08)
                     } else {
                         Color.clear
                     }
@@ -735,7 +735,7 @@ struct HistoryView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .background {
                 if pbCount > 0 {
-                    themeManager.effectiveTheme.pbColor.opacity(0.08)
+                    themeManager.effectiveTheme.pbColor.opacity(themeManager.effectiveTheme.isDark ? 0.15 : 0.08)
                 } else {
                     themeManager.effectiveTheme.cardBackgroundColor
                 }

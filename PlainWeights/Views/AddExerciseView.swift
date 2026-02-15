@@ -46,7 +46,7 @@ struct AddExerciseView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header (like AddSetView)
+            // Header
             HStack {
                 Text(screenTitle)
                     .font(themeManager.effectiveTheme.title3Font)
@@ -65,9 +65,38 @@ struct AddExerciseView: View {
             // Content
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    exerciseNameSection
-                    tagsSection
-                    secondaryTagsSection
+                    ExerciseNameField(
+                        name: $name,
+                        isFocused: nameFieldFocused,
+                        isDuplicate: isDuplicateName,
+                        onSubmit: { tagFieldFocused = true }
+                    )
+                    .focused($nameFieldFocused)
+                    .onChange(of: name) { _, _ in
+                        checkForDuplicate()
+                    }
+
+                    TagInputSection(
+                        title: "Primary Tags (optional)",
+                        placeholder: "e.g. chest, push, strength",
+                        tags: $tags,
+                        input: $tagInput,
+                        isFocused: tagFieldFocused,
+                        isSecondary: false,
+                        onSubmit: { tagFieldFocused = true }
+                    )
+                    .focused($tagFieldFocused)
+
+                    TagInputSection(
+                        title: "Secondary Tags (optional)",
+                        placeholder: "e.g. triceps, shoulders",
+                        tags: $secondaryTags,
+                        input: $secondaryTagInput,
+                        isFocused: secondaryTagFieldFocused,
+                        isSecondary: true,
+                        onSubmit: { secondaryTagFieldFocused = true }
+                    )
+                    .focused($secondaryTagFieldFocused)
                 }
                 .padding(.top, 24)
             }
@@ -75,185 +104,24 @@ struct AddExerciseView: View {
             Spacer()
 
             // Bottom CTA button
-            addButton
+            Button(action: saveExercise) {
+                let isDisabled = name.isEmpty || isDuplicateName
+                Text(isEditMode ? "Save Changes" : "Add Exercise")
+                    .font(themeManager.effectiveTheme.headlineFont)
+                    .foregroundStyle(themeManager.effectiveTheme.background)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+            .disabled(name.isEmpty || isDuplicateName)
         }
         .padding(24)
         .background(themeManager.effectiveTheme.background)
         .onAppear {
-            // Auto-focus name field when view appears
             nameFieldFocused = true
         }
-    }
-
-    // MARK: - Exercise Name Section
-
-    private var exerciseNameSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Exercise Name")
-                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-
-            TextField("e.g. Romanian Deadlift", text: $name)
-                .font(themeManager.effectiveTheme.dataFont(size: 20))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                .padding(16)
-                .frame(height: 56)
-                .background(themeManager.effectiveTheme.cardBackgroundColor)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(
-                            nameFieldFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
-                            lineWidth: nameFieldFocused ? 2 : 1
-                        )
-                )
-                .focused($nameFieldFocused)
-                .onSubmit {
-                    tagFieldFocused = true
-                }
-                .onChange(of: name) { _, _ in
-                    checkForDuplicate()
-                }
-
-            if isDuplicateName {
-                Text("An exercise with this name already exists")
-                    .font(themeManager.effectiveTheme.captionFont)
-                    .foregroundStyle(.red)
-            }
-        }
-    }
-
-    // MARK: - Tags Section
-
-    private var tagsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Primary Tags (optional)")
-                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-
-            HStack(spacing: 8) {
-                TextField("e.g. chest, push, strength", text: $tagInput)
-                    .font(themeManager.effectiveTheme.dataFont(size: 20))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                    .padding(16)
-                    .frame(height: 56)
-                    .background(themeManager.effectiveTheme.cardBackgroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(
-                                tagFieldFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
-                                lineWidth: tagFieldFocused ? 2 : 1
-                            )
-                    )
-                    .focused($tagFieldFocused)
-                    .onSubmit {
-                        addTag()
-                        // Keep focus for continuous entry
-                        tagFieldFocused = true
-                    }
-
-                Button(action: addTag) {
-                    let isDisabled = tagInput.trimmingCharacters(in: .whitespaces).isEmpty
-                    Text("Add")
-                        .font(themeManager.effectiveTheme.headlineFont)
-                        .foregroundStyle(themeManager.effectiveTheme.background)
-                        .padding(.horizontal, 16)
-                        .frame(height: 56)
-                        .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
-                .disabled(tagInput.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-
-            // Tag pills
-            if !tags.isEmpty {
-                FlowLayout(spacing: 8) {
-                    ForEach(tags, id: \.self) { tag in
-                        TagPillView(tag: tag) {
-                            withAnimation { tags.removeAll { $0 == tag } }
-                        }
-                    }
-                }
-                .padding(.top, 8)
-            }
-        }
-    }
-
-    // MARK: - Secondary Tags Section
-
-    private var secondaryTagsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Secondary Tags (optional)")
-                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-
-            HStack(spacing: 8) {
-                TextField("e.g. triceps, shoulders", text: $secondaryTagInput)
-                    .font(themeManager.effectiveTheme.dataFont(size: 20))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                    .padding(16)
-                    .frame(height: 56)
-                    .background(themeManager.effectiveTheme.cardBackgroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(
-                                secondaryTagFieldFocused ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
-                                lineWidth: secondaryTagFieldFocused ? 2 : 1
-                            )
-                    )
-                    .focused($secondaryTagFieldFocused)
-                    .onSubmit {
-                        addSecondaryTag()
-                        // Keep focus for continuous entry
-                        secondaryTagFieldFocused = true
-                    }
-
-                Button(action: addSecondaryTag) {
-                    let isDisabled = secondaryTagInput.trimmingCharacters(in: .whitespaces).isEmpty
-                    Text("Add")
-                        .font(themeManager.effectiveTheme.headlineFont)
-                        .foregroundStyle(themeManager.effectiveTheme.background)
-                        .padding(.horizontal, 16)
-                        .frame(height: 56)
-                        .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
-                .disabled(secondaryTagInput.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-
-            // Secondary tag pills (grey styling)
-            if !secondaryTags.isEmpty {
-                FlowLayout(spacing: 8) {
-                    ForEach(secondaryTags, id: \.self) { tag in
-                        TagPillView(tag: tag, isSecondary: true) {
-                            withAnimation { secondaryTags.removeAll { $0 == tag } }
-                        }
-                    }
-                }
-                .padding(.top, 8)
-            }
-        }
-    }
-
-    // MARK: - Add Button
-
-    private var addButton: some View {
-        let isDisabled = name.isEmpty || isDuplicateName
-        return Button(action: saveExercise) {
-            Text(isEditMode ? "Save Changes" : "Add Exercise")
-                .font(themeManager.effectiveTheme.headlineFont)
-                .foregroundStyle(themeManager.effectiveTheme.background)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
-        .disabled(isDisabled)
     }
 
     // MARK: - Actions
@@ -264,26 +132,6 @@ struct AddExerciseView: View {
             excluding: exerciseToEdit,
             context: modelContext
         )
-    }
-
-    private func addTag() {
-        let trimmed = tagInput.trimmingCharacters(in: .whitespaces).lowercased()
-        if !trimmed.isEmpty && !tags.contains(trimmed) && tags.count < 10 {
-            withAnimation {
-                tags.append(trimmed)
-            }
-        }
-        tagInput = ""
-    }
-
-    private func addSecondaryTag() {
-        let trimmed = secondaryTagInput.trimmingCharacters(in: .whitespaces).lowercased()
-        if !trimmed.isEmpty && !secondaryTags.contains(trimmed) && secondaryTags.count < 10 {
-            withAnimation {
-                secondaryTags.append(trimmed)
-            }
-        }
-        secondaryTagInput = ""
     }
 
     private func saveExercise() {

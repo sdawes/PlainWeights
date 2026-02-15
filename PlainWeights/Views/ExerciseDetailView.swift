@@ -129,7 +129,7 @@ struct ExerciseDetailView: View {
             }
 
             // Inline Progress Chart - conditional based on toggle
-            if showChart && !sets.isEmpty {
+            if showChart {
                 Section {
                     InlineProgressChart(sets: Array(sets))
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))

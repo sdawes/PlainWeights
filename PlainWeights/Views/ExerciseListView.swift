@@ -70,12 +70,11 @@ struct FilteredExerciseListView: View {
     /// Pre-computed "done today" flags
     @State private var cachedDoneToday: Set<PersistentIdentifier> = []
 
-    /// Exercises sorted by actual workout date (not metadata changes)
-    /// Exercises with no sets go to the bottom
+    /// Exercises sorted by actual workout date, falling back to lastUpdated for exercises with no sets
     private var sortedExercises: [Exercise] {
         exercises.sorted { a, b in
-            let aDate = a.lastWorkoutDate ?? .distantPast
-            let bDate = b.lastWorkoutDate ?? .distantPast
+            let aDate = a.lastWorkoutDate ?? a.lastUpdated
+            let bDate = b.lastWorkoutDate ?? b.lastUpdated
             return aDate > bDate
         }
     }

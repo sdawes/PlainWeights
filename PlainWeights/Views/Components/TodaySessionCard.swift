@@ -102,22 +102,46 @@ struct TodaySessionCard: View {
                 )
                 .padding(16)
             } else {
-                // Empty progress bar when no comparison data
+                // First session — preview bar + baseline + motivational nudge
                 VStack(alignment: .leading, spacing: 6) {
-                    // Empty progress bar
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(themeManager.effectiveTheme.muted)
-                        .frame(height: 8)
-
-                    // Explanatory text
                     if exerciseTypeChanged {
+                        // Empty bar for type switch
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(themeManager.effectiveTheme.muted)
+                            .frame(height: 8)
+
                         Text("Switched to weighted — comparison starts next session")
                             .font(themeManager.effectiveTheme.captionFont)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                     } else {
-                        Text("Next session will compare to this one")
+                        // Preview progress bar at ~60% fill (muted colors)
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(themeManager.effectiveTheme.muted)
+                                    .frame(height: 8)
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(themeManager.effectiveTheme.mutedForeground.opacity(0.3))
+                                    .frame(width: geometry.size.width * 0.6, height: 8)
+                            }
+                        }
+                        .frame(height: 8)
+
+                        // Baseline explanation
+                        if isWeightedExercise {
+                            Text("Baseline: \(Formatters.formatVolume(themeManager.displayWeight(volume))) \(themeManager.weightUnit.displayName) total volume")
+                                .font(themeManager.effectiveTheme.captionFont)
+                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        } else {
+                            Text("Baseline: \(totalReps) total reps")
+                                .font(themeManager.effectiveTheme.captionFont)
+                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        }
+
+                        // Explanation of what will appear
+                        Text("Progress against previous sessions will be shown here")
                             .font(themeManager.effectiveTheme.captionFont)
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     }
                 }
                 .padding(16)

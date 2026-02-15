@@ -266,11 +266,13 @@ struct ComparisonMetricsCard: View {
                 }
                 .background(themeManager.effectiveTheme.borderColor)
             } else {
-                // Empty state
-                Text("No data yet")
-                    .font(themeManager.effectiveTheme.subheadlineFont)
+                // First session empty state
+                Text("After your next session, your weight, reps, and volume deltas will appear here")
+                    .font(themeManager.effectiveTheme.captionFont)
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal, 16)
                     .padding(.vertical, 16)
             }
         }

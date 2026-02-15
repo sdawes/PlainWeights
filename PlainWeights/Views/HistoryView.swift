@@ -31,11 +31,13 @@ private struct PeriodExerciseSummary: Identifiable {
     let id: PersistentIdentifier
     let name: String
     let hasPB: Bool
+    let deltas: HistoryView.ExerciseDeltas?
 
-    init(from workoutExercise: ExerciseDataGrouper.WorkoutExercise) {
+    init(from workoutExercise: ExerciseDataGrouper.WorkoutExercise, deltas: HistoryView.ExerciseDeltas? = nil) {
         self.id = workoutExercise.id
         self.name = workoutExercise.exercise.name
         self.hasPB = workoutExercise.sets.workingSets.contains { $0.isPB }
+        self.deltas = deltas
     }
 }
 
@@ -45,10 +47,12 @@ private struct PeriodDaySummary: Identifiable {
     let date: Date
     let exercises: [PeriodExerciseSummary]
 
-    init(from workoutDay: ExerciseDataGrouper.WorkoutDay) {
+    init(from workoutDay: ExerciseDataGrouper.WorkoutDay, deltas: [PersistentIdentifier: HistoryView.ExerciseDeltas] = [:]) {
         self.id = workoutDay.date
         self.date = workoutDay.date
-        self.exercises = workoutDay.exercises.map { PeriodExerciseSummary(from: $0) }
+        self.exercises = workoutDay.exercises.map { exercise in
+            PeriodExerciseSummary(from: exercise, deltas: deltas[exercise.exercise.persistentModelID])
+        }
     }
 }
 
@@ -62,9 +66,6 @@ struct HistoryView: View {
 
     // Cached display day - prevents expensive recomputation on every render
     @State private var cachedDisplayDay: ExerciseDataGrouper.WorkoutDay?
-
-    // Cached session wins for summary card
-    @State private var cachedSessionWins: SessionWins = .empty
 
     // Cached period metrics for summary view (Week/Month/Year/12 Mo)
     @State private var cachedPeriodMetrics: PeriodMetrics = .empty
@@ -268,7 +269,7 @@ struct HistoryView: View {
                         periodDayHeader(for: daySummary.date)
 
                         ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
-                            periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0)
+                            periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
                         }
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
@@ -507,12 +508,10 @@ struct HistoryView: View {
             let day = Self.computeDisplayDay(from: allSets)
             cachedDisplayDay = day
 
-            // Compute session wins for summary card
+            // Compute exercise deltas for summary card
             if let day = day {
-                cachedSessionWins = Self.computeSessionWins(for: day, from: allSets)
                 cachedExerciseDeltas = Self.computeExerciseDeltas(for: day, from: allSets)
             } else {
-                cachedSessionWins = .empty
                 cachedExerciseDeltas = [:]
             }
         } else {
@@ -520,8 +519,8 @@ struct HistoryView: View {
             let filteredSets = Self.filterSets(allSets, for: selectedPeriod)
             cachedPeriodMetrics = Self.computePeriodMetrics(from: filteredSets)
 
-            // Compute workout days for exercise list
-            cachedPeriodDays = Self.computePeriodDays(from: filteredSets)
+            // Compute workout days for exercise list (pass all sets for delta comparison)
+            cachedPeriodDays = Self.computePeriodDays(from: filteredSets, allSets: Array(allSets))
 
             // Compute tag distribution for the period
             cachedPeriodTagDistribution = ExerciseService.tagDistribution(from: filteredSets)
@@ -590,9 +589,16 @@ struct HistoryView: View {
 
     /// Compute workout days from filtered sets for period summary
     /// Returns days in reverse chronological order (most recent first)
-    private static func computePeriodDays(from sets: [ExerciseSet]) -> [PeriodDaySummary] {
+    /// Uses allSets (unfiltered) to compute deltas against previous sessions outside the period
+    /// Pre-indexes allSets once for O(1) exercise lookup across all days
+    private static func computePeriodDays(from sets: [ExerciseSet], allSets: [ExerciseSet]) -> [PeriodDaySummary] {
         let workoutDays = ExerciseDataGrouper.createWorkoutJournal(from: sets)
-        return workoutDays.map { PeriodDaySummary(from: $0) }
+        // Build index once, reuse across all days — avoids O(D × N) repeated scans
+        let index = buildWorkingSetIndex(from: allSets)
+        return workoutDays.map { day in
+            let deltas = computeExerciseDeltas(for: day, from: allSets, setsByExercise: index)
+            return PeriodDaySummary(from: day, deltas: deltas)
+        }
     }
 
     // MARK: - View Components
@@ -845,26 +851,10 @@ struct HistoryView: View {
         }
     }
 
-    // MARK: - Session Wins
-
-    /// Summary of achievements in a session
-    private struct SessionWins {
-        let pbCount: Int
-        let weightIncreases: Int
-        let repIncreases: Int
-        let volumeIncreases: Int
-
-        var hasAnyWins: Bool {
-            pbCount > 0 || weightIncreases > 0 || repIncreases > 0 || volumeIncreases > 0
-        }
-
-        static let empty = SessionWins(pbCount: 0, weightIncreases: 0, repIncreases: 0, volumeIncreases: 0)
-    }
-
     // MARK: - Exercise Deltas
 
     /// Change direction for a metric: up, down, or same
-    private enum DeltaDirection {
+    enum DeltaDirection {
         case up, down, same, noData
 
         var color: Color {
@@ -877,7 +867,7 @@ struct HistoryView: View {
     }
 
     /// Deltas for an exercise compared to previous session
-    private struct ExerciseDeltas {
+    struct ExerciseDeltas {
         let weight: DeltaDirection
         let reps: DeltaDirection
         let volume: DeltaDirection
@@ -885,83 +875,18 @@ struct HistoryView: View {
         static let empty = ExerciseDeltas(weight: .noData, reps: .noData, volume: .noData)
     }
 
-    /// Compute session wins by comparing to previous sessions
-    private static func computeSessionWins(
-        for day: ExerciseDataGrouper.WorkoutDay,
-        from allSets: [ExerciseSet]
-    ) -> SessionWins {
-        let calendar = Calendar.current
-        let dayStart = calendar.startOfDay(for: day.date)
-
-        // Count PBs
-        let pbCount = day.exercises.flatMap { $0.sets }.filter { $0.isPB }.count
-
-        var weightIncreases = 0
-        var repIncreases = 0
-        var volumeIncreases = 0
-
-        for exercise in day.exercises {
-            let exerciseID = exercise.exercise.persistentModelID
-            let workingSets = exercise.sets.workingSets
-
-            // Current session values
-            let currentMaxWeight = workingSets.map { $0.weight }.max() ?? 0
-            let currentMaxReps = currentMaxWeight > 0
-                ? (workingSets.filter { $0.weight == currentMaxWeight }.map { $0.reps }.max() ?? 0)
-                : (workingSets.map { $0.reps }.max() ?? 0)
-            let currentVolume = exercise.volume
-
-            // Find previous session for this exercise
-            let previousSets = allSets.filter { set in
-                guard let setExerciseID = set.exercise?.persistentModelID,
-                      setExerciseID == exerciseID,
-                      calendar.startOfDay(for: set.timestamp) < dayStart,
-                      !set.isWarmUp && !set.isBonus else {
-                    return false
-                }
-                return true
-            }
-
-            guard !previousSets.isEmpty else { continue }
-
-            // Group by day and get most recent
-            let grouped = Dictionary(grouping: previousSets) { set in
-                calendar.startOfDay(for: set.timestamp)
-            }
-
-            guard let mostRecentDay = grouped.keys.max(),
-                  let previousDaySets = grouped[mostRecentDay] else {
-                continue
-            }
-
-            // Previous session values
-            let prevMaxWeight = previousDaySets.map { $0.weight }.max() ?? 0
-            let prevMaxReps = prevMaxWeight > 0
-                ? (previousDaySets.filter { $0.weight == prevMaxWeight }.map { $0.reps }.max() ?? 0)
-                : (previousDaySets.map { $0.reps }.max() ?? 0)
-            let prevVolume = previousDaySets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
-
-            // Count improvements
-            if currentMaxWeight > prevMaxWeight { weightIncreases += 1 }
-            if currentMaxReps > prevMaxReps { repIncreases += 1 }
-            if currentVolume > prevVolume { volumeIncreases += 1 }
-        }
-
-        return SessionWins(
-            pbCount: pbCount,
-            weightIncreases: weightIncreases,
-            repIncreases: repIncreases,
-            volumeIncreases: volumeIncreases
-        )
-    }
-
-    /// Compute deltas for each exercise compared to previous session
+    /// Compute deltas for each exercise compared to previous session.
+    /// Pre-indexes allSets by exercise ID for O(1) lookup per exercise instead of O(N) full scan.
     private static func computeExerciseDeltas(
         for day: ExerciseDataGrouper.WorkoutDay,
-        from allSets: [ExerciseSet]
+        from allSets: [ExerciseSet],
+        setsByExercise: [PersistentIdentifier: [ExerciseSet]]? = nil
     ) -> [PersistentIdentifier: ExerciseDeltas] {
         let calendar = Calendar.current
         let dayStart = calendar.startOfDay(for: day.date)
+
+        // Use pre-built index if provided, otherwise build one (single-day case)
+        let index = setsByExercise ?? Self.buildWorkingSetIndex(from: allSets)
 
         var deltas: [PersistentIdentifier: ExerciseDeltas] = [:]
 
@@ -976,15 +901,10 @@ struct HistoryView: View {
                 : (workingSets.map { $0.reps }.max() ?? 0)
             let currentVolume = exercise.volume
 
-            // Find previous session for this exercise
-            let previousSets = allSets.filter { set in
-                guard let setExerciseID = set.exercise?.persistentModelID,
-                      setExerciseID == exerciseID,
-                      calendar.startOfDay(for: set.timestamp) < dayStart,
-                      !set.isWarmUp && !set.isBonus else {
-                    return false
-                }
-                return true
+            // Look up previous sets from pre-built index, filter to before this day
+            let allExerciseSets = index[exerciseID] ?? []
+            let previousSets = allExerciseSets.filter {
+                calendar.startOfDay(for: $0.timestamp) < dayStart
             }
 
             guard !previousSets.isEmpty else {
@@ -1022,5 +942,17 @@ struct HistoryView: View {
         }
 
         return deltas
+    }
+
+    /// Build a dictionary index of working sets grouped by exercise ID.
+    /// Called once before processing multiple days to avoid repeated O(N) scans.
+    private static func buildWorkingSetIndex(from allSets: [ExerciseSet]) -> [PersistentIdentifier: [ExerciseSet]] {
+        var index: [PersistentIdentifier: [ExerciseSet]] = [:]
+        for set in allSets {
+            guard let exerciseID = set.exercise?.persistentModelID,
+                  !set.isWarmUp && !set.isBonus else { continue }
+            index[exerciseID, default: []].append(set)
+        }
+        return index
     }
 }

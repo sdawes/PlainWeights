@@ -224,19 +224,21 @@ struct FilteredExerciseListView: View {
                                         .foregroundStyle(color)
                                 }
                                 if isDoneToday {
-                                    Text("Last: ")
-                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                                        .foregroundStyle(.green)
-                                    + Text("Today")
-                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                                        .foregroundStyle(.green)
+                                    HStack(spacing: 0) {
+                                        Text("Last: ")
+                                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                                        Text("Today")
+                                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                                    }
+                                    .foregroundStyle(.green)
                                 } else if let lastWorkout = exercise.lastWorkoutDate {
-                                    Text("Last: ")
-                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                                        .foregroundStyle(color ?? themeManager.effectiveTheme.mutedForeground)
-                                    + Text(Formatters.formatExerciseLastDone(lastWorkout))
-                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                                        .foregroundStyle(color ?? themeManager.effectiveTheme.mutedForeground)
+                                    HStack(spacing: 0) {
+                                        Text("Last: ")
+                                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                                        Text(Formatters.formatExerciseLastDone(lastWorkout))
+                                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                                    }
+                                    .foregroundStyle(color ?? themeManager.effectiveTheme.mutedForeground)
                                 } else {
                                     // No sets recorded yet
                                     Text("No sets recorded")

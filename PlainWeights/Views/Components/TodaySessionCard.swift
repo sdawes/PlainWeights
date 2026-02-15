@@ -40,20 +40,20 @@ struct TodaySessionCard: View {
                     HStack(spacing: 12) {
                         // Running total (bold styling)
                         if isWeightedExercise {
-                            (
+                            HStack(spacing: 0) {
                                 Text(Formatters.formatVolume(themeManager.displayWeight(volume)))
                                     .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
-                                + Text(" \(themeManager.weightUnit.displayName)")
+                                Text(" \(themeManager.weightUnit.displayName)")
                                     .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
-                            )
+                            }
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
                         } else {
-                            (
+                            HStack(spacing: 0) {
                                 Text("\(totalReps)")
                                     .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
-                                + Text(" reps")
+                                Text(" reps")
                                     .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
-                            )
+                            }
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
                         }
 

@@ -463,9 +463,9 @@ struct HistoryView: View {
                             HStack(spacing: 0) {
                                 deltaIndicator("scalemass.fill", direction: deltas.weight)
                                     .frame(width: 20)
-                                deltaIndicator("repeat", direction: deltas.reps)
+                                deltaIndicator("arrow.2.squarepath", direction: deltas.reps)
                                     .frame(width: 20)
-                                deltaIndicator("chart.bar.fill", direction: deltas.volume)
+                                deltaIndicator("square.stack.3d.up.fill", direction: deltas.volume)
                                     .frame(width: 20)
                             }
                         }
@@ -772,8 +772,8 @@ struct HistoryView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 deltaInfoRow(symbol: "scalemass.fill", label: "Max weight")
-                deltaInfoRow(symbol: "repeat", label: "Max reps")
-                deltaInfoRow(symbol: "chart.bar.fill", label: "Total volume")
+                deltaInfoRow(symbol: "arrow.2.squarepath", label: "Max reps")
+                deltaInfoRow(symbol: "square.stack.3d.up.fill", label: "Total volume")
             }
 
             Divider()

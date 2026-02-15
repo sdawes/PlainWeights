@@ -46,20 +46,20 @@ struct VolumeProgressBar: View {
                 HStack {
                     Spacer()
                     if isRepsOnly {
-                        (
+                        HStack(spacing: 0) {
                             Text("\(Int(currentVolume))")
                                 .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
-                            + Text(" reps")
+                            Text(" reps")
                                 .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
-                        )
+                        }
                         .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     } else {
-                        (
+                        HStack(spacing: 0) {
                             Text(Formatters.formatVolume(themeManager.displayWeight(currentVolume)))
                                 .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .bold))
-                            + Text(" \(themeManager.weightUnit.displayName)")
+                            Text(" \(themeManager.weightUnit.displayName)")
                                 .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
-                        )
+                        }
                         .foregroundStyle(themeManager.effectiveTheme.primaryText)
                     }
                 }

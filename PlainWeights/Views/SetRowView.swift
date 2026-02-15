@@ -64,8 +64,8 @@ struct SetRowView: View {
                         Image(systemName: "star.fill")
                             .font(.system(size: 16))
                             .foregroundStyle(themeManager.effectiveTheme.pbColor)
-                            .frame(width: 24, alignment: .leading)
-                            .offset(x: -4)
+                            .frame(width: 24, alignment: setNumber >= 10 ? .center : .leading)
+                            .offset(x: setNumber >= 10 ? 0 : -4)
                     } else {
                         Spacer()
                             .frame(width: 24)

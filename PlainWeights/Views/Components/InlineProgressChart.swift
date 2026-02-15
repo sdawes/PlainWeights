@@ -126,8 +126,8 @@ struct InlineProgressChart: View {
     // Chart mode selection - Max (default) shows max weight/reps, Volume shows total
     @State private var chartMode: ChartMode = .max
 
-    // Trend line toggle
-    @State private var showTrendLine: Bool = false
+    // Trend line toggle - reads persisted default from settings
+    @State private var showTrendLine: Bool = UserDefaults.standard.bool(forKey: "showTrendLineByDefault")
 
     // Cached chart state - computed on init to prevent layout shift
     @State private var cachedState: CachedChartState

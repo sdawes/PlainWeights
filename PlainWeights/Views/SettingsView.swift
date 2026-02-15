@@ -74,6 +74,15 @@ struct SettingsView: View {
                         )
 
                         settingsToggleRow(
+                            icon: "line.diagonal",
+                            title: "Show trend lines by default",
+                            isOn: Binding(
+                                get: { themeManager.showTrendLineByDefault },
+                                set: { themeManager.showTrendLineByDefault = $0 }
+                            )
+                        )
+
+                        settingsToggleRow(
                             icon: "note.text",
                             title: "Show notes by default",
                             isOn: Binding(

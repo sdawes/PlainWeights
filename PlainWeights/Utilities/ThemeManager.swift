@@ -15,6 +15,7 @@ final class ThemeManager {
     private static let notesVisibleKey = "notesVisibleByDefault"
     private static let weightUnitKey = "weightUnit"
     private static let tagBreakdownVisibleKey = "tagBreakdownVisible"
+    private static let showTrendLineKey = "showTrendLineByDefault"
 
     var currentTheme: AppTheme {
         didSet {
@@ -54,6 +55,12 @@ final class ThemeManager {
         }
     }
 
+    var showTrendLineByDefault: Bool {
+        didSet {
+            UserDefaults.standard.set(showTrendLineByDefault, forKey: Self.showTrendLineKey)
+        }
+    }
+
     init() {
         let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.system.rawValue
         self.currentTheme = AppTheme(rawValue: savedTheme) ?? .system
@@ -70,6 +77,9 @@ final class ThemeManager {
 
         // Tag breakdown visibility - defaults to true (visible)
         self.tagBreakdownVisible = UserDefaults.standard.object(forKey: Self.tagBreakdownVisibleKey) as? Bool ?? true
+
+        // Trend line visibility - defaults to false (hidden)
+        self.showTrendLineByDefault = UserDefaults.standard.object(forKey: Self.showTrendLineKey) as? Bool ?? false
     }
 
     // MARK: - Weight Conversion Helpers

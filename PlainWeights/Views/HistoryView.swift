@@ -531,15 +531,15 @@ struct HistoryView: View {
             return sets.filter { $0.timestamp >= calendar.startOfDay(for: monday) }
         case .month:
             // 1st of current month
-            let firstOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
+            let firstOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
             return sets.filter { $0.timestamp >= firstOfMonth }
         case .year:
             // Jan 1 of current year
-            let firstOfYear = calendar.date(from: calendar.dateComponents([.year], from: now))!
+            let firstOfYear = calendar.date(from: calendar.dateComponents([.year], from: now)) ?? now
             return sets.filter { $0.timestamp >= firstOfYear }
         case .rolling12Months:
             // Past 365 days
-            let cutoff = calendar.date(byAdding: .day, value: -365, to: now)!
+            let cutoff = calendar.date(byAdding: .day, value: -365, to: now) ?? now
             return sets.filter { $0.timestamp >= cutoff }
         }
     }

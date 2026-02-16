@@ -14,6 +14,7 @@ struct SettingsView: View {
 
     @State private var showingDeleteAllAlert = false
     @State private var showingThemePicker = false
+    @State private var showingHelp = false
 
     #if DEBUG
     @State private var showingGenerateDataAlert = false
@@ -66,7 +67,7 @@ struct SettingsView: View {
 
                         settingsToggleRow(
                             icon: "chart.line.uptrend.xyaxis",
-                            title: "Show charts by default",
+                            title: "Show charts",
                             isOn: Binding(
                                 get: { themeManager.chartVisibleByDefault },
                                 set: { themeManager.chartVisibleByDefault = $0 }
@@ -75,7 +76,7 @@ struct SettingsView: View {
 
                         settingsToggleRow(
                             icon: "line.diagonal",
-                            title: "Show trend lines by default",
+                            title: "Show trend lines",
                             isOn: Binding(
                                 get: { themeManager.showTrendLineByDefault },
                                 set: { themeManager.showTrendLineByDefault = $0 }
@@ -84,7 +85,7 @@ struct SettingsView: View {
 
                         settingsToggleRow(
                             icon: "note.text",
-                            title: "Show notes by default",
+                            title: "Show notes",
                             isOn: Binding(
                                 get: { themeManager.notesVisibleByDefault },
                                 set: { themeManager.notesVisibleByDefault = $0 }
@@ -93,12 +94,23 @@ struct SettingsView: View {
 
                         settingsToggleRow(
                             icon: "tag",
-                            title: "Show tag breakdown",
+                            title: "Tag breakdown",
                             isOn: Binding(
                                 get: { themeManager.tagBreakdownVisible },
                                 set: { themeManager.tagBreakdownVisible = $0 }
                             )
                         )
+                    }
+
+                    // Help section
+                    settingsRow(
+                        icon: "questionmark.circle",
+                        title: "How It Works",
+                        value: nil,
+                        showChevron: true,
+                        tinted: true
+                    ) {
+                        showingHelp = true
                     }
 
                     // Data section
@@ -171,6 +183,10 @@ struct SettingsView: View {
         }
         .padding(24)
         .background(themeManager.effectiveTheme.background)
+        .sheet(isPresented: $showingHelp) {
+            HelpView()
+                .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        }
         .alert("Delete All Exercises?", isPresented: $showingDeleteAllAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete Everything", role: .destructive) {
@@ -214,6 +230,7 @@ struct SettingsView: View {
             Text("Theme")
                 .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                .lineLimit(1)
 
             Spacer()
 
@@ -228,7 +245,7 @@ struct SettingsView: View {
             .pickerStyle(.menu)
             .tint(themeManager.effectiveTheme.mutedForeground)
         }
-        .frame(minHeight: 31)  // Match Toggle height for consistent card sizes
+        .frame(height: 31)
         .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -250,7 +267,7 @@ struct SettingsView: View {
     private func weightUnitPickerRow() -> some View {
         settingsToggleRow(
             icon: "scalemass",
-            title: "Metric measurements",
+            title: "Metric units",
             isOn: Binding(
                 get: { themeManager.weightUnit.isMetric },
                 set: { themeManager.weightUnit = $0 ? .kg : .lbs }
@@ -264,6 +281,8 @@ struct SettingsView: View {
         title: String,
         value: String?,
         isDestructive: Bool = false,
+        showChevron: Bool = false,
+        tinted: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -276,6 +295,7 @@ struct SettingsView: View {
                 Text(title)
                     .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
                     .foregroundStyle(isDestructive ? .red : themeManager.effectiveTheme.primaryText)
+                    .lineLimit(1)
 
                 Spacer()
 
@@ -283,10 +303,18 @@ struct SettingsView: View {
                     Text(value)
                         .font(themeManager.effectiveTheme.interFont(size: 16, weight: .regular))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .lineLimit(1)
+                }
+
+                if showChevron {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
             }
+            .frame(height: 31)
             .padding(16)
-            .background(themeManager.effectiveTheme.cardBackgroundColor)
+            .background(tinted ? themeManager.effectiveTheme.primary.opacity(0.08) : themeManager.effectiveTheme.cardBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
@@ -311,6 +339,7 @@ struct SettingsView: View {
             Text(title)
                 .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                .lineLimit(1)
 
             Spacer()
 
@@ -318,6 +347,7 @@ struct SettingsView: View {
                 .labelsHidden()
                 .tint(.green)
         }
+        .frame(height: 31)
         .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -331,8 +361,6 @@ struct SettingsView: View {
         do {
             try modelContext.delete(model: Exercise.self)
             try modelContext.save()
-        } catch {
-            print("Failed to delete all exercises: \(error)")
-        }
+        } catch { }
     }
 }

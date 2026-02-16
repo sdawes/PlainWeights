@@ -382,9 +382,7 @@ struct FilteredExerciseListView: View {
             modelContext.delete(exercise)
             do {
                 try modelContext.save()
-            } catch {
-                print("Failed to delete exercise: \(error)")
-            }
+            } catch { }
         }
     }
 

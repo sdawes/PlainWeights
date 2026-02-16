@@ -114,7 +114,7 @@ struct TodaySessionCard: View {
                             .font(themeManager.effectiveTheme.captionFont)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                     } else {
-                        // Preview progress bar at ~60% fill (muted colors)
+                        // Muted preview bar with progress fill
                         GeometryReader { geometry in
                             ZStack(alignment: .leading) {
                                 RoundedRectangle(cornerRadius: 4)
@@ -127,19 +127,17 @@ struct TodaySessionCard: View {
                         }
                         .frame(height: 8)
 
-                        // Baseline explanation
                         if isWeightedExercise {
-                            Text("Baseline: \(Formatters.formatVolume(themeManager.displayWeight(volume))) \(themeManager.weightUnit.displayName) total volume")
+                            Text("\(Formatters.formatVolume(themeManager.displayWeight(volume))) \(themeManager.weightUnit.displayName) total volume")
                                 .font(themeManager.effectiveTheme.captionFont)
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                         } else {
-                            Text("Baseline: \(totalReps) total reps")
+                            Text("\(totalReps) total reps")
                                 .font(themeManager.effectiveTheme.captionFont)
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                         }
 
-                        // Explanation of what will appear
-                        Text("Progress against previous sessions will be shown here")
+                        Text("Volume progress will appear here next time")
                             .font(themeManager.effectiveTheme.captionFont)
                             .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     }

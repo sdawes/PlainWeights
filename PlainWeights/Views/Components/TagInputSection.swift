@@ -36,7 +36,7 @@ struct TagInputSection: View {
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
             HStack(spacing: 8) {
-                TextField(placeholder, text: $input)
+                TextField("", text: $input, prompt: Text(placeholder).foregroundStyle(themeManager.effectiveTheme.tertiaryText))
                     .focused(isFocused)
                     .font(themeManager.effectiveTheme.dataFont(size: 15))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
@@ -59,13 +59,12 @@ struct TagInputSection: View {
 
                 Button(action: addTag) {
                     let isDisabled = input.trimmingCharacters(in: .whitespaces).isEmpty
-                    Text("Add")
-                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .semibold))
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(themeManager.effectiveTheme.background)
-                        .padding(.horizontal, 14)
-                        .frame(height: 40)
+                        .frame(width: 32, height: 32)
                         .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
                 .disabled(input.trimmingCharacters(in: .whitespaces).isEmpty)

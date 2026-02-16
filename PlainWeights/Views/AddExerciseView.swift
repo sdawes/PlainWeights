@@ -77,27 +77,29 @@ struct AddExerciseView: View {
                             checkForDuplicate()
                         }
 
-                        TagInputSection(
-                            title: "Primary Tags (optional)",
-                            placeholder: "e.g. chest, push, strength",
-                            tags: $tags,
-                            input: $tagInput,
-                            isFocused: $tagFieldFocused,
-                            isSecondary: false,
-                            suggestions: tagSuggestions,
-                            onSubmit: { tagFieldFocused = true }
-                        )
+                        HStack(alignment: .top, spacing: 12) {
+                            TagInputSection(
+                                title: "Primary Tags",
+                                placeholder: "e.g. chest",
+                                tags: $tags,
+                                input: $tagInput,
+                                isFocused: $tagFieldFocused,
+                                isSecondary: false,
+                                suggestions: tagSuggestions,
+                                onSubmit: { tagFieldFocused = true }
+                            )
 
-                        TagInputSection(
-                            title: "Secondary Tags (optional)",
-                            placeholder: "e.g. triceps, shoulders",
-                            tags: $secondaryTags,
-                            input: $secondaryTagInput,
-                            isFocused: $secondaryTagFieldFocused,
-                            isSecondary: true,
-                            suggestions: tagSuggestions,
-                            onSubmit: { secondaryTagFieldFocused = true }
-                        )
+                            TagInputSection(
+                                title: "Secondary Tags",
+                                placeholder: "e.g. lats",
+                                tags: $secondaryTags,
+                                input: $secondaryTagInput,
+                                isFocused: $secondaryTagFieldFocused,
+                                isSecondary: true,
+                                suggestions: tagSuggestions,
+                                onSubmit: { secondaryTagFieldFocused = true }
+                            )
+                        }
                         .id("secondaryTags")
                     }
                     .padding(.top, 24)

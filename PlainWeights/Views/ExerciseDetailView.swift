@@ -496,9 +496,7 @@ struct ExerciseDetailView: View {
         withAnimation {
             do {
                 try ExerciseSetService.deleteSet(set, context: context)
-            } catch {
-                print("Error deleting set: \(error)")
-            }
+            } catch { }
         }
     }
 
@@ -509,9 +507,7 @@ struct ExerciseDetailView: View {
 
         do {
             try context.save()
-        } catch {
-            print("Error updating note: \(error)")
-        }
+        } catch { }
     }
 
     /// Delete the exercise and all its associated sets (cascade delete)
@@ -520,9 +516,7 @@ struct ExerciseDetailView: View {
         do {
             try context.save()
             dismiss()
-        } catch {
-            print("Failed to delete exercise: \(error)")
-        }
+        } catch { }
     }
 
 }

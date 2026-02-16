@@ -268,8 +268,8 @@ struct ComparisonMetricsCard: View {
             } else {
                 // First session empty state
                 Text("After your next session, deltas will appear here")
-                    .font(themeManager.effectiveTheme.captionFont)
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    .font(themeManager.effectiveTheme.interFont(size: 14))
+                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, 16)

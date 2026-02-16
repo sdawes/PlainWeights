@@ -359,8 +359,6 @@ struct AddSetView: View {
                 )
             }
             dismiss()
-        } catch {
-            print("Error \(setToEdit == nil ? "adding" : "updating") set: \(error)")
-        }
+        } catch { }
     }
 }

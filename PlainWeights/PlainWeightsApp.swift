@@ -22,7 +22,6 @@ struct PlainWeightsApp: App {
                 cloudKitDatabase: .automatic
             )
             container = try ModelContainer(for: schema, configurations: [config])
-            print("✅ ModelContainer created with CloudKit sync enabled")
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }

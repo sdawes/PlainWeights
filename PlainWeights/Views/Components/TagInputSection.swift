@@ -38,14 +38,15 @@ struct TagInputSection: View {
             HStack(spacing: 8) {
                 TextField(placeholder, text: $input)
                     .focused(isFocused)
-                    .font(themeManager.effectiveTheme.dataFont(size: 20))
+                    .font(themeManager.effectiveTheme.dataFont(size: 15))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                    .padding(16)
-                    .frame(height: 56)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .frame(height: 40)
                     .background(themeManager.effectiveTheme.cardBackgroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 10)
                             .strokeBorder(
                                 isFocused.wrappedValue ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
                                 lineWidth: isFocused.wrappedValue ? 2 : 1
@@ -59,12 +60,12 @@ struct TagInputSection: View {
                 Button(action: addTag) {
                     let isDisabled = input.trimmingCharacters(in: .whitespaces).isEmpty
                     Text("Add")
-                        .font(themeManager.effectiveTheme.headlineFont)
+                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .semibold))
                         .foregroundStyle(themeManager.effectiveTheme.background)
-                        .padding(.horizontal, 16)
-                        .frame(height: 56)
+                        .padding(.horizontal, 14)
+                        .frame(height: 40)
                         .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
                 .buttonStyle(.plain)
                 .disabled(input.trimmingCharacters(in: .whitespaces).isEmpty)

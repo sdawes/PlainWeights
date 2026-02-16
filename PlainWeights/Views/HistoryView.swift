@@ -192,18 +192,11 @@ struct HistoryView: View {
                 .contentMargins(.top, 12, for: .scrollContent)
                 .id(selectedPeriod)  // Force scroll to top when period changes
             } else {
-                // Empty state
-                Spacer()
-                VStack(spacing: 12) {
-                    RetroLifterView(pixelSize: 5)
-
-                    Text("No Workouts Yet")
-                        .font(themeManager.effectiveTheme.title2Font)
-
-                    Text("Complete your first workout to see a summary here.")
-                        .font(themeManager.effectiveTheme.subheadlineFont)
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                }
+                Text("Complete your first workout to see a summary here.")
+                    .font(themeManager.effectiveTheme.subheadlineFont)
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 40)
                 Spacer()
             }
         }
@@ -311,18 +304,11 @@ struct HistoryView: View {
             .contentMargins(.top, 12, for: .scrollContent)
             .id(selectedPeriod)  // Force scroll to top when period changes
         } else {
-            // Empty state for period
-            Spacer()
-            VStack(spacing: 12) {
-                RetroLifterView(pixelSize: 5)
-
-                Text("No Workouts")
-                    .font(themeManager.effectiveTheme.title2Font)
-
-                Text("No workouts recorded for this time period.")
-                    .font(themeManager.effectiveTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            }
+            Text("No workouts recorded for this time period.")
+                .font(themeManager.effectiveTheme.subheadlineFont)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 40)
             Spacer()
         }
     }

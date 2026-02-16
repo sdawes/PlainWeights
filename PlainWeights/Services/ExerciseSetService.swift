@@ -85,6 +85,7 @@ enum ExerciseSetService {
         )
 
         context.insert(set)
+        exercise.lastUpdated = set.timestamp
         try context.save()
 
         // Capture rest time on the previous set (how long since that set until this one)

@@ -656,14 +656,14 @@ struct InlineProgressChart: View {
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
 
-                // Single data point: show a visible dot
-                if cachedState.dataPoints.count == 1 {
+                // Endpoint dots: first and last data points
+                if point.index == 0 || point.index == cachedState.dataPoints.count - 1 {
                     PointMark(
                         x: .value("Index", point.index),
                         y: .value("Reps", point.normalizedReps)
                     )
                     .foregroundStyle(themeManager.effectiveTheme.chartColor2)
-                    .symbolSize(40)
+                    .symbolSize(20)
                 }
 
                 // Linear regression trend line for reps-only (only draw at first and last points)
@@ -724,21 +724,21 @@ struct InlineProgressChart: View {
                 .lineStyle(StrokeStyle(lineWidth: 1.0, dash: [5, 3]))
                 .interpolationMethod(.monotone)
 
-                // Single data point: show visible dots for both weight and reps
-                if cachedState.dataPoints.count == 1 {
+                // Endpoint dots: first and last data points
+                if point.index == 0 || point.index == cachedState.dataPoints.count - 1 {
                     PointMark(
                         x: .value("Index", point.index),
                         y: .value("Weight", point.normalizedWeight)
                     )
                     .foregroundStyle(themeManager.effectiveTheme.chartColor1)
-                    .symbolSize(40)
+                    .symbolSize(20)
 
                     PointMark(
                         x: .value("Index", point.index),
                         y: .value("Reps", point.normalizedReps)
                     )
                     .foregroundStyle(themeManager.effectiveTheme.chartColor2)
-                    .symbolSize(30)
+                    .symbolSize(16)
                 }
 
                 // Linear regression trend line (only draw at first and last points)
@@ -821,14 +821,14 @@ struct InlineProgressChart: View {
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
 
-                // Single data point: show a visible dot
-                if cachedState.dataPoints.count == 1 {
+                // Endpoint dots: first and last data points
+                if point.index == 0 || point.index == cachedState.dataPoints.count - 1 {
                     PointMark(
                         x: .value("Index", point.index),
                         y: .value("Total Reps", point.normalizedTotalReps)
                     )
                     .foregroundStyle(themeManager.effectiveTheme.chartColor4)
-                    .symbolSize(40)
+                    .symbolSize(20)
                 }
 
                 // Linear regression trend line for total reps (only draw at first and last points)
@@ -876,14 +876,14 @@ struct InlineProgressChart: View {
                 .lineStyle(StrokeStyle(lineWidth: 2))
                 .interpolationMethod(.monotone)
 
-                // Single data point: show a visible dot
-                if cachedState.dataPoints.count == 1 {
+                // Endpoint dots: first and last data points
+                if point.index == 0 || point.index == cachedState.dataPoints.count - 1 {
                     PointMark(
                         x: .value("Index", point.index),
                         y: .value("Volume", point.normalizedVolume)
                     )
                     .foregroundStyle(themeManager.effectiveTheme.chartColor3)
-                    .symbolSize(40)
+                    .symbolSize(20)
                 }
 
                 // Linear regression trend line for volume (only draw at first and last points)

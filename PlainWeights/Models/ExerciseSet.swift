@@ -25,7 +25,7 @@ final class ExerciseSet {
     var isToFailure: Bool = false    // flag to indicate set was taken to muscular failure (included in metrics)
     var tempoSeconds: Int = 0        // tempo duration in seconds (only used when isTimedSet is true)
     var isPB: Bool = false           // flag to indicate personal best (highest weight, then reps, then earliest timestamp)
-    var restSeconds: Int?            // seconds rested after this set (nil for first set or not yet captured)
+    var restSeconds: Int? = nil       // seconds rested after this set (nil for first set or not yet captured)
     var exercise: Exercise?  // parent (optional to handle cascade delete properly)
 
     init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isDropSet: Bool = false, isAssisted: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isToFailure: Bool = false, isPB: Bool = false, exercise: Exercise) {
@@ -41,9 +41,6 @@ final class ExerciseSet {
         self.isToFailure = isToFailure
         self.isPB = isPB
         self.exercise = exercise
-
-        // Automatically update parent exercise's lastUpdated timestamp
-        exercise.lastUpdated = timestamp
     }
 }
 

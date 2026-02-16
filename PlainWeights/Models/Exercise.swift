@@ -58,13 +58,10 @@ extension Exercise {
     }
 
     /// The date of the most recent set (actual workout activity)
-    /// Returns nil if no sets exist
-    /// Optimized: just get the first timestamp since sets are typically ordered
+    /// Uses lastUpdated which is kept in sync by ExerciseSetService when sets are added
     var lastWorkoutDate: Date? {
         guard let sets = sets, !sets.isEmpty else { return nil }
-        // Sets are typically pre-sorted newest first by queries
-        // If not, fallback to max() but this is rare
-        return sets.lazy.map { $0.timestamp }.max()
+        return lastUpdated
     }
 
     /// Whether this exercise was actually worked out today (has sets from today)

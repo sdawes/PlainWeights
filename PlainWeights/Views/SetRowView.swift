@@ -71,38 +71,18 @@ struct SetRowView: View {
                             .frame(width: 24)
                     }
 
-                    // Weight × Reps
-                    HStack(alignment: .lastTextBaseline, spacing: 0) {
-                        Text(Formatters.formatWeight(themeManager.displayWeight(set.weight)))
-                            .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .medium))
-                            .foregroundStyle(set.isWarmUp ? .secondary : .primary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-
-                        Text(" \(themeManager.weightUnit.displayName)")
-                            .font(themeManager.effectiveTheme.interFont(size: 14))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-
-                        Text(" × ")
-                            .font(themeManager.effectiveTheme.interFont(size: 14))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-
-                        Text("\(set.reps)")
-                            .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .medium))
-                            .foregroundStyle(set.isWarmUp ? .secondary : .primary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-                    }
+                    // Weight × Reps (AttributedString so minimumScaleFactor shrinks uniformly)
+                    Text(weightRepsAttributedString)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
 
                     Spacer()
 
-                    // Badges (immediately left of timer/timestamp) - only reserve space when badge exists
+                    // Badge icon (immediately left of timer/timestamp)
                     if !userBadges.isEmpty {
                         badgesView
-                            .frame(minWidth: 55, alignment: .trailing)
-                            .padding(.trailing, 4)
+                            .frame(width: 24, alignment: .trailing)
+                            .padding(.trailing, 8)
                     }
 
                     // Col 9: Timer or Timestamp
@@ -246,6 +226,26 @@ struct SetRowView: View {
         }
     }
 
+    private var weightRepsAttributedString: AttributedString {
+        let valueColor: Color = set.isWarmUp ? .secondary : .primary
+        let valueFont = themeManager.effectiveTheme.dataFont(size: 20, weight: .medium)
+        let separatorFont = themeManager.effectiveTheme.interFont(size: 14)
+
+        var weight = AttributedString(Formatters.formatWeight(themeManager.displayWeight(set.weight)))
+        weight.font = valueFont
+        weight.foregroundColor = valueColor
+
+        var separator = AttributedString(" \(themeManager.weightUnit.displayName) × ")
+        separator.font = separatorFont
+        separator.foregroundColor = .secondary
+
+        var reps = AttributedString("\(set.reps)")
+        reps.font = valueFont
+        reps.foregroundColor = valueColor
+
+        return weight + separator + reps
+    }
+
     private var userBadges: [String] {
         var badges: [String] = []
         if set.isWarmUp { badges.append("warmup") }
@@ -261,58 +261,29 @@ struct SetRowView: View {
     private func badgeCircle(for badge: String) -> some View {
         switch badge {
         case "warmup":
-            HStack(spacing: 4) {
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 14))
-                Text("Warm")
-                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-            }
-            .foregroundStyle(.orange)
+            Image(systemName: "flame.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(.orange)
         case "failure":
-            HStack(spacing: 4) {
-                Image(systemName: "bolt.fill")
-                    .font(.system(size: 14))
-                Text("Fail")
-                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-            }
-            .foregroundStyle(.red)
+            Image(systemName: "bolt.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(.red)
         case "dropset":
-            HStack(spacing: 4) {
-                Image(systemName: "chevron.down.2")
-                    .font(.system(size: 14, weight: .bold))
-                Text("Drop")
-                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-            }
-            .foregroundStyle(.blue)
+            Image(systemName: "chevron.down.2")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(.blue)
         case "assisted":
-            HStack(spacing: 4) {
-                Image(systemName: "hand.raised.fill")
-                    .font(.system(size: 14))
-                Text("Assist")
-                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-            }
-            .foregroundStyle(Color(red: 1.0, green: 0.2, blue: 0.5))
+            Image(systemName: "hand.raised.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(Color(red: 1.0, green: 0.2, blue: 0.5))
         case "pause":
-            HStack(spacing: 4) {
-                Image(systemName: "pause.fill")
-                    .font(.system(size: 14))
-                Text("Pause")
-                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-            }
-            .foregroundStyle(.indigo)
+            Image(systemName: "pause.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(.indigo)
         case "timed":
-            HStack(spacing: 4) {
-                Image(systemName: "timer")
-                    .font(.system(size: 14))
-                if set.tempoSeconds > 0 {
-                    Text("\(set.tempoSeconds)s")
-                        .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
-                } else {
-                    Text("Timed")
-                        .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-                }
-            }
-            .foregroundStyle(.gray)
+            Image(systemName: "timer")
+                .font(.system(size: 14))
+                .foregroundStyle(.gray)
         default:
             EmptyView()
         }

@@ -24,6 +24,11 @@ struct ExerciseNameField: View {
             TextField("e.g. Romanian Deadlift", text: $name)
                 .focused(isFocused)
                 .font(themeManager.effectiveTheme.dataFont(size: 20))
+                .onChange(of: name) { _, newValue in
+                    if newValue.count > 50 {
+                        name = String(newValue.prefix(50))
+                    }
+                }
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .padding(16)
                 .frame(height: 56)

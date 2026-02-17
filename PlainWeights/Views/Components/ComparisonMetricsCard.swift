@@ -303,6 +303,8 @@ struct ComparisonMetricsCard: View {
             Text(value)
                 .font(themeManager.effectiveTheme.dataFont(size: 22, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -321,6 +323,8 @@ struct ComparisonMetricsCard: View {
                     Text("\(prefix)\(displayValue)")
                         .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .bold))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                     Spacer()
                 }
                 .padding(.horizontal, 16)

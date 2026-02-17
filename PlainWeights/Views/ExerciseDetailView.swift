@@ -375,8 +375,12 @@ struct ExerciseDetailView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
+                    let willShow = !showNotes
                     withAnimation(.easeInOut(duration: 0.3)) {
                         showNotes.toggle()
+                        if willShow {
+                            scrollProxy.scrollTo("top", anchor: .top)
+                        }
                     }
                 }) {
                     Image(systemName: "tag")

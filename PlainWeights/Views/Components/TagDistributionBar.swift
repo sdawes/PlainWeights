@@ -12,6 +12,11 @@ struct TagDistributionBar: View {
 
     let data: [(tag: String, percentage: Double)]
 
+    /// Filtered data excluding tags under 1%
+    private var visibleData: [(tag: String, percentage: Double)] {
+        data.filter { $0.percentage >= 1 }
+    }
+
     // Color palette for chart segments
     static let chartColors: [Color] = [
         Color(red: 0.93, green: 0.47, blue: 0.20),  // Orange
@@ -31,8 +36,8 @@ struct TagDistributionBar: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(data.enumerated(), id: \.element.tag) { index, item in
-                let isLast = index == data.count - 1
+            ForEach(visibleData.enumerated(), id: \.element.tag) { index, item in
+                let isLast = index == visibleData.count - 1
 
                 tagRow(
                     tag: item.tag,

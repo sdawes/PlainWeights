@@ -13,9 +13,7 @@ struct TagAnalyticsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
 
-    var tagDistribution: [(tag: String, percentage: Double)] {
-        ExerciseService.todayTagDistribution(context: modelContext)
-    }
+    @State private var tagDistribution: [(tag: String, percentage: Double)] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -67,6 +65,9 @@ struct TagAnalyticsView: View {
         }
         .padding(24)
         .background(themeManager.effectiveTheme.background)
+        .onAppear {
+            tagDistribution = ExerciseService.todayTagDistribution(context: modelContext)
+        }
     }
 
     private var legendView: some View {

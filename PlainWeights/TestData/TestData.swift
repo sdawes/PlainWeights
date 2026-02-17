@@ -42,7 +42,7 @@ class TestData {
             components.hour = hour
             components.minute = minute
             components.second = second
-            return Calendar.current.date(from: components)!
+            return Calendar.current.date(from: components) ?? Date()
         }
 
         // Exercise definitions with notes and timestamps

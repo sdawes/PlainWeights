@@ -43,7 +43,7 @@ struct ConfettiView: View {
                     Color(red: 1.0, green: 0.84, blue: 0.0),
                     Color(red: 0.95, green: 0.70, blue: 0.1),
                     Color(red: 1.0, green: 0.90, blue: 0.50),
-                ].randomElement()!,
+                ].randomElement() ?? Color(red: 1.0, green: 0.75, blue: 0.0),
                 rotation: Double.random(in: 0...360),
                 scale: CGFloat.random(in: 0.6...1.0)
             ))

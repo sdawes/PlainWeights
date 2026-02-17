@@ -61,6 +61,17 @@ enum Formatters {
         }
     }
 
+    /// Format weight for text field input (no grouping separators, parseable by Double())
+    static func formatWeightForInput(_ value: Double) -> String {
+        if value.truncatingRemainder(dividingBy: 1) == 0 {
+            return value.formatted(.number.precision(.fractionLength(0)).grouping(.never))
+        } else if (value * 10).truncatingRemainder(dividingBy: 1) == 0 {
+            return value.formatted(.number.precision(.fractionLength(1)).grouping(.never))
+        } else {
+            return value.formatted(.number.precision(.fractionLength(2)).grouping(.never))
+        }
+    }
+
     /// Format weight value in specified unit with unit suffix (e.g., "100 kg" or "220 lbs")
     /// - Parameters:
     ///   - kg: Weight value in kilograms (storage unit)

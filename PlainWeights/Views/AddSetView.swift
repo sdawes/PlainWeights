@@ -141,13 +141,13 @@ struct AddSetView: View {
 
         // If editing, pre-populate all fields from the set
         if let set = setToEdit {
-            _weightText = State(initialValue: Formatters.formatWeight(set.weight))
+            _weightText = State(initialValue: Formatters.formatWeightForInput(set.weight))
             _repsText = State(initialValue: String(set.reps))
             _selectedType = State(initialValue: Self.typeFromSet(set))
         } else {
             // If adding new set, use initial values
             if let initialWeight = initialWeight, initialWeight >= 0 {
-                _weightText = State(initialValue: Formatters.formatWeight(initialWeight))
+                _weightText = State(initialValue: Formatters.formatWeightForInput(initialWeight))
             }
             if let initialReps = initialReps, initialReps >= 0 {
                 _repsText = State(initialValue: String(initialReps))
@@ -281,7 +281,7 @@ struct AddSetView: View {
             if !hasConvertedInitialWeight {
                 if let kgValue = Double(weightText), kgValue > 0 {
                     let displayValue = themeManager.displayWeight(kgValue)
-                    weightText = Formatters.formatWeight(displayValue)
+                    weightText = Formatters.formatWeightForInput(displayValue)
                 }
                 hasConvertedInitialWeight = true
             }

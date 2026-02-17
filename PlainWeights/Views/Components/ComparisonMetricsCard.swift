@@ -267,7 +267,7 @@ struct ComparisonMetricsCard: View {
                 .background(themeManager.effectiveTheme.borderColor)
             } else {
                 // First session empty state
-                Text("After your next session, deltas will appear here")
+                Text("Next session will compare weight, reps, and volume vs today")
                     .font(themeManager.effectiveTheme.interFont(size: 14))
                     .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     .multilineTextAlignment(.center)

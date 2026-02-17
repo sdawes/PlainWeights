@@ -182,6 +182,17 @@ enum ExerciseSetService {
         context.delete(set)
         try context.save()
 
+        // Recalculate lastUpdated from remaining sets
+        if let exercise = exercise {
+            if let remainingSets = exercise.sets,
+               let mostRecent = remainingSets.max(by: { $0.timestamp < $1.timestamp }) {
+                exercise.lastUpdated = mostRecent.timestamp
+            } else {
+                exercise.lastUpdated = exercise.createdDate
+            }
+            try context.save()
+        }
+
         // If deleted set was PB, recalculate for the exercise
         if wasPB, let exercise = exercise {
             try recalculatePB(for: exercise, context: context)

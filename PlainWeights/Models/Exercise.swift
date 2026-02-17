@@ -58,10 +58,9 @@ extension Exercise {
     }
 
     /// The date of the most recent set (actual workout activity)
-    /// Uses lastUpdated which is kept in sync by ExerciseSetService when sets are added
     var lastWorkoutDate: Date? {
         guard let sets = sets, !sets.isEmpty else { return nil }
-        return lastUpdated
+        return sets.max(by: { $0.timestamp < $1.timestamp })?.timestamp
     }
 
     /// Whether this exercise was actually worked out today (has sets from today)

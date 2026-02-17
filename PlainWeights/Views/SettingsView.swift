@@ -18,7 +18,6 @@ struct SettingsView: View {
 
     #if DEBUG
     @State private var showingGenerateDataAlert = false
-    @State private var showingClearDataAlert = false
     #endif
 
     var body: some View {
@@ -153,14 +152,6 @@ struct SettingsView: View {
                             showingGenerateDataAlert = true
                         }
 
-                        settingsRow(
-                            icon: "trash",
-                            title: "Clear All Data",
-                            value: nil,
-                            isDestructive: true
-                        ) {
-                            showingClearDataAlert = true
-                        }
                     }
                     #endif
 
@@ -204,15 +195,6 @@ struct SettingsView: View {
             }
         } message: {
             Text("This will DELETE all your existing workout data and replace it with test data. This cannot be undone.")
-        }
-        .alert("Clear All Data?", isPresented: $showingClearDataAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete All", role: .destructive) {
-                TestDataGenerator.clearAllData(modelContext: modelContext)
-                dismiss()
-            }
-        } message: {
-            Text("This will DELETE all your workout data including exercises and sets. This cannot be undone.")
         }
         #endif
     }

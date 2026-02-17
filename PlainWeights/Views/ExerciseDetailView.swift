@@ -217,8 +217,7 @@ struct ExerciseDetailView: View {
 
                 if !todaySets.isEmpty {
                     // Set rows with card positions
-                    ForEach(todaySets.indices, id: \.self) { index in
-                        let set = todaySets[index]
+                    ForEach(todaySets.enumerated(), id: \.element.persistentModelID) { index, set in
                         let isLast = index == todaySets.count - 1
                         SetRowView(
                             set: set,
@@ -269,8 +268,7 @@ struct ExerciseDetailView: View {
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
 
-                    ForEach(dayGroup.sets.indices, id: \.self) { index in
-                        let set = dayGroup.sets[index]
+                    ForEach(dayGroup.sets.enumerated(), id: \.element.persistentModelID) { index, set in
                         let isLast = index == dayGroup.sets.count - 1
                         SetRowView(
                             set: set,

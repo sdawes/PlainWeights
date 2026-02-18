@@ -2,80 +2,57 @@
 //  ConfettiView.swift
 //  PlainWeights
 //
-//  Celebratory confetti animation for Personal Best achievements.
+//  PB celebration visual effects and notification definitions.
 //
 
 import SwiftUI
 
-// MARK: - Confetti Particle
+// MARK: - PB Glow Overlay
 
-struct ConfettiParticle: Identifiable {
-    let id = UUID()
-    let x: CGFloat
-    let color: Color
-    let rotation: Double
-    let scale: CGFloat
-}
+/// Siri-style animated golden glow border for Personal Best achievements
+struct PBGlowOverlay: View {
+    @State private var rotation: Double = 0
+    @State private var glowOpacity: Double = 0
 
-// MARK: - Confetti View
-
-struct ConfettiView: View {
-    @State private var animate = false
-
-    let colors: [Color] = [
+    private let goldColors: [Color] = [
         Color(red: 1.0, green: 0.75, blue: 0.0),   // Gold
         Color(red: 1.0, green: 0.82, blue: 0.2),   // Light gold
+        Color(red: 0.95, green: 0.70, blue: 0.1),   // Dark gold
         Color(red: 1.0, green: 0.84, blue: 0.0),   // Yellow gold
-        Color(red: 0.95, green: 0.70, blue: 0.1),  // Dark gold
-        Color(red: 1.0, green: 0.90, blue: 0.50),  // Pale gold
+        Color(red: 1.0, green: 0.75, blue: 0.0),   // Gold (repeat for seamless loop)
     ]
 
-    let particles: [ConfettiParticle]
-
-    init() {
-        var items: [ConfettiParticle] = []
-        for _ in 0..<60 {
-            items.append(ConfettiParticle(
-                x: CGFloat.random(in: 0...1),
-                color: [
-                    Color(red: 1.0, green: 0.75, blue: 0.0),
-                    Color(red: 1.0, green: 0.82, blue: 0.2),
-                    Color(red: 1.0, green: 0.84, blue: 0.0),
-                    Color(red: 0.95, green: 0.70, blue: 0.1),
-                    Color(red: 1.0, green: 0.90, blue: 0.50),
-                ].randomElement() ?? Color(red: 1.0, green: 0.75, blue: 0.0),
-                rotation: Double.random(in: 0...360),
-                scale: CGFloat.random(in: 0.6...1.0)
-            ))
-        }
-        self.particles = items
-    }
-
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                ForEach(particles) { particle in
-                    Rectangle()
-                        .fill(particle.color)
-                        .frame(width: 8, height: 14)
-                        .scaleEffect(particle.scale)
-                        .rotationEffect(.degrees(particle.rotation + (animate ? 360 : 0)))
-                        .position(
-                            x: particle.x * geometry.size.width,
-                            y: animate ? geometry.size.height + 50 : -50
-                        )
-                        .animation(
-                            .easeIn(duration: Double.random(in: 1.5...2.5))
-                            .delay(Double.random(in: 0...0.3)),
-                            value: animate
-                        )
+        RoundedRectangle(cornerRadius: 40)
+            .strokeBorder(
+                AngularGradient(
+                    colors: goldColors,
+                    center: .center,
+                    angle: .degrees(rotation)
+                ),
+                lineWidth: 6
+            )
+            .blur(radius: 20)
+            .opacity(glowOpacity)
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+            .onAppear {
+                // Rotating glow
+                withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
+                    rotation = 360
+                }
+                // Fade in
+                withAnimation(.easeIn(duration: 0.3)) {
+                    glowOpacity = 0.8
+                }
+                // Fade out after delay
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(2.5))
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        glowOpacity = 0
+                    }
                 }
             }
-        }
-        .allowsHitTesting(false)
-        .onAppear {
-            animate = true
-        }
     }
 }
 
@@ -86,12 +63,10 @@ struct PBCelebrationOverlay: View {
 
     var body: some View {
         if isShowing {
-            ConfettiView()
-                .ignoresSafeArea()
+            PBGlowOverlay()
                 .onAppear {
-                    // Auto-dismiss after animation completes
                     Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(2.5))
+                        try? await Task.sleep(for: .seconds(3))
                         isShowing = false
                     }
                 }
@@ -111,6 +86,6 @@ extension Notification.Name {
 #Preview {
     ZStack {
         Color.black
-        ConfettiView()
+        PBGlowOverlay()
     }
 }

@@ -25,6 +25,7 @@ struct ExerciseDetailView: View {
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
     @State private var showChart: Bool = true  // Will be set in onAppear from setting
+    @State private var showingPBCelebration = false
 
     // Cached data for performance - updated only when sets change
     @State private var todaySets: [ExerciseSet] = []
@@ -350,6 +351,9 @@ struct ExerciseDetailView: View {
             .padding(.trailing, 20)
             .padding(.bottom, 20)
         }
+        .overlay {
+            PBCelebrationOverlay(isShowing: $showingPBCelebration)
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
@@ -463,6 +467,9 @@ struct ExerciseDetailView: View {
             // Refresh when set properties change (warm-up, to-failure, etc.)
             // @Query doesn't always detect property changes within objects
             updateCachedData()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .pbAchieved)) { _ in
+            showingPBCelebration = true
         }
         } // ScrollViewReader
     }

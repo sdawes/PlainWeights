@@ -57,11 +57,13 @@ enum TodaySessionCalculator {
         return workingSets.map { $0.weight }.max() ?? 0.0
     }
 
-    /// Get today's maximum reps performed (for Best mode comparisons)
+    /// Get today's maximum reps at max weight (for delta comparisons)
     static func getTodaysMaxReps(from sets: [ExerciseSet]) -> Int {
         let todaySets = getTodaysSets(from: sets)
         let workingSets = todaySets.workingSets
-        return workingSets.map { $0.reps }.max() ?? 0
+        let maxWeight = workingSets.map { $0.weight }.max() ?? 0.0
+        let maxWeightSets = workingSets.filter { $0.weight == maxWeight }
+        return maxWeightSets.map { $0.reps }.max() ?? 0
     }
 
     // MARK: - Session Duration

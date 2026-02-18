@@ -17,10 +17,6 @@ class TestDataGenerator {
     // MARK: - Public Interface
     
     static func printCurrentData(modelContext: ModelContext) {
-        print("\n================================================================================")
-        print("COMPLETE SWIFT FILE EXPORT - READY TO PASTE")
-        print("================================================================================")
-
         // Fetch all exercises
         let exerciseDescriptor = FetchDescriptor<Exercise>(
             sortBy: [SortDescriptor(\.createdDate)]
@@ -61,19 +57,6 @@ class TestDataGenerator {
                 workoutSessions.append(currentSession)
             }
         }
-
-        print("SUMMARY:")
-        print("- Total Exercises: \(exercises.count)")
-        print("- Total Sets: \(allSets.count)")
-        print("- Total Sessions: \(workoutSessions.count)")
-        if let firstSet = allSets.first, let lastSet = allSets.last {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "dd MMM yyyy"
-            print("- Date Range: \(dateFormatter.string(from: firstSet.set.timestamp)) - \(dateFormatter.string(from: lastSet.set.timestamp))")
-        }
-        print("")
-        print("// COPY FROM HERE ========================================================")
-        print("")
 
         // Print complete Swift file
         let today = DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .medium)
@@ -323,11 +306,6 @@ class TestDataGenerator {
         print("")
         print("#endif")
         print("")
-        print("// COPY TO HERE ==========================================================")
-        print("")
-        print("================================================================================")
-        print("EXPORT COMPLETE - Paste entire output above into TestData.swift")
-        print("================================================================================")
     }
     
     static func generateTestData(modelContext: ModelContext) {

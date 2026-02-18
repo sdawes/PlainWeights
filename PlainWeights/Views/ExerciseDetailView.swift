@@ -381,7 +381,7 @@ struct ExerciseDetailView: View {
                         }
                     }
                 }) {
-                    Image(systemName: "tag")
+                    Image(systemName: "note.text")
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(showNotes
@@ -393,7 +393,7 @@ struct ExerciseDetailView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showingEditSheet = true }) {
-                    Image(systemName: "pencil")
+                    Image(systemName: "square.and.pencil")
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(themeManager.effectiveTheme.textColor)

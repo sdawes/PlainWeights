@@ -85,6 +85,9 @@ struct HistoryView: View {
     // Show delta symbols info popover
     @State private var showingDeltaInfo = false
 
+    // Tag breakdown visibility toggle (default from setting)
+    @State private var showTagBreakdown = true
+
     var body: some View {
         VStack(spacing: 0) {
             // Time period picker
@@ -109,7 +112,7 @@ struct HistoryView: View {
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            // Always refresh when view becomes visible (handles navigation back)
+            showTagBreakdown = themeManager.tagBreakdownVisible
             updateCaches()
         }
         .onChange(of: allSets.count) { _, _ in
@@ -141,18 +144,13 @@ struct HistoryView: View {
                     .listRowBackground(Color.clear)
 
                     // Tag distribution chart (only if setting enabled and there are tagged exercises)
-                    if themeManager.tagBreakdownVisible {
-                        let daySets = day.exercises.flatMap { $0.sets }
-                        let tagDistribution = ExerciseService.tagDistribution(from: daySets)
-                        if !tagDistribution.isEmpty {
-                            Section {
-                                Text("Tag Breakdown")
-                                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                                    .padding(.top, 20)
-                                    .padding(.bottom, 4)
-                                    .padding(.leading, 8)
+                    let daySets = day.exercises.flatMap { $0.sets }
+                    let tagDistribution = ExerciseService.tagDistribution(from: daySets)
+                    if !tagDistribution.isEmpty {
+                        Section {
+                            tagBreakdownToggleButton
 
+                            if showTagBreakdown {
                                 TagDistributionBar(data: tagDistribution)
                                     .frame(maxWidth: .infinity)
                                     .background(themeManager.effectiveTheme.cardBackgroundColor)
@@ -161,11 +159,12 @@ struct HistoryView: View {
                                         RoundedRectangle(cornerRadius: 12)
                                             .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
                                     )
+                                    .padding(.top, 4)
                             }
-                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
                         }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                     }
 
                     // Exercises section (simple list matching period views)
@@ -216,23 +215,21 @@ struct HistoryView: View {
                 .listRowBackground(Color.clear)
 
                 // Tag distribution chart (only if setting enabled and there are tagged exercises)
-                if themeManager.tagBreakdownVisible && !cachedPeriodTagDistribution.isEmpty {
+                if !cachedPeriodTagDistribution.isEmpty {
                     Section {
-                        Text("Tag Breakdown")
-                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            .padding(.top, 20)
-                            .padding(.bottom, 4)
-                            .padding(.leading, 8)
+                        tagBreakdownToggleButton
 
-                        TagDistributionBar(data: cachedPeriodTagDistribution)
-                            .frame(maxWidth: .infinity)
-                            .background(themeManager.effectiveTheme.cardBackgroundColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-                            )
+                        if showTagBreakdown {
+                            TagDistributionBar(data: cachedPeriodTagDistribution)
+                                .frame(maxWidth: .infinity)
+                                .background(themeManager.effectiveTheme.cardBackgroundColor)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
+                                )
+                                .padding(.top, 4)
+                        }
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     .listRowSeparator(.hidden)
@@ -588,6 +585,31 @@ struct HistoryView: View {
     }
 
     // MARK: - View Components
+
+    private var tagBreakdownToggleButton: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showTagBreakdown.toggle()
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text("Tag Breakdown")
+                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                    .foregroundStyle(showTagBreakdown
+                        ? themeManager.effectiveTheme.mutedForeground
+                        : themeManager.effectiveTheme.tertiaryText)
+                Image(systemName: showTagBreakdown ? "chevron.down" : "chevron.right")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+            }
+            .padding(.top, 20)
+            .padding(.bottom, 4)
+            .padding(.leading, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
 
     @ViewBuilder
     private func sessionInfoCard(for day: ExerciseDataGrouper.WorkoutDay) -> some View {

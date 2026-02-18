@@ -392,19 +392,29 @@ struct ExerciseDetailView: View {
                 .contentShape(Rectangle())
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showingEditSheet = true }) {
-                    Image(systemName: "square.and.pencil")
+                NavigationLink(value: HistoryDestination.history) {
+                    Image(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(themeManager.effectiveTheme.textColor)
                 }
                 .buttonStyle(.plain)
-                .contentShape(Rectangle())
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                IconComponents.deleteIcon {
-                    showingDeleteAlert = true
+                Menu {
+                    Button(action: { showingEditSheet = true }) {
+                        Label("Edit", systemImage: "square.and.pencil")
+                    }
+                    Button(role: .destructive, action: { showingDeleteAlert = true }) {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundStyle(themeManager.effectiveTheme.textColor)
                 }
+                .buttonStyle(.plain)
             }
         }
         .navigationBarTitleDisplayMode(.inline)

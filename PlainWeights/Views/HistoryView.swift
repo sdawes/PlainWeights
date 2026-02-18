@@ -30,12 +30,14 @@ private struct PeriodMetrics {
 private struct PeriodExerciseSummary: Identifiable {
     let id: PersistentIdentifier
     let name: String
+    let exercise: Exercise
     let hasPB: Bool
     let deltas: HistoryView.ExerciseDeltas?
 
     init(from workoutExercise: ExerciseDataGrouper.WorkoutExercise, deltas: HistoryView.ExerciseDeltas? = nil) {
         self.id = workoutExercise.id
         self.name = workoutExercise.exercise.name
+        self.exercise = workoutExercise.exercise
         self.hasPB = workoutExercise.sets.workingSets.contains { $0.isPB }
         self.deltas = deltas
     }
@@ -177,10 +179,13 @@ struct HistoryView: View {
                         ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
                             let hasPB = exercise.sets.contains { $0.isPB }
                             let deltas = cachedExerciseDeltas[exercise.exercise.persistentModelID]
-                            periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
-                                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
+                            NavigationLink(value: exercise.exercise) {
+                                periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
+                            }
+                            .buttonStyle(.plain)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                         }
                     }
                 }
@@ -259,7 +264,10 @@ struct HistoryView: View {
                         periodDayHeader(for: daySummary.date)
 
                         ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
-                            periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
+                            NavigationLink(value: exercise.exercise) {
+                                periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))

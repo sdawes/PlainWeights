@@ -62,6 +62,7 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     @Query private var allSets: [ExerciseSet]
+    @Binding var navigationPath: NavigationPath
 
     // Selected time period
     @State private var selectedPeriod: HistoryTimePeriod = .lastSession
@@ -179,7 +180,9 @@ struct HistoryView: View {
                         ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
                             let hasPB = exercise.sets.contains { $0.isPB }
                             let deltas = cachedExerciseDeltas[exercise.exercise.persistentModelID]
-                            NavigationLink(value: exercise.exercise) {
+                            Button {
+                                navigateToExercise(exercise.exercise)
+                            } label: {
                                 periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
                             }
                             .buttonStyle(.plain)
@@ -264,7 +267,9 @@ struct HistoryView: View {
                         periodDayHeader(for: daySummary.date)
 
                         ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
-                            NavigationLink(value: exercise.exercise) {
+                            Button {
+                                navigateToExercise(exercise.exercise)
+                            } label: {
                                 periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
                             }
                             .buttonStyle(.plain)
@@ -488,6 +493,15 @@ struct HistoryView: View {
         Image(systemName: symbolName)
             .font(.system(size: 10))
             .foregroundStyle(direction.color)
+    }
+
+    // MARK: - Navigation
+
+    /// Navigate to an exercise, resetting the path so back goes to the exercise list
+    private func navigateToExercise(_ exercise: Exercise) {
+        var path = NavigationPath()
+        path.append(exercise)
+        navigationPath = path
     }
 
     // MARK: - Cache Management

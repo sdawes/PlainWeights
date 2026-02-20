@@ -78,15 +78,12 @@ struct SetRowView: View {
 
                     Spacer()
 
-                    // Badge icon (centered between weight×reps and timer)
-                    if !userBadges.isEmpty {
-                        badgesView
-                            .frame(width: 24, alignment: .center)
+                    // Badge icon (fixed-width column so icons always align vertically)
+                    badgesView
+                        .frame(width: 24, alignment: .center)
+                        .padding(.trailing, 8)
 
-                        Spacer()
-                        }
-
-                    // Col 9: Timer or Timestamp
+                    // Timer or Timestamp
                     restTimeView
                         .frame(width: 55, alignment: .trailing)
                         .lineLimit(1)
@@ -275,7 +272,7 @@ struct SetRowView: View {
                 .font(.system(size: 14))
                 .foregroundStyle(.primary)
         case "timed":
-            Image(systemName: "timer")
+            Image(systemName: "metronome.fill")
                 .font(.system(size: 14))
                 .foregroundStyle(.primary)
         default:

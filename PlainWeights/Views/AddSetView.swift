@@ -25,7 +25,7 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
         case .dropset: return "chevron.down.2"
         case .assisted: return "hand.raised.fill"
         case .pause: return "pause.fill"
-        case .timed: return "timer"
+        case .timed: return "metronome.fill"
         }
     }
 

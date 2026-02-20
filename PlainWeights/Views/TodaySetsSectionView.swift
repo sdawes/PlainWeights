@@ -49,7 +49,7 @@ struct TodaySetsSectionView: View {
                             .font(themeManager.effectiveTheme.dataFont(size: 14))
                             .foregroundStyle(.primary)
                     } else {
-                        Image(systemName: "timer")
+                        Image(systemName: "metronome.fill")
                             .font(.system(size: 14))
                             .foregroundStyle(.primary)
                     }

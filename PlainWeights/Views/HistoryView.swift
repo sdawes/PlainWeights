@@ -437,10 +437,11 @@ struct HistoryView: View {
                     HStack(spacing: 0) {
                         // Number (styled like set rows)
                         Text("\(number)")
-                            .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .medium))
+                            .font(themeManager.effectiveTheme.dataFont(size: 13, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            .frame(width: 20, alignment: .leading)
+                            .frame(width: 24, alignment: .leading)
                             .padding(.leading, 6)
+                            .padding(.trailing, 4)
 
                         // Exercise name (medium weight for consistency)
                         Text(name)

@@ -67,6 +67,7 @@ struct SettingsView: View {
                         settingsToggleRow(
                             icon: "chart.line.uptrend.xyaxis",
                             title: "Show charts",
+                            subtitle: "by default",
                             isOn: Binding(
                                 get: { themeManager.chartVisibleByDefault },
                                 set: { themeManager.chartVisibleByDefault = $0 }
@@ -76,6 +77,7 @@ struct SettingsView: View {
                         settingsToggleRow(
                             icon: "line.diagonal",
                             title: "Show trend lines",
+                            subtitle: "by default",
                             isOn: Binding(
                                 get: { themeManager.showTrendLineByDefault },
                                 set: { themeManager.showTrendLineByDefault = $0 }
@@ -85,6 +87,7 @@ struct SettingsView: View {
                         settingsToggleRow(
                             icon: "note.text",
                             title: "Show notes",
+                            subtitle: "by default",
                             isOn: Binding(
                                 get: { themeManager.notesVisibleByDefault },
                                 set: { themeManager.notesVisibleByDefault = $0 }
@@ -94,6 +97,7 @@ struct SettingsView: View {
                         settingsToggleRow(
                             icon: "tag",
                             title: "Tag breakdown",
+                            subtitle: "by default",
                             isOn: Binding(
                                 get: { themeManager.tagBreakdownVisible },
                                 set: { themeManager.tagBreakdownVisible = $0 }
@@ -310,6 +314,7 @@ struct SettingsView: View {
     private func settingsToggleRow(
         icon: String,
         title: String,
+        subtitle: String? = nil,
         isOn: Binding<Bool>
     ) -> some View {
         HStack(spacing: 12) {
@@ -318,10 +323,19 @@ struct SettingsView: View {
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .frame(width: 24)
 
-            Text(title)
-                .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                .lineLimit(1)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    .lineLimit(1)
+
+                if let subtitle {
+                    Text(subtitle)
+                        .font(themeManager.effectiveTheme.interFont(size: 13, weight: .regular))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .lineLimit(1)
+                }
+            }
 
             Spacer()
 
@@ -329,7 +343,6 @@ struct SettingsView: View {
                 .labelsHidden()
                 .tint(.green)
         }
-        .frame(height: 31)
         .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))

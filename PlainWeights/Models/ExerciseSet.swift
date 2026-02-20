@@ -22,13 +22,13 @@ final class ExerciseSet {
     var isAssisted: Bool = false     // flag to indicate assisted set (e.g., spotter help)
     var isPauseAtTop: Bool = false   // flag to indicate pause at top technique
     var isTimedSet: Bool = false     // flag to indicate timed/tempo set (slow controlled movement)
-    var isToFailure: Bool = false    // flag to indicate set was taken to muscular failure (included in metrics)
+    var isToFailure: Bool = false     // DEPRECATED: kept for CloudKit compatibility, no longer used in UI
     var tempoSeconds: Int = 0        // tempo duration in seconds (only used when isTimedSet is true)
     var isPB: Bool = false           // flag to indicate personal best (highest weight, then reps, then earliest timestamp)
     var restSeconds: Int? = nil       // seconds rested after this set (nil for first set or not yet captured)
     var exercise: Exercise?  // parent (optional to handle cascade delete properly)
 
-    init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isDropSet: Bool = false, isAssisted: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isToFailure: Bool = false, isPB: Bool = false, exercise: Exercise) {
+    init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isDropSet: Bool = false, isAssisted: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, exercise: Exercise) {
         self.timestamp = timestamp
         self.weight = weight
         self.reps = reps
@@ -38,7 +38,6 @@ final class ExerciseSet {
         self.isPauseAtTop = isPauseAtTop
         self.isTimedSet = isTimedSet
         self.tempoSeconds = tempoSeconds
-        self.isToFailure = isToFailure
         self.isPB = isPB
         self.exercise = exercise
     }
@@ -53,20 +52,3 @@ extension Array where Element == ExerciseSet {
     }
 }
 
-// MARK: - Set Type Color Extension
-
-import SwiftUI
-
-extension ExerciseSet {
-    /// Color associated with the set type (nil for normal working sets)
-    /// Colors are defined in AppTheme as the single source of truth
-    var setTypeColor: Color? {
-        if isWarmUp { return AppTheme.warmUpColor }
-        if isToFailure { return AppTheme.failureColor }
-        if isDropSet { return AppTheme.dropSetColor }
-        if isAssisted { return AppTheme.assistedColor }
-        if isTimedSet { return AppTheme.timedSetColor }
-        if isPauseAtTop { return AppTheme.pauseAtTopColor }
-        return nil
-    }
-}

@@ -14,7 +14,6 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
     case warmup = "Warm-up"
     case dropset = "Drop"
     case assisted = "Assisted"
-    case toFailure = "To Failure"
     case pause = "Pause"
     case timed = "Timed"
 
@@ -25,7 +24,6 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
         case .warmup: return "flame.fill"
         case .dropset: return "chevron.down.2"
         case .assisted: return "hand.raised.fill"
-        case .toFailure: return "bolt.fill"
         case .pause: return "pause.fill"
         case .timed: return "timer"
         }
@@ -36,7 +34,6 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
         case .warmup: return AppTheme.warmUpColor
         case .dropset: return AppTheme.dropSetColor
         case .assisted: return AppTheme.assistedColor
-        case .toFailure: return AppTheme.failureColor
         case .pause: return AppTheme.pauseAtTopColor
         case .timed: return AppTheme.timedSetColor
         }
@@ -49,11 +46,11 @@ struct SetTypePillSelector: View {
     @Environment(ThemeManager.self) private var themeManager
     @Binding var selectedType: SetTypeOption?
 
-    // 6 special set types in 3 rows of 2
+    // 5 special set types in 2-2-1 layout
     private let gridRows: [[SetTypeOption]] = [
-        [.warmup, .toFailure],
-        [.dropset, .assisted],
-        [.pause, .timed]
+        [.warmup, .dropset],
+        [.pause, .assisted],
+        [.timed]
     ]
 
     var body: some View {
@@ -68,6 +65,11 @@ struct SetTypePillSelector: View {
                         ForEach(row) { type in
                             setTypePill(for: type)
                                 .frame(maxWidth: .infinity)
+                        }
+                        // Pad odd rows with invisible spacer to keep button widths consistent
+                        if row.count < 2 {
+                            Color.clear
+                                .frame(maxWidth: .infinity, maxHeight: 0)
                         }
                     }
                 }
@@ -157,7 +159,6 @@ struct AddSetView: View {
 
     private static func typeFromSet(_ set: ExerciseSet) -> SetTypeOption? {
         if set.isWarmUp { return .warmup }
-        if set.isToFailure { return .toFailure }
         if set.isDropSet { return .dropset }
         if set.isAssisted { return .assisted }
         if set.isPauseAtTop { return .pause }
@@ -324,7 +325,6 @@ struct AddSetView: View {
         let isAssisted = selectedType == .assisted
         let isPauseAtTop = selectedType == .pause
         let isTimedSet = selectedType == .timed
-        let isToFailure = selectedType == .toFailure
 
         do {
             if let setToEdit = setToEdit {
@@ -339,7 +339,6 @@ struct AddSetView: View {
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
                     tempoSeconds: 0,
-                    isToFailure: isToFailure,
                     context: context
                 )
             } else {
@@ -353,7 +352,6 @@ struct AddSetView: View {
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
                     tempoSeconds: 0,
-                    isToFailure: isToFailure,
                     to: exercise,
                     context: context
                 )

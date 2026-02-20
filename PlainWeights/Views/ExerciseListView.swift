@@ -29,7 +29,7 @@ struct ExerciseListView: View {
                 .navigationDestination(for: HistoryDestination.self) { destination in
                     switch destination {
                     case .history:
-                        HistoryView(navigationPath: $navigationPath)
+                        HistoryView()
                     }
                 }
         }

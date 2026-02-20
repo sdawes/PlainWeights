@@ -31,12 +31,6 @@ struct TodaySetsSectionView: View {
                         .foregroundStyle(.primary)
                 }
 
-                if set.isToFailure {
-                    Image(systemName: "bolt.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.red)
-                }
-
                 if set.isDropSet {
                     Image(systemName: "chevron.down.2")
                         .font(.system(size: 14, weight: .bold))

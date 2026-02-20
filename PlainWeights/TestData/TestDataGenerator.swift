@@ -190,14 +190,6 @@ class TestDataGenerator {
         print("            modelContext.insert(set)")
         print("        }")
         print("")
-        print("        // Helper function to add a to-failure set")
-        print("        func addToFailureSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
-        print("            guard let ex = exercises[exercise] else { return }")
-        print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isDropSet: false, isAssisted: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)")
-        print("            set.isToFailure = true")
-        print("            set.restSeconds = restSeconds")
-        print("            modelContext.insert(set)")
-        print("        }")
         print("")
 
         let sessionDateFormatter = DateFormatter()
@@ -258,8 +250,6 @@ class TestDataGenerator {
 
                             if item.set.isWarmUp {
                                 print("        addWarmUpSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s))\(optionalParams))")
-                            } else if item.set.isToFailure {
-                                print("        addToFailureSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s))\(optionalParams))")
                             } else if item.set.isDropSet {
                                 print("        addDropSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s))\(optionalParams))")
                             } else if item.set.isAssisted {

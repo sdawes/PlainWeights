@@ -78,12 +78,13 @@ struct SetRowView: View {
 
                     Spacer()
 
-                    // Badge icon (immediately left of timer/timestamp)
+                    // Badge icon (centered between weight×reps and timer)
                     if !userBadges.isEmpty {
                         badgesView
-                            .frame(width: 24, alignment: .trailing)
-                            .padding(.trailing, 8)
-                    }
+                            .frame(width: 24, alignment: .center)
+
+                        Spacer()
+                        }
 
                     // Col 9: Timer or Timestamp
                     restTimeView
@@ -162,10 +163,8 @@ struct SetRowView: View {
 
     /// Effective tint color - PB takes precedence over set type
     private var effectiveTintColor: Color? {
-        if set.isPB {
-            return themeManager.effectiveTheme.pbColor
-        }
-        return set.setTypeColor
+        if set.isPB { return themeManager.effectiveTheme.pbColor }
+        return nil
     }
 
     /// Color for set number based on set type (PB takes precedence)
@@ -218,7 +217,7 @@ struct SetRowView: View {
     @ViewBuilder
     private var badgesView: some View {
         // Only show first badge to keep row clean
-        // Priority order: warm-up → failure → drop → pause → timed
+        // Priority order: warm-up → drop → pause → timed
         if let firstBadge = userBadges.first {
             badgeCircle(for: firstBadge)
         } else {
@@ -249,7 +248,6 @@ struct SetRowView: View {
     private var userBadges: [String] {
         var badges: [String] = []
         if set.isWarmUp { badges.append("warmup") }
-        if set.isToFailure { badges.append("failure") }
         if set.isDropSet { badges.append("dropset") }
         if set.isAssisted { badges.append("assisted") }
         if set.isPauseAtTop { badges.append("pause") }
@@ -263,27 +261,23 @@ struct SetRowView: View {
         case "warmup":
             Image(systemName: "flame.fill")
                 .font(.system(size: 14))
-                .foregroundStyle(.orange)
-        case "failure":
-            Image(systemName: "bolt.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(.red)
+                .foregroundStyle(.primary)
         case "dropset":
             Image(systemName: "chevron.down.2")
                 .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(.blue)
+                .foregroundStyle(.primary)
         case "assisted":
             Image(systemName: "hand.raised.fill")
                 .font(.system(size: 14))
-                .foregroundStyle(Color(red: 1.0, green: 0.2, blue: 0.5))
+                .foregroundStyle(.primary)
         case "pause":
             Image(systemName: "pause.fill")
                 .font(.system(size: 14))
-                .foregroundStyle(.indigo)
+                .foregroundStyle(.primary)
         case "timed":
             Image(systemName: "timer")
                 .font(.system(size: 14))
-                .foregroundStyle(.gray)
+                .foregroundStyle(.primary)
         default:
             EmptyView()
         }

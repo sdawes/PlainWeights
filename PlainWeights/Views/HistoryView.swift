@@ -62,8 +62,6 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     @Query private var allSets: [ExerciseSet]
-    @Binding var navigationPath: NavigationPath
-
     // Selected time period
     @State private var selectedPeriod: HistoryTimePeriod = .lastSession
 
@@ -180,9 +178,7 @@ struct HistoryView: View {
                         ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
                             let hasPB = exercise.sets.contains { $0.isPB }
                             let deltas = cachedExerciseDeltas[exercise.exercise.persistentModelID]
-                            Button {
-                                navigateToExercise(exercise.exercise)
-                            } label: {
+                            NavigationLink(value: exercise.exercise) {
                                 periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
                             }
                             .buttonStyle(.plain)
@@ -267,9 +263,7 @@ struct HistoryView: View {
                         periodDayHeader(for: daySummary.date)
 
                         ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
-                            Button {
-                                navigateToExercise(exercise.exercise)
-                            } label: {
+                            NavigationLink(value: exercise.exercise) {
                                 periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
                             }
                             .buttonStyle(.plain)
@@ -495,15 +489,6 @@ struct HistoryView: View {
             .foregroundStyle(direction.color)
     }
 
-    // MARK: - Navigation
-
-    /// Navigate to an exercise, resetting the path so back goes to the exercise list
-    private func navigateToExercise(_ exercise: Exercise) {
-        var path = NavigationPath()
-        path.append(exercise)
-        navigationPath = path
-    }
-
     // MARK: - Cache Management
 
     /// Update all cached values - called on appear and when data/period changes
@@ -614,14 +599,19 @@ struct HistoryView: View {
                 showTagBreakdown.toggle()
             }
         } label: {
-            HStack(spacing: 4) {
+            HStack(spacing: 6) {
+                Image(systemName: "tag")
+                    .font(.system(size: 13))
+                    .foregroundStyle(showTagBreakdown
+                        ? themeManager.effectiveTheme.mutedForeground
+                        : themeManager.effectiveTheme.tertiaryText)
                 Text("Tag Breakdown")
                     .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                     .foregroundStyle(showTagBreakdown
                         ? themeManager.effectiveTheme.mutedForeground
                         : themeManager.effectiveTheme.tertiaryText)
                 Image(systemName: showTagBreakdown ? "chevron.down" : "chevron.right")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
             }
             .padding(.top, 20)

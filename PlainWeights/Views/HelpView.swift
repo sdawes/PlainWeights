@@ -37,7 +37,7 @@ struct HelpView: View {
 
                     helpSection(
                         title: "Sets",
-                        body: "Tap an exercise and log each set as you go. Add the weight, reps, and a note if you like. Mark sets as warm-up, drop set, or to failure if needed."
+                        body: "Tap an exercise and log each set as you go. Add the weight, reps, and a note if you like. Mark sets as warm-up, drop set, assisted, or other types if needed."
                     )
 
                     helpSection(

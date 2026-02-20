@@ -11,6 +11,13 @@ import Foundation
 import SwiftData
 import UIKit
 
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let pbAchieved = Notification.Name("pbAchieved")
+    static let setDataChanged = Notification.Name("setDataChanged")
+}
+
 /// Service handling all ExerciseSet operations
 enum ExerciseSetService {
 
@@ -49,7 +56,6 @@ enum ExerciseSetService {
     ///   - isPauseAtTop: Whether this is a pause at top set
     ///   - isTimedSet: Whether this is a timed/tempo set
     ///   - tempoSeconds: Tempo duration in seconds (only used when isTimedSet is true)
-    ///   - isToFailure: Whether this set was taken to muscular failure
     ///   - exercise: Parent exercise
     ///   - context: SwiftData model context
     static func addSet(
@@ -61,7 +67,6 @@ enum ExerciseSetService {
         isPauseAtTop: Bool = false,
         isTimedSet: Bool = false,
         tempoSeconds: Int = 0,
-        isToFailure: Bool = false,
         to exercise: Exercise,
         context: ModelContext
     ) throws {
@@ -80,7 +85,6 @@ enum ExerciseSetService {
             isPauseAtTop: isPauseAtTop,
             isTimedSet: isTimedSet,
             tempoSeconds: tempoSeconds,
-            isToFailure: isToFailure,
             exercise: exercise
         )
 
@@ -258,7 +262,6 @@ enum ExerciseSetService {
     ///   - isPauseAtTop: Whether this is a pause at top set
     ///   - isTimedSet: Whether this is a timed/tempo set
     ///   - tempoSeconds: Tempo duration in seconds (only used when isTimedSet is true)
-    ///   - isToFailure: Whether this set was taken to muscular failure
     ///   - context: SwiftData model context
     static func updateSet(
         _ set: ExerciseSet,
@@ -270,7 +273,6 @@ enum ExerciseSetService {
         isPauseAtTop: Bool,
         isTimedSet: Bool,
         tempoSeconds: Int,
-        isToFailure: Bool,
         context: ModelContext
     ) throws {
         // Validation
@@ -291,7 +293,6 @@ enum ExerciseSetService {
         set.isPauseAtTop = isPauseAtTop
         set.isTimedSet = isTimedSet
         set.tempoSeconds = tempoSeconds
-        set.isToFailure = isToFailure
 
         try context.save()
 

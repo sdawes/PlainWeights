@@ -291,8 +291,9 @@ struct InlineProgressChart: View {
         // Calculate max weight and reps per period, total volume/reps, and check for PB
         var rawDataPoints: [(date: Date, maxWeight: Double, maxReps: Int, isPB: Bool, totalVolume: Double, totalReps: Int)] = []
         for (date, periodSets) in grouped {
-            let maxWeight = periodSets.map { $0.weight }.max() ?? 0
-            let maxReps = periodSets.map { $0.reps }.max() ?? 0
+            let heaviestSet = periodSets.max { $0.weight < $1.weight }
+            let maxWeight = heaviestSet?.weight ?? 0
+            let maxReps = heaviestSet?.reps ?? 0
             let hasPB = periodSets.contains { $0.isPB }
             // Calculate total volume (sum of weight × reps) and total reps
             let totalVolume = periodSets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }

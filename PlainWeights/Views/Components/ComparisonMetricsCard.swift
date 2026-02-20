@@ -301,7 +301,7 @@ struct ComparisonMetricsCard: View {
                 .font(themeManager.effectiveTheme.captionFont)
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             Text(value)
-                .font(themeManager.effectiveTheme.dataFont(size: 22, weight: .semibold))
+                .font(themeManager.effectiveTheme.dataFont(size: 24, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)

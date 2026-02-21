@@ -486,7 +486,7 @@ struct HistoryView: View {
     @ViewBuilder
     private func deltaIndicator(_ symbolName: String, direction: DeltaDirection) -> some View {
         Image(systemName: symbolName)
-            .font(.system(size: 10))
+            .font(.system(size: 10, weight: .bold))
             .foregroundStyle(direction.color)
     }
 

@@ -64,20 +64,13 @@ struct FilteredExerciseListView: View {
     @State private var showingNoSessionAlert = false
     @State private var exerciseToDelete: Exercise?
 
-    // MARK: - Cached Staleness Data (for scroll performance)
+    // MARK: - Cached Data (for scroll performance)
     /// Pre-computed staleness colors to avoid expensive Calendar operations during scroll
     @State private var cachedStalenessColors: [PersistentIdentifier: Color?] = [:]
     /// Pre-computed "done today" flags
     @State private var cachedDoneToday: Set<PersistentIdentifier> = []
-
-    /// Exercises sorted by actual workout date, falling back to lastUpdated for exercises with no sets
-    private var sortedExercises: [Exercise] {
-        exercises.sorted { a, b in
-            let aDate = a.lastWorkoutDate ?? a.lastUpdated
-            let bDate = b.lastWorkoutDate ?? b.lastUpdated
-            return aDate > bDate
-        }
-    }
+    /// Pre-sorted exercises to avoid expensive lastWorkoutDate lookups on every render
+    @State private var cachedSortedExercises: [Exercise] = []
 
     init(searchText: String, showingAddExercise: Binding<Bool>, navigationPath: Binding<NavigationPath>) {
         self.searchText = searchText
@@ -139,6 +132,15 @@ struct FilteredExerciseListView: View {
     /// Pre-computed opacity for staleness background tint
     private var stalenessOpacity: Double {
         themeManager.currentTheme == .dark ? 0.15 : 0.05
+    }
+
+    /// Rebuild the sorted exercises cache - call when exercises change
+    private func rebuildSortedExercisesCache() {
+        cachedSortedExercises = exercises.sorted { a, b in
+            let aDate = a.lastWorkoutDate ?? a.lastUpdated
+            let bDate = b.lastWorkoutDate ?? b.lastUpdated
+            return aDate > bDate
+        }
     }
 
     /// Rebuild the staleness cache - call when exercises change
@@ -203,7 +205,7 @@ struct FilteredExerciseListView: View {
                 .listRowSeparator(.hidden)
             } else {
                 Section {
-                    ForEach(sortedExercises.enumerated(), id: \.element.persistentModelID) { index, exercise in
+                    ForEach(cachedSortedExercises.enumerated(), id: \.element.persistentModelID) { index, exercise in
                         VStack(alignment: .leading, spacing: 0) {
                             Text(highlightedName(exercise.name))
                                 .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
@@ -367,9 +369,11 @@ struct FilteredExerciseListView: View {
             Text("Complete your first workout to see a session summary.")
         }
         .onAppear {
+            rebuildSortedExercisesCache()
             rebuildStalenessCache()
         }
         .onChange(of: exercises) { _, _ in
+            rebuildSortedExercisesCache()
             rebuildStalenessCache()
         }
     }

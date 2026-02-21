@@ -11,17 +11,6 @@ import SwiftUI
 /// Service for tracking progress and determining UI presentation colors/states
 enum ProgressTracker {
 
-    /// Determine direction and color for volume/reps comparison
-    /// - Parameters:
-    ///   - today: Today's volume or rep count
-    ///   - last: Last session's volume or rep count
-    /// - Returns: PRDirection indicating performance (up/same/down)
-    static func volumeComparisonDirection(today: Double, last: Double) -> PRDirection {
-        if today > last { return .up }
-        if today < last { return .down }
-        return .same
-    }
-
     // MARK: - Progress Indicators
 
     enum PRDirection {

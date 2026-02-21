@@ -11,46 +11,6 @@ import SwiftData
 /// Service for grouping and organizing exercise data
 enum ExerciseDataGrouper {
     
-    // MARK: - Day Grouping
-    
-    /// Group exercise sets by day, sorted with most recent first
-    static func groupSetsByDay(_ sets: [ExerciseSet]) -> [(Date, [ExerciseSet])] {
-        let calendar = Calendar.current
-        let grouped = Dictionary(grouping: sets) { set in
-            calendar.startOfDay(for: set.timestamp)
-        }
-        return grouped.sorted { $0.key > $1.key }  // Most recent first
-    }
-    
-    /// Group exercise sets by day with volume calculations
-    static func groupSetsWithVolume(_ sets: [ExerciseSet]) -> [(date: Date, sets: [ExerciseSet], volume: Double)] {
-        let dayGroups = groupSetsByDay(sets)
-        return dayGroups.map { date, daySets in
-            let volume = VolumeAnalytics.calculateVolume(for: daySets)
-            return (date: date, sets: daySets, volume: volume)
-        }
-    }
-    
-    // MARK: - Future Expansion
-    
-    /// Potential future grouping by week
-    static func groupSetsByWeek(_ sets: [ExerciseSet]) -> [(Date, [ExerciseSet])] {
-        let calendar = Calendar.current
-        let grouped = Dictionary(grouping: sets) { set in
-            calendar.dateInterval(of: .weekOfYear, for: set.timestamp)?.start ?? set.timestamp
-        }
-        return grouped.sorted { $0.key > $1.key }
-    }
-    
-    /// Potential future grouping by month  
-    static func groupSetsByMonth(_ sets: [ExerciseSet]) -> [(Date, [ExerciseSet])] {
-        let calendar = Calendar.current
-        let grouped = Dictionary(grouping: sets) { set in
-            calendar.dateInterval(of: .month, for: set.timestamp)?.start ?? set.timestamp
-        }
-        return grouped.sorted { $0.key > $1.key }
-    }
-    
     // MARK: - Helper Types
     
     /// Represents a day group with metadata

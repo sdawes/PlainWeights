@@ -372,25 +372,16 @@ struct HistoryView: View {
 
     /// Description of the current time period
     private var periodDescription: String {
-        let calendar = Calendar.current
-        let now = Date()
-
         switch selectedPeriod {
         case .lastSession:
             return "" // Not used for last session
         case .week:
-            // "This Week (Mon - Today)"
             return "This Week"
         case .month:
-            // "February 2025"
-            let formatter = DateFormatter()
-            formatter.dateFormat = "MMMM yyyy"
-            return formatter.string(from: now)
+            return Date.now.formatted(.dateTime.month(.wide).year())
         case .year:
-            // "2025"
-            return "\(calendar.component(.year, from: now))"
+            return Date.now.formatted(.dateTime.year())
         case .rolling12Months:
-            // "Past 12 Months"
             return "Past 12 Months"
         }
     }

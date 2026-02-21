@@ -60,9 +60,6 @@ enum AppTheme: String, CaseIterable {
         }
     }
 
-    var background1: Color { background }
-    var background2: Color { background }
-
     // MARK: - Border Color
 
     var border: Color {
@@ -83,12 +80,6 @@ enum AppTheme: String, CaseIterable {
         case .light, .system: return Color(red: 0.44, green: 0.44, blue: 0.51) // #717182
         case .dark: return Color(red: 0.63, green: 0.63, blue: 0.63)  // #a0a0a0
         }
-    }
-
-    // MARK: - Card Header Background
-
-    var cardHeaderBackground: Color {
-        muted.opacity(0.5)  // Was 0.3, now one step darker/lighter
     }
 
     // MARK: - Dark Mode Detection

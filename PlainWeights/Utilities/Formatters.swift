@@ -88,40 +88,6 @@ enum Formatters {
         return "\(formatVolume(displayValue)) \(unit.displayName)"
     }
 
-    // MARK: - Relative Date Formatting
-
-    /// Cached relative date formatter
-    private static let relativeDateFormatter: RelativeDateTimeFormatter = {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .full
-        return formatter
-    }()
-
-    /// Format date as relative string (e.g., "3 days ago", "yesterday", "2 weeks ago")
-    static func formatRelativeDate(_ date: Date) -> String {
-        let calendar = Calendar.current
-        let now = Date()
-
-        // If it's today, show "Today"
-        if calendar.isDateInToday(date) {
-            return "Today"
-        }
-
-        // If it's yesterday, show "Yesterday"
-        if calendar.isDateInYesterday(date) {
-            return "Yesterday"
-        }
-
-        // For dates within the last week, show relative format
-        let daysDiff = calendar.dateComponents([.day], from: date, to: now).day ?? 0
-        if daysDiff <= 7 {
-            return relativeDateFormatter.localizedString(for: date, relativeTo: now)
-        }
-
-        // For older dates, show "Mon 23 Dec" format
-        return deltaDateFormatter.string(from: date)
-    }
-
     // MARK: - Date Formatting
 
     /// Format date for delta display (e.g., "Thu 14 Aug")

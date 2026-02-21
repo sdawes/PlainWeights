@@ -904,6 +904,75 @@ struct MyView: View {
 3. **Update in onChange(of:)** to react to data changes
 4. **Don't animate initial load** if it causes visible delay - set animation state to `true` initially
 
+#### Consolidate Saves - One Save Per Operation
+
+**Problem:** Calling `context.save()` multiple times in one operation triggers multiple CloudKit sync cycles, increasing latency and merge conflict risk.
+
+**Solution:** Internal helper methods should NEVER call `context.save()`. Only the top-level operation (the method called from the view) should save once at the end, after all mutations are complete.
+
+```swift
+// ✅ CORRECT - Single save after all mutations
+static func addSet(weight: Double, reps: Int, to exercise: Exercise, context: ModelContext) throws {
+    let set = ExerciseSet(weight: weight, reps: reps, exercise: exercise)
+    context.insert(set)
+    exercise.lastUpdated = set.timestamp
+
+    try captureRestTimeOnPreviousSet(currentSet: set, exercise: exercise, context: context)  // no save
+    try detectAndMarkPB(for: set, exercise: exercise, context: context)                       // no save
+
+    try context.save()  // Single save for all mutations
+}
+
+// ❌ WRONG - Multiple saves per operation
+static func addSet(...) throws {
+    context.insert(set)
+    try context.save()                    // Save 1 - triggers CloudKit sync
+    try captureRestTime(...)
+    // captureRestTime internally calls context.save()  // Save 2 - another sync
+    try detectPB(...)
+    // detectPB internally calls context.save()          // Save 3 - yet another sync
+}
+```
+
+**Key rules:**
+1. **Service helpers** (`captureRestTimeOnPreviousSet`, `detectAndMarkPB`, `recalculatePB`) must NOT save — add a comment: `// Note: caller is responsible for saving`
+2. **Top-level service methods** (`addSet`, `deleteSet`, `updateSet`) save exactly once at the end
+3. **Standalone view-called methods** (`captureRestTime`, `captureRestTimeExpiry`) DO save, since they are the top-level operation
+4. **Test data generators** that call service helpers in loops must save between logical passes, not inside the loop
+
+**Key files:** `ExerciseSetService.swift`
+
+#### Avoid Converting Computed Properties to Stored Properties
+
+**Problem:** It's tempting to convert expensive computed properties (e.g., `lastWorkoutDate` that scans all sets) into stored database fields for performance. However, this creates significant complexity:
+- Requires a backfill/migration for existing data
+- Introduces race conditions with async backfills
+- Every code path that mutates related data must keep the stored field in sync
+- Test data generators bypass service methods, causing nil values
+- CloudKit sync adds further timing complications
+
+**Solution:** Keep computed properties and cache at the view layer instead. Use `@State` caches that rebuild on `onAppear` and `onChange(of:)` — this avoids the per-frame cost while keeping the data model simple.
+
+```swift
+// ✅ CORRECT - Computed property + view-layer cache
+// Model: simple computed property
+var lastWorkoutDate: Date? {
+    guard let sets = sets, !sets.isEmpty else { return nil }
+    return sets.max(by: { $0.timestamp < $1.timestamp })?.timestamp
+}
+
+// View: cache the expensive sort that uses lastWorkoutDate
+@State private var cachedSortedExercises: [Exercise] = []
+
+.onAppear { rebuildSortedExercisesCache() }
+.onChange(of: exercises) { _, _ in rebuildSortedExercisesCache() }
+
+// ❌ WRONG - Stored property with backfill complexity
+var lastWorkoutDate: Date?  // Stored in database
+// Now you need: backfill migration, sync in addSet/deleteSet,
+// test data fixes, race condition handling...
+```
+
 ### SwiftUI Animation Best Practices
 
 #### Deletions - Always Use `withAnimation`

@@ -57,7 +57,6 @@ struct ChartDataPoint: Identifiable {
     let id = UUID()
     let index: Int
     let date: Date
-    let dateLabel: String
     let maxWeight: Double
     let maxReps: Int
     let normalizedWeight: Double
@@ -221,8 +220,6 @@ struct InlineProgressChart: View {
 
     private static func computeChartState(from sets: [ExerciseSet], timeRange: ChartTimeRange) -> CachedChartState {
         let calendar = Calendar.current
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM d"
 
         // Filter out warm-up and bonus sets
         var workingSets = sets.workingSets
@@ -339,7 +336,6 @@ struct InlineProgressChart: View {
             ChartDataPoint(
                 index: index,
                 date: point.date,
-                dateLabel: dateFormatter.string(from: point.date),
                 maxWeight: point.maxWeight,
                 maxReps: point.maxReps,
                 normalizedWeight: (point.maxWeight - adjustedWeightMin) / weightNormRange,
@@ -383,51 +379,6 @@ struct InlineProgressChart: View {
             totalRepsRegressionSlope: totalRepsRegression?.slope,
             totalRepsRegressionIntercept: totalRepsRegression?.intercept
         )
-    }
-
-    // Determine if data spans multiple years
-    private var spansMultipleYears: Bool {
-        guard let first = cachedState.dataPoints.first?.date,
-              let last = cachedState.dataPoints.last?.date else { return false }
-        let calendar = Calendar.current
-        return calendar.component(.year, from: first) != calendar.component(.year, from: last)
-    }
-
-    // Format date based on data span and granularity - ultra compact
-    private func formatDateLabel(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        switch selectedTimeRange.granularity {
-        case .daily:
-            if spansMultipleYears {
-                formatter.dateFormat = "M/yy"   // "1/25" - month/year
-            } else {
-                formatter.dateFormat = "d/M"    // "27/1" - day/month
-            }
-        case .weekly:
-            formatter.dateFormat = "d/M"    // "27/1" - week start date
-        case .monthly:
-            formatter.dateFormat = "M/yy"   // "1/25" - month/year
-        }
-        return formatter.string(from: date)
-    }
-
-    // Calculate evenly-spaced indices for X-axis labels (max 5)
-    private var xAxisIndices: [Int] {
-        let count = cachedState.dataPoints.count
-        guard count > 1 else { return count == 1 ? [0] : [] }
-
-        let maxLabels = min(5, count)
-        if count <= maxLabels {
-            return Array(0..<count)
-        }
-
-        // Evenly spaced indices including first and last
-        var indices: [Int] = []
-        let step = Double(count - 1) / Double(maxLabels - 1)
-        for i in 0..<maxLabels {
-            indices.append(Int(round(Double(i) * step)))
-        }
-        return indices
     }
 
     // MARK: - Body
@@ -782,12 +733,7 @@ struct InlineProgressChart: View {
         }
         .chartXAxis(.hidden)
         .chartXScale(domain: 0...(max(cachedState.dataPoints.count - 1, 1)))
-        .chartYAxis {
-            AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in
-                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
-                    .foregroundStyle(themeManager.effectiveTheme.borderColor)
-            }
-        }
+        .chartYAxis(.hidden)
         .chartYScale(domain: 0...1)
     }
 
@@ -912,12 +858,7 @@ struct InlineProgressChart: View {
         }
         .chartXAxis(.hidden)
         .chartXScale(domain: 0...(max(cachedState.dataPoints.count - 1, 1)))
-        .chartYAxis {
-            AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { _ in
-                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 3]))
-                    .foregroundStyle(themeManager.effectiveTheme.borderColor)
-            }
-        }
+        .chartYAxis(.hidden)
         .chartYScale(domain: 0...1)
     }
 

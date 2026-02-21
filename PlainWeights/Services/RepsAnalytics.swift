@@ -46,29 +46,6 @@ enum RepsAnalytics {
         return calculateTotalReps(from: lastSessionSets)
     }
 
-    /// Get the maximum reps achieved in a single set from the last session
-    /// - Parameter sets: Array of ExerciseSet sorted by timestamp descending
-    /// - Returns: Max reps from last session, or 0 if no previous session
-    static func getMaxRepsFromLastSession(from sets: [ExerciseSet]) -> Int {
-        let calendar = Calendar.current
-
-        // Filter out today's sets and warm-ups
-        let historicWorkingSets = sets.filter {
-            !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp
-        }
-
-        guard let mostRecentDate = historicWorkingSets.first?.timestamp else {
-            return 0
-        }
-
-        // Get all working sets from the most recent day
-        let lastSessionSets = historicWorkingSets.filter {
-            calendar.isDate($0.timestamp, inSameDayAs: mostRecentDate)
-        }
-
-        return lastSessionSets.map { $0.reps }.max() ?? 0
-    }
-
     /// Get total volume of reps from the most recent completed reps-only session (excluding today)
     /// Only considers sessions where all working sets have weight=0
     /// - Parameter sets: Array of ExerciseSet sorted by timestamp descending
@@ -134,22 +111,4 @@ enum RepsAnalytics {
         return bestTotal
     }
 
-    // MARK: - Reps Volume Comparison
-
-    /// Calculate reps volume difference for display (positive = more, negative = left)
-    /// - Parameters:
-    ///   - todayTotal: Total reps from today's session
-    ///   - lastSessionTotal: Total reps from last session
-    /// - Returns: Tuple with amount and label ("more" or "left"), or nil if equal or no data
-    static func calculateRepsVolumeDifference(todayTotal: Int, lastSessionTotal: Int) -> (amount: Int, label: String)? {
-        guard todayTotal > 0 else { return nil }
-
-        let diff = todayTotal - lastSessionTotal
-        if diff > 0 {
-            return (diff, "more")
-        } else if diff < 0 {
-            return (abs(diff), "left")
-        }
-        return nil // Equal, no message
-    }
 }

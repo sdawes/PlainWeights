@@ -213,10 +213,28 @@ struct SetRowView: View {
 
     @ViewBuilder
     private var badgesView: some View {
-        // Only show first badge to keep row clean
-        // Priority order: warm-up → drop → pause → timed
-        if let firstBadge = userBadges.first {
-            badgeCircle(for: firstBadge)
+        // Priority order: warm-up → drop → assisted → pause → timed
+        // Inline check instead of building an array just to read .first
+        if set.isWarmUp {
+            Image(systemName: "flame.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(AppTheme.warmUpColor)
+        } else if set.isDropSet {
+            Image(systemName: "chevron.down.2")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(AppTheme.dropSetColor)
+        } else if set.isAssisted {
+            Image(systemName: "hand.raised.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(AppTheme.assistedColor)
+        } else if set.isPauseAtTop {
+            Image(systemName: "pause.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(AppTheme.pauseAtTopColor)
+        } else if set.isTimedSet {
+            Image(systemName: "metronome.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(AppTheme.timedSetColor)
         } else {
             Color.clear
         }
@@ -240,44 +258,6 @@ struct SetRowView: View {
         reps.foregroundColor = valueColor
 
         return weight + separator + reps
-    }
-
-    private var userBadges: [String] {
-        var badges: [String] = []
-        if set.isWarmUp { badges.append("warmup") }
-        if set.isDropSet { badges.append("dropset") }
-        if set.isAssisted { badges.append("assisted") }
-        if set.isPauseAtTop { badges.append("pause") }
-        if set.isTimedSet { badges.append("timed") }
-        return badges
-    }
-
-    @ViewBuilder
-    private func badgeCircle(for badge: String) -> some View {
-        switch badge {
-        case "warmup":
-            Image(systemName: "flame.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(.primary)
-        case "dropset":
-            Image(systemName: "chevron.down.2")
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(.primary)
-        case "assisted":
-            Image(systemName: "hand.raised.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(.primary)
-        case "pause":
-            Image(systemName: "pause.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(.primary)
-        case "timed":
-            Image(systemName: "metronome.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(.primary)
-        default:
-            EmptyView()
-        }
     }
 
     // MARK: - Rest Time Display

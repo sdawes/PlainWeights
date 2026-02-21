@@ -19,15 +19,7 @@ struct TagInputSection: View {
     var suggestions: [String] = []
     var onSubmit: () -> Void = {}
 
-    /// Filtered suggestions: match input, exclude already-added tags, max 5
-    private var filteredSuggestions: [String] {
-        let trimmed = input.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else { return [] }
-        return suggestions
-            .filter { $0.localizedStandardContains(trimmed) && !tags.contains($0) }
-            .prefix(5)
-            .map { $0 }
-    }
+    @State private var cachedFilteredSuggestions: [String] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -71,9 +63,9 @@ struct TagInputSection: View {
             }
 
             // Autocomplete suggestions
-            if !filteredSuggestions.isEmpty {
+            if !cachedFilteredSuggestions.isEmpty {
                 FlowLayout(spacing: 6) {
-                    ForEach(filteredSuggestions, id: \.self) { suggestion in
+                    ForEach(cachedFilteredSuggestions, id: \.self) { suggestion in
                         Button {
                             selectSuggestion(suggestion)
                         } label: {
@@ -105,6 +97,20 @@ struct TagInputSection: View {
                 .padding(.top, 8)
             }
         }
+        .onChange(of: input) { _, _ in updateFilteredSuggestions() }
+        .onChange(of: tags) { _, _ in updateFilteredSuggestions() }
+    }
+
+    private func updateFilteredSuggestions() {
+        let trimmed = input.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else {
+            cachedFilteredSuggestions = []
+            return
+        }
+        cachedFilteredSuggestions = suggestions
+            .filter { $0.localizedStandardContains(trimmed) && !tags.contains($0) }
+            .prefix(5)
+            .map { $0 }
     }
 
     private func addTag() {

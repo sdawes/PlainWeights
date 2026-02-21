@@ -15,6 +15,7 @@ struct VolumeProgressBar: View {
     let targetVolume: Double
     let targetLabel: String  // "Last" or "Best"
     let isRepsOnly: Bool  // True for bodyweight exercises (compare reps, not volume)
+    var lastSetWeight: Double? = nil  // Weight of the most recent set (for reps remaining hint)
     var showCurrentValue: Bool = false  // Whether to show current value above the bar
 
     // Computed color based on comparison
@@ -37,6 +38,13 @@ struct VolumeProgressBar: View {
     // Delta between current and target
     private var delta: Double {
         currentVolume - targetVolume
+    }
+
+    // Reps remaining to close the deficit at the last set's weight
+    private var repsRemaining: Int? {
+        guard !isRepsOnly, delta < 0,
+              let weight = lastSetWeight, weight > 0 else { return nil }
+        return Int(ceil(abs(delta) / weight))
     }
 
     var body: some View {
@@ -108,9 +116,16 @@ struct VolumeProgressBar: View {
                             .foregroundStyle(progressColor)
                     } else {
                         let displayDelta = themeManager.displayWeight(delta)
-                        Text(delta > 0 ? "+\(Formatters.formatVolume(displayDelta))" : "\(Formatters.formatVolume(displayDelta))")
-                            .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
-                            .foregroundStyle(progressColor)
+                        let deltaText = delta > 0 ? "+\(Formatters.formatVolume(displayDelta))" : "\(Formatters.formatVolume(displayDelta))"
+                        if let reps = repsRemaining {
+                            Text("\(deltaText) (\(reps) \(reps == 1 ? "rep" : "reps"))")
+                                .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
+                                .foregroundStyle(progressColor)
+                        } else {
+                            Text(deltaText)
+                                .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
+                                .foregroundStyle(progressColor)
+                        }
                     }
                 }
             }

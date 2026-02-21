@@ -40,6 +40,8 @@ struct ExerciseDetailView: View {
     @State private var cachedLastSessionReps: Int = 0
     @State private var cachedBestSessionReps: Int = 0
     @State private var cachedExerciseTypeChanged: Bool = false
+    @State private var cachedLastSetWeight: Double? = nil
+    @State private var cachedAllSets: [ExerciseSet] = []
 
     // Simple getters for cached values
     private var todaysVolume: Double { cachedTodaysVolume }
@@ -131,7 +133,7 @@ struct ExerciseDetailView: View {
             // Inline Progress Chart - conditional based on toggle
             if showChart {
                 Section {
-                    InlineProgressChart(sets: Array(sets))
+                    InlineProgressChart(sets: cachedAllSets)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 }
                 .listRowSeparator(.hidden)
@@ -189,7 +191,7 @@ struct ExerciseDetailView: View {
             Section {
                 ComparisonMetricsCard(
                     comparisonMode: comparisonMode,
-                    sets: Array(sets)
+                    sets: cachedAllSets
                 )
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
@@ -209,7 +211,8 @@ struct ExerciseDetailView: View {
                     totalReps: todaysTotalReps,
                     setCount: todaySets.count,
                     hasSetsBelow: !todaySets.isEmpty,
-                    exerciseTypeChanged: cachedExerciseTypeChanged
+                    exerciseTypeChanged: cachedExerciseTypeChanged,
+                    lastSetWeight: cachedLastSetWeight
                 )
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
@@ -226,7 +229,7 @@ struct ExerciseDetailView: View {
                             isLast: isLast,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            allSets: set.isWarmUp ? nil : Array(sets),
+                            allSets: set.isWarmUp ? nil : cachedAllSets,
                             showTimer: index == 0,
                             cardPosition: isLast ? .bottom : .middle,
                             isFirstInCard: index == 0
@@ -472,7 +475,8 @@ struct ExerciseDetailView: View {
     /// Update cached expensive calculations when sets change
     private func updateCachedData() {
         let allSets = Array(sets)
-        let (todaysData, historicData) = ExerciseDataGrouper.separateTodayFromHistoric(sets: sets)
+        cachedAllSets = allSets
+        let (todaysData, historicData) = ExerciseDataGrouper.separateTodayFromHistoric(sets: allSets)
         todaySets = todaysData
         historicDayGroups = historicData
 
@@ -493,6 +497,9 @@ struct ExerciseDetailView: View {
         // Check if weighted exercise
         let workingSets = todaysData.workingSets
         cachedIsWeightedExercise = workingSets.contains { $0.weight > 0 }
+
+        // Last set weight for reps remaining hint (derive from already-computed todaySets)
+        cachedLastSetWeight = todaySets.first(where: { !$0.isWarmUp })?.weight
 
         // Detect exercise type transition (e.g., bodyweight → weighted or vice versa)
         if !workingSets.isEmpty, let lastSets = ExerciseDataHelper.getLastCompletedDaySets(from: allSets) {

@@ -264,10 +264,12 @@ struct ComparisonMetricsCard: View {
                     comparisonCell(direction: hasWorkingSets ? repsDirection : nil, value: hasWorkingSets ? repsDelta : nil, isReps: true)
                     comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil)
                 }
-                .background(themeManager.effectiveTheme.borderColor)
+                .background(themeManager.effectiveTheme.primary.opacity(0.15))
             } else {
                 // First session empty state
-                Text("Next session will compare weight, reps, and volume vs today")
+                Text(comparisonMode == .lastSession
+                    ? "Next session will compare weight, reps, and volume vs today"
+                    : "Next session will compare weight, reps, and volume vs best ever")
                     .font(themeManager.effectiveTheme.interFont(size: 14))
                     .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     .multilineTextAlignment(.center)

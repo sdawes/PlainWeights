@@ -20,6 +20,7 @@ struct TodaySessionCard: View {
     let setCount: Int
     let hasSetsBelow: Bool  // If true, only top corners rounded; if false, all corners
     var exerciseTypeChanged: Bool = false  // True when exercise switched between bodyweight and weighted
+    var lastSetWeight: Double? = nil  // Weight of the most recent set (for reps remaining hint)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -98,7 +99,8 @@ struct TodaySessionCard: View {
                     currentVolume: volume,
                     targetVolume: comparisonVolume,
                     targetLabel: comparisonLabel,
-                    isRepsOnly: false
+                    isRepsOnly: false,
+                    lastSetWeight: lastSetWeight
                 )
                 .padding(16)
             } else {

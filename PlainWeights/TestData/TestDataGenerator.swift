@@ -298,25 +298,24 @@ class TestDataGenerator {
         print("")
     }
     
-    static func generateTestData(modelContext: ModelContext) {
+    static func generateTestData(container: ModelContainer) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
         logger.info("Generating test data (Real gym data)...")
-        clearAllData(modelContext: modelContext)
-        TestData.generate(modelContext: modelContext)
-    }
-    
-    static func clearAllData(modelContext: ModelContext) {
-        let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestDataGenerator")
-        // Fetch and delete all exercises (sets will cascade delete)
-        let exerciseDescriptor = FetchDescriptor<Exercise>()
-        if let exercises = try? modelContext.fetch(exerciseDescriptor) {
-            for exercise in exercises {
-                modelContext.delete(exercise)
-            }
+
+        // Step 1: Delete all data in a dedicated context, then let it deinit
+        do {
+            let deleteContext = ModelContext(container)
+            try deleteContext.delete(model: ExerciseSet.self)
+            try deleteContext.delete(model: Exercise.self)
+            try deleteContext.save()
+            logger.info("All data cleared")
+        } catch {
+            logger.error("Error clearing data: \(error)")
         }
 
-        try? modelContext.save()
-        logger.info("All data cleared")
+        // Step 2: Generate in a completely fresh context (no stale references)
+        let genContext = ModelContext(container)
+        TestData.generate(modelContext: genContext)
     }
 }
 #endif

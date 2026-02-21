@@ -194,7 +194,7 @@ struct SettingsView: View {
         .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete & Generate", role: .destructive) {
-                TestDataGenerator.generateTestData(modelContext: modelContext)
+                TestDataGenerator.generateTestData(container: modelContext.container)
                 dismiss()
             }
         } message: {

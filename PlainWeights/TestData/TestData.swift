@@ -21,9 +21,7 @@ class TestData {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData")
         logger.info("Generating test data (Real gym data - 69 exercises, 78 sessions)...")
 
-        // Clear existing data
-        clearAllData(modelContext: modelContext)
-
+        // Note: caller (TestDataGenerator) is responsible for clearing data first
         generateGymData(modelContext: modelContext)
         logger.info("Test Data Set 4 generation completed")
     }
@@ -2145,12 +2143,9 @@ class TestData {
         do {
             try modelContext.save()
 
-            // Recalculate PB flags for all exercises (safety net to ensure correctness)
+            // Recalculate PB flags once per exercise (not per set)
             for (_, exercise) in exercises {
-                // Get all sets for this exercise and recalculate PBs
-                for set in (exercise.sets ?? []) where !set.isWarmUp {
-                    try ExerciseSetService.detectAndMarkPB(for: set, exercise: exercise, context: modelContext)
-                }
+                try ExerciseSetService.recalculatePB(for: exercise, context: modelContext)
             }
             try modelContext.save()
         } catch {
@@ -2158,17 +2153,6 @@ class TestData {
         }
     }
 
-    // MARK: - Cleanup
-
-    private static func clearAllData(modelContext: ModelContext) {
-        do {
-            try modelContext.delete(model: Exercise.self)
-            try modelContext.delete(model: ExerciseSet.self)
-            try modelContext.save()
-        } catch {
-            print("Error clearing data: \(error)")
-        }
-    }
 }
 
 #endif

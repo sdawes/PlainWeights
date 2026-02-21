@@ -90,13 +90,15 @@ enum ExerciseSetService {
 
         context.insert(set)
         exercise.lastUpdated = set.timestamp
-        try context.save()
 
         // Capture rest time on the previous set (how long since that set until this one)
         try captureRestTimeOnPreviousSet(currentSet: set, exercise: exercise, context: context)
 
         // Detect and mark PB after adding the set
         try detectAndMarkPB(for: set, exercise: exercise, context: context)
+
+        // Single save for all mutations (insert + rest time + PB)
+        try context.save()
 
         // Notify observers that set data changed
         notifySetDataChanged()
@@ -141,7 +143,7 @@ enum ExerciseSetService {
 
         // Cap at 180 seconds (3 minutes)
         previousSet.restSeconds = min(restTime, 180)
-        try context.save()
+        // Note: caller is responsible for saving
     }
 
     /// Manually capture rest time (user tapped the timer to stop it)
@@ -184,7 +186,6 @@ enum ExerciseSetService {
         let exercise = set.exercise
 
         context.delete(set)
-        try context.save()
 
         // Recalculate lastUpdated from remaining sets
         if let exercise = exercise {
@@ -194,13 +195,15 @@ enum ExerciseSetService {
             } else {
                 exercise.lastUpdated = exercise.createdDate
             }
-            try context.save()
         }
 
         // If deleted set was PB, recalculate for the exercise
         if wasPB, let exercise = exercise {
             try recalculatePB(for: exercise, context: context)
         }
+
+        // Single save for all mutations (delete + lastUpdated + PB recalc)
+        try context.save()
 
         // Notify observers that set data changed
         notifySetDataChanged()
@@ -232,12 +235,11 @@ enum ExerciseSetService {
         let allWorkingSets = try context.fetch(workingDescriptor)
 
         guard let maxWeight = allWorkingSets.map({ $0.weight }).max() else {
-            try context.save()
+            // No working sets — PB flags already cleared above
             return
         }
         let setsAtMaxWeight = allWorkingSets.filter { $0.weight == maxWeight }
         guard let maxReps = setsAtMaxWeight.map({ $0.reps }).max() else {
-            try context.save()
             return
         }
         let bestSets = setsAtMaxWeight.filter { $0.reps == maxReps }
@@ -245,8 +247,7 @@ enum ExerciseSetService {
         if let newPB = bestSets.min(by: { $0.timestamp < $1.timestamp }) {
             newPB.isPB = true
         }
-
-        try context.save()
+        // Note: caller is responsible for saving
     }
 
     // MARK: - Update Set
@@ -294,12 +295,13 @@ enum ExerciseSetService {
         set.isTimedSet = isTimedSet
         set.tempoSeconds = tempoSeconds
 
-        try context.save()
-
         // Recalculate PBs since values or warm-up status may have changed
         if let exercise = set.exercise {
             try detectAndMarkPB(for: set, exercise: exercise, context: context)
         }
+
+        // Single save for all mutations (update + PB recalc)
+        try context.save()
 
         // Notify observers that set data changed
         notifySetDataChanged()
@@ -316,12 +318,14 @@ enum ExerciseSetService {
         context: ModelContext
     ) throws {
         set.isWarmUp.toggle()
-        try context.save()
 
         // Recalculate PBs since warm-up status affects eligibility
         if let exercise = set.exercise {
             try detectAndMarkPB(for: set, exercise: exercise, context: context)
         }
+
+        // Single save for all mutations (toggle + PB recalc)
+        try context.save()
 
         // Notify observers that set data changed
         notifySetDataChanged()
@@ -394,7 +398,7 @@ enum ExerciseSetService {
         let allWorkingSets = try context.fetch(descriptor)
 
         guard !allWorkingSets.isEmpty else {
-            try context.save()
+            // No working sets — PB flags already cleared above
             return
         }
 
@@ -408,8 +412,7 @@ enum ExerciseSetService {
         if currentPB.persistentModelID == newSet.persistentModelID {
             triggerPBCelebration()
         }
-
-        try context.save()
+        // Note: caller is responsible for saving
     }
 
     // MARK: - Input Validation

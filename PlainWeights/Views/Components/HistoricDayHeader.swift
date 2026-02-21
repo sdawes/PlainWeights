@@ -13,17 +13,18 @@ struct HistoricDayHeader: View {
     let dayGroup: ExerciseDataGrouper.DayGroup
     let sessionDurationMinutes: Int?
 
-    // Computed properties for display
-    private var isWeightedDay: Bool {
-        dayGroup.sets.workingSets.contains { $0.weight > 0 }
-    }
+    // Pre-computed in init to avoid recalculation on every render
+    private let isWeightedDay: Bool
+    private let volume: Double
+    private let totalReps: Int
 
-    private var volume: Double {
-        ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)
-    }
-
-    private var totalReps: Int {
-        dayGroup.sets.reduce(0) { $0 + $1.reps }
+    init(dayGroup: ExerciseDataGrouper.DayGroup, sessionDurationMinutes: Int?) {
+        self.dayGroup = dayGroup
+        self.sessionDurationMinutes = sessionDurationMinutes
+        let workingSets = dayGroup.sets.workingSets
+        self.isWeightedDay = workingSets.contains { $0.weight > 0 }
+        self.volume = ExerciseVolumeCalculator.calculateVolume(for: dayGroup.sets)
+        self.totalReps = dayGroup.sets.reduce(0) { $0 + $1.reps }
     }
 
     var body: some View {

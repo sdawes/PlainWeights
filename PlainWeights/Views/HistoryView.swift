@@ -82,6 +82,7 @@ struct HistoryView: View {
 
     // Cached exercise deltas for last session (keyed by exercise persistent ID)
     @State private var cachedExerciseDeltas: [PersistentIdentifier: ExerciseDeltas] = [:]
+    @State private var cachedExercisePBFlags: [PersistentIdentifier: Bool] = [:]
 
     // Show delta symbols info popover
     @State private var showingDeltaInfo = false
@@ -176,7 +177,7 @@ struct HistoryView: View {
                             .listRowBackground(Color.clear)
 
                         ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
-                            let hasPB = exercise.sets.contains { $0.isPB }
+                            let hasPB = cachedExercisePBFlags[exercise.exercise.persistentModelID] ?? false
                             let deltas = cachedExerciseDeltas[exercise.exercise.persistentModelID]
                             NavigationLink(value: exercise.exercise) {
                                 periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
@@ -493,8 +494,15 @@ struct HistoryView: View {
             // Compute exercise deltas for summary card
             if let day = day {
                 cachedExerciseDeltas = Self.computeExerciseDeltas(for: day, from: allSets)
+                // Pre-compute PB flags to avoid linear scan per exercise per render
+                var pbFlags: [PersistentIdentifier: Bool] = [:]
+                for exercise in day.exercises {
+                    pbFlags[exercise.exercise.persistentModelID] = exercise.sets.workingSets.contains { $0.isPB }
+                }
+                cachedExercisePBFlags = pbFlags
             } else {
                 cachedExerciseDeltas = [:]
+                cachedExercisePBFlags = [:]
             }
         } else {
             // Compute period summary metrics

@@ -735,6 +735,20 @@ struct InlineProgressChart: View {
         .chartXScale(domain: 0...(max(cachedState.dataPoints.count - 1, 1)))
         .chartYAxis(.hidden)
         .chartYScale(domain: 0...1)
+        .chartPlotStyle { plotArea in
+            plotArea.overlay(alignment: .bottom) {
+                // Bottom axis line
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(height: 0.5)
+            }
+            .overlay(alignment: .leading) {
+                // Left axis line
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(width: 0.5)
+            }
+        }
     }
 
     // MARK: - Volume Mode Chart View
@@ -860,6 +874,20 @@ struct InlineProgressChart: View {
         .chartXScale(domain: 0...(max(cachedState.dataPoints.count - 1, 1)))
         .chartYAxis(.hidden)
         .chartYScale(domain: 0...1)
+        .chartPlotStyle { plotArea in
+            plotArea.overlay(alignment: .bottom) {
+                // Bottom axis line
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(height: 0.5)
+            }
+            .overlay(alignment: .leading) {
+                // Left axis line
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(width: 0.5)
+            }
+        }
     }
 
     // MARK: - Legend View

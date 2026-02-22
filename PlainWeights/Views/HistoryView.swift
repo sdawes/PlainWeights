@@ -62,6 +62,7 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     @Query private var allSets: [ExerciseSet]
+    @Binding var navigationPath: NavigationPath
     // Selected time period
     @State private var selectedPeriod: HistoryTimePeriod = .lastSession
 
@@ -179,7 +180,11 @@ struct HistoryView: View {
                         ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
                             let hasPB = cachedExercisePBFlags[exercise.exercise.persistentModelID] ?? false
                             let deltas = cachedExerciseDeltas[exercise.exercise.persistentModelID]
-                            NavigationLink(value: exercise.exercise) {
+                            Button {
+                                var newPath = NavigationPath()
+                                newPath.append(exercise.exercise)
+                                navigationPath = newPath
+                            } label: {
                                 periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
                             }
                             .buttonStyle(.plain)
@@ -264,7 +269,11 @@ struct HistoryView: View {
                         periodDayHeader(for: daySummary.date)
 
                         ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
-                            NavigationLink(value: exercise.exercise) {
+                            Button {
+                                var newPath = NavigationPath()
+                                newPath.append(exercise.exercise)
+                                navigationPath = newPath
+                            } label: {
                                 periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
                             }
                             .buttonStyle(.plain)

@@ -160,9 +160,12 @@ enum AppTheme: String, CaseIterable {
 
     // MARK: - PB (Personal Best) Color
 
-    /// Gold color for PB indicators (#faac05)
+    /// Gold color for PB indicators
     var pbColor: Color {
-        Color(red: 0.980, green: 0.675, blue: 0.020)  // #faac05
+        switch self {
+        case .light, .system: return Color(red: 0.980, green: 0.675, blue: 0.020)  // #faac05
+        case .dark: return Color(red: 1.0, green: 0.80, blue: 0.25)  // Brighter gold for black background
+        }
     }
 
     /// Subtle background tint for PB rows (stronger in dark mode for visibility)

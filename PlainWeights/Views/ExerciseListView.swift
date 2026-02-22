@@ -123,9 +123,16 @@ struct FilteredExerciseListView: View {
     private func stalenessColor(for exercise: Exercise) -> Color? {
         // No color for exercises with no sets yet
         guard exercise.lastWorkoutDate != nil else { return nil }
-        if isVeryStale(exercise) { return .red }
-        if isStale(exercise) { return .orange }
-        if isDoneToday(exercise) { return .green }
+        let isDark = themeManager.currentTheme == .dark
+        if isVeryStale(exercise) {
+            return isDark ? Color(red: 1.0, green: 0.40, blue: 0.40) : .red
+        }
+        if isStale(exercise) {
+            return isDark ? Color(red: 1.0, green: 0.70, blue: 0.30) : .orange
+        }
+        if isDoneToday(exercise) {
+            return isDark ? Color(red: 0.40, green: 0.90, blue: 0.50) : .green
+        }
         return nil
     }
 

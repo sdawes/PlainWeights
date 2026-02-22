@@ -17,8 +17,8 @@ struct TagDistributionBar: View {
         data.filter { $0.percentage >= 1 }
     }
 
-    // Color palette for chart segments
-    static let chartColors: [Color] = [
+    // Color palettes for chart segments
+    private static let lightColors: [Color] = [
         Color(red: 0.93, green: 0.47, blue: 0.20),  // Orange
         Color(red: 0.20, green: 0.40, blue: 0.75),  // Deep blue
         Color(red: 0.35, green: 0.70, blue: 0.45),  // Green
@@ -26,8 +26,17 @@ struct TagDistributionBar: View {
         Color(red: 0.55, green: 0.45, blue: 0.70),  // Purple
     ]
 
-    static func color(for index: Int) -> Color {
-        chartColors[index % chartColors.count]
+    private static let darkColors: [Color] = [
+        Color(red: 1.0, green: 0.62, blue: 0.30),   // Bright orange
+        Color(red: 0.45, green: 0.65, blue: 0.95),  // Bright blue
+        Color(red: 0.50, green: 0.85, blue: 0.55),  // Bright green
+        Color(red: 0.95, green: 0.50, blue: 0.70),  // Bright pink
+        Color(red: 0.72, green: 0.62, blue: 0.90),  // Bright purple
+    ]
+
+    static func color(for index: Int, isDark: Bool) -> Color {
+        let palette = isDark ? darkColors : lightColors
+        return palette[index % palette.count]
     }
 
     private var maxPercentage: Double {
@@ -42,7 +51,7 @@ struct TagDistributionBar: View {
                 tagRow(
                     tag: item.tag,
                     percentage: item.percentage,
-                    color: Self.color(for: index),
+                    color: Self.color(for: index, isDark: themeManager.currentTheme == .dark),
                     isLast: isLast
                 )
             }

@@ -76,7 +76,7 @@ struct TagAnalyticsView: View {
             ForEach(tagDistribution.enumerated(), id: \.element.tag) { index, item in
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(TagDistributionBar.color(for: index))
+                        .fill(TagDistributionBar.color(for: index, isDark: themeManager.currentTheme == .dark))
                         .frame(width: 10, height: 10)
                     Text(item.tag)
                         .font(.system(size: 13, weight: .medium))

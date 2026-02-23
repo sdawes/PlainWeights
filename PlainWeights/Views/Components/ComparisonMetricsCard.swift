@@ -205,6 +205,45 @@ struct ComparisonMetricsCard: View {
         return nil
     }
 
+    // MARK: - Cell-Specific Deltas (most recent set vs reference)
+
+    // Most recent working set from today (sets are sorted most-recent-first)
+    private var mostRecentWorkingSet: ExerciseSet? {
+        todaysSets.first(where: { !$0.isWarmUp })
+    }
+
+    // Cell weight: most recent set's weight vs reference max weight
+    private var cellWeightDirection: ProgressTracker.PRDirection? {
+        guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
+        guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
+        let diff = set.weight - metrics.maxWeight
+        if diff > 0 { return .up }
+        if diff < 0 { return .down }
+        return .same
+    }
+
+    private var cellWeightDelta: Double? {
+        guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
+        guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
+        return set.weight - metrics.maxWeight
+    }
+
+    // Cell reps: most recent set's reps vs reference reps at max weight
+    private var cellRepsDirection: ProgressTracker.PRDirection? {
+        guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
+        guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
+        let diff = set.reps - metrics.maxReps
+        if diff > 0 { return .up }
+        if diff < 0 { return .down }
+        return .same
+    }
+
+    private var cellRepsDelta: Double? {
+        guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
+        guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
+        return Double(set.reps - metrics.maxReps)
+    }
+
     // Check if today has sets (derived - cheap)
     private var hasTodaySets: Bool {
         !todaysSets.isEmpty
@@ -224,9 +263,21 @@ struct ComparisonMetricsCard: View {
                     .frame(width: 20)
                 Text(headerText)
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+
+                Spacer()
+
+                if hasTodaySets, hasWorkingSets {
+                    HStack(spacing: 0) {
+                        headerDeltaIcon("scalemass.fill", direction: weightDirection)
+                            .frame(width: 20)
+                        headerDeltaIcon("arrow.2.squarepath", direction: repsDirection)
+                            .frame(width: 20)
+                        headerDeltaIcon("square.stack.3d.up.fill", direction: totalDirection)
+                            .frame(width: 20)
+                    }
+                }
             }
             .foregroundStyle(themeManager.effectiveTheme.primaryText)
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
@@ -260,8 +311,8 @@ struct ComparisonMetricsCard: View {
 
                 // Comparison row - colored background cells (show '-' when no working sets)
                 HStack(spacing: 1) {
-                    comparisonCell(direction: hasWorkingSets ? weightDirection : nil, value: hasWorkingSets ? weightDelta : nil)
-                    comparisonCell(direction: hasWorkingSets ? repsDirection : nil, value: hasWorkingSets ? repsDelta : nil, isReps: true)
+                    comparisonCell(direction: hasWorkingSets ? cellWeightDirection : nil, value: hasWorkingSets ? cellWeightDelta : nil)
+                    comparisonCell(direction: hasWorkingSets ? cellRepsDirection : nil, value: hasWorkingSets ? cellRepsDelta : nil, isReps: true)
                     comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil)
                 }
                 .background(themeManager.effectiveTheme.primary.opacity(0.15))
@@ -345,5 +396,19 @@ struct ComparisonMetricsCard: View {
                 .background(themeManager.effectiveTheme.cardBackgroundColor)
             }
         }
+    }
+
+    // MARK: - Header Delta Icon Helper
+
+    @ViewBuilder
+    private func headerDeltaIcon(_ symbol: String, direction: ProgressTracker.PRDirection?) -> some View {
+        let color: Color = switch direction {
+        case .up: .green
+        case .down: .red
+        case .same, nil: .gray.opacity(0.3)
+        }
+        Image(systemName: symbol)
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(color)
     }
 }

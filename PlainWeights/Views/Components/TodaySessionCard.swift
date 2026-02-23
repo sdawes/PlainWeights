@@ -139,12 +139,6 @@ struct TodaySessionCard: View {
                                 .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                         }
 
-                        Text(isWeightedExercise
-                            ? "Next session will track volume vs today"
-                            : "Next session will track reps vs today")
-                            .font(themeManager.effectiveTheme.captionFont)
-                            .italic()
-                            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     }
                 }
                 .padding(16)

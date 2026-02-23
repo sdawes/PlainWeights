@@ -21,6 +21,7 @@ struct InfoButton: View {
                 .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Information")
         .popover(isPresented: $showPopover) {
             Text(text)
                 .font(themeManager.effectiveTheme.subheadlineFont)

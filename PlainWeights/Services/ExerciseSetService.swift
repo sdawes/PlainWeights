@@ -9,31 +9,14 @@
 
 import Foundation
 import SwiftData
-import UIKit
-
 // MARK: - Notification Names
 
 extension Notification.Name {
-    static let pbAchieved = Notification.Name("pbAchieved")
     static let setDataChanged = Notification.Name("setDataChanged")
 }
 
 /// Service handling all ExerciseSet operations
 enum ExerciseSetService {
-
-    // MARK: - PB Celebration
-
-    /// Trigger haptic feedback and post notification for PB achievement
-    private static func triggerPBCelebration() {
-        // Strong haptic feedback
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-
-        // Post notification for confetti animation
-        Task { @MainActor in
-            NotificationCenter.default.post(name: .pbAchieved, object: nil)
-        }
-    }
 
     // MARK: - Data Change Notification
 
@@ -407,11 +390,6 @@ enum ExerciseSetService {
 
         // Mark the winner
         currentPB.isPB = true
-
-        // Trigger celebration only if the new set is the PB
-        if currentPB.persistentModelID == newSet.persistentModelID {
-            triggerPBCelebration()
-        }
         // Note: caller is responsible for saving
     }
 

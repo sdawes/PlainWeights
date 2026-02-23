@@ -50,6 +50,7 @@ struct TagPillView: View {
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
+                .accessibilityLabel("Remove tag \(displayTag)")
             }
         }
         .padding(.horizontal, 8)

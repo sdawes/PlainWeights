@@ -60,6 +60,7 @@ struct AddExerciseView: View {
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Close")
             }
             .padding(.bottom, 16)
 

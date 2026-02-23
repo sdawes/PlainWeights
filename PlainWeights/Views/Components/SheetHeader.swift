@@ -25,6 +25,7 @@ struct SheetHeader: View {
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Close")
         }
     }
 }

@@ -313,6 +313,7 @@ struct FilteredExerciseListView: View {
             .background(themeManager.effectiveTheme.primary)
             .clipShape(Circle())
             .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+            .accessibilityLabel("Add exercise")
             .padding(.trailing, 20)
             .padding(.bottom, 20)
         }
@@ -324,6 +325,7 @@ struct FilteredExerciseListView: View {
                         .fontWeight(.medium)
                         .foregroundStyle(themeManager.effectiveTheme.textColor)
                 }
+                .accessibilityLabel("Settings")
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
@@ -339,6 +341,7 @@ struct FilteredExerciseListView: View {
                         .font(.body)
                         .fontWeight(.medium)
                 }
+                .accessibilityLabel("View history")
             }
         }
         .sheet(isPresented: $showingAddExercise) {

@@ -29,6 +29,7 @@ struct TagAnalyticsView: View {
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Close")
             }
             .padding(.bottom, 24)
 

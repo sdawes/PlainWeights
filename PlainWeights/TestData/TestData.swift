@@ -13,6 +13,7 @@ import Foundation
 import SwiftData
 import os.log
 
+@MainActor
 class TestData {
 
     // MARK: - Public Interface

@@ -12,6 +12,7 @@ import os
 
 // The separate test data generators are part of the same module
 
+@MainActor
 class TestDataGenerator {
     
     // MARK: - Public Interface

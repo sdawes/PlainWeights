@@ -12,15 +12,15 @@ import os
 
 // The separate test data generators are part of the same module
 
-@MainActor
 class TestDataGenerator {
     
     // MARK: - Public Interface
     
     static func printCurrentData(modelContext: ModelContext) {
         // Fetch all exercises
+        let exerciseSort = SortDescriptor(\Exercise.createdDate)
         let exerciseDescriptor = FetchDescriptor<Exercise>(
-            sortBy: [SortDescriptor(\.createdDate)]
+            sortBy: [exerciseSort]
         )
 
         guard let exercises = try? modelContext.fetch(exerciseDescriptor) else {

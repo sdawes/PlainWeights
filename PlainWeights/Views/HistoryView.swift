@@ -634,8 +634,8 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func sessionInfoCard(for day: ExerciseDataGrouper.WorkoutDay) -> some View {
-        let pbCount = day.exercises.flatMap { $0.sets }.filter { $0.isPB }.count
         let allSetsForDay = day.exercises.flatMap { $0.sets }
+        let pbCount = allSetsForDay.filter { $0.isPB }.count
         let sessionDuration = SessionStatsCalculator.getSessionDurationMinutes(from: allSetsForDay)
         let sessionAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: allSetsForDay)
 

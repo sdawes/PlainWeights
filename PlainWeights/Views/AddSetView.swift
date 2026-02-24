@@ -130,6 +130,7 @@ struct AddSetView: View {
     @State private var repsText = ""
     @State private var selectedType: SetTypeOption? = nil
     @State private var hasConvertedInitialWeight = false
+    @State private var showError = false
     @FocusState private var focusedField: Field?
     @AppStorage("lastEditedSetField") private var lastEditedField: String = "weight"
 
@@ -290,6 +291,11 @@ struct AddSetView: View {
             // Focus the last edited field
             focusedField = Field(rawValue: lastEditedField) ?? .weight
         }
+        .alert("Unable to Save", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Something went wrong. Please try again.")
+        }
         .onChange(of: focusedField) { _, newValue in
             if let field = newValue {
                 // Remember which field was focused
@@ -358,6 +364,8 @@ struct AddSetView: View {
                 )
             }
             dismiss()
-        } catch { }
+        } catch {
+            showError = true
+        }
     }
 }

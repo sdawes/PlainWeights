@@ -21,6 +21,7 @@ struct ExerciseDetailView: View {
     // Form state
     @State private var noteText: String = ""
     @State private var showingDeleteAlert = false
+    @State private var showError = false
     @State private var showNotes: Bool = false
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
@@ -324,6 +325,11 @@ struct ExerciseDetailView: View {
             .listRowSeparator(.hidden)
 
         }
+        .alert("Something Went Wrong", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("The operation couldn't be completed. Please try again.")
+        }
         .id(themeManager.systemColorScheme) // Force List re-render on theme change
         .listStyle(.plain)
         .scrollIndicators(.hidden)
@@ -515,7 +521,9 @@ struct ExerciseDetailView: View {
         withAnimation {
             do {
                 try ExerciseSetService.deleteSet(set, context: context)
-            } catch { }
+            } catch {
+                showError = true
+            }
         }
     }
 
@@ -526,7 +534,9 @@ struct ExerciseDetailView: View {
 
         do {
             try context.save()
-        } catch { }
+        } catch {
+            showError = true
+        }
     }
 
     /// Delete the exercise and all its associated sets (cascade delete)
@@ -535,7 +545,9 @@ struct ExerciseDetailView: View {
         do {
             try context.save()
             dismiss()
-        } catch { }
+        } catch {
+            showError = true
+        }
     }
 
 }

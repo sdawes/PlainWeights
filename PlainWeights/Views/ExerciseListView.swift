@@ -63,6 +63,7 @@ struct FilteredExerciseListView: View {
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
     @State private var exerciseToDelete: Exercise?
+    @State private var showError = false
 
     // MARK: - Cached Data (for scroll performance)
     /// Pre-computed staleness colors to avoid expensive Calendar operations during scroll
@@ -355,6 +356,11 @@ struct FilteredExerciseListView: View {
             SettingsView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
+        .alert("Something Went Wrong", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("The operation couldn't be completed. Please try again.")
+        }
         .alert("Delete Exercise", isPresented: Binding(
             get: { exerciseToDelete != nil },
             set: { if !$0 { exerciseToDelete = nil } }
@@ -396,7 +402,9 @@ struct FilteredExerciseListView: View {
             modelContext.delete(exercise)
             do {
                 try modelContext.save()
-            } catch { }
+            } catch {
+                showError = true
+            }
         }
     }
 

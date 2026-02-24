@@ -13,6 +13,7 @@ struct SettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
 
     @State private var showingDeleteAllAlert = false
+    @State private var showError = false
     @State private var showingThemePicker = false
     @State private var showingHelp = false
 
@@ -182,6 +183,11 @@ struct SettingsView: View {
         .sheet(isPresented: $showingHelp) {
             HelpView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        }
+        .alert("Something Went Wrong", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("The operation couldn't be completed. Please try again.")
         }
         .alert("Delete All Exercises?", isPresented: $showingDeleteAllAlert) {
             Button("Cancel", role: .cancel) { }
@@ -357,6 +363,8 @@ struct SettingsView: View {
         do {
             try modelContext.delete(model: Exercise.self)
             try modelContext.save()
-        } catch { }
+        } catch {
+            showError = true
+        }
     }
 }

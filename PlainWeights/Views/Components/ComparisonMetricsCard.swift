@@ -323,9 +323,9 @@ struct ComparisonMetricsCard: View {
                         label: "Reps",
                         value: "\(metrics.maxReps)"
                     )
-                    // Conditional: show "Total Reps" for reps-only, "Total" for weighted
+                    // Conditional: show "Total Reps" for reps-only, "Total Volume" for weighted
                     metricColumn(
-                        label: isRepsOnlyComparison ? "Total Reps" : "Total",
+                        label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
                         value: isRepsOnlyComparison ? "\(metrics.totalReps)" : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume))
                     )
                 }

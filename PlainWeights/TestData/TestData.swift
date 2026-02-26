@@ -7,7 +7,7 @@
 //  Last Updated: 26 Feb 2026 at 18:38:07
 //
 //  Real Gym Data
-//  69 exercises, 80 workout sessions (22 Sep 2025 - 26 Feb 2026)
+//  70 exercises, 80 workout sessions (22 Sep 2025 - 26 Feb 2026)
 
 #if DEBUG
 import Foundation
@@ -20,7 +20,7 @@ class TestData {
 
     static func generate(modelContext: ModelContext) {
         let logger = Logger(subsystem: "com.stephendawes.PlainWeights", category: "TestData")
-        logger.info("Generating test data (Real gym data - 69 exercises, 80 sessions)...")
+        logger.info("Generating test data (Real gym data - 70 exercises, 80 sessions)...")
 
         // Clear existing data
         clearAllData(modelContext: modelContext)
@@ -58,6 +58,7 @@ class TestData {
     (name: "Landmine Row", tags: ["lats"], secondaryTags: [], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 23, 19, 26, 42)),
     (name: "Front lateral dumbbell raise", tags: ["front delts"], secondaryTags: [], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2025, 10, 29, 17, 36, 55)),
     (name: "Back squat", tags: ["quads", "glutes"], secondaryTags: ["hamstrings", "lower back"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 2, 25, 16, 32, 12)),
+    (name: "Press ups", tags: ["chest"], secondaryTags: [], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 2, 8, 10, 40, 33)),
     (name: "Chest press machine", tags: ["chest"], secondaryTags: ["triceps", "front delts"], note: nil as String?, createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 2, 26, 17, 19, 21)),
     (name: "Shoulder press machine ", tags: ["front delts"], secondaryTags: [], note: "4 - 32kg, 5 - 37.5, 6 - 43kg", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 2, 26, 18, 12, 0)),
     (name: "Tricep rope pushdown", tags: ["triceps"], secondaryTags: [], note: "7 - 39.5, 7 plus weight - 42, 8 - 45", createdDate: date(2025, 11, 8, 16, 9, 47), lastUpdated: date(2026, 2, 3, 17, 14, 24)),
@@ -928,6 +929,11 @@ class TestData {
         addSet(exercise: "Bicep rope curls", weight: 39.5, reps: 15, timestamp: date(2025, 11, 1, 9, 47, 41), restSeconds: 60)
         addSet(exercise: "Bicep rope curls", weight: 39.5, reps: 15, timestamp: date(2025, 11, 1, 9, 49, 40), restSeconds: 60)
         addDropSet(exercise: "Bicep rope curls", weight: 39.5, reps: 15, timestamp: date(2025, 11, 1, 9, 52, 20), restSeconds: 60)
+        // Press ups: 2 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2025, 11, 1, 9, 48, 22))
+        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2025, 11, 1, 9, 49, 34), restSeconds: 60)
+        // Press ups: 1 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2025, 11, 1, 9, 52, 25), restSeconds: 180)
 
         // SESSION 32: 2025-11-03 17:11:55
         // Pull ups: 4 sets
@@ -1704,6 +1710,15 @@ class TestData {
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 14, timestamp: date(2026, 1, 29, 17, 18, 47), restSeconds: 79)
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 10, timestamp: date(2026, 1, 29, 17, 20, 6), restSeconds: 115)
         addDropSet(exercise: "Bicep rope curls", weight: 45.0, reps: 10, timestamp: date(2026, 1, 29, 17, 22, 2), restSeconds: 180)
+        // Press ups: 8 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 29, 16, 24, 10), restSeconds: 155)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 1, 29, 16, 26, 45), restSeconds: 174)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 12, timestamp: date(2026, 1, 29, 16, 29, 39), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 11, timestamp: date(2026, 1, 29, 16, 33, 18), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 17, timestamp: date(2026, 1, 29, 16, 38, 46), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 13, timestamp: date(2026, 1, 29, 16, 42, 6), restSeconds: 174)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 12, timestamp: date(2026, 1, 29, 16, 48, 18), restSeconds: 130)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2026, 1, 29, 16, 50, 29), restSeconds: 180)
 
         // SESSION 66: 2026-02-03 16:17:55
         // Chest Press: 4 sets
@@ -1767,6 +1782,11 @@ class TestData {
         // Bicep rope curls: 2 sets
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 15, timestamp: date(2026, 2, 5, 17, 27, 52), restSeconds: 180)
         addSet(exercise: "Bicep rope curls", weight: 50.5, reps: 15, timestamp: date(2026, 2, 5, 17, 31, 5), restSeconds: 180)
+        // Press ups: 4 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 2, 5, 16, 22, 30), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 15, timestamp: date(2026, 2, 5, 16, 26, 20), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 17, timestamp: date(2026, 2, 5, 16, 30, 45), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 12, timestamp: date(2026, 2, 5, 16, 34, 7), restSeconds: 180)
 
         // SESSION 68: 2026-02-07 17:16:50
         // Incline chest press machine: 4 sets
@@ -1827,6 +1847,13 @@ class TestData {
         addSet(exercise: "Face pulls", weight: 50.5, reps: 15, timestamp: date(2026, 2, 8, 11, 30, 52), restSeconds: 180)
         addSet(exercise: "Face pulls", weight: 53.0, reps: 13, timestamp: date(2026, 2, 8, 11, 33, 53), restSeconds: 180)
         addSet(exercise: "Face pulls", weight: 53.0, reps: 15, timestamp: date(2026, 2, 8, 11, 36, 55), restSeconds: 180)
+        // Press ups: 6 sets
+        addSet(exercise: "Press ups", weight: 0.0, reps: 16, timestamp: date(2026, 2, 8, 10, 22, 24), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 16, timestamp: date(2026, 2, 8, 10, 25, 51), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 17, timestamp: date(2026, 2, 8, 10, 30, 47), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 13, timestamp: date(2026, 2, 8, 10, 34, 3), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 14, timestamp: date(2026, 2, 8, 10, 37, 20), restSeconds: 180)
+        addSet(exercise: "Press ups", weight: 0.0, reps: 10, timestamp: date(2026, 2, 8, 10, 40, 33))
 
         // SESSION 70: 2026-02-09 16:15:40
         // Back squat: 4 sets

@@ -23,6 +23,7 @@ struct AddExerciseView: View {
     @FocusState private var nameFieldFocused: Bool
     @FocusState private var tagFieldFocused: Bool
     @FocusState private var secondaryTagFieldFocused: Bool
+    @State private var showingTagInfo = false
 
     // Optional exercise for edit mode
     let exerciseToEdit: Exercise?
@@ -87,7 +88,20 @@ struct AddExerciseView: View {
                                 isFocused: $tagFieldFocused,
                                 isSecondary: false,
                                 suggestions: tagSuggestions,
-                                onSubmit: { tagFieldFocused = true }
+                                onSubmit: { tagFieldFocused = true },
+                                titleAccessory: {
+                                    Button {
+                                        showingTagInfo = true
+                                    } label: {
+                                        Image(systemName: "info.circle")
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.6))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .popover(isPresented: $showingTagInfo) {
+                                        tagInfoPopover
+                                    }
+                                }
                             )
 
                             TagInputSection(
@@ -150,6 +164,33 @@ struct AddExerciseView: View {
             excluding: exerciseToEdit,
             context: modelContext
         )
+    }
+
+    private var tagInfoPopover: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("How tags work")
+                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .semibold))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("**Primary** main muscle (e.g. chest). Weighted more in the tag breakdown.")
+                    .font(themeManager.effectiveTheme.interFont(size: 13))
+                    .foregroundStyle(themeManager.effectiveTheme.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("**Secondary** supporting (e.g. triceps). Counted less.")
+                    .font(themeManager.effectiveTheme.interFont(size: 13))
+                    .foregroundStyle(themeManager.effectiveTheme.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("History shows your training split by tag.")
+                    .font(themeManager.effectiveTheme.interFont(size: 13))
+                    .foregroundStyle(themeManager.effectiveTheme.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(16)
+        .presentationCompactAdaptation(.popover)
     }
 
     private func saveExercise() {

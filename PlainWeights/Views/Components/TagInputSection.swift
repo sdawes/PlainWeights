@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TagInputSection: View {
+struct TagInputSection<Accessory: View>: View {
     @Environment(ThemeManager.self) private var themeManager
 
     let title: String
@@ -18,14 +18,18 @@ struct TagInputSection: View {
     let isSecondary: Bool
     var suggestions: [String] = []
     var onSubmit: () -> Void = {}
+    let titleAccessory: Accessory
 
     @State private var cachedFilteredSuggestions: [String] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            HStack(spacing: 6) {
+                Text(title)
+                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                titleAccessory
+            }
 
             HStack(spacing: 8) {
                 TextField("", text: $input, prompt: Text(placeholder).foregroundStyle(themeManager.effectiveTheme.primary.opacity(0.25)))
@@ -132,5 +136,40 @@ struct TagInputSection: View {
             tags.append(suggestion)
         }
         input = ""
+    }
+}
+
+// Init with custom title accessory view
+extension TagInputSection {
+    init(title: String, placeholder: String, tags: Binding<[String]>, input: Binding<String>,
+         isFocused: FocusState<Bool>.Binding, isSecondary: Bool,
+         suggestions: [String] = [], onSubmit: @escaping () -> Void = {},
+         @ViewBuilder titleAccessory: () -> Accessory) {
+        self.title = title
+        self.placeholder = placeholder
+        self._tags = tags
+        self._input = input
+        self.isFocused = isFocused
+        self.isSecondary = isSecondary
+        self.suggestions = suggestions
+        self.onSubmit = onSubmit
+        self.titleAccessory = titleAccessory()
+    }
+}
+
+// Default accessory to EmptyView so existing call sites don't need to specify it
+extension TagInputSection where Accessory == EmptyView {
+    init(title: String, placeholder: String, tags: Binding<[String]>, input: Binding<String>,
+         isFocused: FocusState<Bool>.Binding, isSecondary: Bool,
+         suggestions: [String] = [], onSubmit: @escaping () -> Void = {}) {
+        self.title = title
+        self.placeholder = placeholder
+        self._tags = tags
+        self._input = input
+        self.isFocused = isFocused
+        self.isSecondary = isSecondary
+        self.suggestions = suggestions
+        self.onSubmit = onSubmit
+        self.titleAccessory = EmptyView()
     }
 }

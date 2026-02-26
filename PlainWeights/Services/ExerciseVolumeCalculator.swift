@@ -46,7 +46,13 @@ struct SessionMetrics {
     let maxWeight: Double
     let maxWeightReps: Int
     let totalSets: Int
+    let totalReps: Int  // Sum of all reps in session
     let date: Date
+    
+    /// Convenience property to check if session was reps-only
+    var isRepsOnly: Bool {
+        maxWeight == 0
+    }
 }
 
 enum ExerciseVolumeCalculator {
@@ -106,12 +112,14 @@ enum ExerciseVolumeCalculator {
         var maxWeight = 0.0
         var maxWeightReps = 0
         var totalSets = 0
+        var totalReps = 0  // Track total reps across all sets
 
         // Single pass through sets to calculate all metrics
         for set in sets {
             guard !set.isWarmUp else { continue }
 
             totalSets += 1
+            totalReps += set.reps  // Accumulate total reps
 
             // Update max weight and reps
             if set.weight > maxWeight {
@@ -146,6 +154,7 @@ enum ExerciseVolumeCalculator {
             maxWeight: maxWeight,
             maxWeightReps: maxWeightReps,
             totalSets: totalSets,
+            totalReps: totalReps,
             date: date
         )
     }

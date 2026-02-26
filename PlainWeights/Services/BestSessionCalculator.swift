@@ -25,6 +25,7 @@ enum BestSessionCalculator {
         let maxWeight: Double        // Best weight ever lifted
         let repsAtMaxWeight: Int     // Reps at that max weight
         let totalVolume: Double      // Total volume for that entire day
+        let totalReps: Int          // Total reps for that entire day
         let date: Date              // Date when this PR occurred
         let isBodyweight: Bool
         let isDropSet: Bool         // Whether the best set was a drop set
@@ -126,10 +127,18 @@ enum BestSessionCalculator {
                 return nil
             }
 
+            // Calculate total reps for the best day
+            let bestDate = calendar.startOfDay(for: bestSet.timestamp)
+            let setsFromBestDay = workingSets.filter {
+                calendar.startOfDay(for: $0.timestamp) == bestDate
+            }
+            let totalReps = setsFromBestDay.reduce(0) { $0 + $1.reps }
+
             return BestDayMetrics(
                 maxWeight: 0,
                 repsAtMaxWeight: bestSet.reps,
                 totalVolume: 0,  // Always 0 for bodyweight (0 kg × reps = 0 kg)
+                totalReps: totalReps,
                 date: bestSet.timestamp,
                 isBodyweight: true,
                 isDropSet: bestSet.isDropSet,
@@ -158,11 +167,13 @@ enum BestSessionCalculator {
             let totalVolume = setsFromBestDay.reduce(0.0) { sum, set in
                 sum + (set.weight * Double(set.reps))
             }
+            let totalReps = setsFromBestDay.reduce(0) { $0 + $1.reps }
 
             return BestDayMetrics(
                 maxWeight: bestSet.weight,
                 repsAtMaxWeight: bestSet.reps,
                 totalVolume: totalVolume,
+                totalReps: totalReps,
                 date: bestSet.timestamp,
                 isBodyweight: false,
                 isDropSet: bestSet.isDropSet,

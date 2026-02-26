@@ -24,7 +24,7 @@ struct ComparisonMetricsCard: View {
     // Cached metrics - computed in init to prevent layout shift and improve scroll performance
     @State private var cachedTodaysSets: [ExerciseSet]
     @State private var cachedSetsExcludingToday: [ExerciseSet]
-    @State private var cachedLastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)?
+    @State private var cachedLastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)?
     @State private var cachedBestMetrics: BestSessionCalculator.BestDayMetrics?
     @State private var cachedLastModeIndicators: ProgressTracker.LastModeIndicators?
     @State private var cachedBestModeIndicators: ProgressTracker.BestModeIndicators?
@@ -48,7 +48,7 @@ struct ComparisonMetricsCard: View {
     private struct ComputedMetrics {
         let todaysSets: [ExerciseSet]
         let setsExcludingToday: [ExerciseSet]
-        let lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)?
+        let lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)?
         let bestMetrics: BestSessionCalculator.BestDayMetrics?
         let lastModeIndicators: ProgressTracker.LastModeIndicators?
         let bestModeIndicators: ProgressTracker.BestModeIndicators?
@@ -65,9 +65,11 @@ struct ComparisonMetricsCard: View {
 
         // Last session metrics
         let progressState = ProgressTracker.createProgressState(from: sets)
-        let lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)?
+        let lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)?
         if let lastInfo = progressState.lastCompletedDayInfo {
-            lastSessionMetrics = (lastInfo.date, lastInfo.maxWeight, lastInfo.maxWeightReps, lastInfo.volume)
+            // Calculate total reps from last session
+            let lastSessionTotalReps = LastSessionCalculator.getLastSessionTotalReps(from: sets)
+            lastSessionMetrics = (lastInfo.date, lastInfo.maxWeight, lastInfo.maxWeightReps, lastInfo.volume, lastSessionTotalReps)
         } else {
             lastSessionMetrics = nil
         }
@@ -88,14 +90,17 @@ struct ComparisonMetricsCard: View {
                 let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: sets)
                 let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: sets)
                 let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
+                let todaysTotalReps = todaysSets.workingSets.reduce(0) { $0 + $1.reps }
 
                 lastModeIndicators = ProgressTracker.LastModeIndicators.compare(
                     todaysMaxWeight: todaysMaxWeight,
                     todaysMaxReps: todaysMaxReps,
                     todaysVolume: todaysVolume,
+                    todaysTotalReps: todaysTotalReps,
                     lastSessionMaxWeight: lastMetrics.maxWeight,
                     lastSessionMaxReps: lastMetrics.maxReps,
                     lastSessionVolume: lastMetrics.totalVolume,
+                    lastSessionTotalReps: lastMetrics.totalReps,
                     exerciseType: todayType
                 )
             }
@@ -142,20 +147,20 @@ struct ComparisonMetricsCard: View {
 
     private var todaysSets: [ExerciseSet] { cachedTodaysSets }
     private var setsExcludingToday: [ExerciseSet] { cachedSetsExcludingToday }
-    private var lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double)? { cachedLastSessionMetrics }
+    private var lastSessionMetrics: (date: Date, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)? { cachedLastSessionMetrics }
     private var bestMetrics: BestSessionCalculator.BestDayMetrics? { cachedBestMetrics }
     private var lastModeIndicators: ProgressTracker.LastModeIndicators? { cachedLastModeIndicators }
     private var bestModeIndicators: ProgressTracker.BestModeIndicators? { cachedBestModeIndicators }
 
     // Current metrics based on mode (derived from cached values - cheap)
-    private var currentMetrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double)? {
+    private var currentMetrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)? {
         switch comparisonMode {
         case .lastSession:
             guard let last = lastSessionMetrics else { return nil }
-            return (last.date, last.maxWeight, last.maxReps, last.totalVolume)
+            return (last.date, last.maxWeight, last.maxReps, last.totalVolume, last.totalReps)
         case .allTimeBest:
             guard let best = bestMetrics else { return nil }
-            return (best.date, best.maxWeight, best.repsAtMaxWeight, best.totalVolume)
+            return (best.date, best.maxWeight, best.repsAtMaxWeight, best.totalVolume, best.totalReps)
         }
     }
 
@@ -193,15 +198,36 @@ struct ComparisonMetricsCard: View {
         return nil
     }
 
+    // Conditional total: use totalReps for reps-only, volume for weighted
+    private var isRepsOnlyComparison: Bool {
+        // Check if comparison session was reps-only
+        guard let metrics = currentMetrics else { return false }
+        return metrics.maxWeight == 0
+    }
+
     private var totalDirection: ProgressTracker.PRDirection? {
-        if let indicators = lastModeIndicators { return indicators.volumeDirection }
-        if let indicators = bestModeIndicators { return indicators.volumeDirection }
+        if isRepsOnlyComparison {
+            // Use total reps direction
+            if let indicators = lastModeIndicators { return indicators.totalRepsDirection }
+            if let indicators = bestModeIndicators { return indicators.totalRepsDirection }
+        } else {
+            // Use volume direction
+            if let indicators = lastModeIndicators { return indicators.volumeDirection }
+            if let indicators = bestModeIndicators { return indicators.volumeDirection }
+        }
         return nil
     }
 
     private var totalDelta: Double? {
-        if let indicators = lastModeIndicators { return indicators.volumeImprovement }
-        if let indicators = bestModeIndicators { return indicators.volumeImprovement }
+        if isRepsOnlyComparison {
+            // Use total reps delta
+            if let indicators = lastModeIndicators { return Double(indicators.totalRepsImprovement) }
+            if let indicators = bestModeIndicators { return Double(indicators.totalRepsImprovement) }
+        } else {
+            // Use volume delta
+            if let indicators = lastModeIndicators { return indicators.volumeImprovement }
+            if let indicators = bestModeIndicators { return indicators.volumeImprovement }
+        }
         return nil
     }
 
@@ -297,9 +323,10 @@ struct ComparisonMetricsCard: View {
                         label: "Reps",
                         value: "\(metrics.maxReps)"
                     )
+                    // Conditional: show "Total Reps" for reps-only, "Total" for weighted
                     metricColumn(
-                        label: "Total",
-                        value: Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume))
+                        label: isRepsOnlyComparison ? "Total Reps" : "Total",
+                        value: isRepsOnlyComparison ? "\(metrics.totalReps)" : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume))
                     )
                 }
                 .padding(.vertical, 12)
@@ -313,7 +340,8 @@ struct ComparisonMetricsCard: View {
                 HStack(spacing: 1) {
                     comparisonCell(direction: hasWorkingSets ? cellWeightDirection : nil, value: hasWorkingSets ? cellWeightDelta : nil)
                     comparisonCell(direction: hasWorkingSets ? cellRepsDirection : nil, value: hasWorkingSets ? cellRepsDelta : nil, isReps: true)
-                    comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil)
+                    // Conditional: show reps delta for reps-only, volume delta for weighted
+                    comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil, isReps: isRepsOnlyComparison)
                 }
                 .background(themeManager.effectiveTheme.primary.opacity(0.15))
             } else {

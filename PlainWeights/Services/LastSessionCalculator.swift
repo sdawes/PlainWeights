@@ -39,6 +39,14 @@ enum LastSessionCalculator {
         return lastSessionInfo.totalSets
     }
 
+    /// Calculate total reps performed in the last completed session
+    static func getLastSessionTotalReps(from sets: [ExerciseSet]) -> Int {
+        guard let lastSessionInfo = getLastCompletedSessionInfo(from: sets) else {
+            return 0
+        }
+        return lastSessionInfo.totalReps
+    }
+
     /// Calculate total volume from last completed session
     static func getLastSessionVolume(from sets: [ExerciseSet]) -> Double {
         guard let lastSessionInfo = getLastCompletedSessionInfo(from: sets) else {
@@ -74,17 +82,25 @@ enum LastSessionCalculator {
     // MARK: - Private Helper Methods
 
     /// Get comprehensive info about the last completed session (before today)
-    private static func getLastCompletedSessionInfo(from sets: [ExerciseSet]) -> (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int, totalSets: Int)? {
+    private static func getLastCompletedSessionInfo(from sets: [ExerciseSet]) -> (date: Date, volume: Double, maxWeight: Double, maxWeightReps: Int, totalSets: Int, totalReps: Int)? {
         guard let lastDayInfo = ExerciseDataHelper.getLastCompletedDayInfo(from: sets) else {
             return nil
         }
+
+        // Calculate total reps from last session
+        let calendar = Calendar.current
+        let lastSessionSets = sets.filter { set in
+            calendar.startOfDay(for: set.timestamp) == calendar.startOfDay(for: lastDayInfo.date) && !set.isWarmUp
+        }
+        let totalReps = lastSessionSets.reduce(0) { $0 + $1.reps }
 
         return (
             date: lastDayInfo.date,
             volume: lastDayInfo.volume,
             maxWeight: lastDayInfo.maxWeight,
             maxWeightReps: lastDayInfo.maxWeightReps,
-            totalSets: lastDayInfo.totalSets
+            totalSets: lastDayInfo.totalSets,
+            totalReps: totalReps
         )
     }
 }

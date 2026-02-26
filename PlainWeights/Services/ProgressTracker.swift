@@ -44,25 +44,30 @@ enum ProgressTracker {
         let weightImprovement: Double
         let repsImprovement: Int
         let volumeImprovement: Double
+        let totalRepsImprovement: Int  // For reps-only exercises
         let weightDirection: PRDirection
         let repsDirection: PRDirection
         let volumeDirection: PRDirection
+        let totalRepsDirection: PRDirection  // For reps-only exercises
         let hasWeightPR: Bool
         let hasRepsPR: Bool
         let hasVolumePR: Bool
+        let hasTotalRepsPR: Bool  // For reps-only exercises
         let exerciseType: ExerciseMetricsType
 
-        static func compare(todaysMaxWeight: Double, todaysMaxReps: Int, todaysVolume: Double,
-                          lastSessionMaxWeight: Double, lastSessionMaxReps: Int, lastSessionVolume: Double,
+        static func compare(todaysMaxWeight: Double, todaysMaxReps: Int, todaysVolume: Double, todaysTotalReps: Int,
+                          lastSessionMaxWeight: Double, lastSessionMaxReps: Int, lastSessionVolume: Double, lastSessionTotalReps: Int,
                           exerciseType: ExerciseMetricsType) -> LastModeIndicators {
 
             let weightDiff = todaysMaxWeight - lastSessionMaxWeight
             let repsDiff = todaysMaxReps - lastSessionMaxReps
             let volumeDiff = todaysVolume - lastSessionVolume
+            let totalRepsDiff = todaysTotalReps - lastSessionTotalReps
 
             let weightDirection: PRDirection
             let repsDirection: PRDirection
             let volumeDirection: PRDirection
+            let totalRepsDirection: PRDirection
 
             if weightDiff > 0 {
                 weightDirection = .up
@@ -88,16 +93,27 @@ enum ProgressTracker {
                 volumeDirection = .same
             }
 
+            if totalRepsDiff > 0 {
+                totalRepsDirection = .up
+            } else if totalRepsDiff < 0 {
+                totalRepsDirection = .down
+            } else {
+                totalRepsDirection = .same
+            }
+
             return LastModeIndicators(
                 weightImprovement: weightDiff,
                 repsImprovement: repsDiff,
                 volumeImprovement: volumeDiff,
+                totalRepsImprovement: totalRepsDiff,
                 weightDirection: weightDirection,
                 repsDirection: repsDirection,
                 volumeDirection: volumeDirection,
+                totalRepsDirection: totalRepsDirection,
                 hasWeightPR: weightDirection == .up,
                 hasRepsPR: repsDirection == .up,
                 hasVolumePR: volumeDirection == .up,
+                hasTotalRepsPR: totalRepsDirection == .up,
                 exerciseType: exerciseType
             )
         }
@@ -109,12 +125,15 @@ enum ProgressTracker {
         let weightImprovement: Double
         let repsImprovement: Int
         let volumeImprovement: Double
+        let totalRepsImprovement: Int  // For reps-only exercises
         let weightDirection: PRDirection
         let repsDirection: PRDirection
         let volumeDirection: PRDirection
+        let totalRepsDirection: PRDirection  // For reps-only exercises
         let hasNewWeightPR: Bool
         let hasNewRepsPR: Bool
         let hasNewVolumePR: Bool
+        let hasNewTotalRepsPR: Bool  // For reps-only exercises
 
         static func calculate(
             todaySets: [ExerciseSet],
@@ -127,32 +146,39 @@ enum ProgressTracker {
             let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: todaySets)
             let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: todaySets)
             let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: todaySets)
+            let todaysTotalReps = todaySets.workingSets.reduce(0) { $0 + $1.reps }
 
             // Get all-time best (or 0 if none)
             let bestWeight = bestMetrics?.maxWeight ?? 0.0
             let bestReps = bestMetrics?.repsAtMaxWeight ?? 0
             let bestVolume = bestMetrics?.totalVolume ?? 0.0
+            let bestTotalReps = bestMetrics?.totalReps ?? 0
 
             // Calculate differences
             let weightDiff = todaysMaxWeight - bestWeight
             let repsDiff = todaysMaxReps - bestReps
             let volumeDiff = todaysVolume - bestVolume
+            let totalRepsDiff = todaysTotalReps - bestTotalReps
 
             // Determine directions
             let weightDirection: PRDirection = weightDiff > 0 ? .up : (weightDiff < 0 ? .down : .same)
             let repsDirection: PRDirection = repsDiff > 0 ? .up : (repsDiff < 0 ? .down : .same)
             let volumeDirection: PRDirection = volumeDiff > 0 ? .up : (volumeDiff < 0 ? .down : .same)
+            let totalRepsDirection: PRDirection = totalRepsDiff > 0 ? .up : (totalRepsDiff < 0 ? .down : .same)
 
             return BestModeIndicators(
                 weightImprovement: weightDiff,
                 repsImprovement: repsDiff,
                 volumeImprovement: volumeDiff,
+                totalRepsImprovement: totalRepsDiff,
                 weightDirection: weightDirection,
                 repsDirection: repsDirection,
                 volumeDirection: volumeDirection,
+                totalRepsDirection: totalRepsDirection,
                 hasNewWeightPR: weightDirection == .up,
                 hasNewRepsPR: repsDirection == .up,
-                hasNewVolumePR: volumeDirection == .up
+                hasNewVolumePR: volumeDirection == .up,
+                hasNewTotalRepsPR: totalRepsDirection == .up
             )
         }
     }
@@ -213,7 +239,7 @@ enum ProgressTracker {
 
             // Calculate progress with type comparison
             let progressResult = ExerciseVolumeCalculator.calculateProgress(
-                today: todayMetrics ?? SessionMetrics(type: .combined, value: 0, maxWeight: 0, maxWeightReps: 0, totalSets: 0, date: Date()),
+                today: todayMetrics ?? SessionMetrics(type: .combined, value: 0, maxWeight: 0, maxWeightReps: 0, totalSets: 0, totalReps: 0, date: Date()),
                 last: lastMetrics
             )
 
@@ -295,6 +321,8 @@ enum ProgressTracker {
                 let lastMaxWeight = lastMetrics?.maxWeight ?? 0.0
                 let lastMaxReps = lastMetrics?.maxWeightReps ?? 0
                 let lastVolume = lastCompletedDayInfo?.volume ?? 0.0
+                let lastTotalReps = lastMetrics?.totalReps ?? 0
+                let todaysTotalReps = todaysSets.workingSets.reduce(0) { $0 + $1.reps }
 
                 // Detect exercise type for adaptive indicators
                 let exerciseType = ExerciseMetricsType.determine(from: sets)
@@ -303,9 +331,11 @@ enum ProgressTracker {
                     todaysMaxWeight: newestSet.weight,
                     todaysMaxReps: newestSet.reps,
                     todaysVolume: todayVolume,
+                    todaysTotalReps: todaysTotalReps,
                     lastSessionMaxWeight: lastMaxWeight,
                     lastSessionMaxReps: lastMaxReps,
                     lastSessionVolume: lastVolume,
+                    lastSessionTotalReps: lastTotalReps,
                     exerciseType: exerciseType
                 )
             } else {

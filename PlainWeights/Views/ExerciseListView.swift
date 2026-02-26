@@ -93,20 +93,20 @@ struct FilteredExerciseListView: View {
         }
     }
 
-    /// Check if exercise hasn't been done in over 1 month (orange)
+    /// Check if exercise hasn't been done in over 2 weeks (orange)
     /// Uses lastWorkoutDate (actual sets) not lastUpdated (metadata changes)
     private func isStale(_ exercise: Exercise) -> Bool {
         guard let lastWorkout = exercise.lastWorkoutDate else { return true } // No sets = stale
-        let oneMonthAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        return lastWorkout < oneMonthAgo
+        let twoWeeksAgo = Calendar.current.date(byAdding: .day, value: -14, to: Date()) ?? Date()
+        return lastWorkout < twoWeeksAgo
     }
 
-    /// Check if exercise hasn't been done in over 2 months (red)
+    /// Check if exercise hasn't been done in over 1 month (red)
     /// Uses lastWorkoutDate (actual sets) not lastUpdated (metadata changes)
     private func isVeryStale(_ exercise: Exercise) -> Bool {
         guard let lastWorkout = exercise.lastWorkoutDate else { return true } // No sets = very stale
-        let twoMonthsAgo = Calendar.current.date(byAdding: .day, value: -60, to: Date()) ?? Date()
-        return lastWorkout < twoMonthsAgo
+        let oneMonthAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        return lastWorkout < oneMonthAgo
     }
 
     /// Check if exercise was done today (green)
@@ -120,7 +120,7 @@ struct FilteredExerciseListView: View {
         themeManager.effectiveTheme.tertiaryText
     }
 
-    /// Get staleness color (red for 60+ days, orange for 30+ days, green for today, nil for recent/no sets)
+    /// Get staleness color (red for 30+ days, orange for 14+ days, green for today, nil for recent/no sets)
     private func stalenessColor(for exercise: Exercise) -> Color? {
         // No color for exercises with no sets yet
         guard exercise.lastWorkoutDate != nil else { return nil }
@@ -156,8 +156,8 @@ struct FilteredExerciseListView: View {
         // Reuse calendar instance and pre-compute thresholds
         let calendar = Calendar.current
         let now = Date()
+        let twoWeeksAgo = calendar.date(byAdding: .day, value: -14, to: now) ?? now
         let oneMonthAgo = calendar.date(byAdding: .day, value: -30, to: now) ?? now
-        let twoMonthsAgo = calendar.date(byAdding: .day, value: -60, to: now) ?? now
         let today = calendar.startOfDay(for: now)
 
         var colors: [PersistentIdentifier: Color?] = [:]
@@ -168,9 +168,9 @@ struct FilteredExerciseListView: View {
 
             // Compute staleness color
             if let lastWorkout = exercise.lastWorkoutDate {
-                if lastWorkout < twoMonthsAgo {
+                if lastWorkout < oneMonthAgo {
                     colors[id] = .red
-                } else if lastWorkout < oneMonthAgo {
+                } else if lastWorkout < twoWeeksAgo {
                     colors[id] = .orange
                 } else if calendar.startOfDay(for: lastWorkout) == today {
                     colors[id] = .green

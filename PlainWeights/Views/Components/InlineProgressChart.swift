@@ -288,7 +288,15 @@ struct InlineProgressChart: View {
         // Calculate max weight and reps per period, total volume/reps, and check for PB
         var rawDataPoints: [(date: Date, maxWeight: Double, maxReps: Int, isPB: Bool, totalVolume: Double, totalReps: Int)] = []
         for (date, periodSets) in grouped {
-            let heaviestSet = periodSets.max { $0.weight < $1.weight }
+            // Find the set with max weight, and if there are multiple sets at max weight, choose the one with highest reps
+            let heaviestSet = periodSets.max { first, second in
+                if first.weight != second.weight {
+                    return first.weight < second.weight
+                } else {
+                    // When weights are equal, prefer the set with more reps
+                    return first.reps < second.reps
+                }
+            }
             let maxWeight = heaviestSet?.weight ?? 0
             let maxReps = heaviestSet?.reps ?? 0
             let hasPB = periodSets.contains { $0.isPB }
@@ -957,10 +965,3 @@ struct InlineProgressChart: View {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    InlineProgressChart(sets: [])
-        .padding()
-        .environment(ThemeManager())
-}

@@ -343,7 +343,7 @@ struct ComparisonMetricsCard: View {
                     // Conditional: show reps delta for reps-only, volume delta for weighted
                     comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil, isReps: isRepsOnlyComparison)
                 }
-                .background(themeManager.effectiveTheme.primary.opacity(0.15))
+                .background(themeManager.effectiveTheme.borderColor)
             } else {
                 // First session empty state
                 Text(comparisonMode == .lastSession

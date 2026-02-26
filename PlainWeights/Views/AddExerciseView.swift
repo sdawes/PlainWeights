@@ -81,7 +81,7 @@ struct AddExerciseView: View {
                         HStack(alignment: .top, spacing: 12) {
                             TagInputSection(
                                 title: "Primary Tags",
-                                placeholder: "e.g. chest",
+                                placeholder: "e.g. upper chest",
                                 tags: $tags,
                                 input: $tagInput,
                                 isFocused: $tagFieldFocused,
@@ -92,7 +92,7 @@ struct AddExerciseView: View {
 
                             TagInputSection(
                                 title: "Secondary Tags",
-                                placeholder: "e.g. lats",
+                                placeholder: "e.g. side delts",
                                 tags: $secondaryTags,
                                 input: $secondaryTagInput,
                                 isFocused: $secondaryTagFieldFocused,

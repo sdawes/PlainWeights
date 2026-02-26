@@ -28,7 +28,7 @@ struct TagInputSection: View {
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
             HStack(spacing: 8) {
-                TextField("", text: $input, prompt: Text(placeholder).foregroundStyle(themeManager.effectiveTheme.tertiaryText))
+                TextField("", text: $input, prompt: Text(placeholder).foregroundStyle(themeManager.effectiveTheme.primary.opacity(0.25)))
                     .focused(isFocused)
                     .font(themeManager.effectiveTheme.dataFont(size: 15))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
@@ -97,7 +97,10 @@ struct TagInputSection: View {
                 .padding(.top, 8)
             }
         }
-        .onChange(of: input) { _, _ in updateFilteredSuggestions() }
+        .onChange(of: input) { _, newValue in
+            if newValue.count > 20 { input = String(newValue.prefix(20)) }
+            updateFilteredSuggestions()
+        }
         .onChange(of: tags) { _, _ in updateFilteredSuggestions() }
     }
 
@@ -115,7 +118,7 @@ struct TagInputSection: View {
 
     private func addTag() {
         let trimmed = input.trimmingCharacters(in: .whitespaces).lowercased()
-        if !trimmed.isEmpty && !tags.contains(trimmed) && tags.count < 10 {
+        if !trimmed.isEmpty && !tags.contains(trimmed) && tags.count < 10 && trimmed.count <= 20 {
             withAnimation {
                 tags.append(trimmed)
             }

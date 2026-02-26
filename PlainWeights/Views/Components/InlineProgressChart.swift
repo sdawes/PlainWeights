@@ -435,9 +435,11 @@ struct InlineProgressChart: View {
                 .pickerStyle(.segmented)
                 .frame(width: 160)
             }
+            .opacity(cachedState.dataPoints.isEmpty ? 0.3 : 1.0)
+            .disabled(cachedState.dataPoints.isEmpty)
 
             if cachedState.dataPoints.isEmpty {
-                emptyState
+                GhostChartPreview()
             } else {
                 chartWithAxes
                     .opacity(isAnimating ? 1 : 0)
@@ -463,16 +465,7 @@ struct InlineProgressChart: View {
         }
     }
 
-    // MARK: - Empty State
 
-    @ViewBuilder
-    private var emptyState: some View {
-        Text("No data yet. Log sets to see progress.")
-            .font(themeManager.effectiveTheme.subheadlineFont)
-            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            .frame(height: 150)
-            .frame(maxWidth: .infinity)
-    }
 
     // MARK: - Chart with Y-Axes
 

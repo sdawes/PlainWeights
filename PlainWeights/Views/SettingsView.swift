@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -16,6 +17,8 @@ struct SettingsView: View {
     @State private var showError = false
     @State private var showingThemePicker = false
     @State private var showingHelp = false
+    @State private var isExporting = false
+    @State private var exportedFileURL: URL?
 
     #if DEBUG
     @State private var showingGenerateDataAlert = false
@@ -123,6 +126,8 @@ struct SettingsView: View {
                         Text("Data")
                             .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+
+                        exportDataRow()
 
                         settingsRow(
                             icon: "trash",
@@ -359,6 +364,66 @@ struct SettingsView: View {
         )
     }
 
+    @ViewBuilder
+    private func exportDataRow() -> some View {
+        Button {
+            guard !isExporting else { return }
+            isExporting = true
+            let container = modelContext.container
+            let unit = themeManager.weightUnit
+            Task.detached {
+                do {
+                    let url = try await CSVExportService.exportToCSV(
+                        container: container,
+                        weightUnit: unit
+                    )
+                    await MainActor.run {
+                        exportedFileURL = url
+                        isExporting = false
+                    }
+                } catch {
+                    await MainActor.run {
+                        isExporting = false
+                        showError = true
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 18))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    .frame(width: 24)
+
+                Text("Export Data as CSV")
+                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    .lineLimit(1)
+
+                Spacer()
+
+                if isExporting {
+                    ProgressView()
+                }
+            }
+            .frame(height: 31)
+            .padding(16)
+            .background(themeManager.effectiveTheme.cardBackgroundColor)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(isExporting)
+        .sheet(item: $exportedFileURL) { url in
+            ActivityViewController(activityItems: [url])
+                .presentationDetents([.medium, .large])
+                .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        }
+    }
+
     private func deleteAllExercises() {
         do {
             try modelContext.delete(model: Exercise.self)
@@ -367,4 +432,22 @@ struct SettingsView: View {
             showError = true
         }
     }
+}
+
+// MARK: - URL + Identifiable for sheet(item:)
+
+extension URL: @retroactive Identifiable {
+    public var id: String { absoluteString }
+}
+
+// MARK: - UIActivityViewController wrapper
+
+private struct ActivityViewController: UIViewControllerRepresentable {
+    let activityItems: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

@@ -162,7 +162,7 @@ class TestData {
         }
 
 
-        // SESSION 1: 2025-09-22 17:00:00
+// SESSION 1: 2025-09-22 17:00:00
         // Chest Press: 4 sets
         addSet(exercise: "Chest Press", weight: 50.0, reps: 10, timestamp: date(2025, 9, 22, 17, 0, 0), restSeconds: 60)
         addSet(exercise: "Chest Press", weight: 50.0, reps: 10, timestamp: date(2025, 9, 22, 17, 3, 0), restSeconds: 60)

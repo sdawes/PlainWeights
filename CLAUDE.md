@@ -122,6 +122,54 @@ When performing tasks, check if any available skill matches the work. Skills pro
 
 PlainWeights is a high-performance gym workout tracking app built with SwiftUI and SwiftData. The app focuses on recording exercises, sets, and reps with optimized data aggregation for real-time charts and statistics using Swift Charts.
 
+### File Structure
+```
+PlainWeights/
+├── PlainWeightsApp.swift          # App entry point, ModelContainer + CloudKit config
+├── ContentView.swift              # Root NavigationStack wrapper
+├── Models/
+│   ├── Exercise.swift             # @Model - exercise entity
+│   ├── ExerciseSet.swift          # @Model - set entity (weight, reps, flags)
+│   ├── AppTheme.swift             # Theme enum with colors, fonts, chart colors
+│   ├── AddSetConfig.swift         # Sheet state enum for add/edit set
+│   └── WeightUnit.swift           # kg/lbs enum with conversion
+├── Views/
+│   ├── ExerciseListView.swift     # Main exercise list with search
+│   ├── ExerciseDetailView.swift   # Exercise detail with metrics + chart
+│   ├── AddSetView.swift           # Add/edit set sheet
+│   ├── AddExerciseView.swift      # Add/edit exercise sheet
+│   ├── SettingsView.swift         # Settings/preferences
+│   ├── HistoryView.swift          # Historical workout journal
+│   ├── TagAnalyticsView.swift     # Tag distribution analytics
+│   ├── HelpView.swift             # Help/about screen
+│   ├── SetRowView.swift           # Individual set display row
+│   ├── TodaySetsSectionView.swift # Today's sets section
+│   └── Components/               # 20 reusable components (see Components section)
+├── Services/                      # Business logic (enums with static methods)
+│   ├── ExerciseSetService.swift   # Core set CRUD, PB detection, rest time
+│   ├── ExerciseService.swift      # Tag distribution, duplicate checks
+│   ├── BestSessionCalculator.swift
+│   ├── LastSessionCalculator.swift
+│   ├── TodaySessionCalculator.swift
+│   ├── SessionStatsCalculator.swift
+│   ├── SessionBreakdown.swift
+│   ├── ExerciseDataGrouper.swift
+│   ├── ExerciseVolumeCalculator.swift
+│   ├── VolumeAnalytics.swift
+│   ├── RepsAnalytics.swift
+│   └── ProgressTracker.swift
+├── Utilities/
+│   ├── ThemeManager.swift         # @Observable theme + preferences manager
+│   ├── Formatters.swift           # Date/number formatters
+│   ├── ExerciseSetFormatters.swift # Set-specific formatting
+│   └── ExerciseDataHelper.swift   # Data helper utilities
+├── TestData/
+│   ├── TestData.swift             # Dev-only test data fixtures
+│   └── TestDataGenerator.swift    # Test data generation
+├── Fonts/                         # Inter font family assets
+└── Assets.xcassets/               # Asset catalog
+```
+
 ## Design Philosophy
 
 **Plain. Simple. Text-based.**
@@ -138,24 +186,34 @@ The whole point of PlainWeights is to strip away all unnecessary complexity and 
 - **Clean and elegant**: Every element must earn its place
 - **Functional simplicity**: If it doesn't help the user record or track, remove it
 
-### Typography - System Font (SF Pro)
-**The app uses the default iOS system font (SF Pro) for clean, native appearance.**
+### Typography - Inter Font
+**The app uses the Inter font family for a clean, modern appearance.**
+
+Fonts are accessed via `AppTheme` semantic helpers:
 
 ```swift
-// Standard text patterns - use default system font
-.font(.body)                    // Body text
-.font(.headline)                // Headlines
-.font(.subheadline)             // Subheadlines
-.font(.caption)                 // Captions
-.font(.title2)                  // Titles
-.font(.system(size: 24))        // Custom sizes
+// Semantic font helpers (always use these)
+themeManager.currentTheme.headlineFont    // 17pt, semibold
+themeManager.currentTheme.bodyFont        // 17pt, regular
+themeManager.currentTheme.subheadlineFont // 15pt, regular
+themeManager.currentTheme.captionFont     // 12pt, regular
+themeManager.currentTheme.caption2Font    // 11pt, regular
+themeManager.currentTheme.footnoteFont    // 13pt, regular
+themeManager.currentTheme.title2Font      // 22pt, bold
+themeManager.currentTheme.title3Font      // 20pt, semibold
+
+// Custom sizes
+themeManager.currentTheme.interFont(size: 14, weight: .medium)
+
+// Numerical data (uses monospacedDigit for aligned columns)
+themeManager.currentTheme.dataFont(size: 20, weight: .semibold)
 ```
 
-**Why SF Pro (System Default):**
-- Native iOS appearance
-- Optimized for readability on Apple devices
-- Automatic support for Dynamic Type accessibility
-- Clean, modern aesthetic
+**Why Inter:**
+- Clean, modern geometric typeface
+- Excellent readability at all sizes
+- Tabular/monospaced digit support for data alignment
+- Full weight range (Thin through Black)
 
 ### What to Avoid
 - Fancy gradients or decorative backgrounds
@@ -165,7 +223,7 @@ The whole point of PlainWeights is to strip away all unnecessary complexity and 
 - Color for color's sake
 
 ### What to Embrace
-- Clear typography hierarchy using system fonts
+- Clear typography hierarchy using Inter font
 - Simple divider lines
 - Subtle color hints for meaning (green = up, red = down)
 - White space that serves readability
@@ -454,7 +512,7 @@ VStack(spacing: 12) {
 - **SwiftData**: For persistent storage with performance-optimized queries
 - **Swift Testing**: New testing framework with `@Test` attributes (NOT XCTest for unit tests)
 - **Swift Charts**: For data visualization
-- **Minimum iOS Target**: iOS 17+ (to use latest SwiftData and SwiftUI features)
+- **Minimum iOS Target**: iOS 26+
 
 ### SwiftUI List Unified Card Pattern - CRITICAL
 
@@ -519,7 +577,7 @@ A 2px colored left border with light tinted background, used to visually highlig
 #### Use Cases
 - **PBs (red)**: Exercise cards/rows containing personal bests
 - **Staleness indicators**: Exercise list items (orange = 14+ days, red = 30+ days, green = today)
-- **Set type badges**: Warm-up (orange), Bonus (green), Drop set (blue), Assisted (pink), Timed (gray), Pause (indigo)
+- **Set type badges**: Warm-up (orange), Drop set (blue), Assisted (pink), Timed (gray), Pause (indigo)
 
 #### Visual Specification
 ```
@@ -552,9 +610,9 @@ private func accentStrip(color: Color) -> some View {
 ```
 
 #### Key Files
-- `SessionSummaryView.swift` - PB accent strip on exercise card headers
+- `ExerciseDetailView.swift` - PB accent strip on exercise card headers
 - `ExerciseListView.swift` - Staleness indicator on exercise rows
-- `SetRowView.swift` - Set type indicators (warm-up, bonus, etc.)
+- `SetRowView.swift` - Set type indicators (warm-up, drop set, etc.)
 
 ### Standalone Card Component Pattern
 
@@ -658,11 +716,13 @@ private func metricCell(label: String, value: String) -> some View {
 ```
 
 #### Key Files
-- `SessionSummaryView.swift` - Reference implementation with session info card and exercise cards
+- `ExerciseDetailView.swift` - Reference implementation with session info card and exercise cards
+- `MetricCell.swift` - Reusable metric cell component
+- `ComparisonMetricsCard.swift` - Metrics comparison card
 
 ### Progress Chart Component
 
-The `InlineProgressChart` displays exercise progress over time using Swift Charts with dual Y-axes for weight and reps.
+The `InlineProgressChart` displays exercise progress over time using Swift Charts with dual Y-axes for weight and reps. Supports two chart modes: **Max** (weight + reps) and **Volume** (total volume or total reps for bodyweight exercises).
 
 **Location:** `PlainWeights/Views/Components/InlineProgressChart.swift`
 
@@ -750,10 +810,14 @@ init(sets: [ExerciseSet]) {
 // Light theme
 chartColor1: Color(red: 0.92, green: 0.45, blue: 0.18)  // Vibrant orange (weight)
 chartColor2: Color(red: 0.18, green: 0.70, blue: 0.65)  // Vibrant teal (reps)
+chartColor3: Color(red: 0.65, green: 0.35, blue: 0.75)  // Purple/violet (volume)
+chartColor4: Color(red: 0.20, green: 0.40, blue: 0.75)  // Deep blue (total reps, reps-only)
 
 // Dark theme
 chartColor1: Color(red: 0.45, green: 0.50, blue: 0.95)  // Bright blue/purple (weight)
 chartColor2: Color(red: 0.45, green: 0.82, blue: 0.58)  // Bright green (reps)
+chartColor3: Color(red: 0.85, green: 0.55, blue: 0.65)  // Coral/rose (volume)
+chartColor4: Color(red: 0.95, green: 0.85, blue: 0.55)  // Pastel yellow (total reps, reps-only)
 
 // PB indicator (both themes)
 pbColor: Color(red: 0.980, green: 0.675, blue: 0.020)   // Gold #faac05
@@ -785,34 +849,43 @@ pbColor: Color(red: 0.980, green: 0.675, blue: 0.020)   // Gold #faac05
 
 ### PlainWeights Color Theme
 
-The app uses a consistent iPhone 17-inspired color palette with `pw_` prefix:
+All colors are defined as computed properties on the `AppTheme` enum in `PlainWeights/Models/AppTheme.swift`. Colors resolve per-theme (light vs dark):
 
-#### Color Palette
+#### Key Color Properties
 ```swift
-// Orange family (inspired by iPhone 17 Pro Cosmic Orange)
-static let pw_orangeLight = Color(red: 0.98, green: 0.65, blue: 0.35)
-static let pw_orange = Color(red: 0.93, green: 0.47, blue: 0.20)
-static let pw_orangeDark = Color(red: 0.75, green: 0.35, blue: 0.10)
+// Text hierarchy
+primary         // Black (light) / 0.93 white (dark)
+primaryText     // Alias for primary
+secondaryText   // primary.opacity(0.6)
+tertiaryText    // primary.opacity(0.4)
 
-// Blue family (inspired by iPhone 17 Pro Deep Blue)
-static let pw_blueLight = Color(red: 0.35, green: 0.55, blue: 0.75)
-static let pw_blue = Color(red: 0.0, green: 0.48, blue: 1.0)  // Bright iOS blue
-static let pw_blueDark = Color(red: 0.11, green: 0.28, blue: 0.45)
+// Backgrounds
+background      // White (light) / Black (dark)
+cardBackgroundColor  // Alias for background
+muted           // #ececf0 (light) / #2a2a2a (dark)
 
-// Grey family (inspired by iPhone 17 Silver/neutral tones)
-static let pw_greyLight = Color(red: 0.95, green: 0.95, blue: 0.96)
-static let pw_grey = Color(red: 0.75, green: 0.75, blue: 0.77)
-static let pw_greyDark = Color(red: 0.35, green: 0.35, blue: 0.37)
+// Borders & muted text
+border          // primary.opacity(0.3)
+mutedForeground // #717182 (light) / #a0a0a0 (dark)
+
+// Set type colors (static, same across themes)
+warmUpColor     // .orange
+dropSetColor    // .blue
+assistedColor   // pink (1.0, 0.2, 0.5)
+timedSetColor   // .gray
+pauseAtTopColor // .indigo
 ```
 
-**Location:** `PlainWeights/Utilities/AppColors.swift`
+**Location:** `PlainWeights/Models/AppTheme.swift`
 
 ### Theme System
 
-The app has its own theme system with Light and Dark themes, managed by `ThemeManager`. This overrides iOS system dark mode.
+The app has its own theme system with Light, Dark, and System themes, managed by `ThemeManager`. The System option follows iOS device dark mode; Light/Dark override it.
+
+`ThemeManager` is a `@MainActor @Observable` class that also stores user preferences for weight unit (kg/lbs), chart visibility, notes visibility, tag breakdowns, and trend lines.
 
 **Key Files:**
-- `PlainWeights/Models/AppTheme.swift` - Theme definitions (Light/Dark with explicit colors)
+- `PlainWeights/Models/AppTheme.swift` - Theme enum (`.light`, `.dark`, `.system`) with all color/font definitions
 - `PlainWeights/Utilities/ThemeManager.swift` - Observable theme manager with UserDefaults persistence
 
 #### Sheets and Color Scheme - CRITICAL
@@ -1070,10 +1143,37 @@ NavigationStack(path: $navigationPath) {
 
 #### Reusable Components
 
-When creating UI elements that may be reused (buttons, inputs, etc.), create them as separate component files in `Views/Components/` rather than private functions within views. Examples:
+When creating UI elements that may be reused (buttons, inputs, etc.), create them as separate component files in `Views/Components/` rather than private functions within views. Current components:
+
+**Layout & Structure:**
+- `FlowLayout.swift` - Wrapping horizontal layout (Layout protocol)
+- `ListRowCard.swift` - Unified card border shapes (TopOpenBorder, SidesOnlyBorder, BottomOpenBorder)
+- `AnimatedGradientBackground.swift` - Theme-aware background
+
+**Input & Controls:**
 - `StepperButton.swift` - +/- buttons for numeric inputs
-- `TagPillView.swift` - Tag display pills
-- `FlowLayout.swift` - Wrapping horizontal layout
+- `TextInputField.swift` - Themed text input field
+- `ExerciseNameField.swift` - Exercise name input
+- `TagInputSection.swift` - Tag input with suggestions and autocomplete
+- `SheetHeader.swift` - Reusable sheet header with dismiss button
+- `InfoButton.swift` - Info/help icon button
+
+**Data Display:**
+- `TagPillView.swift` - Tag display pills (primary/secondary styling)
+- `MetricCell.swift` - Metric label + value cell
+- `ComparisonMetricsCard.swift` - Side-by-side metrics comparison
+- `VolumeProgressBar.swift` - Volume progress visualization
+- `TagDistributionBar.swift` - Tag distribution display
+- `InlineNotesComponent.swift` - Inline notes display
+
+**Charts:**
+- `InlineProgressChart.swift` - Progress chart with dual Y-axes
+- `GhostChartPreview.swift` - Chart skeleton/loading state
+- `GhostPreviewData.swift` - Ghost data for chart preview
+
+**Card Headers:**
+- `TodaySessionCard.swift` - Today's session summary card
+- `HistoricDayHeader.swift` - Historic day header for history view
 
 ### iCloud Sync (CloudKit)
 

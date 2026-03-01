@@ -371,6 +371,9 @@ struct ComparisonMetricsCard: View {
         .onChange(of: comparisonMode) { _, _ in
             updateCache()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in
+            updateCache()
+        }
     }
 
     // MARK: - Metric Column Helper

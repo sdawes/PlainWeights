@@ -463,6 +463,9 @@ struct InlineProgressChart: View {
                 cachedState = Self.computeChartState(from: sets, timeRange: newRange)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in
+            cachedState = Self.computeChartState(from: sets, timeRange: selectedTimeRange)
+        }
     }
 
 

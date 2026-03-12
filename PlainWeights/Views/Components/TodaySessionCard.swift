@@ -19,7 +19,6 @@ struct TodaySessionCard: View {
     let totalReps: Int
     let setCount: Int
     let hasSetsBelow: Bool  // If true, only top corners rounded; if false, all corners
-    var exerciseTypeChanged: Bool = false  // True when exercise switched between bodyweight and weighted
     var lastSetWeight: Double? = nil  // Weight of the most recent set (for reps remaining hint)
 
     var body: some View {
@@ -103,43 +102,19 @@ struct TodaySessionCard: View {
                     lastSetWeight: lastSetWeight
                 )
                 .padding(16)
-            } else {
-                // First session — preview bar + baseline + motivational nudge
-                VStack(alignment: .leading, spacing: 6) {
-                    if exerciseTypeChanged {
-                        // Empty bar for type switch
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(themeManager.effectiveTheme.muted)
-                            .frame(height: 8)
-
-                        Text("Switched to weighted — comparison starts next session")
-                            .font(themeManager.effectiveTheme.captionFont)
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                    } else {
-                        // Muted preview bar with progress fill
-                        GeometryReader { geometry in
-                            ZStack(alignment: .leading) {
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(themeManager.effectiveTheme.muted)
-                                    .frame(height: 8)
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(themeManager.effectiveTheme.mutedForeground.opacity(0.3))
-                                    .frame(width: geometry.size.width * 0.6, height: 8)
-                            }
-                        }
+            } else if setCount > 0 {
+                // First session - no comparison data yet
+                VStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(themeManager.effectiveTheme.muted)
                         .frame(height: 8)
 
-                        if isWeightedExercise {
-                            Text("\(Formatters.formatVolume(themeManager.displayWeight(volume))) \(themeManager.weightUnit.displayName) total volume")
-                                .font(themeManager.effectiveTheme.captionFont)
-                                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                        } else {
-                            Text("\(totalReps) total reps")
-                                .font(themeManager.effectiveTheme.captionFont)
-                                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                        }
-
-                    }
+                    Text(isWeightedExercise
+                        ? "Next session will track total volume vs today"
+                        : "Next session will track reps vs today")
+                        .font(themeManager.effectiveTheme.captionFont)
+                        .italic()
+                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                 }
                 .padding(16)
             }

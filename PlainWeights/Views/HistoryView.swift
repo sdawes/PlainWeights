@@ -318,7 +318,7 @@ struct HistoryView: View {
             .contentMargins(.top, 12, for: .scrollContent)
             .id(selectedPeriod)  // Force scroll to top when period changes
         } else {
-            Text("No workouts recorded for this time period.")
+            Text("No workouts recorded for \(periodDescription.lowercased()).")
                 .font(themeManager.effectiveTheme.subheadlineFont)
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -386,7 +386,14 @@ struct HistoryView: View {
         case .lastSession:
             return "" // Not used for last session
         case .week:
-            return "This Week"
+            let calendar = Calendar.current
+            var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: .now)
+            components.weekday = 2 // Monday
+            let monday = calendar.date(from: components) ?? .now
+            let sunday = calendar.date(byAdding: .day, value: 6, to: monday) ?? .now
+            let mondayStr = monday.formatted(.dateTime.day().month(.abbreviated))
+            let sundayStr = sunday.formatted(.dateTime.day().month(.abbreviated))
+            return "This Week (\(mondayStr) – \(sundayStr))"
         case .month:
             return Date.now.formatted(.dateTime.month(.wide).year())
         case .year:

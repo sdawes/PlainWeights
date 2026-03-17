@@ -19,7 +19,7 @@ struct TagAnalyticsView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Text("Tag Analytics")
+                Text("Muscle Breakdown")
                     .font(themeManager.effectiveTheme.title3Font)
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Spacer()
@@ -36,10 +36,10 @@ struct TagAnalyticsView: View {
             // Content
             if tagDistribution.isEmpty {
                 VStack(spacing: 12) {
-                    Image(systemName: "tag")
+                    Image(systemName: "figure.strengthtraining.traditional")
                         .font(.system(size: 40))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.5))
-                    Text("No tagged exercises done today")
+                    Text("No exercises with muscle tags today")
                         .font(themeManager.effectiveTheme.bodyFont)
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }

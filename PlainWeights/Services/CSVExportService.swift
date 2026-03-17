@@ -23,7 +23,7 @@ enum CSVExportService {
         let exercises = try context.fetch(exerciseDescriptor)
 
         let weightHeader = "Weight (\(weightUnit.rawValue))"
-        let header = "Exercise,Tags,Date,Time,\(weightHeader),Reps,Warm Up,Drop Set,Assisted,Pause at Top,Timed Set,Tempo (s),PB,Rest (s),Notes\n"
+        let header = "Exercise,Muscle Tags,Date,Time,\(weightHeader),Reps,Warm Up,Drop Set,Assisted,Pause at Top,Timed Set,Tempo (s),PB,Rest (s),Notes\n"
 
         var csv = header
 

@@ -33,7 +33,7 @@ struct HelpView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     helpSection(
                         title: "Exercises",
-                        body: "Create an exercise for each movement you do in the gym. Tag them by muscle group to keep things organised."
+                        body: "Create an exercise for each movement you do in the gym. Add primary and secondary muscle tags to track your training split."
                     )
 
                     helpSection(

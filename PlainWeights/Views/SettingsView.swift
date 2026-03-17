@@ -100,8 +100,8 @@ struct SettingsView: View {
                         )
 
                         settingsToggleRow(
-                            icon: "tag",
-                            title: "Tag breakdown",
+                            icon: "figure.strengthtraining.traditional",
+                            title: "Muscle breakdown",
                             subtitle: "by default",
                             isOn: Binding(
                                 get: { themeManager.tagBreakdownVisible },

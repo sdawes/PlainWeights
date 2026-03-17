@@ -173,6 +173,40 @@ enum AppTheme: String, CaseIterable {
         pbColor.opacity(isDark ? 0.20 : 0.12)
     }
 
+    // MARK: - Tag Pill Colors
+
+    /// Primary tag pill background (pastel blue)
+    var primaryTagBackground: Color {
+        switch self {
+        case .light, .system: return Color(red: 0.89, green: 0.94, blue: 1.0) // lighter pastel blue
+        case .dark: return Color(red: 0.30, green: 0.55, blue: 0.85).opacity(0.15)
+        }
+    }
+
+    /// Primary tag pill text (soft blue)
+    var primaryTagText: Color {
+        switch self {
+        case .light, .system: return Color(red: 0.35, green: 0.55, blue: 0.78) // softer blue
+        case .dark: return Color(red: 0.58, green: 0.76, blue: 0.93)
+        }
+    }
+
+    /// Secondary tag pill background (pastel violet)
+    var secondaryTagBackground: Color {
+        switch self {
+        case .light, .system: return Color(red: 0.94, green: 0.92, blue: 1.0) // lighter pastel violet
+        case .dark: return Color(red: 0.58, green: 0.42, blue: 0.85).opacity(0.15)
+        }
+    }
+
+    /// Secondary tag pill text (soft violet)
+    var secondaryTagText: Color {
+        switch self {
+        case .light, .system: return Color(red: 0.56, green: 0.44, blue: 0.78) // softer violet
+        case .dark: return Color(red: 0.76, green: 0.66, blue: 0.90)
+        }
+    }
+
     // MARK: - Set Type Colors (static - same across themes)
 
     /// Color for warm-up sets

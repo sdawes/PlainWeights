@@ -33,6 +33,7 @@ struct AddExerciseView: View {
 
     private var isEditMode: Bool { exerciseToEdit != nil }
     private var screenTitle: String { isEditMode ? "Edit Exercise" : "Add Exercise" }
+    private var canSave: Bool { !name.isEmpty && !isDuplicateName }
 
     init(exerciseToEdit: Exercise? = nil, onExerciseCreated: ((Exercise) -> Void)? = nil) {
         self.exerciseToEdit = exerciseToEdit
@@ -49,12 +50,7 @@ struct AddExerciseView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
-            HStack {
-                Text(screenTitle)
-                    .font(themeManager.effectiveTheme.title3Font)
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                    .lineLimit(1)
-                Spacer()
+            HStack(spacing: 12) {
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.title3)
@@ -62,13 +58,33 @@ struct AddExerciseView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Close")
+
+                Text(screenTitle)
+                    .font(themeManager.effectiveTheme.title3Font)
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    .lineLimit(1)
+
+                Spacer()
+
+                Button(action: saveExercise) {
+                    Text("Save")
+                        .font(themeManager.effectiveTheme.headlineFont)
+                        .foregroundStyle(
+                            canSave
+                                ? themeManager.effectiveTheme.primary
+                                : themeManager.effectiveTheme.primary.opacity(0.4)
+                        )
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSave)
+                .accessibilityLabel("Save Exercise")
             }
             .padding(.bottom, 16)
 
             // Content
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 16) {
                         ExerciseNameField(
                             name: $name,
                             isFocused: $nameFieldFocused,
@@ -79,7 +95,7 @@ struct AddExerciseView: View {
                             checkForDuplicate()
                         }
 
-                        HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 12) {
                             TagInputSection(
                                 title: "Primary Tags",
                                 placeholder: "e.g. upper chest",
@@ -114,10 +130,10 @@ struct AddExerciseView: View {
                                 suggestions: tagSuggestions,
                                 onSubmit: { secondaryTagFieldFocused = true }
                             )
+                            .id("secondaryTags")
                         }
-                        .id("secondaryTags")
                     }
-                    .padding(.top, 24)
+                    .padding(.top, 16)
                 }
                 .scrollDismissesKeyboard(.immediately)
                 .onChange(of: secondaryTagFieldFocused) { _, focused in
@@ -132,21 +148,6 @@ struct AddExerciseView: View {
                 }
             }
 
-            Spacer()
-
-            // Bottom CTA button
-            Button(action: saveExercise) {
-                let isDisabled = name.isEmpty || isDuplicateName
-                Text(isEditMode ? "Save Changes" : "Add Exercise")
-                    .font(themeManager.effectiveTheme.headlineFont)
-                    .foregroundStyle(themeManager.effectiveTheme.background)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(isDisabled ? themeManager.effectiveTheme.primary.opacity(0.4) : themeManager.effectiveTheme.primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
-            .disabled(name.isEmpty || isDuplicateName)
         }
         .padding(24)
         .background(themeManager.effectiveTheme.background)

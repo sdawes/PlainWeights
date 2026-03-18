@@ -73,13 +73,6 @@ struct ExerciseDetailView: View {
         comparisonMode == .lastSession ? cachedLastSessionReps : cachedBestSessionReps
     }
 
-    // Rest timer: most recent today set that hasn't captured rest yet
-    private var restTimerSet: ExerciseSet? {
-        guard let mostRecent = todaySets.first,
-              mostRecent.restSeconds == nil else { return nil }
-        return mostRecent
-    }
-
     // Label for progress bar based on selected mode
     private var comparisonLabel: String {
         comparisonMode == .lastSession ? "Last" : "Best"
@@ -345,38 +338,6 @@ struct ExerciseDetailView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .contentMargins(.top, 0, for: .scrollContent)
-        .safeAreaInset(edge: .bottom) {
-            HStack {
-                Spacer()
-                Button(action: {
-                    let lastSet = sets.first
-                    addSetConfig = .previous(
-                        exercise: exercise,
-                        weight: lastSet?.weight,
-                        reps: lastSet?.reps
-                    )
-                }) {
-                    Image(systemName: "plus")
-                        .font(.title2)
-                        .foregroundStyle(themeManager.effectiveTheme.background)
-                }
-                .frame(width: 50, height: 50)
-                .background(themeManager.effectiveTheme.primary)
-                .clipShape(Circle())
-                .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-        }
-        .overlay(alignment: .bottom) {
-            if let timerSet = restTimerSet {
-                FloatingRestTimerPill(set: timerSet)
-                    .alignmentGuide(.bottom) { d in
-                        d[VerticalAlignment.center] - 45
-                    }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
@@ -492,6 +453,26 @@ struct ExerciseDetailView: View {
             updateCachedData()
         }
         } // ScrollViewReader
+        .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
+            Button(action: {
+                let lastSet = sets.first
+                addSetConfig = .previous(
+                    exercise: exercise,
+                    weight: lastSet?.weight,
+                    reps: lastSet?.reps
+                )
+            }) {
+                Image(systemName: "plus")
+                    .font(.title2)
+                    .foregroundStyle(themeManager.effectiveTheme.background)
+            }
+            .frame(width: 50, height: 50)
+            .background(themeManager.effectiveTheme.primary)
+            .clipShape(Circle())
+            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+            .padding(.trailing, 20)
+            .padding(.bottom, 46)
+        }
     }
 
     // MARK: - Data Management

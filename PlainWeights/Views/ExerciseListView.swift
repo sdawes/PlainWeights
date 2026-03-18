@@ -304,7 +304,7 @@ struct FilteredExerciseListView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .navigationBarTitleDisplayMode(.inline)
-        .overlay(alignment: .bottomTrailing) {
+        .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
             Button(action: { showingAddExercise = true }) {
                 Image(systemName: "plus")
                     .font(.title2)
@@ -316,7 +316,7 @@ struct FilteredExerciseListView: View {
             .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
             .accessibilityLabel("Add exercise")
             .padding(.trailing, 20)
-            .padding(.bottom, 20)
+            .padding(.bottom, 8)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

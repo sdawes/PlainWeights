@@ -79,63 +79,97 @@ struct AddExerciseView: View {
                 .disabled(!canSave)
                 .accessibilityLabel("Save Exercise")
             }
-            .padding(.bottom, 16)
+            .padding(.bottom, 20)
 
-            // Content
+            // Card with all sections
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        ExerciseNameField(
-                            name: $name,
-                            isFocused: $nameFieldFocused,
-                            isDuplicate: isDuplicateName,
-                            onSubmit: { tagFieldFocused = true }
-                        )
-                        .onChange(of: name) { _, _ in
-                            checkForDuplicate()
-                        }
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Name section
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Name")
+                                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                                .textCase(.uppercase)
+                                .tracking(0.8)
 
-                        VStack(alignment: .leading, spacing: 12) {
-                            TagInputSection(
-                                title: "Primary Tags",
-                                placeholder: "e.g. upper chest",
-                                tags: $tags,
-                                input: $tagInput,
-                                isFocused: $tagFieldFocused,
-                                isSecondary: false,
-                                suggestions: tagSuggestions,
-                                onSubmit: { tagFieldFocused = true },
-                                titleAccessory: {
-                                    Button {
-                                        showingTagInfo = true
-                                    } label: {
-                                        Image(systemName: "info.circle")
-                                            .font(.system(size: 12))
-                                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.6))
-                                    }
-                                    .buttonStyle(.plain)
-                                    .popover(isPresented: $showingTagInfo) {
-                                        tagInfoPopover
-                                    }
+                            TextField("", text: $name, prompt: Text("e.g. Romanian Deadlift").foregroundStyle(themeManager.effectiveTheme.primary.opacity(0.18)))
+                                .focused($nameFieldFocused)
+                                .font(themeManager.effectiveTheme.dataFont(size: 20))
+                                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                                .onSubmit { tagFieldFocused = true }
+                                .onChange(of: name) { _, newValue in
+                                    if newValue.count > 50 { name = String(newValue.prefix(50)) }
+                                    checkForDuplicate()
                                 }
-                            )
 
-                            TagInputSection(
-                                title: "Secondary Tags",
-                                placeholder: "e.g. side delts",
-                                tags: $secondaryTags,
-                                input: $secondaryTagInput,
-                                isFocused: $secondaryTagFieldFocused,
-                                isSecondary: true,
-                                suggestions: tagSuggestions,
-                                onSubmit: { secondaryTagFieldFocused = true }
-                            )
-                            .id("secondaryTags")
+                            if isDuplicateName {
+                                Text("An exercise with this name already exists")
+                                    .font(themeManager.effectiveTheme.captionFont)
+                                    .foregroundStyle(.red)
+                            }
                         }
+                        .padding(16)
+
+                        // Divider
+                        Rectangle()
+                            .fill(themeManager.effectiveTheme.primary.opacity(0.08))
+                            .frame(height: 1)
+
+                        // Primary tags section
+                        InlineTagSection(
+                            title: "Primary Muscles",
+                            emptyHint: "tap to add primary muscles",
+                            tags: $tags,
+                            input: $tagInput,
+                            isFocused: $tagFieldFocused,
+                            isSecondary: false,
+                            suggestions: tagSuggestions,
+                            onSubmit: { tagFieldFocused = true },
+                            titleAccessory: {
+                                Button {
+                                    showingTagInfo = true
+                                } label: {
+                                    Image(systemName: "info.circle")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.6))
+                                }
+                                .buttonStyle(.plain)
+                                .popover(isPresented: $showingTagInfo) {
+                                    tagInfoPopover
+                                }
+                            }
+                        )
+                        .padding(16)
+
+                        // Divider
+                        Rectangle()
+                            .fill(themeManager.effectiveTheme.primary.opacity(0.08))
+                            .frame(height: 1)
+
+                        // Secondary tags section
+                        InlineTagSection(
+                            title: "Secondary Muscles",
+                            emptyHint: "tap to add secondary muscles",
+                            tags: $secondaryTags,
+                            input: $secondaryTagInput,
+                            isFocused: $secondaryTagFieldFocused,
+                            isSecondary: true,
+                            suggestions: tagSuggestions,
+                            onSubmit: { secondaryTagFieldFocused = true }
+                        )
+                        .padding(16)
+                        .id("secondaryTags")
                     }
-                    .padding(.top, 16)
+                    .background(themeManager.effectiveTheme.cardBackgroundColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(themeManager.effectiveTheme.primary.opacity(0.15), lineWidth: 1)
+                    )
                 }
                 .scrollDismissesKeyboard(.immediately)
+                .scrollIndicators(.hidden)
                 .onChange(of: secondaryTagFieldFocused) { _, focused in
                     if focused {
                         withAnimation { proxy.scrollTo("secondaryTags", anchor: .bottom) }
@@ -147,7 +181,6 @@ struct AddExerciseView: View {
                     }
                 }
             }
-
         }
         .padding(24)
         .background(themeManager.effectiveTheme.background)
@@ -174,12 +207,12 @@ struct AddExerciseView: View {
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("**Primary** main muscle (e.g. chest). Weighted more in the tag breakdown.")
+                Text("**Primary muscles** the main muscles worked (e.g. chest). Weighted more in the tag breakdown.")
                     .font(themeManager.effectiveTheme.interFont(size: 13))
                     .foregroundStyle(themeManager.effectiveTheme.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("**Secondary** supporting (e.g. triceps). Counted less.")
+                Text("**Secondary muscles** supporting muscles (e.g. triceps). Counted less.")
                     .font(themeManager.effectiveTheme.interFont(size: 13))
                     .foregroundStyle(themeManager.effectiveTheme.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)

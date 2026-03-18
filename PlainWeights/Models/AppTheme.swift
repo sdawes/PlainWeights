@@ -194,16 +194,16 @@ enum AppTheme: String, CaseIterable {
     /// Secondary tag pill background (pastel violet)
     var secondaryTagBackground: Color {
         switch self {
-        case .light, .system: return Color(red: 0.94, green: 0.92, blue: 1.0) // lighter pastel violet
-        case .dark: return Color(red: 0.58, green: 0.42, blue: 0.85).opacity(0.15)
+        case .light, .system: return Color(red: 0.95, green: 0.94, blue: 1.0) // paler pastel violet
+        case .dark: return Color(red: 0.58, green: 0.42, blue: 0.85).opacity(0.12)
         }
     }
 
     /// Secondary tag pill text (soft violet)
     var secondaryTagText: Color {
         switch self {
-        case .light, .system: return Color(red: 0.56, green: 0.44, blue: 0.78) // softer violet
-        case .dark: return Color(red: 0.76, green: 0.66, blue: 0.90)
+        case .light, .system: return Color(red: 0.62, green: 0.52, blue: 0.80) // paler violet
+        case .dark: return Color(red: 0.80, green: 0.72, blue: 0.92)
         }
     }
 

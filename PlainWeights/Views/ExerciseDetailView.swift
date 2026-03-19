@@ -239,7 +239,8 @@ struct ExerciseDetailView: View {
                             allSets: set.isWarmUp ? nil : cachedAllSets,
                             showTimer: index == 0,
                             cardPosition: isLast ? .bottom : .middle,
-                            isFirstInCard: index == 0
+                            isFirstInCard: index == 0,
+                            isToday: true
                         )
                         .id(index == 0 ? "latestSet" : nil)
                     }

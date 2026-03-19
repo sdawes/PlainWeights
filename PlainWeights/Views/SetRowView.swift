@@ -25,8 +25,9 @@ struct SetRowView: View {
     let cardPosition: ListRowCardPosition?  // For unified card appearance with today's sets
     let isFirstInCard: Bool  // True for first set after header (no top divider needed)
     let isLastSetInDay: Bool  // True for last set in a day (shows 3:00 if no restSeconds)
+    let isToday: Bool  // True for today's sets - rest time keeps timer colour
 
-    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true, isLastSetInDay: Bool = false) {
+    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true, isLastSetInDay: Bool = false, isToday: Bool = false) {
         self.set = set
         self.setNumber = setNumber
         self.isFirst = isFirst
@@ -38,6 +39,7 @@ struct SetRowView: View {
         self.cardPosition = cardPosition
         self.isFirstInCard = isFirstInCard
         self.isLastSetInDay = isLastSetInDay
+        self.isToday = isToday
     }
 
     var body: some View {
@@ -293,13 +295,14 @@ struct SetRowView: View {
 
     @ViewBuilder
     private func staticRestTimeView(seconds: Int) -> some View {
+        let color = isToday ? restTimeColor(for: seconds) : themeManager.effectiveTheme.tertiaryText
         HStack(spacing: 4) {
             Image(systemName: "timer")
                 .font(.caption)
-                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                .foregroundStyle(color)
             Text(Formatters.formatDuration(Double(seconds)))
                 .font(themeManager.effectiveTheme.dataFont(size: 12))
-                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                .foregroundStyle(color)
         }
     }
 
@@ -312,10 +315,10 @@ struct SetRowView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
                         .font(.caption)
-                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                        .foregroundStyle(restTimeColor(for: 180))
                     Text("3:00")
                         .font(themeManager.effectiveTheme.dataFont(size: 12))
-                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                        .foregroundStyle(restTimeColor(for: 180))
                 }
                 .onAppear {
                     captureRestTimeExpiry()

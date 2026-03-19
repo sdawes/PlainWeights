@@ -503,26 +503,8 @@ struct InlineProgressChart: View {
                 maxModeChartView
                     .frame(height: 150)
             } else {
-                // Dual Y-axes: reps on left, weight on right
+                // Dual Y-axes: weight on left, reps on right
                 VStack(alignment: .trailing, spacing: 0) {
-                    Text("\(cachedState.repsRange.max)")
-                    Spacer()
-                    Text("\((cachedState.repsRange.min + cachedState.repsRange.max) / 2)")
-                    Spacer()
-                    Text("\(cachedState.repsRange.min)")
-                }
-                .font(themeManager.effectiveTheme.dataFont(size: 10))
-                .foregroundStyle(themeManager.effectiveTheme.chartColor2)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .frame(width: 25, height: 130)
-
-                // Main chart
-                maxModeChartView
-                    .frame(height: 150)
-
-                // Right Y-axis labels (Weight) - converted to user's preferred unit
-                VStack(alignment: .leading, spacing: 0) {
                     Text(Formatters.formatWeight(themeManager.displayWeight(cachedState.weightRange.max)))
                     Spacer()
                     Text(Formatters.formatWeight(themeManager.displayWeight((cachedState.weightRange.min + cachedState.weightRange.max) / 2)))
@@ -534,6 +516,24 @@ struct InlineProgressChart: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(width: 35, height: 130)
+
+                // Main chart
+                maxModeChartView
+                    .frame(height: 150)
+
+                // Right Y-axis labels (Reps)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("\(cachedState.repsRange.max)")
+                    Spacer()
+                    Text("\((cachedState.repsRange.min + cachedState.repsRange.max) / 2)")
+                    Spacer()
+                    Text("\(cachedState.repsRange.min)")
+                }
+                .font(themeManager.effectiveTheme.dataFont(size: 10))
+                .foregroundStyle(themeManager.effectiveTheme.chartColor2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(width: 25, height: 130)
             }
         }
     }

@@ -73,6 +73,13 @@ struct ExerciseDetailView: View {
         comparisonMode == .lastSession ? cachedLastSessionReps : cachedBestSessionReps
     }
 
+    // Rest timer: most recent today set that hasn't captured rest yet
+    private var restTimerSet: ExerciseSet? {
+        guard let mostRecent = todaySets.first,
+              mostRecent.restSeconds == nil else { return nil }
+        return mostRecent
+    }
+
     // Label for progress bar based on selected mode
     private var comparisonLabel: String {
         comparisonMode == .lastSession ? "Last" : "Best"
@@ -472,6 +479,14 @@ struct ExerciseDetailView: View {
             .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
             .padding(.trailing, 20)
             .padding(.bottom, 46)
+        }
+        .overlay(alignment: .bottom) {
+            if let timerSet = restTimerSet {
+                FloatingRestTimerPill(set: timerSet)
+                    .padding(.bottom, 36)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .ignoresSafeArea(edges: .bottom)
+            }
         }
     }
 

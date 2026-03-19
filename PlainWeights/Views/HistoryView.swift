@@ -932,10 +932,14 @@ struct HistoryView: View {
 
             // Current session values
             let currentMaxWeight = workingSets.map { $0.weight }.max() ?? 0
+            let isRepsOnly = currentMaxWeight == 0
             let currentMaxReps = currentMaxWeight > 0
                 ? (workingSets.filter { $0.weight == currentMaxWeight }.map { $0.reps }.max() ?? 0)
                 : (workingSets.map { $0.reps }.max() ?? 0)
-            let currentVolume = exercise.volume
+            // For reps-only exercises, use total reps instead of weight × reps volume
+            let currentVolume = isRepsOnly
+                ? Double(workingSets.reduce(0) { $0 + $1.reps })
+                : exercise.volume
 
             // Look up previous sets from pre-built index, filter to before this day
             let allExerciseSets = index[exerciseID] ?? []
@@ -959,12 +963,16 @@ struct HistoryView: View {
                 continue
             }
 
-            // Previous session values
-            let prevMaxWeight = previousDaySets.map { $0.weight }.max() ?? 0
+            // Previous session values (use working sets only for consistency)
+            let prevWorkingSets = previousDaySets.filter { !$0.isWarmUp }
+            let prevMaxWeight = prevWorkingSets.map { $0.weight }.max() ?? 0
             let prevMaxReps = prevMaxWeight > 0
-                ? (previousDaySets.filter { $0.weight == prevMaxWeight }.map { $0.reps }.max() ?? 0)
-                : (previousDaySets.map { $0.reps }.max() ?? 0)
-            let prevVolume = previousDaySets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
+                ? (prevWorkingSets.filter { $0.weight == prevMaxWeight }.map { $0.reps }.max() ?? 0)
+                : (prevWorkingSets.map { $0.reps }.max() ?? 0)
+            // For reps-only exercises, compare total reps instead of weight × reps volume
+            let prevVolume = isRepsOnly
+                ? Double(prevWorkingSets.reduce(0) { $0 + $1.reps })
+                : prevWorkingSets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
 
             // Determine direction for each metric
             let weightDir: DeltaDirection = currentMaxWeight > prevMaxWeight ? .up

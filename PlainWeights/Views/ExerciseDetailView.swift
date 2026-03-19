@@ -376,7 +376,7 @@ struct ExerciseDetailView: View {
                         }
                     }
                 }) {
-                    Image(systemName: "note.text")
+                    Image(systemName: "pencil.line")
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(showNotes
@@ -388,7 +388,7 @@ struct ExerciseDetailView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 NavigationLink(value: HistoryDestination.history) {
-                    Image(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
+                    Image(systemName: "clock.arrow.circlepath")
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(themeManager.effectiveTheme.textColor)

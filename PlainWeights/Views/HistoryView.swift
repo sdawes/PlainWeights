@@ -10,20 +10,20 @@ import SwiftData
 
 enum HistoryTimePeriod: String, CaseIterable {
     case lastSession = "Last"
-    case week = "Week"          // Calendar week (Mon → today)
-    case month = "Month"        // Calendar month (1st → today)
-    case year = "Year"          // Calendar year (Jan 1 → today)
-    case rolling12Months = "12 Mo"  // Rolling 365 days
+    case week = "Week"          // Rolling 7 days
+    case month = "Month"        // Rolling 30 days
+    case year = "Year"          // Rolling 365 days
 }
 
 /// Aggregate metrics for a time period summary
 private struct PeriodMetrics {
     let dayCount: Int           // Unique workout days
+    let exerciseCount: Int      // Unique exercises worked
     let setCount: Int           // Working sets only
     let totalVolume: Double     // Sum of weight × reps
     let pbCount: Int            // Sets where isPB == true
 
-    static let empty = PeriodMetrics(dayCount: 0, setCount: 0, totalVolume: 0, pbCount: 0)
+    static let empty = PeriodMetrics(dayCount: 0, exerciseCount: 0, setCount: 0, totalVolume: 0, pbCount: 0)
 }
 
 /// Lightweight exercise summary for period view
@@ -334,15 +334,15 @@ struct HistoryView: View {
     @ViewBuilder
     private var periodSummaryCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header with period description and workout count
+            // Header with period description and date range
             HStack(spacing: 0) {
                 Text(periodDescription)
                     .font(themeManager.effectiveTheme.interFont(size: 16, weight: .semibold))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                Text(" · \(cachedPeriodMetrics.dayCount) \(cachedPeriodMetrics.dayCount == 1 ? "workout" : "workouts")")
-                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                 Spacer()
+                Text(periodDateRange)
+                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .regular).italic())
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
@@ -352,9 +352,13 @@ struct HistoryView: View {
                 .fill(themeManager.effectiveTheme.borderColor)
                 .frame(height: 1)
 
-            // Row 1: Workout Days, Sets
+            // Row 1: Workout Days, Exercises, Sets
             HStack(spacing: 0) {
                 metricCell(label: "Workout Days", value: "\(cachedPeriodMetrics.dayCount)")
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(width: 1)
+                metricCell(label: "Exercises", value: "\(cachedPeriodMetrics.exerciseCount)")
                 Rectangle()
                     .fill(themeManager.effectiveTheme.borderColor)
                     .frame(width: 1)
@@ -390,20 +394,37 @@ struct HistoryView: View {
         case .lastSession:
             return "" // Not used for last session
         case .week:
-            let calendar = Calendar.current
-            var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: .now)
-            components.weekday = 2 // Monday
-            let monday = calendar.date(from: components) ?? .now
-            let sunday = calendar.date(byAdding: .day, value: 6, to: monday) ?? .now
-            let mondayStr = monday.formatted(.dateTime.day().month(.abbreviated))
-            let sundayStr = sunday.formatted(.dateTime.day().month(.abbreviated))
-            return "This Week (\(mondayStr) – \(sundayStr))"
+            return "Past 7 Days"
         case .month:
-            return Date.now.formatted(.dateTime.month(.wide).year())
+            return "Past 30 Days"
         case .year:
-            return Date.now.formatted(.dateTime.year())
-        case .rolling12Months:
-            return "Past 12 Months"
+            return "Past 365 Days"
+        }
+    }
+
+    /// Date range string for rolling period headers
+    private var periodDateRange: String {
+        let calendar = Calendar.current
+        let now = Date()
+
+        switch selectedPeriod {
+        case .lastSession:
+            return ""
+        case .week:
+            let start = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+            let startStr = start.formatted(.dateTime.weekday(.abbreviated).day())
+            let endStr = now.formatted(.dateTime.weekday(.abbreviated).day())
+            return "\(startStr) – \(endStr)"
+        case .month:
+            let start = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+            let startStr = start.formatted(.dateTime.day().month(.abbreviated))
+            let endStr = now.formatted(.dateTime.day().month(.abbreviated))
+            return "\(startStr) – \(endStr)"
+        case .year:
+            let start = calendar.date(byAdding: .day, value: -365, to: now) ?? now
+            let startStr = start.formatted(.dateTime.month(.abbreviated).year(.twoDigits))
+            let endStr = now.formatted(.dateTime.month(.abbreviated).year(.twoDigits))
+            return "\(startStr) – \(endStr)"
         }
     }
 
@@ -539,7 +560,7 @@ struct HistoryView: View {
 
     // MARK: - Static Computation Functions
 
-    /// Filter sets by time period (calendar-based for Week/Month/Year, rolling for 12 Mo)
+    /// Filter sets by time period (rolling windows)
     private static func filterSets(_ sets: [ExerciseSet], for period: HistoryTimePeriod) -> [ExerciseSet] {
         let calendar = Calendar.current
         let now = Date()
@@ -548,21 +569,12 @@ struct HistoryView: View {
         case .lastSession:
             return sets // Not used - handled by computeDisplayDay
         case .week:
-            // Monday of current week (ISO 8601: Monday = 2)
-            var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
-            components.weekday = 2 // Monday
-            let monday = calendar.date(from: components) ?? now
-            return sets.filter { $0.timestamp >= calendar.startOfDay(for: monday) }
+            let cutoff = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+            return sets.filter { $0.timestamp >= cutoff }
         case .month:
-            // 1st of current month
-            let firstOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now)) ?? now
-            return sets.filter { $0.timestamp >= firstOfMonth }
+            let cutoff = calendar.date(byAdding: .day, value: -30, to: now) ?? now
+            return sets.filter { $0.timestamp >= cutoff }
         case .year:
-            // Jan 1 of current year
-            let firstOfYear = calendar.date(from: calendar.dateComponents([.year], from: now)) ?? now
-            return sets.filter { $0.timestamp >= firstOfYear }
-        case .rolling12Months:
-            // Past 365 days
             let cutoff = calendar.date(byAdding: .day, value: -365, to: now) ?? now
             return sets.filter { $0.timestamp >= cutoff }
         }
@@ -574,11 +586,13 @@ struct HistoryView: View {
         let calendar = Calendar.current
 
         let uniqueDays = Set(workingSets.map { calendar.startOfDay(for: $0.timestamp) })
+        let uniqueExercises = Set(workingSets.compactMap { $0.exercise?.persistentModelID })
         let volume = workingSets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
         let pbs = workingSets.filter { $0.isPB }.count
 
         return PeriodMetrics(
             dayCount: uniqueDays.count,
+            exerciseCount: uniqueExercises.count,
             setCount: workingSets.count,
             totalVolume: volume,
             pbCount: pbs

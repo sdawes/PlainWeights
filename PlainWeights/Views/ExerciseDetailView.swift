@@ -483,7 +483,7 @@ struct ExerciseDetailView: View {
         .overlay(alignment: .bottom) {
             if let timerSet = restTimerSet {
                 FloatingRestTimerPill(set: timerSet)
-                    .padding(.bottom, 36)
+                    .padding(.bottom, 33)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .ignoresSafeArea(edges: .bottom)
             }

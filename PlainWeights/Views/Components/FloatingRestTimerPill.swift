@@ -15,6 +15,10 @@ struct FloatingRestTimerPill: View {
     @Environment(ThemeManager.self) private var themeManager
     @State private var hasExpired = false
 
+    private var isDark: Bool {
+        themeManager.effectiveTheme == .dark
+    }
+
     var body: some View {
         TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
             let elapsed = context.date.timeIntervalSince(set.timestamp)
@@ -37,11 +41,11 @@ struct FloatingRestTimerPill: View {
                             .foregroundStyle(timerColor(for: elapsed))
                         Text("tap to stop")
                             .font(themeManager.effectiveTheme.captionFont)
-                            .foregroundStyle(.white.opacity(0.35))
+                            .foregroundStyle(isDark ? .black.opacity(0.35) : .white.opacity(0.35))
                     }
                     .padding(.horizontal, 28)
                     .padding(.vertical, 14)
-                    .background(Color.black)
+                    .background(isDark ? Color(white: 0.93) : Color.black)
                     .clipShape(Capsule())
                     .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 4)
                 }
@@ -52,11 +56,11 @@ struct FloatingRestTimerPill: View {
 
     private func timerColor(for elapsed: TimeInterval) -> Color {
         if elapsed < 60 {
-            return .white
+            return isDark ? .black : .white
         } else if elapsed < 120 {
-            return .orange
+            return isDark ? Color(red: 0.92, green: 0.45, blue: 0.18) : .orange
         } else {
-            return .red
+            return isDark ? Color(red: 0.85, green: 0.20, blue: 0.20) : .red
         }
     }
 }

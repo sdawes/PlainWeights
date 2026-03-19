@@ -12,7 +12,6 @@ import SwiftUI
 final class ThemeManager {
     private static let themeKey = "selectedTheme"
     private static let chartVisibleKey = "chartVisibleByDefault"
-    private static let notesVisibleKey = "notesVisibleByDefault"
     private static let weightUnitKey = "weightUnit"
     private static let tagBreakdownVisibleKey = "tagBreakdownVisible"
     private static let showTrendLineKey = "showTrendLineByDefault"
@@ -43,12 +42,6 @@ final class ThemeManager {
         }
     }
 
-    var notesVisibleByDefault: Bool {
-        didSet {
-            UserDefaults.standard.set(notesVisibleByDefault, forKey: Self.notesVisibleKey)
-        }
-    }
-
     var tagBreakdownVisible: Bool {
         didSet {
             UserDefaults.standard.set(tagBreakdownVisible, forKey: Self.tagBreakdownVisibleKey)
@@ -69,17 +62,14 @@ final class ThemeManager {
         let savedUnit = UserDefaults.standard.string(forKey: Self.weightUnitKey) ?? WeightUnit.kg.rawValue
         self.weightUnit = WeightUnit(rawValue: savedUnit) ?? .kg
 
-        // Chart visibility - defaults to false (hidden)
-        self.chartVisibleByDefault = UserDefaults.standard.object(forKey: Self.chartVisibleKey) as? Bool ?? false
-
-        // Notes visibility - defaults to false (hidden)
-        self.notesVisibleByDefault = UserDefaults.standard.object(forKey: Self.notesVisibleKey) as? Bool ?? false
+        // Chart visibility - defaults to true (visible)
+        self.chartVisibleByDefault = UserDefaults.standard.object(forKey: Self.chartVisibleKey) as? Bool ?? true
 
         // Tag breakdown visibility - defaults to true (visible)
         self.tagBreakdownVisible = UserDefaults.standard.object(forKey: Self.tagBreakdownVisibleKey) as? Bool ?? true
 
-        // Trend line visibility - defaults to false (hidden)
-        self.showTrendLineByDefault = UserDefaults.standard.object(forKey: Self.showTrendLineKey) as? Bool ?? false
+        // Trend line visibility - defaults to true (visible)
+        self.showTrendLineByDefault = UserDefaults.standard.object(forKey: Self.showTrendLineKey) as? Bool ?? true
     }
 
     // MARK: - Weight Conversion Helpers

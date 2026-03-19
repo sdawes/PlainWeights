@@ -436,7 +436,7 @@ struct ExerciseDetailView: View {
         }
         .onAppear {
             showChart = themeManager.chartVisibleByDefault
-            showNotes = themeManager.notesVisibleByDefault
+            showNotes = false
             updateCachedData()
             previousTodaySetsCount = todaySets.count
         }

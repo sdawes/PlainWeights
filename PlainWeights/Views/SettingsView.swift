@@ -90,16 +90,6 @@ struct SettingsView: View {
                         )
 
                         settingsToggleRow(
-                            icon: "note.text",
-                            title: "Show notes",
-                            subtitle: "by default",
-                            isOn: Binding(
-                                get: { themeManager.notesVisibleByDefault },
-                                set: { themeManager.notesVisibleByDefault = $0 }
-                            )
-                        )
-
-                        settingsToggleRow(
                             icon: "figure.strengthtraining.traditional",
                             title: "Muscle breakdown",
                             subtitle: "by default",
@@ -170,7 +160,7 @@ struct SettingsView: View {
 
                     // Footer
                     VStack(spacing: 4) {
-                        Text("PlainWeights v1.0")
+                        Text("PlainWeights v1.2")
                             .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
                         Text("A simple workout tracking tool")

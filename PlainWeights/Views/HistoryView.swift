@@ -91,12 +91,16 @@ struct HistoryView: View {
     // Tag breakdown visibility toggle (default from setting)
     @State private var showTagBreakdown = true
 
+    private var hasTodaySets: Bool {
+        allSets.contains { Calendar.current.isDateInToday($0.timestamp) }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Time period picker
             Picker("Time Period", selection: $selectedPeriod) {
                 ForEach(HistoryTimePeriod.allCases, id: \.self) { period in
-                    Text(period.rawValue).tag(period)
+                    Text(period == .lastSession && hasTodaySets ? "Today" : period.rawValue).tag(period)
                 }
             }
             .pickerStyle(.segmented)

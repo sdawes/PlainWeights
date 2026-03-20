@@ -15,12 +15,13 @@ enum CSVExportService {
     ///   - container: The SwiftData model container
     ///   - weightUnit: User's preferred weight unit (kg/lbs)
     /// - Returns: URL of the temporary CSV file
-    static func exportToCSV(container: ModelContainer, weightUnit: WeightUnit) async throws -> URL {
+    @MainActor
+    static func exportToCSV(container: ModelContainer, weightUnit: WeightUnit) throws -> URL {
         let context = ModelContext(container)
         context.autosaveEnabled = false
 
-        let exerciseDescriptor = FetchDescriptor<Exercise>(sortBy: [SortDescriptor(\.name)])
-        let exercises = try context.fetch(exerciseDescriptor)
+        let exerciseDescriptor = FetchDescriptor<Exercise>()
+        let exercises = try context.fetch(exerciseDescriptor).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
 
         let weightHeader = "Weight (\(weightUnit.rawValue))"
         let header = "Exercise,Muscle Tags,Date,Time,\(weightHeader),Reps,Warm Up,Drop Set,Assisted,Pause at Top,Timed Set,Tempo (s),PB,Rest (s),Notes\n"

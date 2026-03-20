@@ -361,21 +361,17 @@ struct SettingsView: View {
             isExporting = true
             let container = modelContext.container
             let unit = themeManager.weightUnit
-            Task.detached {
+            Task {
                 do {
-                    let url = try await CSVExportService.exportToCSV(
+                    let url = try CSVExportService.exportToCSV(
                         container: container,
                         weightUnit: unit
                     )
-                    await MainActor.run {
-                        exportedFileURL = url
-                        isExporting = false
-                    }
+                    exportedFileURL = url
+                    isExporting = false
                 } catch {
-                    await MainActor.run {
-                        isExporting = false
-                        showError = true
-                    }
+                    isExporting = false
+                    showError = true
                 }
             }
         } label: {

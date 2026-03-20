@@ -101,7 +101,7 @@ struct WorkoutShareCardView: View {
     }
 
     private func renderShareImage() {
-        let cardWidth = UIScreen.main.bounds.width - 48
+        let cardWidth: CGFloat = 350
         let renderer = ImageRenderer(content:
             shareCard
                 .frame(width: cardWidth)
@@ -109,7 +109,7 @@ struct WorkoutShareCardView: View {
                 .background(theme.background)
                 .environment(themeManager)
         )
-        renderer.scale = UIScreen.main.scale
+        renderer.scale = UITraitCollection.current.displayScale
         shareImage = renderer.uiImage
     }
 
@@ -120,7 +120,7 @@ struct WorkoutShareCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Brand + date + logo header
             HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("Check out my workout, tracked with Plain Weights")
                         .font(theme.interFont(size: 17, weight: .bold))
                         .foregroundStyle(theme.primaryText)
@@ -141,10 +141,10 @@ struct WorkoutShareCardView: View {
                 Image("AppIconImage")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 56, height: 56)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .frame(width: 64, height: 64)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 14)
                             .strokeBorder(.black.opacity(0.2), lineWidth: 1)
                     )
                     .padding(.horizontal, 16)
@@ -180,7 +180,7 @@ struct WorkoutShareCardView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 40)
                 .padding(.vertical, 16)
 
                 cardDivider

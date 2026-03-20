@@ -649,11 +649,6 @@ struct HistoryView: View {
             }
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: "figure.strengthtraining.traditional")
-                    .font(.system(size: 13))
-                    .foregroundStyle(showTagBreakdown
-                        ? themeManager.effectiveTheme.mutedForeground
-                        : themeManager.effectiveTheme.tertiaryText)
                 Text("Muscle Breakdown")
                     .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                     .foregroundStyle(showTagBreakdown

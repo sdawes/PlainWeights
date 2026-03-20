@@ -121,12 +121,17 @@ struct WorkoutShareCardView: View {
             // Brand + date + logo header
             HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Check out my workout, tracked with Plain Weights")
+                    Text("Check out how I track my gym weights!")
                         .font(theme.interFont(size: 17, weight: .bold))
                         .foregroundStyle(theme.primaryText)
-                    Text(day.date, format: .dateTime.weekday(.wide).day().month(.abbreviated))
-                        .font(theme.interFont(size: 13, weight: .regular))
-                        .foregroundStyle(theme.mutedForeground)
+                    HStack(spacing: 0) {
+                        Text("Last session: ")
+                            .font(theme.interFont(size: 13, weight: .medium))
+                            .foregroundStyle(theme.mutedForeground)
+                        Text(day.date, format: .dateTime.weekday(.wide).day().month(.abbreviated))
+                            .font(theme.interFont(size: 13, weight: .regular))
+                            .foregroundStyle(theme.mutedForeground)
+                    }
                 }
                 .padding(.vertical, 14)
                 .padding(.leading, 16)
@@ -141,11 +146,11 @@ struct WorkoutShareCardView: View {
                 Image("AppIconImage")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 64, height: 64)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .frame(width: 80, height: 80)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .strokeBorder(.black.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 18)
+                            .strokeBorder(.white, lineWidth: 2)
                     )
                     .padding(.horizontal, 16)
             }
@@ -154,34 +159,41 @@ struct WorkoutShareCardView: View {
 
             // Donut + legend side by side
             if !topMuscleGroups.isEmpty {
-                HStack(alignment: .center, spacing: 0) {
-                    VStack(spacing: 10) {
-                        Text("Muscles Worked")
-                            .font(theme.interFont(size: 14, weight: .medium))
-                            .foregroundStyle(theme.mutedForeground)
-                        donutChart
-                            .frame(width: 80, height: 80)
-                    }
+                Text("Top 5 Muscles Worked")
+                    .font(theme.interFont(size: 14, weight: .medium))
+                    .foregroundStyle(theme.mutedForeground)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                    .padding(.bottom, 4)
 
-                    Spacer()
+                HStack(spacing: 0) {
+                    donutChart
+                        .frame(width: 80, height: 80)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 4)
+                        .padding(.bottom, 12)
 
-                    Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
-                        ForEach(topMuscleGroups.indices, id: \.self) { index in
-                            let group = topMuscleGroups[index]
-                            GridRow {
-                                Circle()
-                                    .fill(muscleColors[index % muscleColors.count])
-                                    .frame(width: 8, height: 8)
-                                Text(group.tag)
-                                    .font(theme.captionFont)
-                                    .foregroundStyle(theme.primaryText)
-                                    .gridColumnAlignment(.leading)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 8) {
+                            ForEach(topMuscleGroups.indices, id: \.self) { index in
+                                let group = topMuscleGroups[index]
+                                GridRow {
+                                    Circle()
+                                        .fill(muscleColors[index % muscleColors.count])
+                                        .frame(width: 8, height: 8)
+                                    Text(group.tag)
+                                        .font(theme.captionFont)
+                                        .foregroundStyle(theme.primaryText)
+                                        .gridColumnAlignment(.leading)
+                                }
                             }
                         }
+
+                        Spacer(minLength: 0)
                     }
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 40)
-                .padding(.vertical, 16)
+                .padding(.bottom, 12)
 
                 cardDivider
             }
@@ -191,10 +203,12 @@ struct WorkoutShareCardView: View {
                 VStack(spacing: 4) {
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
                         Text("\(Formatters.formatVolume(themeManager.displayWeight(day.totalVolume)))")
-                            .font(theme.dataFont(size: 24, weight: .semibold))
+                            .font(theme.dataFont(size: 20, weight: .semibold))
                             .foregroundStyle(theme.primaryText)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                         Text(themeManager.weightUnit.displayName)
-                            .font(theme.dataFont(size: 14, weight: .medium))
+                            .font(theme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(theme.mutedForeground)
                     }
                     Text("Total Volume")
@@ -210,13 +224,13 @@ struct WorkoutShareCardView: View {
                 VStack(spacing: 4) {
                     HStack(alignment: .center, spacing: 4) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 18))
+                            .font(.system(size: 15))
                             .foregroundStyle(theme.pbColor)
                         Text("\(pbCount)")
-                            .font(theme.dataFont(size: 24, weight: .semibold))
+                            .font(theme.dataFont(size: 20, weight: .semibold))
                             .foregroundStyle(theme.primaryText)
                     }
-                    Text("Personal Bests")
+                    Text("PBs")
                         .font(theme.caption2Font)
                         .foregroundStyle(theme.mutedForeground)
                 }
@@ -229,8 +243,10 @@ struct WorkoutShareCardView: View {
 
                     VStack(spacing: 4) {
                         Text(formatDuration(duration))
-                            .font(theme.dataFont(size: 24, weight: .semibold))
+                            .font(theme.dataFont(size: 20, weight: .semibold))
                             .foregroundStyle(theme.primaryText)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                         Text("Duration")
                             .font(theme.caption2Font)
                             .foregroundStyle(theme.mutedForeground)
@@ -245,22 +261,22 @@ struct WorkoutShareCardView: View {
             // vs Last Session – 3 columns
             let deltas = deltasSummary
             if deltas.total > 0 {
-                sectionLabel("vs Last Session")
+                sectionLabel("Improvements vs Last Session")
 
                 HStack(spacing: 0) {
-                    deltaStat(value: deltas.weightUp, total: deltas.total, label: "Beat Max Weight")
+                    deltaStat(value: deltas.weightUp, total: deltas.total, label: "Heavier")
 
                     Rectangle()
                         .fill(theme.borderColor)
                         .frame(width: 1, height: 44)
 
-                    deltaStat(value: deltas.repsUp, total: deltas.total, label: "Beat Max Reps")
+                    deltaStat(value: deltas.repsUp, total: deltas.total, label: "More Reps")
 
                     Rectangle()
                         .fill(theme.borderColor)
                         .frame(width: 1, height: 44)
 
-                    deltaStat(value: deltas.volumeUp, total: deltas.total, label: "Beat Total Volume")
+                    deltaStat(value: deltas.volumeUp, total: deltas.total, label: "More Volume")
                 }
                 .padding(.bottom, 16)
 
@@ -329,7 +345,7 @@ struct WorkoutShareCardView: View {
         Text(text)
             .font(theme.interFont(size: 14, weight: .medium))
             .foregroundStyle(theme.mutedForeground)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 16)
             .padding(.top, 14)
             .padding(.bottom, 8)
     }

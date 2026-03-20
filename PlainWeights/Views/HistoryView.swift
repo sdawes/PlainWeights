@@ -88,6 +88,9 @@ struct HistoryView: View {
     // Show delta symbols info popover
     @State private var showingDeltaInfo = false
 
+    // Show share card sheet
+    @State private var showingShareCard = false
+
     // Tag breakdown visibility toggle (default from setting)
     @State private var showTagBreakdown = true
 
@@ -133,6 +136,18 @@ struct HistoryView: View {
         .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in
             // Refresh caches when sets are edited from any view
             updateCaches()
+        }
+        .navigationDestination(isPresented: $showingShareCard) {
+            if let day = cachedDisplayDay {
+                let daySets = day.exercises.flatMap { $0.sets }
+                let tagDist = ExerciseService.tagDistribution(from: daySets)
+                WorkoutShareCardView(
+                    day: day,
+                    tagDistribution: tagDist,
+                    exerciseDeltas: cachedExerciseDeltas
+                )
+                .preferredColorScheme(themeManager.currentTheme.colorScheme)
+            }
         }
     }
 
@@ -665,15 +680,23 @@ struct HistoryView: View {
         let sessionAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: allSetsForDay)
 
         VStack(alignment: .leading, spacing: 0) {
-            // Header with date and duration
+            // Header with date, duration, and share button
             HStack(spacing: 8) {
                 Text(day.date, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
                     .font(themeManager.effectiveTheme.interFont(size: 16, weight: .semibold))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                Spacer()
                 Text(formatDuration(sessionDuration))
                     .font(themeManager.effectiveTheme.dataFont(size: 14))
                     .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                Spacer()
+                Button {
+                    showingShareCard = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)

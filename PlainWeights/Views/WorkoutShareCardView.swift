@@ -146,11 +146,11 @@ struct WorkoutShareCardView: View {
                 Image("AppIconImage")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 80, height: 80)
-                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .frame(width: 68, height: 68)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18)
-                            .strokeBorder(.white, lineWidth: 2)
+                        RoundedRectangle(cornerRadius: 15)
+                            .strokeBorder(theme == .dark ? .white : .black, lineWidth: 2)
                     )
                     .padding(.horizontal, 16)
             }

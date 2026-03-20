@@ -105,7 +105,8 @@ struct WorkoutShareCardView: View {
         let renderer = ImageRenderer(content:
             shareCard
                 .frame(width: cardWidth)
-                .padding(4)
+                .padding(32)
+                .background(theme.background)
                 .environment(themeManager)
         )
         renderer.scale = UIScreen.main.scale
@@ -121,7 +122,7 @@ struct WorkoutShareCardView: View {
             HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Check out my workout, tracked with Plain Weights")
-                        .font(theme.interFont(size: 14, weight: .semibold))
+                        .font(theme.interFont(size: 17, weight: .bold))
                         .foregroundStyle(theme.primaryText)
                     Text(day.date, format: .dateTime.weekday(.wide).day().month(.abbreviated))
                         .font(theme.interFont(size: 13, weight: .regular))
@@ -142,6 +143,10 @@ struct WorkoutShareCardView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 56, height: 56)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(.black.opacity(0.2), lineWidth: 1)
+                    )
                     .padding(.horizontal, 16)
             }
 
@@ -149,7 +154,7 @@ struct WorkoutShareCardView: View {
 
             // Donut + legend side by side
             if !topMuscleGroups.isEmpty {
-                HStack(alignment: .center, spacing: 20) {
+                HStack(alignment: .center, spacing: 0) {
                     VStack(spacing: 10) {
                         Text("Muscles Worked")
                             .font(theme.interFont(size: 14, weight: .medium))
@@ -158,7 +163,9 @@ struct WorkoutShareCardView: View {
                             .frame(width: 80, height: 80)
                     }
 
-                    Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 8) {
+                    Spacer()
+
+                    Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 10) {
                         ForEach(topMuscleGroups.indices, id: \.self) { index in
                             let group = topMuscleGroups[index]
                             GridRow {
@@ -169,10 +176,6 @@ struct WorkoutShareCardView: View {
                                     .font(theme.captionFont)
                                     .foregroundStyle(theme.primaryText)
                                     .gridColumnAlignment(.leading)
-                                Text("\(group.percentage, format: .number.precision(.fractionLength(0)))%")
-                                    .font(theme.dataFont(size: 12))
-                                    .foregroundStyle(theme.mutedForeground)
-                                    .gridColumnAlignment(.trailing)
                             }
                         }
                     }
@@ -270,16 +273,13 @@ struct WorkoutShareCardView: View {
             sectionLabel("Top 5 Exercises")
 
             ForEach(exercises.indices, id: \.self) { i in
-                let item = exercises[i]
-                let exercise = item.exercise
-                let hasPB = exercise.sets.workingSets.contains { $0.isPB }
-                let deltas = exerciseDeltas[exercise.exercise.persistentModelID]
+                let exercise = exercises[i].exercise
 
                 if i > 0 {
                     Rectangle()
                         .fill(theme.borderColor)
                         .frame(height: 1)
-                        .padding(.leading, hasPB ? 48 : 40)
+                        .padding(.leading, 40)
                 }
 
                 HStack(spacing: 0) {
@@ -293,54 +293,16 @@ struct WorkoutShareCardView: View {
                         .foregroundStyle(theme.primaryText)
 
                     Spacer()
-
-                    if let deltas {
-                        HStack(spacing: 0) {
-                            shareDeltaIndicator("scalemass.fill", direction: deltas.weight)
-                                .frame(width: 20)
-                            shareDeltaIndicator("arrow.2.squarepath", direction: deltas.reps)
-                                .frame(width: 20)
-                            shareDeltaIndicator("square.stack.3d.up.fill", direction: deltas.volume)
-                                .frame(width: 20)
-                        }
-                    }
-
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 12))
-                        .foregroundStyle(hasPB ? theme.pbColor : .clear)
-                        .frame(width: 20)
                 }
-                .padding(.leading, 16)
-                .padding(.trailing, 16)
+                .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .background {
-                    if hasPB {
-                        HStack(spacing: 0) {
-                            Color.clear.frame(width: 8)
-                            Rectangle()
-                                .fill(theme.pbColor)
-                                .frame(width: 3)
-                            Rectangle()
-                                .fill(theme.pbColor.opacity(theme.isDark ? 0.15 : 0.06))
-                            Color.clear.frame(width: 8)
-                        }
-                    }
-                }
             }
 
             // Footer – CTA
             cardDivider
 
-            Text("The simplest weight tracking app out there :-)")
-                .font(theme.interFont(size: 13, weight: .medium))
-                .foregroundStyle(theme.mutedForeground)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-
-            cardDivider
-
-            // Placeholder for user's social link
-            Text("insert social link here")
+            // Footer CTA
+            Text("Try it out yourself — Plain Weights on the App Store")
                 .font(theme.interFont(size: 13, weight: .regular))
                 .foregroundStyle(theme.mutedForeground.opacity(0.5))
                 .frame(maxWidth: .infinity)
@@ -417,6 +379,16 @@ struct WorkoutShareCardView: View {
 
                 context.fill(path, with: .color(muscleColors[index % muscleColors.count]))
                 startAngle = endAngle
+            }
+
+            // Fill remaining segment with grey
+            let endOfChart = Angle.degrees(270)
+            if startAngle.degrees < endOfChart.degrees - 0.5 {
+                var remainderPath = Path()
+                remainderPath.addArc(center: center, radius: outerRadius, startAngle: startAngle, endAngle: endOfChart, clockwise: false)
+                remainderPath.addArc(center: center, radius: innerRadius, startAngle: endOfChart, endAngle: startAngle, clockwise: true)
+                remainderPath.closeSubpath()
+                context.fill(remainderPath, with: .color(Color.gray.opacity(0.3)))
             }
         }
     }

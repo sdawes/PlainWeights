@@ -483,27 +483,27 @@ struct HistoryView: View {
                     }
 
                     HStack(spacing: 0) {
-                        // Number (styled like set rows)
+                        // Column 1: Exercise number
                         Text("\(number)")
                             .font(themeManager.effectiveTheme.dataFont(size: 13, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            .frame(width: 24, alignment: .leading)
-                            .padding(.leading, 6)
+                            .frame(width: 28, alignment: .center)
 
-                        // PB star or spacer — fixed width so name stays aligned
+                        // Column 2: PB star
                         Image(systemName: "star.fill")
                             .font(.system(size: 12))
                             .foregroundStyle(hasPB ? themeManager.effectiveTheme.pbColor : .clear)
-                            .frame(width: 16)
+                            .frame(width: 20, alignment: .leading)
+                            .offset(x: -3)
 
-                        // Exercise name (medium weight for consistency)
+                        // Column 3: Exercise name
                         Text(name)
                             .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
                         Spacer()
 
-                        // Delta indicators - only show if deltas provided
+                        // Column 4: Delta indicators
                         if let deltas = deltas {
                             HStack(spacing: 0) {
                                 deltaIndicator("scalemass.fill", direction: deltas.weight)
@@ -688,7 +688,7 @@ struct HistoryView: View {
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                        .foregroundStyle(themeManager.effectiveTheme.chartColor1)
                 }
                 .buttonStyle(.plain)
             }

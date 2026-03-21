@@ -11,6 +11,9 @@ import SwiftUI
 /// Service for tracking progress and determining UI presentation colors/states
 enum ProgressTracker {
 
+    /// Tolerance for weight/volume comparisons to handle kg↔lbs floating point drift
+    static let weightTolerance: Double = 0.01  // 10 grams
+
     // MARK: - Progress Indicators
 
     enum PRDirection {
@@ -69,9 +72,11 @@ enum ProgressTracker {
             let volumeDirection: PRDirection
             let totalRepsDirection: PRDirection
 
-            if weightDiff > 0 {
+            let t = weightTolerance
+
+            if weightDiff > t {
                 weightDirection = .up
-            } else if weightDiff < 0 {
+            } else if weightDiff < -t {
                 weightDirection = .down
             } else {
                 weightDirection = .same
@@ -85,9 +90,9 @@ enum ProgressTracker {
                 repsDirection = .same
             }
 
-            if volumeDiff > 0 {
+            if volumeDiff > t {
                 volumeDirection = .up
-            } else if volumeDiff < 0 {
+            } else if volumeDiff < -t {
                 volumeDirection = .down
             } else {
                 volumeDirection = .same
@@ -160,10 +165,11 @@ enum ProgressTracker {
             let volumeDiff = todaysVolume - bestVolume
             let totalRepsDiff = todaysTotalReps - bestTotalReps
 
-            // Determine directions
-            let weightDirection: PRDirection = weightDiff > 0 ? .up : (weightDiff < 0 ? .down : .same)
+            // Determine directions (with tolerance for floating point drift from unit conversion)
+            let t = weightTolerance
+            let weightDirection: PRDirection = weightDiff > t ? .up : (weightDiff < -t ? .down : .same)
             let repsDirection: PRDirection = repsDiff > 0 ? .up : (repsDiff < 0 ? .down : .same)
-            let volumeDirection: PRDirection = volumeDiff > 0 ? .up : (volumeDiff < 0 ? .down : .same)
+            let volumeDirection: PRDirection = volumeDiff > t ? .up : (volumeDiff < -t ? .down : .same)
             let totalRepsDirection: PRDirection = totalRepsDiff > 0 ? .up : (totalRepsDiff < 0 ? .down : .same)
 
             return BestModeIndicators(

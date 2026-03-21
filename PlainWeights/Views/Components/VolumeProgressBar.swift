@@ -104,24 +104,25 @@ struct VolumeProgressBar: View {
                 // Delta display
                 if delta > 0 {
                     if isRepsOnly {
-                        Text("+\(Int(delta)) \(Int(delta) == 1 ? "rep" : "reps") over")
+                        let count = Int(delta)
+                        Text("\(count) \(count == 1 ? "rep" : "reps") ahead")
                             .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(progressColor)
                     } else if let weight = lastSetWeight, weight > 0 {
                         let repsOver = Int(delta / weight)
                         if repsOver > 0 {
-                            Text("+\(repsOver) \(repsOver == 1 ? "rep" : "reps") over")
+                            Text("\(repsOver) \(repsOver == 1 ? "rep" : "reps") ahead")
                                 .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                                 .foregroundStyle(progressColor)
                         }
                     }
                 } else if delta < 0 {
                     if let reps = repsRemaining {
-                        Text("\(reps) \(reps == 1 ? "rep" : "reps") to beat")
+                        Text("\(reps) more to beat it")
                             .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(progressColor)
                     } else if isRepsOnly {
-                        Text("\(Int(abs(delta) + 1)) reps to beat")
+                        Text("\(Int(abs(delta) + 1)) more to beat it")
                             .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(progressColor)
                     }

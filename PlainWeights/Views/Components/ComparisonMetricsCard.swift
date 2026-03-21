@@ -258,15 +258,17 @@ struct ComparisonMetricsCard: View {
         guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
         guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
         let diff = set.weight - metrics.maxWeight
-        if diff > 0 { return .up }
-        if diff < 0 { return .down }
+        let t = ProgressTracker.weightTolerance
+        if diff > t { return .up }
+        if diff < -t { return .down }
         return .same
     }
 
     private var cellWeightDelta: Double? {
         guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
         guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
-        return set.weight - metrics.maxWeight
+        let diff = set.weight - metrics.maxWeight
+        return abs(diff) < ProgressTracker.weightTolerance ? 0 : diff
     }
 
     // Cell reps: most recent set's reps vs reference reps at max weight
@@ -306,6 +308,9 @@ struct ComparisonMetricsCard: View {
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
 
                 Spacer()
+
+                Text(themeManager.weightUnit.displayName)
+                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
             }
             .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .padding(.horizontal, 16)

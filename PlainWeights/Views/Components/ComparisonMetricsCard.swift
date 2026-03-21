@@ -309,8 +309,9 @@ struct ComparisonMetricsCard: View {
 
                 Spacer()
 
-                Text(themeManager.weightUnit.displayName)
+                Text(themeManager.weightUnit == .kg ? "kgs" : "lbs")
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
             .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .padding(.horizontal, 16)

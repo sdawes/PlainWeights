@@ -262,6 +262,9 @@ struct AddSetView: View {
                 }
             }
 
+            // Set Type selector
+            SetTypePillSelector(selectedType: $selectedType)
+
             // Notes toggle + inline editor
             VStack(alignment: .leading, spacing: 12) {
                 Button {
@@ -286,9 +289,6 @@ struct AddSetView: View {
                 }
             }
             .clipped()
-
-            // Set Type selector
-            SetTypePillSelector(selectedType: $selectedType)
 
             // Save button
             Button(action: addSet) {

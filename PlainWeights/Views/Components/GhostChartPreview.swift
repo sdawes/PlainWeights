@@ -18,7 +18,7 @@ struct GhostChartPreview: View {
             .opacity(0.18)
             .accessibilityHidden(true)
 
-            Text("Your progress appears here")
+            Text("Your progress will appear here")
                 .font(themeManager.effectiveTheme.subheadlineFont)
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
         }

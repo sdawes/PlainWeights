@@ -73,11 +73,16 @@ struct TodaySessionCard: View {
 
             // Content area - empty state only (progress bar moved to ComparisonMetricsCard)
             if setCount == 0 {
-                Text("No sets logged yet")
-                    .font(themeManager.effectiveTheme.interFont(size: 14))
-                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(16)
+                HStack(spacing: 6) {
+                    Text("Add a set to get going")
+                        .font(themeManager.effectiveTheme.interFont(size: 14))
+                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(16)
             }
         }
         .background(themeManager.effectiveTheme.cardBackgroundColor)

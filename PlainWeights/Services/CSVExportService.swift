@@ -10,13 +10,12 @@ import SwiftData
 
 enum CSVExportService {
 
-    /// Export all workout data to a CSV file on a background thread.
+    /// Export all workout data to a CSV file.
     /// - Parameters:
     ///   - container: The SwiftData model container
     ///   - weightUnit: User's preferred weight unit (kg/lbs)
     /// - Returns: URL of the temporary CSV file
-    @MainActor
-    static func exportToCSV(container: ModelContainer, weightUnit: WeightUnit) throws -> URL {
+    static func exportToCSV(container: ModelContainer, weightUnit: WeightUnit) throws -> sending URL {
         let context = ModelContext(container)
         context.autosaveEnabled = false
 

@@ -686,9 +686,9 @@ struct HistoryView: View {
                 Button {
                     showingShareCard = true
                 } label: {
-                    Image(systemName: "square.and.arrow.up")
+                    Image(systemName: "photo.on.rectangle")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.chartColor2)
+                        .foregroundStyle(.blue)
                 }
                 .buttonStyle(.plain)
             }

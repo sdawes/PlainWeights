@@ -18,7 +18,7 @@ struct SettingsView: View {
     @State private var showingThemePicker = false
     @State private var showingHelp = false
     @State private var isExporting = false
-    @State private var exportedFileURL: URL?
+    @State private var exportedFile: IdentifiableURL?
 
     #if DEBUG
     @State private var showingGenerateDataAlert = false
@@ -160,7 +160,7 @@ struct SettingsView: View {
 
                     // Footer
                     VStack(spacing: 4) {
-                        Text("PlainWeights v1.2")
+                        Text("PlainWeights v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                             .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
                         Text("A simple workout tracking tool")
@@ -361,17 +361,21 @@ struct SettingsView: View {
             isExporting = true
             let container = modelContext.container
             let unit = themeManager.weightUnit
-            Task {
+            Task.detached {
                 do {
                     let url = try CSVExportService.exportToCSV(
                         container: container,
                         weightUnit: unit
                     )
-                    exportedFileURL = url
-                    isExporting = false
+                    await MainActor.run {
+                        exportedFile = IdentifiableURL(url)
+                        isExporting = false
+                    }
                 } catch {
-                    isExporting = false
-                    showError = true
+                    await MainActor.run {
+                        isExporting = false
+                        showError = true
+                    }
                 }
             }
         } label: {
@@ -403,8 +407,8 @@ struct SettingsView: View {
         }
         .buttonStyle(.plain)
         .disabled(isExporting)
-        .sheet(item: $exportedFileURL) { url in
-            ActivityViewController(activityItems: [url])
+        .sheet(item: $exportedFile) { file in
+            ActivityViewController(activityItems: [file.url])
                 .presentationDetents([.medium, .large])
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
@@ -420,10 +424,16 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - URL + Identifiable for sheet(item:)
+// MARK: - Identifiable URL wrapper for sheet(item:)
 
-extension URL: @retroactive Identifiable {
-    public var id: String { absoluteString }
+struct IdentifiableURL: Identifiable {
+    let id: String
+    let url: URL
+
+    init(_ url: URL) {
+        self.id = url.absoluteString
+        self.url = url
+    }
 }
 
 // MARK: - UIActivityViewController wrapper

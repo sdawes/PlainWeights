@@ -212,14 +212,10 @@ struct ExerciseDetailView: View {
                 TodaySessionCard(
                     volume: todaysVolume,
                     durationMinutes: sessionDurationMinutes,
-                    comparisonVolume: comparisonVolume,
-                    comparisonReps: comparisonReps,
-                    comparisonLabel: comparisonLabel,
                     isWeightedExercise: isWeightedExercise,
                     totalReps: todaysTotalReps,
                     setCount: todaySets.count,
-                    hasSetsBelow: !todaySets.isEmpty,
-                    lastSetWeight: cachedLastSetWeight
+                    hasSetsBelow: !todaySets.isEmpty
                 )
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)

@@ -28,6 +28,9 @@ struct ComparisonMetricsCard: View {
     @State private var cachedBestMetrics: BestSessionCalculator.BestDayMetrics?
     @State private var cachedLastModeIndicators: ProgressTracker.LastModeIndicators?
     @State private var cachedBestModeIndicators: ProgressTracker.BestModeIndicators?
+    @State private var cachedTodaysVolume: Double
+    @State private var cachedTodaysTotalReps: Int
+    @State private var cachedLastSetWeight: Double?
 
     init(comparisonMode: ComparisonMode, sets: [ExerciseSet]) {
         self.comparisonMode = comparisonMode
@@ -41,6 +44,9 @@ struct ComparisonMetricsCard: View {
         _cachedBestMetrics = State(initialValue: computed.bestMetrics)
         _cachedLastModeIndicators = State(initialValue: computed.lastModeIndicators)
         _cachedBestModeIndicators = State(initialValue: computed.bestModeIndicators)
+        _cachedTodaysVolume = State(initialValue: computed.todaysVolume)
+        _cachedTodaysTotalReps = State(initialValue: computed.todaysTotalReps)
+        _cachedLastSetWeight = State(initialValue: computed.lastSetWeight)
     }
 
     // MARK: - Static Computation
@@ -52,6 +58,9 @@ struct ComparisonMetricsCard: View {
         let bestMetrics: BestSessionCalculator.BestDayMetrics?
         let lastModeIndicators: ProgressTracker.LastModeIndicators?
         let bestModeIndicators: ProgressTracker.BestModeIndicators?
+        let todaysVolume: Double
+        let todaysTotalReps: Int
+        let lastSetWeight: Double?
     }
 
     private static func computeAllMetrics(sets: [ExerciseSet], comparisonMode: ComparisonMode) -> ComputedMetrics {
@@ -129,7 +138,10 @@ struct ComparisonMetricsCard: View {
             lastSessionMetrics: lastSessionMetrics,
             bestMetrics: bestMetrics,
             lastModeIndicators: lastModeIndicators,
-            bestModeIndicators: bestModeIndicators
+            bestModeIndicators: bestModeIndicators,
+            todaysVolume: TodaySessionCalculator.getTodaysVolume(from: sets),
+            todaysTotalReps: todaysSets.workingSets.reduce(0) { $0 + $1.reps },
+            lastSetWeight: todaysSets.first(where: { !$0.isWarmUp })?.weight
         )
     }
 
@@ -141,6 +153,9 @@ struct ComparisonMetricsCard: View {
         cachedBestMetrics = computed.bestMetrics
         cachedLastModeIndicators = computed.lastModeIndicators
         cachedBestModeIndicators = computed.bestModeIndicators
+        cachedTodaysVolume = computed.todaysVolume
+        cachedTodaysTotalReps = computed.todaysTotalReps
+        cachedLastSetWeight = computed.lastSetWeight
     }
 
     // MARK: - Simple Getters for Cached Values
@@ -333,6 +348,32 @@ struct ComparisonMetricsCard: View {
                     comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil, isReps: isRepsOnlyComparison)
                 }
                 .background(themeManager.effectiveTheme.borderColor)
+
+                // Volume progress bar
+                if hasTodaySets {
+                    Rectangle()
+                        .fill(themeManager.effectiveTheme.borderColor)
+                        .frame(height: 1)
+
+                    if isRepsOnlyComparison && metrics.totalReps > 0 {
+                        VolumeProgressBar(
+                            currentVolume: Double(cachedTodaysTotalReps),
+                            targetVolume: Double(metrics.totalReps),
+                            targetLabel: comparisonMode == .lastSession ? "Last" : "Best",
+                            isRepsOnly: true
+                        )
+                        .padding(16)
+                    } else if !isRepsOnlyComparison && metrics.totalVolume > 0 {
+                        VolumeProgressBar(
+                            currentVolume: cachedTodaysVolume,
+                            targetVolume: metrics.totalVolume,
+                            targetLabel: comparisonMode == .lastSession ? "Last" : "Best",
+                            isRepsOnly: false,
+                            lastSetWeight: cachedLastSetWeight
+                        )
+                        .padding(16)
+                    }
+                }
             } else {
                 // First session empty state
                 Text(comparisonMode == .lastSession

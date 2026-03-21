@@ -40,11 +40,11 @@ struct VolumeProgressBar: View {
         currentVolume - targetVolume
     }
 
-    // Reps remaining to close the deficit at the last set's weight
+    // Reps remaining to beat the target at the last set's weight
     private var repsRemaining: Int? {
         guard !isRepsOnly, delta < 0,
               let weight = lastSetWeight, weight > 0 else { return nil }
-        return Int(ceil(abs(delta) / weight))
+        return Int(abs(delta) / weight) + 1
     }
 
     var body: some View {
@@ -93,39 +93,37 @@ struct VolumeProgressBar: View {
             }
             .frame(height: 8)
 
-            // Labels row (matching Make design)
+            // Labels row
             HStack {
-                // Target label - simplified format
-                if isRepsOnly {
-                    Text("\(targetLabel): \(Int(targetVolume)) reps")
-                        .font(themeManager.effectiveTheme.interFont(size: 12))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                } else {
-                    Text("\(targetLabel): \(Formatters.formatVolume(themeManager.displayWeight(targetVolume))) \(themeManager.weightUnit.displayName)")
-                        .font(themeManager.effectiveTheme.interFont(size: 12))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                }
+                Text("Total volume progress")
+                    .font(themeManager.effectiveTheme.interFont(size: 12))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
                 Spacer()
 
                 // Delta display
-                if delta != 0 {
+                if delta > 0 {
                     if isRepsOnly {
-                        Text(delta > 0 ? "+\(Int(delta)) reps" : "\(Int(delta)) reps")
+                        Text("+\(Int(delta)) \(Int(delta) == 1 ? "rep" : "reps") over")
                             .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                             .foregroundStyle(progressColor)
-                    } else {
-                        let displayDelta = themeManager.displayWeight(delta)
-                        let deltaText = delta > 0 ? "+\(Formatters.formatVolume(displayDelta))" : "\(Formatters.formatVolume(displayDelta))"
-                        if let reps = repsRemaining {
-                            Text("\(deltaText) (\(reps) \(reps == 1 ? "rep" : "reps"))")
-                                .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
-                                .foregroundStyle(progressColor)
-                        } else {
-                            Text(deltaText)
+                    } else if let weight = lastSetWeight, weight > 0 {
+                        let repsOver = Int(delta / weight)
+                        if repsOver > 0 {
+                            Text("+\(repsOver) \(repsOver == 1 ? "rep" : "reps") over")
                                 .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
                                 .foregroundStyle(progressColor)
                         }
+                    }
+                } else if delta < 0 {
+                    if let reps = repsRemaining {
+                        Text("\(reps) \(reps == 1 ? "rep" : "reps") to beat")
+                            .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
+                            .foregroundStyle(progressColor)
+                    } else if isRepsOnly {
+                        Text("\(Int(abs(delta) + 1)) reps to beat")
+                            .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .medium))
+                            .foregroundStyle(progressColor)
                     }
                 }
             }

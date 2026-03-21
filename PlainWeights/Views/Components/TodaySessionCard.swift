@@ -12,14 +12,10 @@ struct TodaySessionCard: View {
     @Environment(ThemeManager.self) private var themeManager
     let volume: Double
     let durationMinutes: Int?
-    let comparisonVolume: Double
-    let comparisonReps: Int  // For reps-only exercises
-    let comparisonLabel: String
     let isWeightedExercise: Bool
     let totalReps: Int
     let setCount: Int
     let hasSetsBelow: Bool  // If true, only top corners rounded; if false, all corners
-    var lastSetWeight: Double? = nil  // Weight of the most recent set (for reps remaining hint)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -75,55 +71,13 @@ struct TodaySessionCard: View {
                 .fill(themeManager.effectiveTheme.borderColor)
                 .frame(height: 1)
 
-            // Content area
+            // Content area - empty state only (progress bar moved to ComparisonMetricsCard)
             if setCount == 0 {
-                // No sets logged yet
                 Text("No sets logged yet")
                     .font(themeManager.effectiveTheme.interFont(size: 14))
                     .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(16)
-            } else if !isWeightedExercise && comparisonReps > 0 {
-                // Progress bar for reps-only exercises
-                VolumeProgressBar(
-                    currentVolume: Double(totalReps),
-                    targetVolume: Double(comparisonReps),
-                    targetLabel: comparisonLabel,
-                    isRepsOnly: true
-                )
-                .padding(16)
-            } else if comparisonVolume > 0 {
-                // Progress bar for weighted exercises with comparison data
-                VolumeProgressBar(
-                    currentVolume: volume,
-                    targetVolume: comparisonVolume,
-                    targetLabel: comparisonLabel,
-                    isRepsOnly: false,
-                    lastSetWeight: lastSetWeight
-                )
-                .padding(16)
-            } else if setCount > 0 {
-                // First session - no comparison data yet
-                VStack(spacing: 6) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(themeManager.effectiveTheme.muted)
-                        .frame(height: 8)
-
-                    Text(isWeightedExercise
-                        ? "Next session will track total volume vs today"
-                        : "Next session will track reps vs today")
-                        .font(themeManager.effectiveTheme.captionFont)
-                        .italic()
-                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                }
-                .padding(16)
-            }
-
-            // Bottom divider (when sets follow below)
-            if hasSetsBelow {
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
-                    .frame(height: 1)
             }
         }
         .background(themeManager.effectiveTheme.cardBackgroundColor)

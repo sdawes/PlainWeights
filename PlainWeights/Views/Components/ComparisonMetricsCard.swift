@@ -21,8 +21,6 @@ struct ComparisonMetricsCard: View {
     let comparisonMode: ComparisonMode
     let sets: [ExerciseSet]
 
-    @State private var showingDeltaInfo = false
-
     // Cached metrics - computed in init to prevent layout shift and improve scroll performance
     @State private var cachedTodaysSets: [ExerciseSet]
     @State private var cachedSetsExcludingToday: [ExerciseSet]
@@ -293,25 +291,6 @@ struct ComparisonMetricsCard: View {
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
 
                 Spacer()
-
-                if hasTodaySets, hasWorkingSets {
-                    Button {
-                        showingDeltaInfo = true
-                    } label: {
-                        HStack(spacing: 0) {
-                            headerDeltaIcon("scalemass.fill", direction: weightDirection)
-                                .frame(width: 20)
-                            headerDeltaIcon("repeat", direction: repsDirection)
-                                .frame(width: 20)
-                            headerDeltaIcon("chart.bar.fill", direction: totalDirection)
-                                .frame(width: 20)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .popover(isPresented: $showingDeltaInfo) {
-                        deltaInfoPopover
-                    }
-                }
             }
             .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .padding(.horizontal, 16)
@@ -439,68 +418,4 @@ struct ComparisonMetricsCard: View {
         }
     }
 
-    // MARK: - Header Delta Icon Helper
-
-    @ViewBuilder
-    private func headerDeltaIcon(_ symbol: String, direction: ProgressTracker.PRDirection?) -> some View {
-        let color: Color = switch direction {
-        case .up: .green
-        case .down: .red
-        case .same, nil: .gray.opacity(0.3)
-        }
-        Image(systemName: symbol)
-            .font(.system(size: 10, weight: .bold))
-            .foregroundStyle(color)
-    }
-
-    // MARK: - Delta Info Popover
-
-    private var deltaInfoPopover: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Compared to \(comparisonMode == .lastSession ? "last session" : "all-time best")")
-                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .semibold))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-
-            VStack(alignment: .leading, spacing: 8) {
-                deltaInfoRow(symbol: "scalemass.fill", label: "Max weight")
-                deltaInfoRow(symbol: "repeat", label: "Max reps")
-                deltaInfoRow(symbol: "chart.bar.fill", label: isRepsOnlyComparison ? "Total reps" : "Total volume")
-            }
-
-            Divider()
-
-            HStack(spacing: 16) {
-                HStack(spacing: 4) {
-                    Circle().fill(.green).frame(width: 8, height: 8)
-                    Text("Increase")
-                        .font(themeManager.effectiveTheme.captionFont)
-                }
-                HStack(spacing: 4) {
-                    Circle().fill(.red).frame(width: 8, height: 8)
-                    Text("Decrease")
-                        .font(themeManager.effectiveTheme.captionFont)
-                }
-                HStack(spacing: 4) {
-                    Circle().fill(.gray.opacity(0.3)).frame(width: 8, height: 8)
-                    Text("No change")
-                        .font(themeManager.effectiveTheme.captionFont)
-                }
-            }
-            .foregroundStyle(themeManager.effectiveTheme.secondaryText)
-        }
-        .padding(16)
-        .presentationCompactAdaptation(.popover)
-    }
-
-    private func deltaInfoRow(symbol: String, label: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: symbol)
-                .font(.system(size: 12))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                .frame(width: 20)
-            Text(label)
-                .font(themeManager.effectiveTheme.interFont(size: 13))
-                .foregroundStyle(themeManager.effectiveTheme.secondaryText)
-        }
-    }
 }

@@ -301,9 +301,9 @@ struct ComparisonMetricsCard: View {
                         HStack(spacing: 0) {
                             headerDeltaIcon("scalemass.fill", direction: weightDirection)
                                 .frame(width: 20)
-                            headerDeltaIcon("arrow.2.squarepath", direction: repsDirection)
+                            headerDeltaIcon("repeat", direction: repsDirection)
                                 .frame(width: 20)
-                            headerDeltaIcon("square.stack.3d.up.fill", direction: totalDirection)
+                            headerDeltaIcon("chart.bar.fill", direction: totalDirection)
                                 .frame(width: 20)
                         }
                     }
@@ -463,8 +463,8 @@ struct ComparisonMetricsCard: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 deltaInfoRow(symbol: "scalemass.fill", label: "Max weight")
-                deltaInfoRow(symbol: "arrow.2.squarepath", label: "Max reps")
-                deltaInfoRow(symbol: "square.stack.3d.up.fill", label: isRepsOnlyComparison ? "Total reps" : "Total volume")
+                deltaInfoRow(symbol: "repeat", label: "Max reps")
+                deltaInfoRow(symbol: "chart.bar.fill", label: isRepsOnlyComparison ? "Total reps" : "Total volume")
             }
 
             Divider()

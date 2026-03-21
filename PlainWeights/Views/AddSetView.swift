@@ -131,6 +131,8 @@ struct AddSetView: View {
     @State private var selectedType: SetTypeOption? = nil
     @State private var hasConvertedInitialWeight = false
     @State private var showError = false
+    @State private var showNotes = false
+    @State private var noteText = ""
     @FocusState private var focusedField: Field?
     @AppStorage("lastEditedSetField") private var lastEditedField: String = "weight"
 
@@ -141,6 +143,9 @@ struct AddSetView: View {
     init(exercise: Exercise, initialWeight: Double? = nil, initialReps: Int? = nil, setToEdit: ExerciseSet? = nil) {
         self.exercise = exercise
         self.setToEdit = setToEdit
+
+        // Initialize note text from exercise
+        _noteText = State(initialValue: exercise.note ?? "")
 
         // If editing, pre-populate all fields from the set
         if let set = setToEdit {
@@ -257,6 +262,31 @@ struct AddSetView: View {
                 }
             }
 
+            // Notes toggle + inline editor
+            VStack(alignment: .leading, spacing: 12) {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showNotes.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("Notes")
+                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                            .rotationEffect(.degrees(showNotes ? 90 : 0))
+                    }
+                }
+                .buttonStyle(.plain)
+
+                if showNotes {
+                    InlineNotesComponent(noteText: $noteText, onSave: updateNote)
+                }
+            }
+            .clipped()
+
             // Set Type selector
             SetTypePillSelector(selectedType: $selectedType)
 
@@ -310,6 +340,18 @@ struct AddSetView: View {
     }
 
     // MARK: - Business Logic
+
+    private func updateNote() {
+        let trimmed = noteText.trimmingCharacters(in: .whitespacesAndNewlines)
+        exercise.note = trimmed.isEmpty ? nil : trimmed
+        exercise.bumpUpdated()
+
+        do {
+            try context.save()
+        } catch {
+            showError = true
+        }
+    }
 
     private var canAddSet: Bool {
         ExerciseSetService.validateInput(weightText: weightText, repsText: repsText) != nil

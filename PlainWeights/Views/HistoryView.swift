@@ -489,7 +489,12 @@ struct HistoryView: View {
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                             .frame(width: 24, alignment: .leading)
                             .padding(.leading, 6)
-                            .padding(.trailing, 4)
+
+                        // PB star or spacer — fixed width so name stays aligned
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 12))
+                            .foregroundStyle(hasPB ? themeManager.effectiveTheme.pbColor : .clear)
+                            .frame(width: 16)
 
                         // Exercise name (medium weight for consistency)
                         Text(name)
@@ -503,18 +508,12 @@ struct HistoryView: View {
                             HStack(spacing: 0) {
                                 deltaIndicator("scalemass.fill", direction: deltas.weight)
                                     .frame(width: 20)
-                                deltaIndicator("arrow.2.squarepath", direction: deltas.reps)
+                                deltaIndicator("repeat", direction: deltas.reps)
                                     .frame(width: 20)
-                                deltaIndicator("square.stack.3d.up.fill", direction: deltas.volume)
+                                deltaIndicator("chart.bar.fill", direction: deltas.volume)
                                     .frame(width: 20)
                             }
                         }
-
-                        // Star icon - always reserve space for alignment
-                        Image(systemName: "star.fill")
-                            .font(.system(size: 12))
-                            .foregroundStyle(hasPB ? themeManager.effectiveTheme.pbColor : .clear)
-                            .frame(width: 20)
                     }
                     .padding(.vertical, 6)
                     .padding(.trailing, 8)
@@ -850,8 +849,8 @@ struct HistoryView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 deltaInfoRow(symbol: "scalemass.fill", label: "Max weight")
-                deltaInfoRow(symbol: "arrow.2.squarepath", label: "Max reps")
-                deltaInfoRow(symbol: "square.stack.3d.up.fill", label: "Total volume")
+                deltaInfoRow(symbol: "repeat", label: "Max reps")
+                deltaInfoRow(symbol: "chart.bar.fill", label: "Total volume")
             }
 
             Divider()

@@ -688,7 +688,7 @@ struct HistoryView: View {
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.chartColor1)
+                        .foregroundStyle(themeManager.effectiveTheme.chartColor2)
                 }
                 .buttonStyle(.plain)
             }

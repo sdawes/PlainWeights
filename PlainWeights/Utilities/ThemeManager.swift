@@ -65,8 +65,8 @@ final class ThemeManager {
         // Chart visibility - defaults to true (visible)
         self.chartVisibleByDefault = UserDefaults.standard.object(forKey: Self.chartVisibleKey) as? Bool ?? true
 
-        // Tag breakdown visibility - defaults to true (visible)
-        self.tagBreakdownVisible = UserDefaults.standard.object(forKey: Self.tagBreakdownVisibleKey) as? Bool ?? true
+        // Tag breakdown visibility - defaults to false (hidden until enabled in settings)
+        self.tagBreakdownVisible = UserDefaults.standard.object(forKey: Self.tagBreakdownVisibleKey) as? Bool ?? false
 
         // Trend line visibility - defaults to true (visible)
         self.showTrendLineByDefault = UserDefaults.standard.object(forKey: Self.showTrendLineKey) as? Bool ?? true

@@ -310,6 +310,10 @@ struct ComparisonMetricsCard: View {
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
 
                 Spacer()
+
+                Text(themeManager.weightUnit == .kg ? "kgs" : "lbs")
+                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
             .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .padding(.horizontal, 16)
@@ -321,46 +325,32 @@ struct ComparisonMetricsCard: View {
                 .frame(height: 1)
 
             if let metrics = currentMetrics {
-                // Delta legend row
-                HStack(spacing: 0) {
-                    deltaLegendItem(icon: "scalemass.fill", label: comparisonMode == .lastSession ? "Max Weight" : "Weight", direction: todayDeltas.weight)
-                    deltaLegendItem(icon: "repeat", label: "Reps", direction: todayDeltas.reps)
-                    deltaLegendItem(
-                        icon: "chart.bar.fill",
-                        label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
-                        direction: todayDeltas.volume
-                    )
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(themeManager.effectiveTheme.muted.opacity(0.3))
-
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
-                    .frame(height: 1)
-
-                // Metrics row
+                // Metrics row with labels
                 HStack(spacing: 0) {
                     metricColumn(
+                        label: comparisonMode == .lastSession ? "Max Weight" : "Weight",
                         value: Formatters.formatWeight(themeManager.displayWeight(metrics.maxWeight)),
-                        unit: themeManager.weightUnit.displayName
+                        beaten: hasWorkingSets ? todayDeltas.weight : nil
                     )
                     metricColumn(
-                        value: "\(metrics.maxReps)"
+                        label: "Reps",
+                        value: "\(metrics.maxReps)",
+                        beaten: hasWorkingSets ? todayDeltas.reps : nil
                     )
                     metricColumn(
+                        label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
                         value: isRepsOnlyComparison ? "\(metrics.totalReps)" : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume)),
-                        unit: isRepsOnlyComparison ? nil : themeManager.weightUnit.displayName
+                        beaten: hasWorkingSets ? todayDeltas.volume : nil
                     )
                 }
                 .padding(.vertical, 12)
 
-                // Divider above comparison row
+                // Divider above last-set comparison row
                 Rectangle()
                     .fill(themeManager.effectiveTheme.borderColor)
                     .frame(height: 1)
 
-                // Comparison row - colored background cells (show '-' when no working sets)
+                // Last-set comparison row (show '-' when no working sets)
                 HStack(spacing: 1) {
                     comparisonCell(direction: hasWorkingSets ? cellWeightDirection : nil, value: hasWorkingSets ? cellWeightDelta : nil)
                     comparisonCell(direction: hasWorkingSets ? cellRepsDirection : nil, value: hasWorkingSets ? cellRepsDelta : nil, isReps: true)
@@ -429,20 +419,27 @@ struct ComparisonMetricsCard: View {
     // MARK: - Metric Column Helper
 
     @ViewBuilder
-    private func metricColumn(value: String, unit: String? = nil) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 2) {
+    private func metricColumn(label: String, value: String, beaten: DeltaDirection? = nil) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 0) {
+                Text(label)
+                    .font(themeManager.effectiveTheme.captionFont)
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                Spacer()
+                if let beaten {
+                    Image(systemName: beaten == .up ? "checkmark.circle.fill" : beaten == .down ? "xmark.circle" : "minus")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(beaten == .up ? .green : beaten == .down ? .red : themeManager.effectiveTheme.mutedForeground.opacity(0.4))
+                }
+            }
+            .lineLimit(1)
             Text(value)
                 .font(themeManager.effectiveTheme.dataFont(size: 24, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
-            if let unit {
-                Text(unit)
-                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            }
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
-        .lineLimit(1)
-        .minimumScaleFactor(0.7)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -479,21 +476,6 @@ struct ComparisonMetricsCard: View {
                 .background(themeManager.effectiveTheme.cardBackgroundColor)
             }
         }
-    }
-
-    // MARK: - Delta Legend Item
-
-    @ViewBuilder
-    private func deltaLegendItem(icon: String, label: String, direction: DeltaDirection) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(direction.color)
-            Text(label)
-                .font(themeManager.effectiveTheme.captionFont)
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
 }

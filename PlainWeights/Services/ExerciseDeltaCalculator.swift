@@ -32,6 +32,7 @@ enum ExerciseDeltaCalculator {
             // Current session values
             let currentMaxWeight: Double = workingSets.map(\.weight).max() ?? 0
             let isRepsOnly = currentMaxWeight == 0
+            // Reps at max weight (consistent with card display), or overall max reps for reps-only
             let currentMaxReps: Int
             if currentMaxWeight > 0 {
                 currentMaxReps = workingSets.filter { $0.weight == currentMaxWeight }.map(\.reps).max() ?? 0
@@ -71,6 +72,7 @@ enum ExerciseDeltaCalculator {
             // Previous session values (use working sets only for consistency)
             let prevWorkingSets = previousDaySets.filter { !$0.isWarmUp }
             let prevMaxWeight: Double = prevWorkingSets.map(\.weight).max() ?? 0
+            // Reps at max weight (consistent with card display), or overall max reps for reps-only
             let prevMaxReps: Int
             if prevMaxWeight > 0 {
                 prevMaxReps = prevWorkingSets.filter { $0.weight == prevMaxWeight }.map(\.reps).max() ?? 0
@@ -111,6 +113,7 @@ enum ExerciseDeltaCalculator {
         // Current session values
         let currentMaxWeight: Double = todayWorkingSets.map(\.weight).max() ?? 0
         let isRepsOnly = currentMaxWeight == 0
+        // Reps at max weight (matches what the card displays), or overall max reps for reps-only
         let currentMaxReps: Int
         if currentMaxWeight > 0 {
             currentMaxReps = todayWorkingSets.filter { $0.weight == currentMaxWeight }.map(\.reps).max() ?? 0
@@ -138,6 +141,7 @@ enum ExerciseDeltaCalculator {
 
         // Previous session values
         let prevMaxWeight: Double = prevDaySets.map(\.weight).max() ?? 0
+        // Reps at max weight (matches what the card displays), or overall max reps for reps-only
         let prevMaxReps: Int
         if prevMaxWeight > 0 {
             prevMaxReps = prevDaySets.filter { $0.weight == prevMaxWeight }.map(\.reps).max() ?? 0

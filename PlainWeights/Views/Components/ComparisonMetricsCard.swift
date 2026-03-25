@@ -20,6 +20,7 @@ struct ComparisonMetricsCard: View {
     @Environment(ThemeManager.self) private var themeManager
     let comparisonMode: ComparisonMode
     let sets: [ExerciseSet]
+    var todayDeltas: ExerciseDeltas = .empty
 
     // Cached metrics - computed in init to prevent layout shift and improve scroll performance
     @State private var cachedTodaysSets: [ExerciseSet]
@@ -32,9 +33,10 @@ struct ComparisonMetricsCard: View {
     @State private var cachedTodaysTotalReps: Int
     @State private var cachedLastSetWeight: Double?
 
-    init(comparisonMode: ComparisonMode, sets: [ExerciseSet]) {
+    init(comparisonMode: ComparisonMode, sets: [ExerciseSet], todayDeltas: ExerciseDeltas = .empty) {
         self.comparisonMode = comparisonMode
         self.sets = sets
+        self.todayDeltas = todayDeltas
 
         // Pre-compute all metrics during init
         let computed = Self.computeAllMetrics(sets: sets, comparisonMode: comparisonMode)
@@ -309,9 +311,7 @@ struct ComparisonMetricsCard: View {
 
                 Spacer()
 
-                Text(themeManager.weightUnit == .kg ? "kgs" : "lbs")
-                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                DeltaIndicatorsView(deltas: todayDeltas)
             }
             .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .padding(.horizontal, 16)
@@ -327,7 +327,8 @@ struct ComparisonMetricsCard: View {
                 HStack(spacing: 0) {
                     metricColumn(
                         label: comparisonMode == .lastSession ? "Max Weight" : "Weight",
-                        value: Formatters.formatWeight(themeManager.displayWeight(metrics.maxWeight))
+                        value: Formatters.formatWeight(themeManager.displayWeight(metrics.maxWeight)),
+                        unit: themeManager.weightUnit.displayName
                     )
                     metricColumn(
                         label: "Reps",
@@ -336,7 +337,8 @@ struct ComparisonMetricsCard: View {
                     // Conditional: show "Total Reps" for reps-only, "Total Volume" for weighted
                     metricColumn(
                         label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
-                        value: isRepsOnlyComparison ? "\(metrics.totalReps)" : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume))
+                        value: isRepsOnlyComparison ? "\(metrics.totalReps)" : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume)),
+                        unit: isRepsOnlyComparison ? nil : themeManager.weightUnit.displayName
                     )
                 }
                 .padding(.vertical, 12)
@@ -415,16 +417,23 @@ struct ComparisonMetricsCard: View {
     // MARK: - Metric Column Helper
 
     @ViewBuilder
-    private func metricColumn(label: String, value: String) -> some View {
+    private func metricColumn(label: String, value: String, unit: String? = nil) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(themeManager.effectiveTheme.captionFont)
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            Text(value)
-                .font(themeManager.effectiveTheme.dataFont(size: 24, weight: .semibold))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(value)
+                    .font(themeManager.effectiveTheme.dataFont(size: 24, weight: .semibold))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                if let unit {
+                    Text(unit)
+                        .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                }
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)

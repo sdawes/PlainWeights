@@ -99,6 +99,68 @@ enum ExerciseDeltaCalculator {
         return deltas
     }
 
+    /// Compute deltas for a single exercise comparing today's working sets against the most recent previous session.
+    /// Returns `.empty` if there are no today sets or no previous session to compare against.
+    static func computeSingleExerciseDeltas(todaySets: [ExerciseSet], allSets: [ExerciseSet]) -> ExerciseDeltas {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        let todayWorkingSets = todaySets.workingSets
+        guard !todayWorkingSets.isEmpty else { return .empty }
+
+        // Current session values
+        let currentMaxWeight: Double = todayWorkingSets.map(\.weight).max() ?? 0
+        let isRepsOnly = currentMaxWeight == 0
+        let currentMaxReps: Int
+        if currentMaxWeight > 0 {
+            currentMaxReps = todayWorkingSets.filter { $0.weight == currentMaxWeight }.map(\.reps).max() ?? 0
+        } else {
+            currentMaxReps = todayWorkingSets.map(\.reps).max() ?? 0
+        }
+        let currentVolume: Double
+        if isRepsOnly {
+            currentVolume = Double(todayWorkingSets.reduce(0) { $0 + $1.reps })
+        } else {
+            currentVolume = todayWorkingSets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
+        }
+
+        // Previous session: working sets before today, grouped by day, most recent day
+        let previousSets = allSets.workingSets.filter {
+            calendar.startOfDay(for: $0.timestamp) < today
+        }
+        guard !previousSets.isEmpty else { return .empty }
+
+        let grouped = Dictionary(grouping: previousSets) { set in
+            calendar.startOfDay(for: set.timestamp)
+        }
+        guard let mostRecentDay = grouped.keys.max(),
+              let prevDaySets = grouped[mostRecentDay] else { return .empty }
+
+        // Previous session values
+        let prevMaxWeight: Double = prevDaySets.map(\.weight).max() ?? 0
+        let prevMaxReps: Int
+        if prevMaxWeight > 0 {
+            prevMaxReps = prevDaySets.filter { $0.weight == prevMaxWeight }.map(\.reps).max() ?? 0
+        } else {
+            prevMaxReps = prevDaySets.map(\.reps).max() ?? 0
+        }
+        let prevVolume: Double
+        if isRepsOnly {
+            prevVolume = Double(prevDaySets.reduce(0) { $0 + $1.reps })
+        } else {
+            prevVolume = prevDaySets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
+        }
+
+        let weightDir: DeltaDirection = currentMaxWeight > prevMaxWeight ? .up
+            : currentMaxWeight < prevMaxWeight ? .down : .same
+        let repsDir: DeltaDirection = currentMaxReps > prevMaxReps ? .up
+            : currentMaxReps < prevMaxReps ? .down : .same
+        let volumeDir: DeltaDirection = currentVolume > prevVolume ? .up
+            : currentVolume < prevVolume ? .down : .same
+
+        return ExerciseDeltas(weight: weightDir, reps: repsDir, volume: volumeDir)
+    }
+
     /// Build a dictionary index of working sets grouped by exercise ID.
     /// Called once before processing multiple days to avoid repeated O(N) scans.
     static func buildWorkingSetIndex(from allSets: [ExerciseSet]) -> [PersistentIdentifier: [ExerciseSet]] {

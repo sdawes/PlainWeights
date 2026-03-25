@@ -43,6 +43,7 @@ struct ExerciseDetailView: View {
 
     @State private var cachedLastSetWeight: Double? = nil
     @State private var cachedAllSets: [ExerciseSet] = []
+    @State private var cachedTodayDeltas: ExerciseDeltas = .empty
 
     // Simple getters for cached values
     private var todaysVolume: Double { cachedTodaysVolume }
@@ -196,15 +197,7 @@ struct ExerciseDetailView: View {
             .listRowBackground(Color.clear)
 
             // Comparison metrics card (responds to toggle)
-            Section {
-                ComparisonMetricsCard(
-                    comparisonMode: comparisonMode,
-                    sets: cachedAllSets
-                )
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-            }
+            comparisonSection
 
             // Today's Sets Section (unified card appearance)
             Section {
@@ -487,6 +480,21 @@ struct ExerciseDetailView: View {
         }
     }
 
+    // MARK: - Extracted Sections
+
+    private var comparisonSection: some View {
+        Section {
+            ComparisonMetricsCard(
+                comparisonMode: comparisonMode,
+                sets: cachedAllSets,
+                todayDeltas: cachedTodayDeltas
+            )
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+        }
+    }
+
     // MARK: - Data Management
 
     /// Update cached expensive calculations when sets change
@@ -517,6 +525,9 @@ struct ExerciseDetailView: View {
 
         // Last set weight for reps remaining hint (derive from already-computed todaySets)
         cachedLastSetWeight = todaySets.first(where: { !$0.isWarmUp })?.weight
+
+        // Delta indicators comparing today vs last session
+        cachedTodayDeltas = ExerciseDeltaCalculator.computeSingleExerciseDeltas(todaySets: todaysData, allSets: allSets)
 
     }
 

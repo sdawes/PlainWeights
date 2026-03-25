@@ -43,7 +43,8 @@ struct ExerciseDetailView: View {
 
     @State private var cachedLastSetWeight: Double? = nil
     @State private var cachedAllSets: [ExerciseSet] = []
-    @State private var cachedTodayDeltas: ExerciseDeltas = .empty
+    @State private var cachedLastSessionDeltas: ExerciseDeltas = .empty
+    @State private var cachedBestEverDeltas: ExerciseDeltas = .empty
 
     // Simple getters for cached values
     private var todaysVolume: Double { cachedTodaysVolume }
@@ -161,7 +162,7 @@ struct ExerciseDetailView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: mode == .lastSession ? "calendar.badge.clock" : "star.fill")
                                     .font(.system(size: 16))
-                                Text(mode == .lastSession ? "Last" : "Best")
+                                Text(mode == .lastSession ? "Last" : "Best Ever")
                                     .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                             }
                             .frame(maxWidth: .infinity)
@@ -487,7 +488,7 @@ struct ExerciseDetailView: View {
             ComparisonMetricsCard(
                 comparisonMode: comparisonMode,
                 sets: cachedAllSets,
-                todayDeltas: cachedTodayDeltas
+                todayDeltas: comparisonMode == .lastSession ? cachedLastSessionDeltas : cachedBestEverDeltas
             )
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
@@ -526,8 +527,25 @@ struct ExerciseDetailView: View {
         // Last set weight for reps remaining hint (derive from already-computed todaySets)
         cachedLastSetWeight = todaySets.first(where: { !$0.isWarmUp })?.weight
 
-        // Delta indicators comparing today vs last session
-        cachedTodayDeltas = ExerciseDeltaCalculator.computeSingleExerciseDeltas(todaySets: todaysData, allSets: allSets)
+        // Delta indicators comparing today vs last session and best ever
+        let lastIsRepsOnly = !cachedIsWeightedExercise
+        cachedLastSessionDeltas = ExerciseDeltaCalculator.computeSingleExerciseDeltas(
+            todaySets: todaysData,
+            refMaxWeight: LastSessionCalculator.getLastSessionMaxWeight(from: allSets),
+            refMaxReps: LastSessionCalculator.getLastSessionMaxReps(from: allSets),
+            refTotalVolume: cachedLastSessionVolume,
+            isRepsOnly: lastIsRepsOnly
+        )
+
+        // Build best-ever reference
+        let bestMetrics = BestSessionCalculator.calculateBestDayMetrics(from: setsExcludingToday)
+        cachedBestEverDeltas = ExerciseDeltaCalculator.computeSingleExerciseDeltas(
+            todaySets: todaysData,
+            refMaxWeight: bestMetrics?.maxWeight ?? 0,
+            refMaxReps: bestMetrics?.repsAtMaxWeight ?? 0,
+            refTotalVolume: bestMetrics?.totalVolume ?? 0,
+            isRepsOnly: bestMetrics?.isBodyweight ?? lastIsRepsOnly
+        )
 
     }
 

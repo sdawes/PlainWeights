@@ -427,7 +427,7 @@ struct ComparisonMetricsCard: View {
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 Spacer()
                 if let beaten {
-                    Image(systemName: beaten == .up ? "checkmark.circle.fill" : beaten == .down ? "xmark.circle" : "minus")
+                    Image(systemName: beaten == .up ? "checkmark.circle" : beaten == .down ? "xmark.circle" : "minus.circle")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(beaten == .up ? .green : beaten == .down ? .red : themeManager.effectiveTheme.mutedForeground.opacity(0.4))
                 }

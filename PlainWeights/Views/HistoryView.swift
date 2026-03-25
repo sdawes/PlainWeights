@@ -32,9 +32,9 @@ private struct PeriodExerciseSummary: Identifiable {
     let name: String
     let exercise: Exercise
     let hasPB: Bool
-    let deltas: HistoryView.ExerciseDeltas?
+    let deltas: ExerciseDeltas?
 
-    init(from workoutExercise: ExerciseDataGrouper.WorkoutExercise, deltas: HistoryView.ExerciseDeltas? = nil) {
+    init(from workoutExercise: ExerciseDataGrouper.WorkoutExercise, deltas: ExerciseDeltas? = nil) {
         self.id = workoutExercise.id
         self.name = workoutExercise.exercise.name
         self.exercise = workoutExercise.exercise
@@ -49,7 +49,7 @@ private struct PeriodDaySummary: Identifiable {
     let date: Date
     let exercises: [PeriodExerciseSummary]
 
-    init(from workoutDay: ExerciseDataGrouper.WorkoutDay, deltas: [PersistentIdentifier: HistoryView.ExerciseDeltas] = [:]) {
+    init(from workoutDay: ExerciseDataGrouper.WorkoutDay, deltas: [PersistentIdentifier: ExerciseDeltas] = [:]) {
         self.id = workoutDay.date
         self.date = workoutDay.date
         self.exercises = workoutDay.exercises.map { exercise in
@@ -505,14 +505,7 @@ struct HistoryView: View {
 
                         // Column 4: Delta indicators
                         if let deltas = deltas {
-                            HStack(spacing: 0) {
-                                deltaIndicator("scalemass.fill", direction: deltas.weight)
-                                    .frame(width: 20)
-                                deltaIndicator("repeat", direction: deltas.reps)
-                                    .frame(width: 20)
-                                deltaIndicator("chart.bar.fill", direction: deltas.volume)
-                                    .frame(width: 20)
-                            }
+                            DeltaIndicatorsView(deltas: deltas)
                         }
                     }
                     .padding(.vertical, 6)
@@ -530,13 +523,6 @@ struct HistoryView: View {
         }
     }
 
-    @ViewBuilder
-    private func deltaIndicator(_ symbolName: String, direction: DeltaDirection) -> some View {
-        Image(systemName: symbolName)
-            .font(.system(size: 10, weight: .bold))
-            .foregroundStyle(direction.color)
-    }
-
     // MARK: - Cache Management
 
     /// Update all cached values - called on appear and when data/period changes
@@ -548,7 +534,7 @@ struct HistoryView: View {
 
             // Compute exercise deltas for summary card
             if let day = day {
-                cachedExerciseDeltas = Self.computeExerciseDeltas(for: day, from: allSets)
+                cachedExerciseDeltas = ExerciseDeltaCalculator.computeExerciseDeltas(for: day, from: allSets)
                 // Pre-compute PB flags to avoid linear scan per exercise per render
                 var pbFlags: [PersistentIdentifier: Bool] = [:]
                 for exercise in day.exercises {
@@ -632,9 +618,9 @@ struct HistoryView: View {
     private static func computePeriodDays(from sets: [ExerciseSet], allSets: [ExerciseSet]) -> [PeriodDaySummary] {
         let workoutDays = ExerciseDataGrouper.createWorkoutJournal(from: sets)
         // Build index once, reuse across all days — avoids O(D × N) repeated scans
-        let index = buildWorkingSetIndex(from: allSets)
+        let index = ExerciseDeltaCalculator.buildWorkingSetIndex(from: allSets)
         return workoutDays.map { day in
-            let deltas = computeExerciseDeltas(for: day, from: allSets, setsByExercise: index)
+            let deltas = ExerciseDeltaCalculator.computeExerciseDeltas(for: day, from: allSets, setsByExercise: index)
             return PeriodDaySummary(from: day, deltas: deltas)
         }
     }
@@ -831,7 +817,7 @@ struct HistoryView: View {
             }
             .buttonStyle(.plain)
             .popover(isPresented: $showingDeltaInfo) {
-                deltaInfoPopover
+                DeltaInfoPopover()
             }
 
             Spacer()
@@ -839,55 +825,6 @@ struct HistoryView: View {
         .padding(.top, 16)
         .padding(.bottom, 10)
         .padding(.leading, 8)
-    }
-
-    private var deltaInfoPopover: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Compared to previous session")
-                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .semibold))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-
-            VStack(alignment: .leading, spacing: 8) {
-                deltaInfoRow(symbol: "scalemass.fill", label: "Max weight")
-                deltaInfoRow(symbol: "repeat", label: "Max reps")
-                deltaInfoRow(symbol: "chart.bar.fill", label: "Total volume")
-            }
-
-            Divider()
-
-            HStack(spacing: 16) {
-                HStack(spacing: 4) {
-                    Circle().fill(.green).frame(width: 8, height: 8)
-                    Text("Increase")
-                        .font(themeManager.effectiveTheme.captionFont)
-                }
-                HStack(spacing: 4) {
-                    Circle().fill(.red).frame(width: 8, height: 8)
-                    Text("Decrease")
-                        .font(themeManager.effectiveTheme.captionFont)
-                }
-                HStack(spacing: 4) {
-                    Circle().fill(.gray.opacity(0.3)).frame(width: 8, height: 8)
-                    Text("No change")
-                        .font(themeManager.effectiveTheme.captionFont)
-                }
-            }
-            .foregroundStyle(themeManager.effectiveTheme.secondaryText)
-        }
-        .padding(16)
-        .presentationCompactAdaptation(.popover)
-    }
-
-    private func deltaInfoRow(symbol: String, label: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: symbol)
-                .font(.system(size: 12))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                .frame(width: 20)
-            Text(label)
-                .font(themeManager.effectiveTheme.interFont(size: 13, weight: .regular))
-                .foregroundStyle(themeManager.effectiveTheme.secondaryText)
-        }
     }
 
     /// Format rest time: "45s" if under 1 min, "1m 30s" if over
@@ -922,116 +859,4 @@ struct HistoryView: View {
         }
     }
 
-    // MARK: - Exercise Deltas
-
-    /// Change direction for a metric: up, down, or same
-    enum DeltaDirection {
-        case up, down, same, noData
-
-        var color: Color {
-            switch self {
-            case .up: return .green
-            case .down: return .red
-            case .same, .noData: return .gray.opacity(0.3)
-            }
-        }
-    }
-
-    /// Deltas for an exercise compared to previous session
-    struct ExerciseDeltas {
-        let weight: DeltaDirection
-        let reps: DeltaDirection
-        let volume: DeltaDirection
-
-        static let empty = ExerciseDeltas(weight: .noData, reps: .noData, volume: .noData)
-    }
-
-    /// Compute deltas for each exercise compared to previous session.
-    /// Pre-indexes allSets by exercise ID for O(1) lookup per exercise instead of O(N) full scan.
-    private static func computeExerciseDeltas(
-        for day: ExerciseDataGrouper.WorkoutDay,
-        from allSets: [ExerciseSet],
-        setsByExercise: [PersistentIdentifier: [ExerciseSet]]? = nil
-    ) -> [PersistentIdentifier: ExerciseDeltas] {
-        let calendar = Calendar.current
-        let dayStart = calendar.startOfDay(for: day.date)
-
-        // Use pre-built index if provided, otherwise build one (single-day case)
-        let index = setsByExercise ?? Self.buildWorkingSetIndex(from: allSets)
-
-        var deltas: [PersistentIdentifier: ExerciseDeltas] = [:]
-
-        for exercise in day.exercises {
-            let exerciseID = exercise.exercise.persistentModelID
-            let workingSets = exercise.sets.workingSets
-
-            // Current session values
-            let currentMaxWeight = workingSets.map { $0.weight }.max() ?? 0
-            let isRepsOnly = currentMaxWeight == 0
-            let currentMaxReps = currentMaxWeight > 0
-                ? (workingSets.filter { $0.weight == currentMaxWeight }.map { $0.reps }.max() ?? 0)
-                : (workingSets.map { $0.reps }.max() ?? 0)
-            // For reps-only exercises, use total reps instead of weight × reps volume
-            let currentVolume = isRepsOnly
-                ? Double(workingSets.reduce(0) { $0 + $1.reps })
-                : exercise.volume
-
-            // Look up previous sets from pre-built index, filter to before this day
-            let allExerciseSets = index[exerciseID] ?? []
-            let previousSets = allExerciseSets.filter {
-                calendar.startOfDay(for: $0.timestamp) < dayStart
-            }
-
-            guard !previousSets.isEmpty else {
-                deltas[exerciseID] = .empty
-                continue
-            }
-
-            // Group by day and get most recent
-            let grouped = Dictionary(grouping: previousSets) { set in
-                calendar.startOfDay(for: set.timestamp)
-            }
-
-            guard let mostRecentDay = grouped.keys.max(),
-                  let previousDaySets = grouped[mostRecentDay] else {
-                deltas[exerciseID] = .empty
-                continue
-            }
-
-            // Previous session values (use working sets only for consistency)
-            let prevWorkingSets = previousDaySets.filter { !$0.isWarmUp }
-            let prevMaxWeight = prevWorkingSets.map { $0.weight }.max() ?? 0
-            let prevMaxReps = prevMaxWeight > 0
-                ? (prevWorkingSets.filter { $0.weight == prevMaxWeight }.map { $0.reps }.max() ?? 0)
-                : (prevWorkingSets.map { $0.reps }.max() ?? 0)
-            // For reps-only exercises, compare total reps instead of weight × reps volume
-            let prevVolume = isRepsOnly
-                ? Double(prevWorkingSets.reduce(0) { $0 + $1.reps })
-                : prevWorkingSets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
-
-            // Determine direction for each metric
-            let weightDir: DeltaDirection = currentMaxWeight > prevMaxWeight ? .up
-                : currentMaxWeight < prevMaxWeight ? .down : .same
-            let repsDir: DeltaDirection = currentMaxReps > prevMaxReps ? .up
-                : currentMaxReps < prevMaxReps ? .down : .same
-            let volumeDir: DeltaDirection = currentVolume > prevVolume ? .up
-                : currentVolume < prevVolume ? .down : .same
-
-            deltas[exerciseID] = ExerciseDeltas(weight: weightDir, reps: repsDir, volume: volumeDir)
-        }
-
-        return deltas
-    }
-
-    /// Build a dictionary index of working sets grouped by exercise ID.
-    /// Called once before processing multiple days to avoid repeated O(N) scans.
-    private static func buildWorkingSetIndex(from allSets: [ExerciseSet]) -> [PersistentIdentifier: [ExerciseSet]] {
-        var index: [PersistentIdentifier: [ExerciseSet]] = [:]
-        for set in allSets {
-            guard let exerciseID = set.exercise?.persistentModelID,
-                  !set.isWarmUp else { continue }
-            index[exerciseID, default: []].append(set)
-        }
-        return index
-    }
 }

@@ -13,7 +13,7 @@ struct WorkoutShareCardView: View {
 
     let day: ExerciseDataGrouper.WorkoutDay
     let tagDistribution: [(tag: String, percentage: Double)]
-    let exerciseDeltas: [PersistentIdentifier: HistoryView.ExerciseDeltas]
+    let exerciseDeltas: [PersistentIdentifier: ExerciseDeltas]
 
     @State private var shareImage: UIImage?
 
@@ -407,12 +407,6 @@ struct WorkoutShareCardView: View {
                 context.fill(remainderPath, with: .color(Color.gray.opacity(0.3)))
             }
         }
-    }
-
-    private func shareDeltaIndicator(_ symbolName: String, direction: HistoryView.DeltaDirection) -> some View {
-        Image(systemName: symbolName)
-            .font(.system(size: 10, weight: .bold))
-            .foregroundStyle(direction.color)
     }
 
     // MARK: - Helpers

@@ -310,8 +310,6 @@ struct ComparisonMetricsCard: View {
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
 
                 Spacer()
-
-                DeltaIndicatorsView(deltas: todayDeltas)
             }
             .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .padding(.horizontal, 16)
@@ -323,20 +321,34 @@ struct ComparisonMetricsCard: View {
                 .frame(height: 1)
 
             if let metrics = currentMetrics {
-                // Metrics row (no deltas here)
+                // Delta legend row
+                HStack(spacing: 0) {
+                    deltaLegendItem(icon: "scalemass.fill", label: comparisonMode == .lastSession ? "Max Weight" : "Weight", direction: todayDeltas.weight)
+                    deltaLegendItem(icon: "repeat", label: "Reps", direction: todayDeltas.reps)
+                    deltaLegendItem(
+                        icon: "chart.bar.fill",
+                        label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
+                        direction: todayDeltas.volume
+                    )
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(themeManager.effectiveTheme.muted.opacity(0.3))
+
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(height: 1)
+
+                // Metrics row
                 HStack(spacing: 0) {
                     metricColumn(
-                        label: comparisonMode == .lastSession ? "Max Weight" : "Weight",
                         value: Formatters.formatWeight(themeManager.displayWeight(metrics.maxWeight)),
                         unit: themeManager.weightUnit.displayName
                     )
                     metricColumn(
-                        label: "Reps",
                         value: "\(metrics.maxReps)"
                     )
-                    // Conditional: show "Total Reps" for reps-only, "Total Volume" for weighted
                     metricColumn(
-                        label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
                         value: isRepsOnlyComparison ? "\(metrics.totalReps)" : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume)),
                         unit: isRepsOnlyComparison ? nil : themeManager.weightUnit.displayName
                     )
@@ -417,24 +429,19 @@ struct ComparisonMetricsCard: View {
     // MARK: - Metric Column Helper
 
     @ViewBuilder
-    private func metricColumn(label: String, value: String, unit: String? = nil) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(themeManager.effectiveTheme.captionFont)
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(value)
-                    .font(themeManager.effectiveTheme.dataFont(size: 24, weight: .semibold))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                if let unit {
-                    Text(unit)
-                        .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                }
+    private func metricColumn(value: String, unit: String? = nil) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 2) {
+            Text(value)
+                .font(themeManager.effectiveTheme.dataFont(size: 24, weight: .semibold))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+            if let unit {
+                Text(unit)
+                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
         }
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -472,6 +479,21 @@ struct ComparisonMetricsCard: View {
                 .background(themeManager.effectiveTheme.cardBackgroundColor)
             }
         }
+    }
+
+    // MARK: - Delta Legend Item
+
+    @ViewBuilder
+    private func deltaLegendItem(icon: String, label: String, direction: DeltaDirection) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(direction.color)
+            Text(label)
+                .font(themeManager.effectiveTheme.captionFont)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
 }

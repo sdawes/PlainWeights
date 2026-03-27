@@ -32,6 +32,8 @@ struct ComparisonMetricsCard: View {
     @State private var cachedTodaysVolume: Double
     @State private var cachedTodaysTotalReps: Int
     @State private var cachedLastSetWeight: Double?
+    @State private var cachedTodaysBestWeight: Double
+    @State private var cachedTodaysBestReps: Int
 
     init(comparisonMode: ComparisonMode, sets: [ExerciseSet], todayDeltas: ExerciseDeltas = .empty) {
         self.comparisonMode = comparisonMode
@@ -49,6 +51,8 @@ struct ComparisonMetricsCard: View {
         _cachedTodaysVolume = State(initialValue: computed.todaysVolume)
         _cachedTodaysTotalReps = State(initialValue: computed.todaysTotalReps)
         _cachedLastSetWeight = State(initialValue: computed.lastSetWeight)
+        _cachedTodaysBestWeight = State(initialValue: computed.todaysBestWeight)
+        _cachedTodaysBestReps = State(initialValue: computed.todaysBestReps)
     }
 
     // MARK: - Static Computation
@@ -63,6 +67,8 @@ struct ComparisonMetricsCard: View {
         let todaysVolume: Double
         let todaysTotalReps: Int
         let lastSetWeight: Double?
+        let todaysBestWeight: Double
+        let todaysBestReps: Int
     }
 
     private static func computeAllMetrics(sets: [ExerciseSet], comparisonMode: ComparisonMode) -> ComputedMetrics {
@@ -143,7 +149,9 @@ struct ComparisonMetricsCard: View {
             bestModeIndicators: bestModeIndicators,
             todaysVolume: TodaySessionCalculator.getTodaysVolume(from: sets),
             todaysTotalReps: todaysSets.workingSets.reduce(0) { $0 + $1.reps },
-            lastSetWeight: todaysSets.first(where: { !$0.isWarmUp })?.weight
+            lastSetWeight: todaysSets.first(where: { !$0.isWarmUp })?.weight,
+            todaysBestWeight: TodaySessionCalculator.getTodaysMaxWeight(from: sets),
+            todaysBestReps: TodaySessionCalculator.getTodaysHighestReps(from: sets)
         )
     }
 
@@ -158,6 +166,8 @@ struct ComparisonMetricsCard: View {
         cachedTodaysVolume = computed.todaysVolume
         cachedTodaysTotalReps = computed.todaysTotalReps
         cachedLastSetWeight = computed.lastSetWeight
+        cachedTodaysBestWeight = computed.todaysBestWeight
+        cachedTodaysBestReps = computed.todaysBestReps
     }
 
     // MARK: - Simple Getters for Cached Values
@@ -190,111 +200,18 @@ struct ComparisonMetricsCard: View {
         return comparisonMode == .lastSession ? "Last Session (\(dateStr))" : "All-Time Best (\(dateStr))"
     }
 
-    // Delta values for comparison row (derived from cached indicators - cheap)
-    private var weightDirection: ProgressTracker.PRDirection? {
-        if let indicators = lastModeIndicators { return indicators.weightDirection }
-        if let indicators = bestModeIndicators { return indicators.weightDirection }
-        return nil
-    }
-
-    private var weightDelta: Double? {
-        if let indicators = lastModeIndicators { return indicators.weightImprovement }
-        if let indicators = bestModeIndicators { return indicators.weightImprovement }
-        return nil
-    }
-
-    private var repsDirection: ProgressTracker.PRDirection? {
-        if let indicators = lastModeIndicators { return indicators.repsDirection }
-        if let indicators = bestModeIndicators { return indicators.repsDirection }
-        return nil
-    }
-
-    private var repsDelta: Double? {
-        if let indicators = lastModeIndicators { return Double(indicators.repsImprovement) }
-        if let indicators = bestModeIndicators { return Double(indicators.repsImprovement) }
-        return nil
-    }
-
-    // Conditional total: use totalReps for reps-only, volume for weighted
+    // Whether the reference session was reps-only (bodyweight exercise)
     private var isRepsOnlyComparison: Bool {
-        // Check if comparison session was reps-only
         guard let metrics = currentMetrics else { return false }
         return metrics.maxWeight == 0
     }
-
-    private var totalDirection: ProgressTracker.PRDirection? {
-        if isRepsOnlyComparison {
-            // Use total reps direction
-            if let indicators = lastModeIndicators { return indicators.totalRepsDirection }
-            if let indicators = bestModeIndicators { return indicators.totalRepsDirection }
-        } else {
-            // Use volume direction
-            if let indicators = lastModeIndicators { return indicators.volumeDirection }
-            if let indicators = bestModeIndicators { return indicators.volumeDirection }
-        }
-        return nil
-    }
-
-    private var totalDelta: Double? {
-        if isRepsOnlyComparison {
-            // Use total reps delta
-            if let indicators = lastModeIndicators { return Double(indicators.totalRepsImprovement) }
-            if let indicators = bestModeIndicators { return Double(indicators.totalRepsImprovement) }
-        } else {
-            // Use volume delta
-            if let indicators = lastModeIndicators { return indicators.volumeImprovement }
-            if let indicators = bestModeIndicators { return indicators.volumeImprovement }
-        }
-        return nil
-    }
-
-    // MARK: - Cell-Specific Deltas (most recent set vs reference)
 
     // Most recent working set from today (sets are sorted most-recent-first)
     private var mostRecentWorkingSet: ExerciseSet? {
         todaysSets.first(where: { !$0.isWarmUp })
     }
 
-    // Cell weight: most recent set's weight vs reference max weight
-    private var cellWeightDirection: ProgressTracker.PRDirection? {
-        guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
-        guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
-        let diff = set.weight - metrics.maxWeight
-        let t = ProgressTracker.weightTolerance
-        if diff > t { return .up }
-        if diff < -t { return .down }
-        return .same
-    }
-
-    private var cellWeightDelta: Double? {
-        guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
-        guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
-        let diff = set.weight - metrics.maxWeight
-        return abs(diff) < ProgressTracker.weightTolerance ? 0 : diff
-    }
-
-    // Cell reps: most recent set's reps vs reference reps at max weight
-    private var cellRepsDirection: ProgressTracker.PRDirection? {
-        guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
-        guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
-        let diff = set.reps - metrics.maxReps
-        if diff > 0 { return .up }
-        if diff < 0 { return .down }
-        return .same
-    }
-
-    private var cellRepsDelta: Double? {
-        guard lastModeIndicators != nil || bestModeIndicators != nil else { return nil }
-        guard let set = mostRecentWorkingSet, let metrics = currentMetrics else { return nil }
-        return Double(set.reps - metrics.maxReps)
-    }
-
-    // Check if today has sets (derived - cheap)
-    private var hasTodaySets: Bool {
-        !todaysSets.isEmpty
-    }
-
-    // Check if today has working sets (derived - cheap)
+    // Check if today has working sets
     private var hasWorkingSets: Bool {
         todaysSets.contains { !$0.isWarmUp }
     }
@@ -325,65 +242,13 @@ struct ComparisonMetricsCard: View {
                 .frame(height: 1)
 
             if let metrics = currentMetrics {
-                // Metrics row with labels
-                HStack(spacing: 0) {
-                    metricColumn(
-                        label: comparisonMode == .lastSession ? "Max Weight" : "Weight",
-                        value: Formatters.formatWeight(themeManager.displayWeight(metrics.maxWeight)),
-                        beaten: hasWorkingSets ? todayDeltas.weight : nil
-                    )
-                    metricColumn(
-                        label: "Reps",
-                        value: "\(metrics.maxReps)",
-                        beaten: hasWorkingSets ? todayDeltas.reps : nil
-                    )
-                    metricColumn(
-                        label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
-                        value: isRepsOnlyComparison ? "\(metrics.totalReps)" : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume)),
-                        beaten: hasWorkingSets ? todayDeltas.volume : nil
-                    )
-                }
-                .padding(.vertical, 12)
+                // Large reference values row
+                referenceValuesRow(metrics: metrics)
 
-                // Divider above last-set comparison row
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
-                    .frame(height: 1)
-
-                // Last-set comparison row (show '-' when no working sets)
-                HStack(spacing: 1) {
-                    comparisonCell(direction: hasWorkingSets ? cellWeightDirection : nil, value: hasWorkingSets ? cellWeightDelta : nil)
-                    comparisonCell(direction: hasWorkingSets ? cellRepsDirection : nil, value: hasWorkingSets ? cellRepsDelta : nil, isReps: true)
-                    // Conditional: show reps delta for reps-only, volume delta for weighted
-                    comparisonCell(direction: hasWorkingSets ? totalDirection : nil, value: hasWorkingSets ? totalDelta : nil, isReps: isRepsOnlyComparison)
-                }
-                .background(themeManager.effectiveTheme.borderColor)
-
-                // Volume progress bar
-                if hasTodaySets {
-                    Rectangle()
-                        .fill(themeManager.effectiveTheme.borderColor)
-                        .frame(height: 1)
-
-                    if isRepsOnlyComparison && metrics.totalReps > 0 {
-                        VolumeProgressBar(
-                            currentVolume: Double(cachedTodaysTotalReps),
-                            targetVolume: Double(metrics.totalReps),
-                            targetLabel: comparisonMode == .lastSession ? "Last" : "Best",
-                            isRepsOnly: true
-                        )
-                        .padding(16)
-                    } else if !isRepsOnlyComparison && metrics.totalVolume > 0 {
-                        VolumeProgressBar(
-                            currentVolume: cachedTodaysVolume,
-                            targetVolume: metrics.totalVolume,
-                            targetLabel: comparisonMode == .lastSession ? "Last" : "Best",
-                            isRepsOnly: false,
-                            lastSetWeight: cachedLastSetWeight
-                        )
-                        .padding(16)
-                    }
-                }
+                // Vertical bar chart comparing reference vs session best vs last set
+                VerticalBarComparison(
+                    columns: buildBarColumns(from: metrics)
+                )
             } else {
                 // First session empty state
                 Text(comparisonMode == .lastSession
@@ -416,23 +281,43 @@ struct ComparisonMetricsCard: View {
         }
     }
 
-    // MARK: - Metric Column Helper
+    // MARK: - Reference Values Row
+
+    /// Large display of the reference session's key metrics (sits above the bar chart)
+    @ViewBuilder
+    private func referenceValuesRow(metrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)) -> some View {
+        let isLastSession = comparisonMode == .lastSession
+
+        HStack(spacing: 0) {
+            if !isRepsOnlyComparison {
+                referenceMetric(
+                    label: isLastSession ? "Max Weight" : "Weight",
+                    value: Formatters.formatWeight(themeManager.displayWeight(metrics.maxWeight))
+                )
+            }
+
+            referenceMetric(
+                label: isRepsOnlyComparison ? "Max Reps" : "Reps",
+                value: "\(metrics.maxReps)"
+            )
+
+            referenceMetric(
+                label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
+                value: isRepsOnlyComparison
+                    ? "\(metrics.totalReps)"
+                    : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume))
+            )
+        }
+        .padding(.top, 12)
+        .padding(.bottom, 4)
+    }
 
     @ViewBuilder
-    private func metricColumn(label: String, value: String, beaten: DeltaDirection? = nil) -> some View {
+    private func referenceMetric(label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 0) {
-                Text(label)
-                    .font(themeManager.effectiveTheme.captionFont)
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                Spacer()
-                if let beaten, beaten != .same {
-                    Image(systemName: beaten == .up ? "arrow.up" : "arrow.down")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(beaten == .up ? .green : .red)
-                }
-            }
-            .lineLimit(1)
+            Text(label)
+                .font(themeManager.effectiveTheme.captionFont)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             Text(value)
                 .font(themeManager.effectiveTheme.dataFont(size: 24, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
@@ -443,39 +328,146 @@ struct ComparisonMetricsCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // MARK: - Comparison Cell Helper
+    // MARK: - Bar Chart Data Builder
 
-    @ViewBuilder
-    private func comparisonCell(direction: ProgressTracker.PRDirection?, value: Double?, isReps: Bool = false) -> some View {
-        Group {
-            if hasTodaySets, let direction = direction, let value = value, direction != .same {
-                // Up or down - colored background with white text
-                let displayValue = isReps ? "\(Int(value))" : Formatters.formatWeight(themeManager.displayWeight(value))
-                let prefix = direction == .up ? "+" : ""
-                HStack {
-                    Text("\(prefix)\(displayValue)")
-                        .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                    Spacer()
+    /// Label for the session best legend entry (e.g. "Best today (Set 2)")
+    /// Build the bar column data from cached metrics for the VerticalBarComparison
+    private func buildBarColumns(from metrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)) -> [BarColumnData] {
+        let lastSet = mostRecentWorkingSet
+        let workingSetCount = todaysSets.filter { !$0.isWarmUp }.count
+        let isLastSession = comparisonMode == .lastSession
+        let tol = ProgressTracker.weightTolerance
+
+        if isRepsOnlyComparison {
+            let lastSetReps = lastSet.map { Double($0.reps) }
+            let repsDelta = lastSetReps.map { $0 - Double(metrics.maxReps) } ?? 0
+            let repsIsSame = lastSetReps != nil && Int(repsDelta) == 0
+
+            // Don't show session best if it matches the last set
+            let bestReps = Double(cachedTodaysBestReps)
+            let showBestReps = workingSetCount >= 2 && lastSetReps != bestReps
+
+            let totalRepsDelta = Double(cachedTodaysTotalReps - metrics.totalReps)
+            let totalIsSame = hasWorkingSets && Int(totalRepsDelta) == 0
+
+            // Reps remaining hint for total reps
+            let repsHint: String? = {
+                guard hasWorkingSets else { return nil }
+                if totalRepsDelta > 0 {
+                    let count = Int(totalRepsDelta)
+                    return "\(count) \(count == 1 ? "rep" : "reps") ahead"
+                } else if totalRepsDelta < 0 {
+                    let count = Int(abs(totalRepsDelta)) + 1
+                    return "\(count) to beat"
                 }
-                .padding(.horizontal, 16)
-                .frame(height: 40)
-                .background(direction == .up ? Color.green : Color.red)
-            } else {
-                // No data - show dash
-                HStack {
-                    Text("—")
-                        .font(themeManager.effectiveTheme.interFont(size: 14))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.3))
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .frame(height: 40)
-                .background(themeManager.effectiveTheme.cardBackgroundColor)
-            }
+                return nil
+            }()
+
+            return [
+                BarColumnData(
+                    label: "Max Reps",
+                    referenceValue: Double(metrics.maxReps),
+                    sessionBestValue: showBestReps ? bestReps : nil,
+                    lastSetValue: lastSetReps,
+                    delta: repsDelta,
+                    isUp: repsDelta > 0,
+                    isSame: repsIsSame,
+                    showSessionBest: showBestReps,
+                    formatAsWeight: false
+                ),
+                BarColumnData(
+                    label: "Total Reps",
+                    referenceValue: Double(metrics.totalReps),
+                    sessionBestValue: nil,
+                    lastSetValue: hasWorkingSets ? Double(cachedTodaysTotalReps) : nil,
+                    delta: totalRepsDelta,
+                    isUp: totalRepsDelta > 0,
+                    isSame: totalIsSame,
+                    showSessionBest: false,
+                    formatAsWeight: false,
+                    volumeHint: repsHint
+                )
+            ]
         }
+
+        // Weighted exercise: Weight, Reps, Total Volume
+        let refWeight = themeManager.displayWeight(metrics.maxWeight)
+        let bestWeight = themeManager.displayWeight(cachedTodaysBestWeight)
+        let lastWeight = lastSet.map { themeManager.displayWeight($0.weight) }
+        let weightDelta = lastWeight.map { $0 - refWeight } ?? 0
+        let weightIsSame = lastWeight != nil && abs(weightDelta) < tol
+
+        // Don't show session best bar if it matches the last set value
+        let showBestWeight = workingSetCount >= 2
+            && (lastWeight == nil || abs(bestWeight - (lastWeight ?? 0)) > tol)
+
+        let lastSetReps = lastSet.map { Double($0.reps) }
+        let repsDelta = lastSetReps.map { $0 - Double(metrics.maxReps) } ?? 0
+        let repsIsSame = lastSetReps != nil && Int(repsDelta) == 0
+
+        let bestReps = Double(cachedTodaysBestReps)
+        let showBestReps = workingSetCount >= 2
+            && (lastSetReps == nil || lastSetReps != bestReps)
+
+        let refVolume = themeManager.displayWeight(metrics.totalVolume)
+        let todayVolume = themeManager.displayWeight(cachedTodaysVolume)
+        let volumeDelta = todayVolume - refVolume
+        let volumeIsSame = hasWorkingSets && abs(volumeDelta) < tol
+
+        // Calculate "reps to go" or "reps ahead" hint for volume
+        let volumeHint: String? = {
+            guard hasWorkingSets else { return nil }
+            if let weight = cachedLastSetWeight, weight > 0 {
+                let displayWeight = themeManager.displayWeight(weight)
+                if volumeDelta > tol {
+                    let repsOver = Int(volumeDelta / displayWeight)
+                    if repsOver > 0 {
+                        return "\(repsOver) \(repsOver == 1 ? "rep" : "reps") ahead"
+                    }
+                } else if volumeDelta < -tol {
+                    let repsNeeded = Int(abs(volumeDelta) / displayWeight) + 1
+                    return "\(repsNeeded) to beat"
+                }
+            }
+            return nil
+        }()
+
+        return [
+            BarColumnData(
+                label: isLastSession ? "Max Weight" : "Weight",
+                referenceValue: refWeight,
+                sessionBestValue: showBestWeight ? bestWeight : nil,
+                lastSetValue: lastWeight,
+                delta: weightDelta,
+                isUp: weightDelta > tol,
+                isSame: weightIsSame,
+                showSessionBest: showBestWeight,
+                formatAsWeight: true
+            ),
+            BarColumnData(
+                label: "Reps",
+                referenceValue: Double(metrics.maxReps),
+                sessionBestValue: showBestReps ? bestReps : nil,
+                lastSetValue: lastSetReps,
+                delta: repsDelta,
+                isUp: repsDelta > 0,
+                isSame: repsIsSame,
+                showSessionBest: showBestReps,
+                formatAsWeight: false
+            ),
+            BarColumnData(
+                label: "Total Volume",
+                referenceValue: refVolume,
+                sessionBestValue: nil,
+                lastSetValue: hasWorkingSets ? todayVolume : nil,
+                delta: volumeDelta,
+                isUp: volumeDelta > tol,
+                isSame: volumeIsSame,
+                showSessionBest: false,
+                formatAsWeight: false,
+                volumeHint: volumeHint
+            )
+        ]
     }
 
 }

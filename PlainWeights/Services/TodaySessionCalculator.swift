@@ -57,6 +57,12 @@ enum TodaySessionCalculator {
         return workingSets.map { $0.weight }.max() ?? 0.0
     }
 
+    /// Get today's highest reps from any single working set (regardless of weight)
+    static func getTodaysHighestReps(from sets: [ExerciseSet]) -> Int {
+        let todaySets = getTodaysSets(from: sets)
+        return todaySets.workingSets.map { $0.reps }.max() ?? 0
+    }
+
     /// Get today's maximum reps at max weight (for delta comparisons)
     static func getTodaysMaxReps(from sets: [ExerciseSet]) -> Int {
         let todaySets = getTodaysSets(from: sets)

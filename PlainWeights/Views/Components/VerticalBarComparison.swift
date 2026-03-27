@@ -101,19 +101,17 @@ struct VerticalBarComparison: View {
                     let fillRatio = max(lastValue / maxVal, 0.02)
                     let fillWidth = CGFloat(fillRatio) * totalWidth
 
-                    let fillColor: Color = data.isSame ? .gray.opacity(0.45)
-                        : data.isUp ? .green.opacity(0.35) : .red.opacity(0.3)
-                    let bookendColor: Color = data.isSame ? .gray.opacity(0.6)
+                    let barColor: Color = data.isSame ? .gray.opacity(0.6)
                         : data.isUp ? .green : .red
 
-                    // Last set fill
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(fillColor)
+                    // Last set fill (squared right edge so bookend sits flush)
+                    UnevenRoundedRectangle(topLeadingRadius: 4, bottomLeadingRadius: 4, bottomTrailingRadius: 0, topTrailingRadius: 0)
+                        .fill(barColor)
                         .frame(width: fillWidth, height: barHeight)
 
                     // Last set bookend
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(bookendColor)
+                        .fill(barColor)
                         .frame(width: 2, height: bookendHeight)
                         .offset(x: fillWidth - 1)
 
@@ -184,13 +182,13 @@ struct VerticalBarComparison: View {
                     if let hint = columns[index].volumeHint {
                         let data = columns[index]
                         Text(hint)
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
                             .foregroundStyle(data.isUp ? .green : .red)
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                     } else {
                         Text(" ")
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                            .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
                     }
                 }
                 .padding(.horizontal, 12)

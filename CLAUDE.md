@@ -1264,6 +1264,13 @@ xcodebuild -scheme PlainWeights clean
 
 ## Figma MCP Integration
 
+### Sending Designs to Figma
+When sending design explorations, mockups, or variant comparisons to Figma:
+- **Always create a new page** in the PlainWeights_Designs file (fileKey: `6ItentSODrpcV7ehfMA8VQ`)
+- Use `outputMode: "existingFile"` with `fileKey: "6ItentSODrpcV7ehfMA8VQ"` and **no `nodeId`** (omitting nodeId creates a new page)
+- Build the HTML designs directly and serve them locally for capture — do NOT route through the whiteboard first
+- The PlainWeights_Designs file is in **Stephen's team** (planKey: `team::1314668560232528671`)
+
 ### Figma Make File Access
 The design source of truth is in Figma Make. To access Make files via MCP:
 

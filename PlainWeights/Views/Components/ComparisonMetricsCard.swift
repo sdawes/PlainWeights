@@ -426,10 +426,10 @@ struct ComparisonMetricsCard: View {
                     .font(themeManager.effectiveTheme.captionFont)
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 Spacer()
-                if let beaten {
-                    Image(systemName: beaten == .up ? "checkmark.circle" : beaten == .down ? "xmark.circle" : "minus.circle")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(beaten == .up ? .green : beaten == .down ? .red : themeManager.effectiveTheme.mutedForeground.opacity(0.4))
+                if let beaten, beaten != .same {
+                    Image(systemName: beaten == .up ? "arrow.up" : "arrow.down")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(beaten == .up ? .green : .red)
                 }
             }
             .lineLimit(1)

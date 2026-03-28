@@ -438,7 +438,7 @@ struct HistoryView: View {
             .frame(height: 6)
 
             HStack {
-                Text("\(days) of \(total) days")
+                Text("Trained \(days) of \(total) available days")
                     .font(themeManager.effectiveTheme.interFont(size: 11))
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 Spacer()
@@ -448,7 +448,8 @@ struct HistoryView: View {
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
     }
 
     private var periodDescription: String {

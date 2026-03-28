@@ -57,7 +57,7 @@ struct ExerciseListView: View {
         } else {
             listView
                 .searchable(text: $searchText, prompt: "Search exercises")
-                .searchScopes($searchScope, activation: .onSearchPresentation) {
+                .searchScopes($searchScope, activation: .onTextEntry) {
                     Text("Name").tag(ExerciseSearchScope.name)
                     Text("Tags").tag(ExerciseSearchScope.tags)
                 }

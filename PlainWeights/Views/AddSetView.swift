@@ -276,10 +276,7 @@ struct AddSetView: View {
                         Text("Notes")
                             .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            .rotationEffect(.degrees(showNotes ? 90 : 0))
+                        ChevronDisclosureButton(isExpanded: showNotes)
                     }
                 }
                 .buttonStyle(.plain)

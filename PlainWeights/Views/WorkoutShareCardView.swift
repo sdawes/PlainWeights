@@ -41,25 +41,6 @@ struct WorkoutShareCardView: View {
         return (weightUp, repsUp, volumeUp, total)
     }
 
-    /// Top 5 exercises ranked by achievement: PBs first, then weight beat, reps beat, volume beat
-    private var topExercises: [(index: Int, exercise: ExerciseDataGrouper.WorkoutExercise)] {
-        let ranked = day.exercises.enumerated().map { index, exercise in
-            let hasPB = exercise.sets.workingSets.contains { $0.isPB }
-            let delta = exerciseDeltas[exercise.exercise.persistentModelID]
-            // Score: PB=1000, weight up=100, reps up=10, volume up=1
-            var score = 0
-            if hasPB { score += 1000 }
-            if delta?.weight == .up { score += 100 }
-            if delta?.reps == .up { score += 10 }
-            if delta?.volume == .up { score += 1 }
-            return (index: index, exercise: exercise, score: score)
-        }
-        .sorted { $0.score > $1.score }
-        .prefix(5)
-
-        return ranked.map { (index: $0.index, exercise: $0.exercise) }
-    }
-
     // Top 5 muscle groups for the donut chart
     private var topMuscleGroups: [(tag: String, percentage: Double)] {
         Array(tagDistribution.prefix(5))
@@ -119,42 +100,22 @@ struct WorkoutShareCardView: View {
     @ViewBuilder
     private var shareCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Brand + date + logo header
-            HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Every rep counts. Start tracking yours.")
-                        .font(theme.interFont(size: 17, weight: .bold))
-                        .foregroundStyle(theme.primaryText)
-                    HStack(spacing: 0) {
-                        Text("Last session: ")
-                            .font(theme.interFont(size: 13, weight: .medium))
-                            .foregroundStyle(theme.mutedForeground)
-                        Text(day.date, format: .dateTime.weekday(.wide).day().month(.abbreviated))
-                            .font(theme.interFont(size: 13, weight: .regular))
-                            .foregroundStyle(theme.mutedForeground)
-                    }
+            // Brand + date header
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Every rep counts. Start tracking yours.")
+                    .font(theme.interFont(size: 17, weight: .bold))
+                    .foregroundStyle(theme.primaryText)
+                HStack(spacing: 0) {
+                    Text("Last session: ")
+                        .font(theme.interFont(size: 13, weight: .medium))
+                        .foregroundStyle(theme.mutedForeground)
+                    Text(day.date, format: .dateTime.weekday(.wide).day().month(.abbreviated))
+                        .font(theme.interFont(size: 13, weight: .regular))
+                        .foregroundStyle(theme.mutedForeground)
                 }
-                .padding(.vertical, 14)
-                .padding(.leading, 16)
-
-                Spacer()
-
-                Rectangle()
-                    .fill(theme.borderColor)
-                    .frame(width: 1)
-                    .padding(.vertical, 10)
-
-                Image("AppIconImage")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 68, height: 68)
-                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 15)
-                            .strokeBorder(theme == .dark ? .white : .black, lineWidth: 2)
-                    )
-                    .padding(.horizontal, 16)
             }
+            .padding(.vertical, 14)
+            .padding(.horizontal, 16)
 
             cardDivider
 
@@ -262,7 +223,7 @@ struct WorkoutShareCardView: View {
             // vs Last Session – 3 columns
             let deltas = deltasSummary
             if deltas.total > 0 {
-                sectionLabel("Improvements vs Last Session")
+                sectionLabel("Exercise Improvements")
 
                 HStack(spacing: 0) {
                     deltaStat(value: deltas.weightUp, total: deltas.total, label: "Heavier")
@@ -281,49 +242,7 @@ struct WorkoutShareCardView: View {
                 }
                 .padding(.bottom, 16)
 
-                cardDivider
             }
-
-            // Exercises list (top 5 ranked by achievement)
-            let exercises = topExercises
-
-            sectionLabel("Top 5 Exercises")
-
-            ForEach(exercises.indices, id: \.self) { i in
-                let exercise = exercises[i].exercise
-
-                if i > 0 {
-                    Rectangle()
-                        .fill(theme.borderColor)
-                        .frame(height: 1)
-                        .padding(.leading, 40)
-                }
-
-                HStack(spacing: 0) {
-                    Text("\(i + 1)")
-                        .font(theme.dataFont(size: 13, weight: .medium))
-                        .foregroundStyle(theme.mutedForeground)
-                        .frame(width: 24, alignment: .leading)
-
-                    Text(exercise.exercise.name)
-                        .font(theme.subheadlineFont)
-                        .foregroundStyle(theme.primaryText)
-
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-            }
-
-            // Footer – CTA
-            cardDivider
-
-            // Footer CTA
-            Text("Try it out yourself — Plain Weights on the App Store")
-                .font(theme.interFont(size: 13, weight: .regular))
-                .foregroundStyle(theme.mutedForeground.opacity(0.5))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
         }
         .background(theme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -331,6 +250,13 @@ struct WorkoutShareCardView: View {
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(theme.borderColor, lineWidth: 1)
         )
+
+        // Socials banner image below the card
+        Image("socials")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.top, 12)
     }
 
     // MARK: - Subviews

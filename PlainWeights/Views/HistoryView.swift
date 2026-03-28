@@ -92,7 +92,7 @@ struct HistoryView: View {
     @State private var showingShareCard = false
 
     // Tag breakdown visibility toggle (default from setting)
-    @State private var showTagBreakdown = true
+    @State private var showTagBreakdown = false
 
     private var hasTodaySets: Bool {
         allSets.contains { Calendar.current.isDateInToday($0.timestamp) }
@@ -316,9 +316,7 @@ struct HistoryView: View {
                                 Text("See \(remainingCount) more days")
                                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                                     .foregroundStyle(themeManager.effectiveTheme.primary)
-                                Image(systemName: "chevron.down")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(themeManager.effectiveTheme.primary)
+                                ChevronDisclosureButton(isExpanded: false)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
@@ -640,9 +638,7 @@ struct HistoryView: View {
                     .foregroundStyle(showTagBreakdown
                         ? themeManager.effectiveTheme.mutedForeground
                         : themeManager.effectiveTheme.tertiaryText)
-                Image(systemName: showTagBreakdown ? "chevron.down" : "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                ChevronDisclosureButton(isExpanded: showTagBreakdown)
             }
             .padding(.top, 20)
             .padding(.bottom, 4)

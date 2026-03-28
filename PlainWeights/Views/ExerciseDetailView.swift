@@ -298,9 +298,7 @@ struct ExerciseDetailView: View {
                             Text("See \(remainingCount) more sessions")
                                 .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                                 .foregroundStyle(themeManager.effectiveTheme.primary)
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(themeManager.effectiveTheme.primary)
+                            ChevronDisclosureButton(isExpanded: false)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)

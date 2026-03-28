@@ -236,66 +236,7 @@ struct FilteredExerciseListView: View {
             } else {
                 Section {
                     ForEach(cachedSortedExercises.enumerated(), id: \.element.persistentModelID) { index, exercise in
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text(highlightedName(exercise.name))
-                                .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
-                                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                            if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
-                                TagPillsRow(
-                                    tags: exercise.tags,
-                                    secondaryTags: exercise.secondaryTags,
-                                    highlightText: searchScope == .tags ? searchText : ""
-                                )
-                                    .padding(.top, 6)
-                            }
-                            HStack(spacing: 4) {
-                                let exerciseId = exercise.persistentModelID
-                                let isDoneToday = cachedDoneToday.contains(exerciseId)
-                                let color = cachedStalenessColors[exerciseId] ?? nil
-
-                                if let color = color, !isDoneToday {
-                                    Image(systemName: "exclamationmark.circle")
-                                        .font(.system(size: 14))
-                                        .foregroundStyle(color)
-                                }
-                                if isDoneToday {
-                                    HStack(spacing: 0) {
-                                        Text("Last: ")
-                                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                                        Text("Today")
-                                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                                    }
-                                    .foregroundStyle(.green)
-                                } else if let lastWorkout = exercise.lastWorkoutDate {
-                                    HStack(spacing: 0) {
-                                        Text("Last: ")
-                                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                                        Text(Formatters.formatExerciseLastDone(lastWorkout))
-                                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                                    }
-                                    .foregroundStyle(color ?? themeManager.effectiveTheme.mutedForeground)
-                                } else {
-                                    // No sets recorded yet
-                                    Text("No sets recorded")
-                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                                }
-                            }
-                            .padding(.top, 12)
-                        }
-                        .padding(.leading, 14)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            navigationPath.append(exercise)
-                        }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                exerciseToDelete = exercise
-                            } label: {
-                                Label("Delete", systemImage: "trash")
-                            }
-                        }
+                        exerciseRow(exercise)
                         .listRowBackground(
                             Group {
                                 if let color = cachedStalenessColors[exercise.persistentModelID] ?? nil {
@@ -424,6 +365,76 @@ struct FilteredExerciseListView: View {
         }
         .onChange(of: searchScope) { _, _ in
             rebuildSortedExercisesCache()
+        }
+    }
+
+    // MARK: - Exercise Row
+
+    /// A single exercise row extracted from body to reduce compiler type-check complexity
+    @ViewBuilder
+    private func exerciseRow(_ exercise: Exercise) -> some View {
+        let exerciseId = exercise.persistentModelID
+        let isDoneToday = cachedDoneToday.contains(exerciseId)
+        let color = cachedStalenessColors[exerciseId] ?? nil
+        let tagHighlight = searchScope == .tags ? searchText : ""
+
+        VStack(alignment: .leading, spacing: 0) {
+            Text(highlightedName(exercise.name))
+                .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+            if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
+                TagPillsRow(
+                    tags: exercise.tags,
+                    secondaryTags: exercise.secondaryTags,
+                    highlightText: tagHighlight
+                )
+                .padding(.top, 6)
+            }
+
+            HStack(spacing: 4) {
+                if let color, !isDoneToday {
+                    Image(systemName: "exclamationmark.circle")
+                        .font(.system(size: 14))
+                        .foregroundStyle(color)
+                }
+
+                if isDoneToday {
+                    HStack(spacing: 0) {
+                        Text("Last: ")
+                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                        Text("Today")
+                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                    }
+                    .foregroundStyle(.green)
+                } else if let lastWorkout = exercise.lastWorkoutDate {
+                    HStack(spacing: 0) {
+                        Text("Last: ")
+                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                        Text(Formatters.formatExerciseLastDone(lastWorkout))
+                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                    }
+                    .foregroundStyle(color ?? themeManager.effectiveTheme.mutedForeground)
+                } else {
+                    Text("No sets recorded")
+                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                }
+            }
+            .padding(.top, 12)
+        }
+        .padding(.leading, 14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            navigationPath.append(exercise)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                exerciseToDelete = exercise
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
         }
     }
 

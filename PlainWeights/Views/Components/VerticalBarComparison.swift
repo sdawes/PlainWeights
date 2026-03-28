@@ -99,7 +99,8 @@ struct VerticalBarComparison: View {
     }
 
     /// A single gauge bar: grey track (reference), colored fill (last set),
-    /// and optional green shading (session best exceeding last set)
+    /// optional green shading (session best exceeding last set), and a small
+    /// label showing the session best value at the end of the green shading
     @ViewBuilder
     private func gaugeBar(for data: BarColumnData) -> some View {
         let maxVal = maxValue(for: data)
@@ -126,7 +127,6 @@ struct VerticalBarComparison: View {
                         .frame(width: fillWidth, height: barHeight)
 
                     // Session best shading — green fill between last set and session best
-                    // Shows that an earlier set exceeded the current one
                     if data.showSessionBest,
                        let bestValue = data.sessionBestValue,
                        bestValue > lastValue {
@@ -173,7 +173,6 @@ struct VerticalBarComparison: View {
                     .foregroundStyle(data.isUp ? .green : .red)
             }
         } else {
-            // Invisible spacer to maintain alignment when no sets added
             Text(" ")
                 .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
         }

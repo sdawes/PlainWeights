@@ -2,7 +2,17 @@
 //  ComparisonMetricsCard.swift
 //  PlainWeights
 //
-//  Comparison metrics card component showing last session or all-time best metrics.
+//  Session Comparison Card — shows how the current workout compares to a
+//  reference session (Last Session or All-Time Best). The user toggles between
+//  these two modes via buttons above this card in ExerciseDetailView.
+//
+//  Layout (top to bottom):
+//    ┌─────────────────────────────────────────────┐
+//    │  Card Header — mode icon, title, date, unit  │
+//    │  ─────────────────────────────────────────── │
+//    │  Reference Metrics — Max Weight, Reps, Vol   │
+//    │  Gauges + Deltas + Footer (VerticalBarComp.) │
+//    └─────────────────────────────────────────────┘
 //
 
 import SwiftUI
@@ -218,7 +228,7 @@ struct ComparisonMetricsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header section
+            // Card Header — mode icon, title with date, weight unit
             HStack(spacing: 8) {
                 Image(systemName: comparisonMode == .lastSession ? "calendar.badge.clock" : "star.fill")
                     .font(.system(size: 14))
@@ -242,15 +252,15 @@ struct ComparisonMetricsCard: View {
                 .frame(height: 1)
 
             if let metrics = currentMetrics {
-                // Large reference values row
+                // Reference Metrics — the big values (Max Weight, Reps, Total Volume)
                 referenceValuesRow(metrics: metrics)
 
-                // Vertical bar chart comparing reference vs session best vs last set
+                // Gauges + Deltas + Footer Hint (see VerticalBarComparison.swift)
                 VerticalBarComparison(
                     columns: buildBarColumns(from: metrics)
                 )
             } else {
-                // First session empty state
+                // Empty state — no previous session data to compare against
                 Text(comparisonMode == .lastSession
                     ? "Next session will compare weight, reps, and volume vs today"
                     : "Next session will compare weight, reps, and volume vs best ever")
@@ -353,14 +363,15 @@ struct ComparisonMetricsCard: View {
             // Reps remaining hint for total reps
             let repsHint: String? = {
                 guard hasWorkingSets else { return nil }
-                if totalRepsDelta > 0 {
+                if Int(totalRepsDelta) == 0 {
+                    return "Total reps matched"
+                } else if totalRepsDelta > 0 {
                     let count = Int(totalRepsDelta)
-                    return "\(count) \(count == 1 ? "rep" : "reps") ahead"
-                } else if totalRepsDelta < 0 {
+                    return "\(count) \(count == 1 ? "rep" : "reps") over total reps"
+                } else {
                     let count = Int(abs(totalRepsDelta)) + 1
-                    return "\(count) to beat"
+                    return "\(count) \(count == 1 ? "rep" : "reps") to beat total reps"
                 }
-                return nil
             }()
 
             return [
@@ -414,19 +425,22 @@ struct ComparisonMetricsCard: View {
         let volumeDelta = todayVolume - refVolume
         let volumeIsSame = hasWorkingSets && abs(volumeDelta) < tol
 
-        // Calculate "reps to go" or "reps ahead" hint for volume
+        // Calculate volume hint — how many reps to beat or exceed total volume
         let volumeHint: String? = {
             guard hasWorkingSets else { return nil }
+            if abs(volumeDelta) < tol {
+                return "Total volume matched"
+            }
             if let weight = cachedLastSetWeight, weight > 0 {
                 let displayWeight = themeManager.displayWeight(weight)
                 if volumeDelta > tol {
                     let repsOver = Int(volumeDelta / displayWeight)
                     if repsOver > 0 {
-                        return "\(repsOver) \(repsOver == 1 ? "rep" : "reps") ahead"
+                        return "\(repsOver) \(repsOver == 1 ? "rep" : "reps") over total volume"
                     }
                 } else if volumeDelta < -tol {
                     let repsNeeded = Int(abs(volumeDelta) / displayWeight) + 1
-                    return "\(repsNeeded) to beat"
+                    return "\(repsNeeded) \(repsNeeded == 1 ? "rep" : "reps") to beat total volume"
                 }
             }
             return nil

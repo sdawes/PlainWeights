@@ -2,17 +2,30 @@
 //  VerticalBarComparison.swift
 //  PlainWeights
 //
-//  Horizontal gauge bars comparing reference, last set, and session best values.
-//  Each metric column shows thin horizontal bars stacked under its reference value:
-//  grey = reference, colored = last set, dashed green = session best today.
-//  Bars, deltas, and hints are laid out in aligned rows.
+//  The gauge section of the Session Comparison Card. Sits below the reference
+//  metrics (Max Weight, Reps, Total Volume) and shows horizontal gauge bars
+//  comparing the user's current session against those reference values.
+//
+//  Layout (top to bottom):
+//    ┌─────────────────────────────────────────────┐
+//    │  Gauges Row — one gauge bar per metric       │
+//    │  Deltas Row — +/- change values per metric   │
+//    │  ─────────────────────────────────────────── │
+//    │  Footer Hint — e.g. "12 reps to beat volume" │
+//    └─────────────────────────────────────────────┘
+//
+//  Each gauge bar shows:
+//    - Grey track = reference value (what they did last time / best ever)
+//    - Colored fill = last set progress (green if up, red if down, grey if same)
+//    - Green shading = session best that exceeds the last set
 //
 
 import SwiftUI
 
-// MARK: - Data Model
+// MARK: - Gauge Column Data
 
-/// Data for a single metric column (e.g. Weight, Reps, or Volume)
+/// Data for a single metric column (e.g. Weight, Reps, or Volume).
+/// Built by ComparisonMetricsCard from cached session data.
 struct BarColumnData: Equatable {
     let label: String
     let referenceValue: Double
@@ -26,77 +39,81 @@ struct BarColumnData: Equatable {
     var volumeHint: String?
 }
 
-// MARK: - Vertical Bar Comparison
+// MARK: - Session Comparison Gauges
 
-/// Horizontal gauge bars under each reference value, with aligned delta and hint rows
+/// Horizontal gauge bars with aligned delta and footer hint rows
 struct VerticalBarComparison: View {
     @Environment(ThemeManager.self) private var themeManager
     let columns: [BarColumnData]
 
     private let barHeight: CGFloat = 8
-    private let bookendOverhang: CGFloat = 4
 
-    // Whether any column has a last set to show deltas for
+    /// Whether any column has a last set value (determines if deltas row shows)
     private var hasAnyLastSet: Bool {
         columns.contains { $0.lastSetValue != nil }
     }
 
-    // Whether any column has a volume hint
+    /// Whether any column has a footer hint (e.g. "12 reps to beat total volume")
     private var hasAnyHint: Bool {
         columns.contains { $0.volumeHint != nil }
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Horizontal bars under each metric column
-            barsRow
+            // Gauges — one horizontal bar per metric, aligned under reference values above
+            gaugesRow
                 .padding(.top, 8)
-                .padding(.bottom, 4)
+                .padding(.bottom, hasAnyLastSet ? 4 : 16)
 
-            // Delta values row
+            // Deltas — the +/- change value for each metric (e.g. "-5", "+2", "-275")
             if hasAnyLastSet {
                 deltasRow
+                    .padding(.bottom, hasAnyHint ? 0 : 12)
             }
 
-            // Hints row as footer (e.g. "12 to beat")
+            // Footer hint — e.g. "12 reps to beat total volume"
             if hasAnyHint {
-                hintsRow
-                    .padding(.top, 4)
-                    .padding(.bottom, 8)
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(height: 1)
+                    .padding(.top, 8)
+
+                footerHintRow
+                    .padding(.top, 9)
+                    .padding(.bottom, 11)
             }
         }
     }
 
-    // MARK: - Bars Row (gauge bars under each column)
+    // MARK: - Gauges Row
 
-    private var barsRow: some View {
+    /// One gauge bar per metric, left-aligned under its reference value
+    private var gaugesRow: some View {
         HStack(alignment: .top, spacing: 0) {
             ForEach(columns.indices, id: \.self) { index in
-                gaugeStack(for: columns[index])
+                gaugeBar(for: columns[index])
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
 
-    /// Single gauge bar per metric.
-    /// Grey track = reference. Colored fill = last set progress.
-    /// If session best exceeds last set, green fill from last-set bookend to bar end + green bookend.
+    /// A single gauge bar: grey track (reference), colored fill (last set),
+    /// and optional green shading (session best exceeding last set)
     @ViewBuilder
-    private func gaugeStack(for data: BarColumnData) -> some View {
+    private func gaugeBar(for data: BarColumnData) -> some View {
         let maxVal = maxValue(for: data)
 
         GeometryReader { geometry in
             let totalWidth = geometry.size.width
-            let bookendHeight = barHeight + (bookendOverhang * 2)
 
             ZStack(alignment: .leading) {
-                // Grey track (always full width)
+                // Grey track — represents the reference value (always full width)
                 RoundedRectangle(cornerRadius: 4)
                     .fill(themeManager.effectiveTheme.muted)
                     .frame(width: totalWidth, height: barHeight)
 
-                // Colored fill + bookend — only when a set has been added
+                // Colored fill — shows where the last set sits relative to reference
                 if let lastValue = data.lastSetValue {
                     let fillRatio = max(lastValue / maxVal, 0.02)
                     let fillWidth = CGFloat(fillRatio) * totalWidth
@@ -104,108 +121,91 @@ struct VerticalBarComparison: View {
                     let barColor: Color = data.isSame ? .gray.opacity(0.6)
                         : data.isUp ? .green : .red
 
-                    // Last set fill (squared right edge so bookend sits flush)
-                    UnevenRoundedRectangle(topLeadingRadius: 4, bottomLeadingRadius: 4, bottomTrailingRadius: 0, topTrailingRadius: 0)
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(barColor)
                         .frame(width: fillWidth, height: barHeight)
 
-                    // Last set bookend
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(barColor)
-                        .frame(width: 2, height: bookendHeight)
-                        .offset(x: fillWidth - 1)
-
-                    // Session best: green shading from last-set bookend to best value + green bookend
+                    // Session best shading — green fill between last set and session best
+                    // Shows that an earlier set exceeded the current one
                     if data.showSessionBest,
                        let bestValue = data.sessionBestValue,
                        bestValue > lastValue {
                         let bestRatio = max(bestValue / maxVal, 0.02)
                         let bestWidth = CGFloat(bestRatio) * totalWidth
-                        let greenStart = fillWidth
                         let greenWidth = bestWidth - fillWidth
 
-                        // Green fill between last set and session best
-                        RoundedRectangle(cornerRadius: 0)
-                            .fill(Color.green.opacity(0.2))
+                        UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: 4, topTrailingRadius: 4)
+                            .fill(Color.green.opacity(0.4))
                             .frame(width: greenWidth, height: barHeight)
-                            .offset(x: greenStart)
-
-                        // Green bookend at the session best position
-                        RoundedRectangle(cornerRadius: 1)
-                            .fill(Color.green)
-                            .frame(width: 2, height: bookendHeight)
-                            .offset(x: bestWidth - 1)
+                            .offset(x: fillWidth)
                     }
                 }
             }
         }
-        .frame(height: barHeight + (bookendOverhang * 2))
+        .frame(height: barHeight)
     }
 
     // MARK: - Deltas Row
 
+    /// The +/- change values, one per metric column, aligned under their gauge bars
     private var deltasRow: some View {
         HStack(spacing: 0) {
             ForEach(columns.indices, id: \.self) { index in
-                deltaView(for: columns[index])
+                deltaLabel(for: columns[index])
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
 
+    /// A single delta label: "+5", "-2", "+0" (grey when same)
     @ViewBuilder
-    private func deltaView(for data: BarColumnData) -> some View {
+    private func deltaLabel(for data: BarColumnData) -> some View {
         if data.lastSetValue != nil {
             if data.isSame {
-                Text("0")
-                    .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .semibold))
+                Text("+0")
+                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             } else {
                 let prefix = data.isUp ? "+" : ""
                 Text("\(prefix)\(formatValue(data.delta, asWeight: data.formatAsWeight))")
-                    .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .semibold))
+                    .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
                     .foregroundStyle(data.isUp ? .green : .red)
             }
         } else {
+            // Invisible spacer to maintain alignment when no sets added
             Text(" ")
-                .font(themeManager.effectiveTheme.dataFont(size: 15, weight: .semibold))
+                .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
         }
     }
 
-    // MARK: - Hints Row
+    // MARK: - Footer Hint Row
 
-    private var hintsRow: some View {
-        HStack(spacing: 0) {
-            ForEach(columns.indices, id: \.self) { index in
-                Group {
-                    if let hint = columns[index].volumeHint {
-                        let data = columns[index]
-                        Text(hint)
-                            .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
-                            .foregroundStyle(data.isUp ? .green : .red)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                    } else {
-                        Text(" ")
-                            .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
-                    }
-                }
-                .padding(.horizontal, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
+    /// Contextual hint about total volume progress, e.g. "12 reps to beat total volume"
+    /// Left-aligned, spans the full card width. Only shown when relevant.
+    private var footerHintRow: some View {
+        Group {
+            if let hintColumn = columns.first(where: { $0.volumeHint != nil }) {
+                Text(hintColumn.volumeHint ?? "")
+                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .regular))
+                    .foregroundStyle(hintColumn.isUp || hintColumn.isSame ? .green : .red)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
         }
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
-
-    // MARK: - Legend Row
 
     // MARK: - Helpers
 
+    /// The highest value across all bars in a column, used to scale gauge widths
     private func maxValue(for data: BarColumnData) -> Double {
         let values: [Double] = [data.referenceValue, data.sessionBestValue ?? 0, data.lastSetValue ?? 0]
         return max(values.max() ?? 1, 1)
     }
 
+    /// Format a delta value for display — uses weight formatter or integer formatting
     private func formatValue(_ value: Double, asWeight: Bool) -> String {
         if asWeight {
             return Formatters.formatWeight(value)
@@ -217,4 +217,3 @@ struct VerticalBarComparison: View {
         }
     }
 }
-

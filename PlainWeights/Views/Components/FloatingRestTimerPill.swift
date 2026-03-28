@@ -15,10 +15,6 @@ struct FloatingRestTimerPill: View {
     @Environment(ThemeManager.self) private var themeManager
     @State private var hasExpired = false
 
-    private var isDark: Bool {
-        themeManager.effectiveTheme == .dark
-    }
-
     var body: some View {
         TimelineView(.periodic(from: set.timestamp, by: 1.0)) { context in
             let elapsed = context.date.timeIntervalSince(set.timestamp)
@@ -41,13 +37,12 @@ struct FloatingRestTimerPill: View {
                             .foregroundStyle(timerColor(for: elapsed))
                         Text("tap to stop")
                             .font(themeManager.effectiveTheme.captionFont)
-                            .foregroundStyle(isDark ? .black.opacity(0.35) : .white.opacity(0.35))
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.horizontal, 28)
                     .padding(.vertical, 14)
-                    .background(isDark ? Color(white: 0.93) : Color.black)
-                    .clipShape(Capsule())
-                    .shadow(color: .black.opacity(0.25), radius: 8, x: 0, y: 4)
+                    .glassEffect(.regular.interactive(), in: .capsule)
+                    .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
                 }
                 .buttonStyle(.plain)
             }
@@ -56,11 +51,11 @@ struct FloatingRestTimerPill: View {
 
     private func timerColor(for elapsed: TimeInterval) -> Color {
         if elapsed < 60 {
-            return isDark ? .black : .white
+            return .primary
         } else if elapsed < 120 {
-            return isDark ? Color(red: 0.92, green: 0.45, blue: 0.18) : .orange
+            return .orange
         } else {
-            return isDark ? Color(red: 0.85, green: 0.20, blue: 0.20) : .red
+            return .red
         }
     }
 }

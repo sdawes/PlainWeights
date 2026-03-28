@@ -271,14 +271,9 @@ struct HistoryView: View {
                 let hasMoreDays = cachedPeriodDays.count > visiblePeriodDaysCount
                 let remainingCount = cachedPeriodDays.count - visiblePeriodDaysCount
 
-                // Exercises label (once, above all days)
+                // Exercises label with info button (once, above all days)
                 Section {
-                    Text("Exercises")
-                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        .padding(.top, 16)
-                        .padding(.bottom, 4)
-                        .padding(.leading, 8)
+                    exercisesHeader
                 }
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)

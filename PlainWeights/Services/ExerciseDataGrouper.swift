@@ -148,11 +148,11 @@ enum ExerciseDataGrouper {
                 }
             }
 
-            // Sort exercises: most recent set first, then alphabetically
+            // Sort exercises: earliest performed first, then alphabetically
             exercises.sort { a, b in
-                let aTime = a.sets.first?.timestamp ?? .distantPast
-                let bTime = b.sets.first?.timestamp ?? .distantPast
-                if aTime != bTime { return aTime > bTime }
+                let aTime = a.sets.last?.timestamp ?? .distantPast
+                let bTime = b.sets.last?.timestamp ?? .distantPast
+                if aTime != bTime { return aTime < bTime }
                 return a.exercise.name.localizedCaseInsensitiveCompare(b.exercise.name) == .orderedAscending
             }
 

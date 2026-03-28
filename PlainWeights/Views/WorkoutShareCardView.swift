@@ -251,8 +251,8 @@ struct WorkoutShareCardView: View {
                 .strokeBorder(theme.borderColor, lineWidth: 1)
         )
 
-        // Socials banner image below the card
-        Image("socials")
+        // Socials banner image below the card (light/dark variant)
+        Image(theme == .dark ? "socials_dark" : "socials")
             .resizable()
             .aspectRatio(contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: 12))

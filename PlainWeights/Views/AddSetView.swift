@@ -86,7 +86,7 @@ struct SetTypePillSelector: View {
             }
         } label: {
             HStack(spacing: 8) {
-                Image(systemName: "note.text")
+                Image(systemName: "pencil.line")
                     .font(.system(size: 14))
                     .frame(width: 20)
                 Text("Notes")
@@ -210,7 +210,7 @@ struct AddSetView: View {
                 Group {
                     if setToEdit != nil {
                         Text("Edit Set")
-                            .foregroundStyle(Color(red: 0.85, green: 0.25, blue: 0.45))
+                            .foregroundStyle(Color(red: 1.0, green: 0.2, blue: 0.55))
                         + Text(" - \(exercise.name)")
                     } else {
                         Text("Add Set - \(exercise.name)")

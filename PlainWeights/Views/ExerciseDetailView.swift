@@ -463,7 +463,7 @@ struct ExerciseDetailView: View {
                     .font(.title2)
                     .foregroundStyle(themeManager.effectiveTheme.background)
             }
-            .frame(width: 50, height: 50)
+            .frame(width: 52, height: 52)
             .background(themeManager.effectiveTheme.primary)
             .clipShape(Circle())
             .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)

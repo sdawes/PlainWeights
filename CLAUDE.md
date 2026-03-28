@@ -144,10 +144,11 @@ PlainWeights/
 │   ├── HelpView.swift             # Help/about screen
 │   ├── SetRowView.swift           # Individual set display row
 │   ├── TodaySetsSectionView.swift # Today's sets section
-│   └── Components/               # 20 reusable components (see Components section)
+│   └── Components/               # Reusable components (see Components section)
 ├── Services/                      # Business logic (enums with static methods)
 │   ├── ExerciseSetService.swift   # Core set CRUD, PB detection, rest time
 │   ├── ExerciseService.swift      # Tag distribution, duplicate checks
+│   ├── CSVExportService.swift     # CSV data export
 │   ├── BestSessionCalculator.swift
 │   ├── LastSessionCalculator.swift
 │   ├── TodaySessionCalculator.swift
@@ -430,7 +431,19 @@ TextField("0", text: $text)
 - Border radius: 12pt
 - Focus indicator: 2pt border
 
-### Search Bar
+### Search Bar with Scopes
+
+The exercise list search supports two scopes: **Name** and **Tags**. The scope picker appears when the user starts typing (`.onTextEntry` activation — `.onSearchPresentation` has a SwiftUI bug where scopes disappear after first dismiss).
+
+```swift
+.searchable(text: $searchText, prompt: "Search exercises")
+.searchScopes($searchScope, activation: .onTextEntry) {
+    Text("Name").tag(ExerciseSearchScope.name)
+    Text("Tags").tag(ExerciseSearchScope.tags)
+}
+```
+
+When searching by tags, matching tag pills get highlighted with an orange border via `TagPillsRow(highlightText:)`.
 
 ```swift
 // Only show when data exists
@@ -823,6 +836,37 @@ chartColor4: Color(red: 0.95, green: 0.85, blue: 0.55)  // Pastel yellow (total 
 pbColor: Color(red: 0.980, green: 0.675, blue: 0.020)   // Gold #faac05
 ```
 
+### Session Comparison Card (VerticalBarComparison)
+
+The session comparison card shows how the current workout compares to a reference (Last Session or All-Time Best). It has three sections:
+
+**Layout:**
+```
+┌─────────────────────────────────────────────┐
+│  Card Header — mode icon, title, date, unit  │
+│  ─────────────────────────────────────────── │
+│  Reference Metrics — Max Weight, Reps, Vol   │
+│  Gauges — horizontal bars per metric          │
+│  Deltas — +/- change values                  │
+│  ─────────────────────────────────────────── │
+│  Footer Hint — "12 reps to beat total volume" │
+└─────────────────────────────────────────────┘
+```
+
+**Gauge bars:**
+- Grey track = reference value (full width)
+- Coloured fill = last set (green if up, red if down, grey if same)
+- Green shading = session best that exceeds the last set (drawn first, fill overlaps it)
+- Session best bar only shows when 2+ working sets and best differs from last set
+- Volume column shows session total vs reference (no session best bar)
+
+**Delta display rules:**
+- `+0` in grey when set equals reference (not `—` or `0`)
+- Reps delta checks if ANY set beat the reference reps (not just reps at max weight)
+- Footer hint shows "X reps to beat total volume" or "X reps over total volume" or "Total volume matched"
+
+**Key files:** `VerticalBarComparison.swift`, `ComparisonMetricsCard.swift`
+
 ### SwiftUI API Preferences
 **Always use `foregroundStyle()` instead of `foregroundColor()`** - the latter is deprecated.
 
@@ -1175,6 +1219,14 @@ When creating UI elements that may be reused (buttons, inputs, etc.), create the
 - `TodaySessionCard.swift` - Today's session summary card
 - `HistoricDayHeader.swift` - Historic day header for history view
 
+**Session Comparison:**
+- `VerticalBarComparison.swift` - Horizontal gauge bars comparing reference vs last set vs session best
+- `ComparisonMetricsCard.swift` - Session comparison card (Last Session / All-Time Best)
+
+**UI Controls:**
+- `ChevronDisclosureButton.swift` - Styled expand/collapse chevron (orange circle, white chevron)
+- `FloatingRestTimerPill.swift` - Floating rest timer countdown pill
+
 ### iCloud Sync (CloudKit)
 
 The app uses SwiftData with automatic CloudKit sync. User data is backed up to their iCloud account and restored automatically on reinstall or new device.
@@ -1200,13 +1252,26 @@ The app uses SwiftData with automatic CloudKit sync. User data is backed up to t
 1. Must test on real device (Simulator is unreliable)
 2. Check CloudKit Dashboard: https://icloud.developer.apple.com/dashboard
 3. Look in `com.apple.coredata.cloudkit.zone` for records
-4. Sync can take 30 seconds to several minutes
+4. Initial sync after fresh install takes 2-5 minutes for large datasets — this is normal
+5. The app shows an iCloud sync hint on the empty exercise list to inform users
 
-**Schema Changes After Release:**
-Once deployed to Production, follow "Add-Only, No-Delete, No-Change" principle:
-- Can add new properties/entities
-- Cannot delete or rename existing properties
-- Cannot change property types
+**Production Schema Status:**
+- ⚠️ **Schema has been deployed to Production** (as of March 2026)
+- Record types `CD_Exercise` and `CD_ExerciseSet` are now immutable in Production
+- **CRITICAL: You CANNOT delete, rename, or change the type of any existing field**
+- You CAN add new properties (with defaults) and new entities
+- If a field needs changing, add a new field and deprecate the old one with a comment
+- Any model changes that add new properties will auto-deploy to Development on first run
+- New properties must be re-deployed to Production via CloudKit Dashboard before App Store submission
+
+**Schema Changes After Release — "Add-Only, No-Delete, No-Change":**
+- ✅ Can add new properties (must have default values)
+- ✅ Can add new @Model entities
+- ❌ Cannot delete existing properties (keep with `DEPRECATED` comment)
+- ❌ Cannot rename existing properties
+- ❌ Cannot change property types (e.g. String → Int)
+- ❌ Cannot add `@Attribute(.unique)` retroactively
+- ❌ Cannot change relationship delete rules
 
 ---
 
@@ -1216,9 +1281,11 @@ Once deployed to Production, follow "Add-Only, No-Delete, No-Change" principle:
 
 ### CloudKit Schema Deployment
 1. Go to [CloudKit Dashboard](https://icloud.developer.apple.com/dashboard)
-2. Select container `iCloud.com.stevolution.PlainWeights`
-3. Click **Deploy Schema Changes** to push Development schema to Production
-4. Verify schema deployed successfully
+2. Click **CloudKit Database**
+3. Select container `iCloud.com.stevolution.PlainWeights`
+4. If any model changes were made, click **Deploy Schema Changes** at the bottom left
+5. Review the changes and click **Deploy**
+6. Switch environment dropdown to **Production** and verify record types appear
 
 ### App Store Connect
 - [ ] App screenshots for all device sizes
@@ -1229,9 +1296,13 @@ Once deployed to Production, follow "Add-Only, No-Delete, No-Change" principle:
 
 ### Testing
 - [ ] Test on multiple real devices
-- [ ] Test CloudKit sync (delete app, reinstall, verify data restores)
+- [ ] Test CloudKit sync (delete app, reinstall, verify data restores — allow 2-5 mins)
 - [ ] Test both light and dark themes
 - [ ] Test with large datasets (performance)
+- [ ] Test search scopes (Name and Tags) — verify scopes reappear after dismissing search
+- [ ] Test session comparison card with various scenarios (under/over/same/session best)
+- [ ] Test reps-only (bodyweight) exercises
+- [ ] Test kg/lbs unit switching
 
 ---
 

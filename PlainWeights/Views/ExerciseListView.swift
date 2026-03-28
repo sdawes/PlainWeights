@@ -213,33 +213,35 @@ struct FilteredExerciseListView: View {
         List {
             // Exercises section
             if exercises.isEmpty && searchText.isEmpty {
-                // Empty state — hint to add exercises + iCloud sync note
+                // Empty state — hint to add exercises
                 Section {
-                    VStack(spacing: 16) {
-                        HStack {
-                            Text("Tap + to add your first exercise")
-                                .font(themeManager.effectiveTheme.bodyFont)
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    HStack {
+                        Text("Tap + to add your first exercise")
+                            .font(themeManager.effectiveTheme.bodyFont)
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
-                            Spacer()
+                        Spacer()
 
-                            // Arrow pointing right-then-down toward FAB
-                            Image(systemName: "arrow.turn.right.down")
-                                .font(.title3)
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                                .padding(.trailing, 5)
-                        }
-
-                        // iCloud sync hint
-                        HStack(spacing: 6) {
-                            Image(systemName: "icloud.and.arrow.down")
-                                .font(.system(size: 12))
-                            Text("If you have existing data, iCloud sync may take a few minutes")
-                                .font(themeManager.effectiveTheme.captionFont)
-                        }
-                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                        Image(systemName: "arrow.turn.right.down")
+                            .font(.title3)
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                            .padding(.trailing, 5)
                     }
                     .padding(.vertical, 12)
+                    .padding(.horizontal, 8)
+                    .listRowBackground(Color.clear)
+                }
+                .listRowSeparator(.hidden)
+
+                // iCloud sync hint — separate row, left-aligned under the hint above
+                Section {
+                    HStack(spacing: 6) {
+                        Image(systemName: "icloud.and.arrow.down")
+                            .font(.system(size: 12))
+                        Text("If you have existing data, iCloud sync may take a few minutes")
+                            .font(themeManager.effectiveTheme.captionFont)
+                    }
+                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     .padding(.horizontal, 8)
                     .listRowBackground(Color.clear)
                 }

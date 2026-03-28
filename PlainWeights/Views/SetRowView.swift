@@ -271,17 +271,20 @@ struct SetRowView: View {
     @ViewBuilder
     private var restTimeView: some View {
         if let restSeconds = set.restSeconds {
+            // Timer has been captured — show the static rest time
             staticRestTimeView(seconds: restSeconds)
-        } else if showTimer && !hasExceededRestTime {
+        } else if showTimer && hasExceededRestTime {
+            // Timer expired — capture and show static 3:00
+            staticRestTimeView(seconds: 180)
+                .onAppear {
+                    captureRestTimeExpiry()
+                }
+        } else if showTimer {
+            // Timer is active — live timer ticking at standard row size
             liveTimerView
                 .contentShape(Rectangle())
                 .onTapGesture {
                     captureRestTimeManually()
-                }
-        } else if showTimer && hasExceededRestTime {
-            staticRestTimeView(seconds: 180)
-                .onAppear {
-                    captureRestTimeExpiry()
                 }
         } else if isLastSetInDay {
             // Last set in a historic day with no captured rest time - show 3:00
@@ -297,7 +300,7 @@ struct SetRowView: View {
     private func staticRestTimeView(seconds: Int) -> some View {
         let color = isToday ? restTimeColor(for: seconds) : themeManager.effectiveTheme.tertiaryText
         HStack(spacing: 4) {
-            Image(systemName: "timer")
+            Image(systemName: "moon.zzz")
                 .font(.caption)
                 .foregroundStyle(color)
             Text(Formatters.formatDuration(Double(seconds)))
@@ -326,10 +329,10 @@ struct SetRowView: View {
             } else {
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.caption)
                         .foregroundStyle(restTimeColor(for: Int(elapsed)))
                     Text(Formatters.formatDuration(elapsed))
-                        .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .bold))
+                        .font(themeManager.effectiveTheme.dataFont(size: 12))
                         .foregroundStyle(restTimeColor(for: Int(elapsed)))
                 }
             }

@@ -88,10 +88,12 @@ enum ExerciseDeltaCalculator {
             }
 
             // Determine direction for each metric
+            // For reps, check if ANY set in the session beat the reference reps (not just reps at max weight)
+            let currentHighestReps = workingSets.map(\.reps).max() ?? 0
             let weightDir: DeltaDirection = currentMaxWeight > prevMaxWeight ? .up
                 : currentMaxWeight < prevMaxWeight ? .down : .same
-            let repsDir: DeltaDirection = currentMaxReps > prevMaxReps ? .up
-                : currentMaxReps < prevMaxReps ? .down : .same
+            let repsDir: DeltaDirection = currentHighestReps > prevMaxReps ? .up
+                : currentHighestReps < prevMaxReps ? .down : .same
             let volumeDir: DeltaDirection = currentVolume > prevVolume ? .up
                 : currentVolume < prevVolume ? .down : .same
 

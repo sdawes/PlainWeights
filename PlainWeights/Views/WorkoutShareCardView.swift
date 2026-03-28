@@ -226,19 +226,19 @@ struct WorkoutShareCardView: View {
                 sectionLabel("Exercise Improvements")
 
                 HStack(spacing: 0) {
-                    deltaStat(value: deltas.weightUp, total: deltas.total, label: "Heavier")
+                    deltaStat(value: deltas.weightUp, total: deltas.total, label: "Lifted More")
 
                     Rectangle()
                         .fill(theme.borderColor)
                         .frame(width: 1, height: 44)
 
-                    deltaStat(value: deltas.repsUp, total: deltas.total, label: "More Reps")
+                    deltaStat(value: deltas.repsUp, total: deltas.total, label: "Did More Reps")
 
                     Rectangle()
                         .fill(theme.borderColor)
                         .frame(width: 1, height: 44)
 
-                    deltaStat(value: deltas.volumeUp, total: deltas.total, label: "More Volume")
+                    deltaStat(value: deltas.volumeUp, total: deltas.total, label: "Total Volume Beat")
                 }
                 .padding(.bottom, 16)
 

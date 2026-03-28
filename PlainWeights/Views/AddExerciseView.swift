@@ -207,7 +207,7 @@ struct AddExerciseView: View {
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("**Primary muscles** the main muscles worked (e.g. chest). Weighted more in the tag breakdown.")
+                Text("**Primary muscles** the main muscles worked (e.g. chest). Weighted more in the muscle breakdown.")
                     .font(themeManager.effectiveTheme.interFont(size: 13))
                     .foregroundStyle(themeManager.effectiveTheme.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -217,13 +217,14 @@ struct AddExerciseView: View {
                     .foregroundStyle(themeManager.effectiveTheme.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("History shows your training split by tag.")
+                Text("History shows your training split by muscle.")
                     .font(themeManager.effectiveTheme.interFont(size: 13))
                     .foregroundStyle(themeManager.effectiveTheme.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(16)
+        .padding(20)
+        .frame(width: 300)
         .presentationCompactAdaptation(.popover)
     }
 

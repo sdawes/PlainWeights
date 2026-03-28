@@ -387,6 +387,15 @@ struct HistoryView: View {
                     .frame(width: 1)
                 pbMetricCell(pbCount: cachedPeriodMetrics.pbCount)
             }
+
+            // Workout frequency bar — shows workout days as % of available days
+            if selectedPeriod != .lastSession {
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.borderColor)
+                    .frame(height: 1)
+
+                workoutFrequencyBar
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
@@ -398,6 +407,50 @@ struct HistoryView: View {
     }
 
     /// Description of the current time period
+    /// Total days in the selected period
+    private var totalDaysInPeriod: Int {
+        switch selectedPeriod {
+        case .lastSession: return 1
+        case .week: return 7
+        case .month: return 30
+        case .year: return 365
+        }
+    }
+
+    /// Progress bar showing workout days as a percentage of the period
+    private var workoutFrequencyBar: some View {
+        let days = cachedPeriodMetrics.dayCount
+        let total = totalDaysInPeriod
+        let percentage = min(Double(days) / Double(total), 1.0)
+
+        return VStack(spacing: 6) {
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(themeManager.effectiveTheme.muted)
+                        .frame(height: 6)
+
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(themeManager.effectiveTheme.chartColor1)
+                        .frame(width: CGFloat(percentage) * geometry.size.width, height: 6)
+                }
+            }
+            .frame(height: 6)
+
+            HStack {
+                Text("\(days) of \(total) days")
+                    .font(themeManager.effectiveTheme.interFont(size: 11))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                Spacer()
+                Text("\(Int(percentage * 100))%")
+                    .font(themeManager.effectiveTheme.dataFont(size: 11, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
     private var periodDescription: String {
         switch selectedPeriod {
         case .lastSession:
@@ -664,8 +717,8 @@ struct HistoryView: View {
                 Button {
                     showingShareCard = true
                 } label: {
-                    Image(systemName: "photo.on.rectangle")
-                        .font(.system(size: 18, weight: .medium))
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(.blue)
                 }
                 .buttonStyle(.plain)

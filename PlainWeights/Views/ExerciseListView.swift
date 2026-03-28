@@ -233,6 +233,17 @@ struct FilteredExerciseListView: View {
                     .listRowBackground(Color.clear)
                 }
                 .listRowSeparator(.hidden)
+            } else if cachedSortedExercises.isEmpty && !searchText.isEmpty {
+                // No results for search query
+                Section {
+                    Text("No exercises found")
+                        .font(themeManager.effectiveTheme.bodyFont)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
+                        .listRowBackground(Color.clear)
+                }
+                .listRowSeparator(.hidden)
             } else {
                 Section {
                     ForEach(cachedSortedExercises.enumerated(), id: \.element.persistentModelID) { index, exercise in

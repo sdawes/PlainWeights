@@ -41,8 +41,11 @@ struct InlineNotesComponent: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
         )
-        .onChange(of: noteText) { _, _ in
-            // Cancel previous pending save and start a new debounce timer
+        .onChange(of: noteText) { _, newValue in
+            // Limit note length to 500 characters
+            if newValue.count > 500 { noteText = String(newValue.prefix(500)) }
+
+            // Debounce save — cancel previous and start new timer
             saveTask?.cancel()
             saveTask = Task {
                 try? await Task.sleep(for: .milliseconds(500))

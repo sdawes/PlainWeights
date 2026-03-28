@@ -121,6 +121,7 @@ struct HistoryView: View {
         .background(AnimatedGradientBackground())
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackgroundVisibility(.visible, for: .navigationBar)
         .onAppear {
             showTagBreakdown = themeManager.tagBreakdownVisible
             updateCaches()

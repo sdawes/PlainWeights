@@ -83,6 +83,7 @@ struct WorkoutShareCardView: View {
         .scrollIndicators(.hidden)
         .background(theme.background)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackgroundVisibility(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if let shareImage {
@@ -121,7 +122,7 @@ struct WorkoutShareCardView: View {
             // Brand + date + logo header
             HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Check out how I track my gym weights!")
+                    Text("Every rep counts. Start tracking yours.")
                         .font(theme.interFont(size: 17, weight: .bold))
                         .foregroundStyle(theme.primaryText)
                     HStack(spacing: 0) {

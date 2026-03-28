@@ -304,16 +304,17 @@ struct FilteredExerciseListView: View {
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackgroundVisibility(.visible, for: .navigationBar)
         .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
             Button(action: { showingAddExercise = true }) {
                 Image(systemName: "plus")
                     .font(.title2)
-                    .foregroundStyle(themeManager.effectiveTheme.background)
+                    .foregroundStyle(.primary)
+                    .frame(width: 50, height: 50)
+                    .glassEffect(.regular.interactive(), in: .circle)
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
             }
-            .frame(width: 50, height: 50)
-            .background(themeManager.effectiveTheme.primary)
-            .clipShape(Circle())
-            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+            .buttonStyle(.plain)
             .accessibilityLabel("Add exercise")
             .padding(.trailing, 20)
             .padding(.bottom, 8)

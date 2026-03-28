@@ -53,7 +53,7 @@ struct VerticalBarComparison: View {
         columns.contains { $0.lastSetValue != nil }
     }
 
-    /// Whether any column has a footer hint (e.g. "12 reps to beat total volume")
+    /// Whether the footer hint row should be shown
     private var hasAnyHint: Bool {
         columns.contains { $0.volumeHint != nil }
     }
@@ -114,7 +114,7 @@ struct VerticalBarComparison: View {
                     .fill(themeManager.effectiveTheme.muted)
                     .frame(width: totalWidth, height: barHeight)
 
-                // Colored fill — shows where the last set sits relative to reference
+                // Colored fill + session best shading
                 if let lastValue = data.lastSetValue {
                     let fillRatio = max(lastValue / maxVal, 0.02)
                     let fillWidth = CGFloat(fillRatio) * totalWidth
@@ -122,23 +122,28 @@ struct VerticalBarComparison: View {
                     let barColor: Color = data.isSame ? .gray.opacity(0.6)
                         : data.isUp ? .green : .red
 
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(barColor)
-                        .frame(width: fillWidth, height: barHeight)
-
-                    // Session best shading — green fill between last set and session best
+                    // Session best shading — drawn FIRST so the colored fill overlaps it
+                    // Only show when last set is under the reference (not when same/equal)
                     if data.showSessionBest,
+                       !data.isSame,
                        let bestValue = data.sessionBestValue,
                        bestValue > lastValue {
                         let bestRatio = max(bestValue / maxVal, 0.02)
                         let bestWidth = CGFloat(bestRatio) * totalWidth
-                        let greenWidth = bestWidth - fillWidth
+                        // Overlap under the colored fill by 4px to eliminate gap
+                        let overlap: CGFloat = 4
+                        let greenWidth = bestWidth - fillWidth + overlap
 
                         UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: 4, topTrailingRadius: 4)
                             .fill(Color.green.opacity(0.4))
                             .frame(width: greenWidth, height: barHeight)
-                            .offset(x: fillWidth)
+                            .offset(x: fillWidth - overlap)
                     }
+
+                    // Colored fill — drawn AFTER green so it renders on top
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(barColor)
+                        .frame(width: fillWidth, height: barHeight)
                 }
             }
         }
@@ -180,13 +185,12 @@ struct VerticalBarComparison: View {
 
     // MARK: - Footer Hint Row
 
-    /// Contextual hint about total volume progress, e.g. "12 reps to beat total volume"
-    /// Left-aligned, spans the full card width. Only shown when relevant.
+    /// Footer row showing volume progress hint (e.g. "12 reps to beat total volume")
     private var footerHintRow: some View {
         Group {
             if let hintColumn = columns.first(where: { $0.volumeHint != nil }) {
                 Text(hintColumn.volumeHint ?? "")
-                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .regular))
+                    .font(themeManager.effectiveTheme.interFont(size: 13, weight: .regular))
                     .foregroundStyle(hintColumn.isUp || hintColumn.isSame ? .green : .red)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)

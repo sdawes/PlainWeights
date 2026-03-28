@@ -11,6 +11,7 @@ struct TagPillView: View {
     @Environment(ThemeManager.self) private var themeManager
     let tag: String
     var isSecondary: Bool = false
+    var isHighlighted: Bool = false
     var onRemove: (() -> Void)?
 
     // Truncate very long tags and ensure lowercase
@@ -55,15 +56,23 @@ struct TagPillView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(pillBackground)
+        .background(isHighlighted ? themeManager.effectiveTheme.chartColor1.opacity(0.2) : pillBackground)
         .clipShape(RoundedRectangle(cornerRadius: 4))
+        .overlay(
+            isHighlighted
+                ? RoundedRectangle(cornerRadius: 4)
+                    .strokeBorder(themeManager.effectiveTheme.chartColor1, lineWidth: 1.5)
+                : nil
+        )
     }
 }
 
 /// Display-only version without remove button (for lists)
+/// When highlightText is set, matching tags get a highlighted border
 struct TagPillsRow: View {
     let tags: [String]
     var secondaryTags: [String] = []
+    var highlightText: String = ""
 
     var body: some View {
         if tags.isEmpty && secondaryTags.isEmpty {
@@ -72,11 +81,18 @@ struct TagPillsRow: View {
             FlowLayout(spacing: 4) {
                 // Primary tags
                 ForEach(tags, id: \.self) { tag in
-                    TagPillView(tag: tag)
+                    TagPillView(
+                        tag: tag,
+                        isHighlighted: !highlightText.isEmpty && tag.localizedStandardContains(highlightText)
+                    )
                 }
                 // Secondary tags (grey styling)
                 ForEach(secondaryTags, id: \.self) { tag in
-                    TagPillView(tag: tag, isSecondary: true)
+                    TagPillView(
+                        tag: tag,
+                        isSecondary: true,
+                        isHighlighted: !highlightText.isEmpty && tag.localizedStandardContains(highlightText)
+                    )
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

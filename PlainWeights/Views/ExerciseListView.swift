@@ -13,11 +13,18 @@ enum HistoryDestination: Hashable {
     case history
 }
 
+// Search scope for filtering exercises by name or tags
+enum ExerciseSearchScope: String, CaseIterable {
+    case name = "Name"
+    case tags = "Tags"
+}
+
 struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allExercises: [Exercise]
     @State private var showingAddExercise = false
     @State private var searchText = ""
+    @State private var searchScope: ExerciseSearchScope = .name
     @State private var navigationPath = NavigationPath()
 
     var body: some View {
@@ -39,6 +46,7 @@ struct ExerciseListView: View {
     private var filteredListView: some View {
         let listView = FilteredExerciseListView(
             searchText: searchText,
+            searchScope: searchScope,
             showingAddExercise: $showingAddExercise,
             navigationPath: $navigationPath
         )
@@ -49,6 +57,10 @@ struct ExerciseListView: View {
         } else {
             listView
                 .searchable(text: $searchText, prompt: "Search exercises")
+                .searchScopes($searchScope, activation: .onSearchPresentation) {
+                    Text("Name").tag(ExerciseSearchScope.name)
+                    Text("Tags").tag(ExerciseSearchScope.tags)
+                }
         }
     }
 }
@@ -60,6 +72,7 @@ struct FilteredExerciseListView: View {
     @Binding var showingAddExercise: Bool
     @Binding var navigationPath: NavigationPath
     let searchText: String
+    let searchScope: ExerciseSearchScope
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
     @State private var exerciseToDelete: Exercise?
@@ -73,24 +86,16 @@ struct FilteredExerciseListView: View {
     /// Pre-sorted exercises to avoid expensive lastWorkoutDate lookups on every render
     @State private var cachedSortedExercises: [Exercise] = []
 
-    init(searchText: String, showingAddExercise: Binding<Bool>, navigationPath: Binding<NavigationPath>) {
+    init(searchText: String, searchScope: ExerciseSearchScope, showingAddExercise: Binding<Bool>, navigationPath: Binding<NavigationPath>) {
         self.searchText = searchText
+        self.searchScope = searchScope
         self._showingAddExercise = showingAddExercise
         self._navigationPath = navigationPath
 
-        // Query exercises directly with search filtering in predicate
-        if searchText.isEmpty {
-            _exercises = Query(
-                sort: [SortDescriptor(\.lastUpdated, order: .reverse)]
-            )
-        } else {
-            _exercises = Query(
-                filter: #Predicate<Exercise> { exercise in
-                    exercise.name.localizedStandardContains(searchText)
-                },
-                sort: [SortDescriptor(\.lastUpdated, order: .reverse)]
-            )
-        }
+        // Fetch all exercises — filtering by search text + scope happens in the sorted cache
+        _exercises = Query(
+            sort: [SortDescriptor(\.lastUpdated, order: .reverse)]
+        )
     }
 
     /// Check if exercise hasn't been done in over 2 weeks (orange)
@@ -142,9 +147,26 @@ struct FilteredExerciseListView: View {
         themeManager.currentTheme == .dark ? 0.15 : 0.05
     }
 
-    /// Rebuild the sorted exercises cache - call when exercises change
+    /// Rebuild the sorted exercises cache — filters by search text + scope, then sorts
     private func rebuildSortedExercisesCache() {
-        cachedSortedExercises = exercises.sorted { a, b in
+        // Filter by search text and scope
+        let filtered: [Exercise]
+        if searchText.isEmpty {
+            filtered = exercises
+        } else {
+            switch searchScope {
+            case .name:
+                filtered = exercises.filter { $0.name.localizedStandardContains(searchText) }
+            case .tags:
+                filtered = exercises.filter { exercise in
+                    exercise.tags.contains { $0.localizedStandardContains(searchText) }
+                    || exercise.secondaryTags.contains { $0.localizedStandardContains(searchText) }
+                }
+            }
+        }
+
+        // Sort by most recent workout first
+        cachedSortedExercises = filtered.sorted { a, b in
             let aDate = a.lastWorkoutDate ?? a.lastUpdated
             let bDate = b.lastWorkoutDate ?? b.lastUpdated
             return aDate > bDate
@@ -219,7 +241,11 @@ struct FilteredExerciseListView: View {
                                 .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
                                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
                             if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
-                                TagPillsRow(tags: exercise.tags, secondaryTags: exercise.secondaryTags)
+                                TagPillsRow(
+                                    tags: exercise.tags,
+                                    secondaryTags: exercise.secondaryTags,
+                                    highlightText: searchScope == .tags ? searchText : ""
+                                )
                                     .padding(.top, 6)
                             }
                             HStack(spacing: 4) {
@@ -392,6 +418,12 @@ struct FilteredExerciseListView: View {
         .onChange(of: exercises) { _, _ in
             rebuildSortedExercisesCache()
             rebuildStalenessCache()
+        }
+        .onChange(of: searchText) { _, _ in
+            rebuildSortedExercisesCache()
+        }
+        .onChange(of: searchScope) { _, _ in
+            rebuildSortedExercisesCache()
         }
     }
 

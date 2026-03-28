@@ -207,17 +207,15 @@ struct AddSetView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Group {
-                    if setToEdit != nil {
-                        Text("Edit Set")
-                            .foregroundStyle(Color(red: 1.0, green: 0.2, blue: 0.55))
-                        + Text(" - \(exercise.name)")
-                    } else {
-                        Text("Add Set - \(exercise.name)")
-                    }
+                if setToEdit != nil {
+                    Text(editSetTitle)
+                        .font(themeManager.effectiveTheme.title3Font)
+                        .lineLimit(1)
+                } else {
+                    Text("Add Set - \(exercise.name)")
+                        .font(themeManager.effectiveTheme.title3Font)
+                        .lineLimit(1)
                 }
-                .font(themeManager.effectiveTheme.title3Font)
-                .lineLimit(1)
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
@@ -370,6 +368,14 @@ struct AddSetView: View {
         } catch {
             showError = true
         }
+    }
+
+    /// Attributed title for edit mode — "Edit Set" in pink, exercise name in default color
+    private var editSetTitle: AttributedString {
+        var edit = AttributedString("Edit Set")
+        edit.foregroundColor = UIColor(red: 1.0, green: 0.2, blue: 0.55, alpha: 1.0)
+        let name = AttributedString(" - \(exercise.name)")
+        return edit + name
     }
 
     private var canAddSet: Bool {

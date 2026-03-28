@@ -32,13 +32,6 @@ enum ExerciseDeltaCalculator {
             // Current session values
             let currentMaxWeight: Double = workingSets.map(\.weight).max() ?? 0
             let isRepsOnly = currentMaxWeight == 0
-            // Reps at max weight (consistent with card display), or overall max reps for reps-only
-            let currentMaxReps: Int
-            if currentMaxWeight > 0 {
-                currentMaxReps = workingSets.filter { $0.weight == currentMaxWeight }.map(\.reps).max() ?? 0
-            } else {
-                currentMaxReps = workingSets.map(\.reps).max() ?? 0
-            }
             // For reps-only exercises, use total reps instead of weight × reps volume
             let currentVolume: Double
             if isRepsOnly {

@@ -213,20 +213,31 @@ struct FilteredExerciseListView: View {
         List {
             // Exercises section
             if exercises.isEmpty && searchText.isEmpty {
-                // Simple inline hint when no exercises exist
+                // Empty state — hint to add exercises + iCloud sync note
                 Section {
-                    HStack {
-                        Text("Tap + to add your first exercise")
-                            .font(themeManager.effectiveTheme.bodyFont)
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    VStack(spacing: 16) {
+                        HStack {
+                            Text("Tap + to add your first exercise")
+                                .font(themeManager.effectiveTheme.bodyFont)
+                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
-                        Spacer()
+                            Spacer()
 
-                        // Arrow pointing right-then-down toward FAB
-                        Image(systemName: "arrow.turn.right.down")
-                            .font(.title3)
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            .padding(.trailing, 5)
+                            // Arrow pointing right-then-down toward FAB
+                            Image(systemName: "arrow.turn.right.down")
+                                .font(.title3)
+                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                                .padding(.trailing, 5)
+                        }
+
+                        // iCloud sync hint
+                        HStack(spacing: 6) {
+                            Image(systemName: "icloud.and.arrow.down")
+                                .font(.system(size: 12))
+                            Text("If you have existing data, iCloud sync may take a few minutes")
+                                .font(themeManager.effectiveTheme.captionFont)
+                        }
+                        .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 8)

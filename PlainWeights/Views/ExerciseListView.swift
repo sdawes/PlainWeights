@@ -287,12 +287,12 @@ struct FilteredExerciseListView: View {
             Button(action: { showingAddExercise = true }) {
                 Image(systemName: "plus")
                     .font(.title2)
-                    .foregroundStyle(.primary)
-                    .frame(width: 50, height: 50)
-                    .glassEffect(.regular.interactive(), in: .circle)
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    .foregroundStyle(themeManager.effectiveTheme.background)
             }
-            .buttonStyle(.plain)
+            .frame(width: 50, height: 50)
+            .background(themeManager.effectiveTheme.primary)
+            .clipShape(Circle())
+            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
             .accessibilityLabel("Add exercise")
             .padding(.trailing, 20)
             .padding(.bottom, 8)

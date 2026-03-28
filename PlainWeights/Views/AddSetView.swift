@@ -45,8 +45,9 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
 struct SetTypePillSelector: View {
     @Environment(ThemeManager.self) private var themeManager
     @Binding var selectedType: SetTypeOption?
+    @Binding var showNotes: Bool
 
-    // 5 special set types in 2-2-1 layout
+    // 5 special set types in 2-2-1 layout, with Notes pill in the spare slot
     private let gridRows: [[SetTypeOption]] = [
         [.warmup, .dropset],
         [.pause, .assisted],
@@ -66,15 +67,45 @@ struct SetTypePillSelector: View {
                             setTypePill(for: type)
                                 .frame(maxWidth: .infinity)
                         }
-                        // Pad odd rows with invisible spacer to keep button widths consistent
+                        // Notes pill in the spare slot on the last row
                         if row.count < 2 {
-                            Color.clear
-                                .frame(maxWidth: .infinity, maxHeight: 0)
+                            notesPill
+                                .frame(maxWidth: .infinity)
                         }
                     }
                 }
             }
         }
+    }
+
+    /// Notes toggle pill — same style as set type pills
+    private var notesPill: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showNotes.toggle()
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "note.text")
+                    .font(.system(size: 14))
+                    .frame(width: 20)
+                Text("Notes")
+                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                Spacer()
+                ChevronDisclosureButton(isExpanded: showNotes)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(Color.blue.opacity(0.08))
+            .foregroundStyle(themeManager.effectiveTheme.primaryText)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -176,9 +207,17 @@ struct AddSetView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Text("\(setToEdit == nil ? "Add Set" : "Edit Set") - \(exercise.name)")
-                    .font(themeManager.effectiveTheme.title3Font)
-                    .lineLimit(1)
+                Group {
+                    if setToEdit != nil {
+                        Text("Edit Set")
+                            .foregroundStyle(Color(red: 0.85, green: 0.25, blue: 0.45))
+                        + Text(" - \(exercise.name)")
+                    } else {
+                        Text("Add Set - \(exercise.name)")
+                    }
+                }
+                .font(themeManager.effectiveTheme.title3Font)
+                .lineLimit(1)
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark")
@@ -262,30 +301,13 @@ struct AddSetView: View {
                 }
             }
 
-            // Set Type selector
-            SetTypePillSelector(selectedType: $selectedType)
+            // Set Type selector (includes Notes pill in the last row)
+            SetTypePillSelector(selectedType: $selectedType, showNotes: $showNotes)
 
-            // Notes toggle + inline editor
-            VStack(alignment: .leading, spacing: 12) {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        showNotes.toggle()
-                    }
-                } label: {
-                    HStack(spacing: 6) {
-                        Text("Notes")
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        ChevronDisclosureButton(isExpanded: showNotes)
-                    }
-                }
-                .buttonStyle(.plain)
-
-                if showNotes {
-                    InlineNotesComponent(noteText: $noteText, onSave: updateNote)
-                }
+            // Notes editor — expands below set type pills when Notes is toggled
+            if showNotes {
+                InlineNotesComponent(noteText: $noteText, onSave: updateNote)
             }
-            .clipped()
 
             // Save button
             Button(action: addSet) {

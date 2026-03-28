@@ -190,7 +190,7 @@ struct VerticalBarComparison: View {
         Group {
             if let hintColumn = columns.first(where: { $0.volumeHint != nil }) {
                 Text(hintColumn.volumeHint ?? "")
-                    .font(themeManager.effectiveTheme.interFont(size: 13, weight: .regular))
+                    .font(themeManager.effectiveTheme.interFont(size: 17, weight: .regular))
                     .foregroundStyle(hintColumn.isUp || hintColumn.isSame ? .green : .red)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)

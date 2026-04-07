@@ -6,6 +6,18 @@ Project-specific guidance for Claude Code (claude.ai/code)
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Folder
+
+When the user says **"look in the project folder"**, always check this location:
+
+```
+/Users/stephendawes/Documents/Claude/Projects/plainweights_cw/
+```
+
+This folder contains supporting documents (markdown, PDFs) related to the project — marketing copy, scripts, overviews, etc. Claude cannot read `.docx` files; only `.md` and `.pdf` are supported.
+
+---
+
 ## Quick Commands
 
 ### `acp` - Add, Commit, and Push
@@ -1287,9 +1299,20 @@ The app uses SwiftData with automatic CloudKit sync. User data is backed up to t
 5. Review the changes and click **Deploy**
 6. Switch environment dropdown to **Production** and verify record types appear
 
+### Build Numbers & Archiving
+- **MARKETING_VERSION** (e.g. `1.3`) — the user-facing version. Set in target → General → Version
+- **CURRENT_PROJECT_VERSION** (e.g. `4`) — the build number. Set in target → General → Build
+- **Each upload to App Store Connect must have a unique build number** — Apple rejects duplicates
+- If an archive is trashed and re-uploaded with the same build number, it will be rejected. Always bump the build number
+- Xcode may auto-increment the build number during upload — check what was actually uploaded
+- Build processing takes 5-30 minutes before it appears in App Store Connect
+
 ### App Store Connect
+- [ ] Create new version (click blue `+` next to iOS App) if version number changed
+- [ ] Wait for build processing (5-30 mins), then select the build
 - [ ] App screenshots for all device sizes
 - [ ] App description and keywords
+- [ ] "What's New" release notes
 - [ ] Privacy policy URL
 - [ ] App category set correctly
 - [ ] Version number and build number updated

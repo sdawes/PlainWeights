@@ -45,9 +45,9 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
 struct SetTypePillSelector: View {
     @Environment(ThemeManager.self) private var themeManager
     @Binding var selectedType: SetTypeOption?
-    @Binding var showNotes: Bool
 
-    // 5 special set types in 2-2-1 layout, with Notes pill in the spare slot
+    // 5 special set types in a 2-2-1 layout — the lone pill on the last row
+    // stays half-width via an empty spacer slot to match the grid rhythm.
     private let gridRows: [[SetTypeOption]] = [
         [.warmup, .dropset],
         [.pause, .assisted],
@@ -67,45 +67,15 @@ struct SetTypePillSelector: View {
                             setTypePill(for: type)
                                 .frame(maxWidth: .infinity)
                         }
-                        // Notes pill in the spare slot on the last row
+                        // Empty slot keeps the single pill at half-width
                         if row.count < 2 {
-                            notesPill
+                            Color.clear
                                 .frame(maxWidth: .infinity)
                         }
                     }
                 }
             }
         }
-    }
-
-    /// Notes toggle pill — same style as set type pills
-    private var notesPill: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                showNotes.toggle()
-            }
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "pencil.line")
-                    .font(.system(size: 14))
-                    .frame(width: 20)
-                Text("Notes")
-                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                Spacer()
-                ChevronDisclosureButton(isExpanded: showNotes)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 12)
-            .frame(maxWidth: .infinity)
-            .background(Color.blue.opacity(0.08))
-            .foregroundStyle(themeManager.effectiveTheme.primaryText)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
     }
 
     @ViewBuilder
@@ -162,8 +132,6 @@ struct AddSetView: View {
     @State private var selectedType: SetTypeOption? = nil
     @State private var hasConvertedInitialWeight = false
     @State private var showError = false
-    @State private var showNotes = false
-    @State private var noteText = ""
     @FocusState private var focusedField: Field?
     @AppStorage("lastEditedSetField") private var lastEditedField: String = "weight"
 
@@ -174,9 +142,6 @@ struct AddSetView: View {
     init(exercise: Exercise, initialWeight: Double? = nil, initialReps: Int? = nil, setToEdit: ExerciseSet? = nil) {
         self.exercise = exercise
         self.setToEdit = setToEdit
-
-        // Initialize note text from exercise
-        _noteText = State(initialValue: exercise.note ?? "")
 
         // If editing, pre-populate all fields from the set
         if let set = setToEdit {
@@ -299,13 +264,8 @@ struct AddSetView: View {
                 }
             }
 
-            // Set Type selector (includes Notes pill in the last row)
-            SetTypePillSelector(selectedType: $selectedType, showNotes: $showNotes)
-
-            // Notes editor — expands below set type pills when Notes is toggled
-            if showNotes {
-                InlineNotesComponent(noteText: $noteText, onSave: updateNote)
-            }
+            // Set Type selector
+            SetTypePillSelector(selectedType: $selectedType)
 
             // Save button
             Button(action: addSet) {
@@ -357,18 +317,6 @@ struct AddSetView: View {
     }
 
     // MARK: - Business Logic
-
-    private func updateNote() {
-        let trimmed = noteText.trimmingCharacters(in: .whitespacesAndNewlines)
-        exercise.note = trimmed.isEmpty ? nil : trimmed
-        exercise.bumpUpdated()
-
-        do {
-            try context.save()
-        } catch {
-            showError = true
-        }
-    }
 
     /// Attributed title for edit mode — "Edit Set" in pink, exercise name in default color
     private var editSetTitle: AttributedString {

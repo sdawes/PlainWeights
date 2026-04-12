@@ -173,28 +173,32 @@ struct HistoryView: View {
                         .listRowBackground(Color.clear)
                     }
 
-                    // Exercises section (simple list matching period views)
+                    // Exercises section
                     Section {
                         exercisesHeader
                             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
 
-                        ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
-                            let hasPB = cachedExercisePBFlags[exercise.exercise.persistentModelID] ?? false
-                            let deltas = cachedExerciseDeltas[exercise.exercise.persistentModelID]
-                            Button {
-                                var newPath = NavigationPath()
-                                newPath.append(exercise.exercise)
-                                navigationPath = newPath
-                            } label: {
-                                periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
+                        VStack(spacing: 0) {
+                            ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
+                                let hasPB = cachedExercisePBFlags[exercise.exercise.persistentModelID] ?? false
+                                let deltas = cachedExerciseDeltas[exercise.exercise.persistentModelID]
+                                Button {
+                                    var newPath = NavigationPath()
+                                    newPath.append(exercise.exercise)
+                                    navigationPath = newPath
+                                } label: {
+                                    periodExerciseRow(number: index + 1, name: exercise.exercise.name, hasPB: hasPB, isFirst: index == 0, deltas: deltas)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
                         }
+                        .background(themeManager.effectiveTheme.cardBackgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                     }
                 }
                 .id(themeManager.systemColorScheme) // Force List re-render on theme change
@@ -262,16 +266,20 @@ struct HistoryView: View {
                     Section {
                         periodDayHeader(for: daySummary.date)
 
-                        ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
-                            Button {
-                                var newPath = NavigationPath()
-                                newPath.append(exercise.exercise)
-                                navigationPath = newPath
-                            } label: {
-                                periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
+                        VStack(spacing: 0) {
+                            ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
+                                Button {
+                                    var newPath = NavigationPath()
+                                    newPath.append(exercise.exercise)
+                                    navigationPath = newPath
+                                } label: {
+                                    periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .background(themeManager.effectiveTheme.cardBackgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     .listRowSeparator(.hidden)
@@ -481,50 +489,43 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func periodExerciseRow(number: Int, name: String, hasPB: Bool, isFirst: Bool, deltas: ExerciseDeltas? = nil) -> some View {
-        HStack(spacing: 0) {
-            // Left spacer
-            Color.clear.frame(width: 8)
-
-            // Accent bar + content area
-            VStack(spacing: 0) {
-                // Divider at top (not for first row)
-                if !isFirst {
-                    Rectangle()
-                        .fill(themeManager.effectiveTheme.dividerColor)
-                        .frame(height: 1)
-                        .padding(.horizontal, 5)
-                }
-
-                HStack(spacing: 0) {
-                    // Column 1: Exercise number
-                    Text("\(number)")
-                        .font(themeManager.effectiveTheme.dataFont(size: 13, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        .frame(width: 28, alignment: .center)
-
-                    // Column 2: PB star
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 13))
-                        .foregroundStyle(hasPB ? themeManager.effectiveTheme.pbColor : .clear)
-                        .frame(width: 20, alignment: .leading)
-                        .offset(x: -3)
-
-                    // Column 3: Exercise name
-                    Text(name)
-                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
-
-                    Spacer()
-
-                    // Column 4: Delta indicators
-                    if let deltas = deltas {
-                        DeltaIndicatorsView(deltas: deltas)
-                    }
-                }
-                .padding(.vertical, 6)
-                .padding(.trailing, 8)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(spacing: 0) {
+            // Divider at top (not for first row)
+            if !isFirst {
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.dividerColor)
+                    .frame(height: 1)
+                    .padding(.horizontal, 5)
             }
+
+            HStack(alignment: .top, spacing: 0) {
+                // Column 1: Exercise number
+                Text("\(number)")
+                    .font(themeManager.effectiveTheme.dataFont(size: 13, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    .frame(width: 28, alignment: .center)
+
+                // Column 2: PB star
+                Image(systemName: "star.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(hasPB ? themeManager.effectiveTheme.pbColor : .clear)
+                    .frame(width: 20, alignment: .leading)
+                    .offset(x: -3)
+
+                // Column 3: Exercise name
+                Text(name)
+                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+                Spacer()
+
+                // Column 4: Delta indicators
+                if let deltas = deltas {
+                    DeltaIndicatorsView(deltas: deltas)
+                }
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
         }
     }
 

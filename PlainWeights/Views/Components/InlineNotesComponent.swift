@@ -37,10 +37,6 @@ struct InlineNotesComponent: View {
         }
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        )
         .onChange(of: noteText) { _, newValue in
             // Limit note length to 500 characters
             if newValue.count > 500 { noteText = String(newValue.prefix(500)) }

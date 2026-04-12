@@ -11,7 +11,7 @@ struct AnimatedGradientBackground: View {
     @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
-        themeManager.effectiveTheme.backgroundColor
+        themeManager.effectiveTheme.surfaceColor
             .ignoresSafeArea()
     }
 }

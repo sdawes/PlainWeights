@@ -97,8 +97,9 @@ struct TagDistributionBar: View {
 
             if !isLast {
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(height: 1)
+                    .padding(.horizontal, 5)
             }
         }
     }

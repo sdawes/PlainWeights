@@ -451,10 +451,6 @@ struct InlineProgressChart: View {
         .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        )
         .onChange(of: sets) { _, _ in
             cachedState = Self.computeChartState(from: sets, timeRange: selectedTimeRange)
         }

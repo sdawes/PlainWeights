@@ -47,8 +47,9 @@ struct SetRowView: View {
             // Divider at top (between rows, not first row after header)
             if cardPosition != nil && !isFirstInCard {
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(height: 1)
+                    .padding(.horizontal, 5)
             }
 
             HStack(spacing: 0) {
@@ -139,25 +140,10 @@ struct SetRowView: View {
         }
     }
 
-    /// Border overlay based on card position - draws only the edges needed to connect with adjacent rows
+    /// Border overlay based on card position (borderless — surface color contrast provides separation)
     @ViewBuilder
     private var cardBorderOverlay: some View {
-        if let position = cardPosition {
-            switch position {
-            case .top:
-                TopOpenBorder(radius: 12)
-                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-            case .middle:
-                SidesOnlyBorder()
-                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-            case .bottom:
-                BottomOpenBorder(radius: 12)
-                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-            case .single:
-                RoundedCorner(radius: 12, corners: .allCorners)
-                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-            }
-        }
+        EmptyView()
     }
 
     /// Effective tint color - PB takes precedence over set type

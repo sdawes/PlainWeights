@@ -51,7 +51,7 @@ enum AppTheme: String, CaseIterable {
         primary.opacity(0.4)
     }
 
-    // MARK: - Background Color (single background)
+    // MARK: - Background Color
 
     var background: Color {
         switch self {
@@ -60,10 +60,25 @@ enum AppTheme: String, CaseIterable {
         }
     }
 
+    // MARK: - Surface Color (page-level background behind floating cards)
+
+    var surfaceColor: Color {
+        switch self {
+        case .light, .system: return Color(red: 0.96, green: 0.96, blue: 0.97) // #f5f5f7
+        case .dark: return Color(red: 0.08, green: 0.08, blue: 0.08)  // #141414
+        }
+    }
+
     // MARK: - Border Color
 
     var border: Color {
         primary.opacity(0.3)
+    }
+
+    // MARK: - Divider Color (lighter than border, for internal card dividers)
+
+    var dividerColor: Color {
+        primary.opacity(0.08)
     }
 
     // MARK: - Muted Colors (for tags, badges, subtle UI)
@@ -118,7 +133,12 @@ enum AppTheme: String, CaseIterable {
     // MARK: - Legacy Compatibility
 
     var backgroundColor: Color { background }
-    var cardBackgroundColor: Color { background }
+    var cardBackgroundColor: Color {
+        switch self {
+        case .light, .system: return .white
+        case .dark: return .black
+        }
+    }
     var textColor: Color { primaryText }
     var secondaryTextColor: Color { secondaryText }
     var tertiaryTextColor: Color { tertiaryText }

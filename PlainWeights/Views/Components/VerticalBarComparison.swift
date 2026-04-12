@@ -74,8 +74,9 @@ struct VerticalBarComparison: View {
             // Footer hint — e.g. "12 reps to beat total volume"
             if hasAnyHint {
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(height: 1)
+                    .padding(.horizontal, 5)
                     .padding(.top, 8)
 
                 footerHintRow

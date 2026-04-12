@@ -66,11 +66,6 @@ struct TodaySessionCard: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
-            // Divider
-            Rectangle()
-                .fill(themeManager.effectiveTheme.borderColor)
-                .frame(height: 1)
-
             // Content area - empty state only (progress bar moved to ComparisonMetricsCard)
             if setCount == 0 {
                 HStack(spacing: 4) {
@@ -87,17 +82,5 @@ struct TodaySessionCard: View {
         }
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedCorner(radius: 12, corners: hasSetsBelow ? [.topLeft, .topRight] : .allCorners))
-        .overlay(borderOverlay)
-    }
-
-    @ViewBuilder
-    private var borderOverlay: some View {
-        if hasSetsBelow {
-            TopOpenBorder(radius: 12)
-                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        } else {
-            RoundedCorner(radius: 12, corners: .allCorners)
-                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        }
     }
 }

@@ -165,10 +165,6 @@ struct HistoryView: View {
                                     .frame(maxWidth: .infinity)
                                     .background(themeManager.effectiveTheme.cardBackgroundColor)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-                                    )
                                     .padding(.top, 4)
                             }
                         }
@@ -241,10 +237,6 @@ struct HistoryView: View {
                                 .frame(maxWidth: .infinity)
                                 .background(themeManager.effectiveTheme.cardBackgroundColor)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-                                )
                                 .padding(.top, 4)
                         }
                     }
@@ -343,43 +335,43 @@ struct HistoryView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
-            // Divider
-            Rectangle()
-                .fill(themeManager.effectiveTheme.borderColor)
-                .frame(height: 1)
-
             // Row 1: Workout Days, Exercises, Sets
             HStack(spacing: 0) {
                 metricCell(label: "Workout Days", value: "\(cachedPeriodMetrics.dayCount)")
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(width: 1)
+                    .padding(.vertical, 5)
                 metricCell(label: "Exercises", value: "\(cachedPeriodMetrics.exerciseCount)")
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(width: 1)
+                    .padding(.vertical, 5)
                 metricCell(label: "Sets", value: "\(cachedPeriodMetrics.setCount)")
             }
 
-            // Divider between rows
+            // Content divider between rows
             Rectangle()
-                .fill(themeManager.effectiveTheme.borderColor)
+                .fill(themeManager.effectiveTheme.dividerColor)
                 .frame(height: 1)
+                .padding(.horizontal, 5)
 
             // Row 2: Volume, PBs
             HStack(spacing: 0) {
                 metricCell(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(cachedPeriodMetrics.totalVolume))) \(themeManager.weightUnit.displayName)")
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(width: 1)
+                    .padding(.vertical, 5)
                 pbMetricCell(pbCount: cachedPeriodMetrics.pbCount)
             }
 
             // Workout frequency bar — shows workout days as % of available days
             if selectedPeriod != .lastSession {
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(height: 1)
+                    .padding(.horizontal, 5)
 
                 workoutFrequencyBar
             }
@@ -387,10 +379,6 @@ struct HistoryView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        )
     }
 
     /// Description of the current time period
@@ -493,20 +481,20 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func periodExerciseRow(number: Int, name: String, hasPB: Bool, isFirst: Bool, deltas: ExerciseDeltas? = nil) -> some View {
-        VStack(spacing: 0) {
-            // Divider at top (not for first row)
-            if !isFirst {
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
-                    .frame(height: 1)
-                    .padding(.leading, 8)
-            }
+        HStack(spacing: 0) {
+            // Left spacer
+            Color.clear.frame(width: 8)
 
-            HStack(spacing: 0) {
-                // Left spacer
-                Color.clear.frame(width: 8)
+            // Accent bar + content area
+            VStack(spacing: 0) {
+                // Divider at top (not for first row)
+                if !isFirst {
+                    Rectangle()
+                        .fill(themeManager.effectiveTheme.dividerColor)
+                        .frame(height: 1)
+                        .padding(.horizontal, 5)
+                }
 
-                // Accent bar + content area
                 HStack(spacing: 0) {
                     // Yellow accent bar for PB rows
                     if hasPB {
@@ -706,35 +694,34 @@ struct HistoryView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
-            // Divider
-            Rectangle()
-                .fill(themeManager.effectiveTheme.borderColor)
-                .frame(height: 1)
-
             // Row 1: Exercises, Sets, PBs
             HStack(spacing: 0) {
                 metricCell(label: "Exercises", value: "\(day.exerciseCount)")
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(width: 1)
+                    .padding(.vertical, 5)
                 metricCell(label: "Sets", value: "\(day.totalSets)")
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(width: 1)
+                    .padding(.vertical, 5)
                 pbMetricCell(pbCount: pbCount)
             }
 
-            // Divider between rows
+            // Content divider between rows
             Rectangle()
-                .fill(themeManager.effectiveTheme.borderColor)
+                .fill(themeManager.effectiveTheme.dividerColor)
                 .frame(height: 1)
+                .padding(.horizontal, 5)
 
             // Row 2: Volume, Avg Rest
             HStack(spacing: 0) {
                 metricCell(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(day.totalVolume))) \(themeManager.weightUnit.displayName)")
                 Rectangle()
-                    .fill(themeManager.effectiveTheme.borderColor)
+                    .fill(themeManager.effectiveTheme.dividerColor)
                     .frame(width: 1)
+                    .padding(.vertical, 5)
                 metricCell(
                     label: "Avg Rest",
                     value: sessionAvgRest.map { formatRestTime($0) } ?? "—"
@@ -744,10 +731,6 @@ struct HistoryView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        )
     }
 
     @ViewBuilder

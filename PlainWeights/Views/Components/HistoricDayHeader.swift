@@ -65,17 +65,9 @@ struct HistoricDayHeader: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
-            // Divider after header
-            Rectangle()
-                .fill(themeManager.effectiveTheme.borderColor)
-                .frame(height: 1)
         }
         .frame(maxWidth: .infinity)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedCorner(radius: 12, corners: [.topLeft, .topRight]))
-        .overlay(
-            TopOpenBorder(radius: 12)
-                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        )
     }
 }

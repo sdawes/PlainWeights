@@ -26,10 +26,6 @@ struct ListRowCardBackground: View {
     var body: some View {
         themeManager.effectiveTheme.cardBackgroundColor
             .clipShape(RoundedCorner(radius: 12, corners: corners))
-            .overlay(
-                RoundedCorner(radius: 12, corners: corners)
-                    .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-            )
     }
 
     private var corners: UIRectCorner {

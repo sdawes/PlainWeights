@@ -246,11 +246,6 @@ struct ComparisonMetricsCard: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
-            // Divider below header
-            Rectangle()
-                .fill(themeManager.effectiveTheme.borderColor)
-                .frame(height: 1)
-
             if let metrics = currentMetrics {
                 // Reference Metrics — the big values (Max Weight, Reps, Total Volume)
                 referenceValuesRow(metrics: metrics)
@@ -275,10 +270,6 @@ struct ComparisonMetricsCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        )
         .animation(.easeInOut(duration: 0.2), value: comparisonMode)
         .onChange(of: sets) { _, _ in
             updateCache()

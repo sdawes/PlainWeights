@@ -152,45 +152,39 @@ struct ExerciseDetailView: View {
 
             // Comparison mode toggle - card style buttons
             Section {
-                HStack(spacing: 12) {
+                HStack(spacing: 4) {
                     ForEach(ComparisonMode.allCases, id: \.self) { mode in
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 comparisonMode = mode
                             }
                         } label: {
-                            HStack(spacing: 8) {
+                            HStack(spacing: 6) {
                                 Image(systemName: mode == .lastSession ? "calendar.badge.clock" : "star.fill")
-                                    .font(.system(size: 16))
+                                    .font(.system(size: 14))
                                 Text(mode == .lastSession ? "Last" : "Best Ever")
-                                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                                    .font(themeManager.effectiveTheme.interFont(size: 13, weight: .medium))
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
+                            .padding(.vertical, 10)
                             .foregroundStyle(
                                 comparisonMode == mode
-                                    ? themeManager.effectiveTheme.background
-                                    : themeManager.effectiveTheme.primaryText
+                                    ? themeManager.effectiveTheme.primaryText
+                                    : themeManager.effectiveTheme.mutedForeground
                             )
                             .background(
                                 comparisonMode == mode
-                                    ? themeManager.effectiveTheme.primaryText
-                                    : themeManager.effectiveTheme.cardBackgroundColor
+                                    ? themeManager.effectiveTheme.muted
+                                    : Color.clear
                             )
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .strokeBorder(
-                                        comparisonMode == mode
-                                            ? Color.clear
-                                            : themeManager.effectiveTheme.borderColor,
-                                        lineWidth: 1
-                                    )
-                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                         .buttonStyle(.plain)
                     }
                 }
+                .padding(5)
+                .background(themeManager.effectiveTheme.cardBackgroundColor)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
             }
             .id("comparisonButtons")
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))

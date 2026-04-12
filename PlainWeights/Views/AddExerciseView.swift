@@ -81,11 +81,10 @@ struct AddExerciseView: View {
             }
             .padding(.bottom, 20)
 
-            // Card with all sections
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        // Name section
+                    VStack(alignment: .leading, spacing: 12) {
+                        // Name card
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Name")
                                 .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
@@ -110,13 +109,11 @@ struct AddExerciseView: View {
                             }
                         }
                         .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(themeManager.effectiveTheme.cardBackgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        // Divider
-                        Rectangle()
-                            .fill(themeManager.effectiveTheme.primary.opacity(0.08))
-                            .frame(height: 1)
-
-                        // Primary tags section
+                        // Primary muscles card
                         InlineTagSection(
                             title: "Primary Muscles",
                             emptyHint: "tap to add primary muscles",
@@ -141,13 +138,11 @@ struct AddExerciseView: View {
                             }
                         )
                         .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(themeManager.effectiveTheme.cardBackgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        // Divider
-                        Rectangle()
-                            .fill(themeManager.effectiveTheme.primary.opacity(0.08))
-                            .frame(height: 1)
-
-                        // Secondary tags section
+                        // Secondary muscles card
                         InlineTagSection(
                             title: "Secondary Muscles",
                             emptyHint: "tap to add secondary muscles",
@@ -159,14 +154,11 @@ struct AddExerciseView: View {
                             onSubmit: { secondaryTagFieldFocused = true }
                         )
                         .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(themeManager.effectiveTheme.cardBackgroundColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                         .id("secondaryTags")
                     }
-                    .background(themeManager.effectiveTheme.cardBackgroundColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .strokeBorder(themeManager.effectiveTheme.primary.opacity(0.15), lineWidth: 1)
-                    )
                 }
                 .scrollDismissesKeyboard(.immediately)
                 .scrollIndicators(.hidden)
@@ -183,7 +175,7 @@ struct AddExerciseView: View {
             }
         }
         .padding(24)
-        .background(themeManager.effectiveTheme.background)
+        .background(themeManager.effectiveTheme.surfaceColor)
         .onAppear {
             nameFieldFocused = true
             tagSuggestions = ExerciseService.allUniqueTags(context: modelContext)

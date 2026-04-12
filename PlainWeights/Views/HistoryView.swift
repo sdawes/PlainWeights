@@ -496,52 +496,34 @@ struct HistoryView: View {
                 }
 
                 HStack(spacing: 0) {
-                    // Yellow accent bar for PB rows
-                    if hasPB {
-                        Rectangle()
-                            .fill(themeManager.effectiveTheme.pbColor)
-                            .frame(width: 3)
-                    } else {
-                        Color.clear.frame(width: 3)
+                    // Column 1: Exercise number
+                    Text("\(number)")
+                        .font(themeManager.effectiveTheme.dataFont(size: 13, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .frame(width: 28, alignment: .center)
+
+                    // Column 2: PB star
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(hasPB ? themeManager.effectiveTheme.pbColor : .clear)
+                        .frame(width: 20, alignment: .leading)
+                        .offset(x: -3)
+
+                    // Column 3: Exercise name
+                    Text(name)
+                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+                    Spacer()
+
+                    // Column 4: Delta indicators
+                    if let deltas = deltas {
+                        DeltaIndicatorsView(deltas: deltas)
                     }
-
-                    HStack(spacing: 0) {
-                        // Column 1: Exercise number
-                        Text("\(number)")
-                            .font(themeManager.effectiveTheme.dataFont(size: 13, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            .frame(width: 28, alignment: .center)
-
-                        // Column 2: PB star
-                        Image(systemName: "star.fill")
-                            .font(.system(size: 12))
-                            .foregroundStyle(hasPB ? themeManager.effectiveTheme.pbColor : .clear)
-                            .frame(width: 20, alignment: .leading)
-                            .offset(x: -3)
-
-                        // Column 3: Exercise name
-                        Text(name)
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.primaryText)
-
-                        Spacer()
-
-                        // Column 4: Delta indicators
-                        if let deltas = deltas {
-                            DeltaIndicatorsView(deltas: deltas)
-                        }
-                    }
-                    .padding(.vertical, 6)
-                    .padding(.trailing, 8)
                 }
+                .padding(.vertical, 6)
+                .padding(.trailing, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background {
-                    if hasPB {
-                        themeManager.effectiveTheme.pbColor.opacity(themeManager.effectiveTheme.isDark ? 0.15 : 0.08)
-                    } else {
-                        Color.clear
-                    }
-                }
             }
         }
     }
@@ -760,52 +742,25 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func pbMetricCell(pbCount: Int) -> some View {
-        HStack(spacing: 0) {
-            // Left spacer to inset accent bar
-            Color.clear.frame(width: 8)
-
-            // Accent bar + content area
-            HStack(spacing: 0) {
-                // Yellow accent bar when there are PBs
-                if pbCount > 0 {
-                    Rectangle()
-                        .fill(themeManager.effectiveTheme.pbColor)
-                        .frame(width: 3)
-                } else {
-                    Color.clear.frame(width: 3)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("PBs")
-                        .font(themeManager.effectiveTheme.captionFont)
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                    // Value: "3 × ⭐"
-                    HStack(alignment: .center, spacing: 0) {
-                        Text("\(pbCount)")
-                            .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
-                            .monospacedDigit()
-                            .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                        Text(" × ")
-                            .font(themeManager.effectiveTheme.interFont(size: 14))
-                            .foregroundStyle(.secondary)
-                        Image(systemName: "star.fill")
-                            .font(.system(size: 16))
-                            .foregroundStyle(themeManager.effectiveTheme.pbColor)
-                    }
-                }
-                .padding(.leading, 8)
-                .padding(.trailing, 16)
-                .padding(.vertical, 12)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .background {
-                if pbCount > 0 {
-                    themeManager.effectiveTheme.pbColor.opacity(themeManager.effectiveTheme.isDark ? 0.15 : 0.08)
-                } else {
-                    themeManager.effectiveTheme.cardBackgroundColor
-                }
+        VStack(alignment: .leading, spacing: 4) {
+            Text("PBs")
+                .font(themeManager.effectiveTheme.captionFont)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            HStack(alignment: .center, spacing: 0) {
+                Text("\(pbCount)")
+                    .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                Text(" × ")
+                    .font(themeManager.effectiveTheme.interFont(size: 14))
+                    .foregroundStyle(.secondary)
+                Image(systemName: "star.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(themeManager.effectiveTheme.pbColor)
             }
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
     }

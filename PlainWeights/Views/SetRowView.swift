@@ -65,7 +65,7 @@ struct SetRowView: View {
                     // Col 2: PB indicator or spacer
                     if set.isPB {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 13))
+                            .font(.system(size: 14))
                             .foregroundStyle(themeManager.effectiveTheme.pbColor)
                             .frame(width: 24, alignment: setNumber >= 10 ? .center : .leading)
                             .offset(x: setNumber >= 10 ? 0 : -4)
@@ -146,15 +146,14 @@ struct SetRowView: View {
         EmptyView()
     }
 
-    /// Effective tint color - PB takes precedence over set type
+    /// Effective tint color for accent bar/background (not PBs — they use star + number colour only)
     private var effectiveTintColor: Color? {
-        if set.isPB { return themeManager.effectiveTheme.pbColor }
-        return nil
+        nil
     }
 
-    /// Color for set number based on set type (PB takes precedence)
+    /// Color for set number
     private var setNumberColor: Color {
-        effectiveTintColor ?? .secondary
+        .secondary
     }
 
     /// Get the background view for set type with colored left border accent

@@ -15,7 +15,8 @@ enum DeltaDirection {
         switch self {
         case .up: return .green
         case .down: return .red
-        case .same, .noData: return .gray.opacity(0.3)
+        case .same: return Color(red: 0.95, green: 0.75, blue: 0.30) // Light amber
+        case .noData: return .gray.opacity(0.3)
         }
     }
 }

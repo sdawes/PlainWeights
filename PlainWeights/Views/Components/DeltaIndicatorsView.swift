@@ -51,9 +51,9 @@ struct DeltaInfoPopover: View {
             Divider()
 
             HStack(spacing: 16) {
-                legendItem(color: .green, label: "Increase")
-                legendItem(color: .red, label: "Decrease")
-                legendItem(color: .gray.opacity(0.3), label: "No change")
+                legendItem(color: DeltaDirection.up.color, label: "Increase")
+                legendItem(color: DeltaDirection.down.color, label: "Decrease")
+                legendItem(color: DeltaDirection.same.color, label: "No change")
             }
             .foregroundStyle(themeManager.effectiveTheme.secondaryText)
         }

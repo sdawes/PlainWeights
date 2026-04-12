@@ -37,6 +37,12 @@ struct BarColumnData: Equatable {
     let showSessionBest: Bool
     let formatAsWeight: Bool
     var volumeHint: String?
+
+    /// Colour based on direction: green (up), red (down), amber (same)
+    var barColor: Color {
+        if isSame { return DeltaDirection.same.color }
+        return isUp ? DeltaDirection.up.color : DeltaDirection.down.color
+    }
 }
 
 // MARK: - Session Comparison Gauges
@@ -120,8 +126,7 @@ struct VerticalBarComparison: View {
                     let fillRatio = max(lastValue / maxVal, 0.02)
                     let fillWidth = CGFloat(fillRatio) * totalWidth
 
-                    let barColor: Color = data.isSame ? .gray.opacity(0.6)
-                        : data.isUp ? .green : .red
+                    let barColor = data.barColor
 
                     // Session best shading — drawn FIRST so the colored fill overlaps it
                     // Only show when last set is under the reference (not when same/equal)
@@ -171,12 +176,12 @@ struct VerticalBarComparison: View {
             if data.isSame {
                 Text("+0")
                     .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    .foregroundStyle(data.barColor)
             } else {
                 let prefix = data.isUp ? "+" : ""
                 Text("\(prefix)\(formatValue(data.delta, asWeight: data.formatAsWeight))")
                     .font(themeManager.effectiveTheme.dataFont(size: 14, weight: .medium))
-                    .foregroundStyle(data.isUp ? .green : .red)
+                    .foregroundStyle(data.barColor)
             }
         } else {
             Text(" ")

@@ -57,10 +57,10 @@ struct TagPillView: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(isHighlighted ? themeManager.effectiveTheme.chartColor1.opacity(0.2) : pillBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
             isHighlighted
-                ? RoundedRectangle(cornerRadius: 4)
+                ? RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(themeManager.effectiveTheme.chartColor1, lineWidth: 1.5)
                 : nil
         )

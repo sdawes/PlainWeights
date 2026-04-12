@@ -142,9 +142,15 @@ struct FilteredExerciseListView: View {
         return nil
     }
 
-    /// Pre-computed opacity for staleness background tint
-    private var stalenessOpacity: Double {
-        themeManager.currentTheme == .dark ? 0.15 : 0.05
+    /// Get staleness pill info (colour + label) for an exercise
+    private func stalenessInfo(for exercise: Exercise) -> (color: Color, label: String)? {
+        guard let lastWorkout = exercise.lastWorkoutDate else { return nil }
+        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: lastWorkout), to: Calendar.current.startOfDay(for: Date())).day ?? 0
+        if days == 0 { return (.green, "Today") }
+        let isDark = themeManager.currentTheme == .dark
+        if days >= 30 { return (isDark ? Color(red: 1.0, green: 0.40, blue: 0.40) : .red, "30d+") }
+        if days >= 14 { return (isDark ? Color(red: 1.0, green: 0.70, blue: 0.30) : .orange, "\(days / 7) wks") }
+        return nil
     }
 
     /// Rebuild the sorted exercises cache — filters by search text + scope, then sorts
@@ -261,27 +267,9 @@ struct FilteredExerciseListView: View {
                 Section {
                     ForEach(cachedSortedExercises.enumerated(), id: \.element.persistentModelID) { index, exercise in
                         exerciseRow(exercise)
-                        .listRowBackground(
-                            Group {
-                                if let color = cachedStalenessColors[exercise.persistentModelID] ?? nil {
-                                    HStack(spacing: 0) {
-                                        Color.clear.frame(width: 16)  // Match list leading inset
-                                        // Vertical accent bar
-                                        Rectangle()
-                                            .fill(color)
-                                            .frame(width: 2)
-                                        // Background tint
-                                        Rectangle()
-                                            .fill(color.opacity(stalenessOpacity))
-                                    }
-                                } else {
-                                    Color.clear
-                                }
-                            }
-                        )
-                        .listRowSeparator(index == 0 ? .hidden : .visible, edges: .top)
-                        .listRowSeparatorTint(themeManager.effectiveTheme.borderColor)
-                        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                     }
                 }
             }
@@ -397,9 +385,8 @@ struct FilteredExerciseListView: View {
     /// A single exercise row extracted from body to reduce compiler type-check complexity
     @ViewBuilder
     private func exerciseRow(_ exercise: Exercise) -> some View {
-        let exerciseId = exercise.persistentModelID
-        let isDoneToday = cachedDoneToday.contains(exerciseId)
-        let color = cachedStalenessColors[exerciseId] ?? nil
+        let isDoneToday = cachedDoneToday.contains(exercise.persistentModelID)
+        let info = stalenessInfo(for: exercise)
         let tagHighlight = searchScope == .tags ? searchText : ""
 
         VStack(alignment: .leading, spacing: 0) {
@@ -407,6 +394,7 @@ struct FilteredExerciseListView: View {
                 .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
+            // Tag pills
             if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
                 TagPillsRow(
                     tags: exercise.tags,
@@ -416,11 +404,12 @@ struct FilteredExerciseListView: View {
                 .padding(.top, 6)
             }
 
-            HStack(spacing: 4) {
-                if let color, !isDoneToday {
-                    Image(systemName: "exclamationmark.circle")
-                        .font(.system(size: 14))
-                        .foregroundStyle(color)
+            // Last workout line with dot
+            HStack(spacing: 6) {
+                if let info {
+                    Circle()
+                        .fill(info.color)
+                        .frame(width: 6, height: 6)
                 }
 
                 if isDoneToday {
@@ -430,7 +419,7 @@ struct FilteredExerciseListView: View {
                         Text("Today")
                             .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                     }
-                    .foregroundStyle(.green)
+                    .foregroundStyle(info?.color ?? .green)
                 } else if let lastWorkout = exercise.lastWorkoutDate {
                     HStack(spacing: 0) {
                         Text("Last: ")
@@ -438,7 +427,7 @@ struct FilteredExerciseListView: View {
                         Text(Formatters.formatExerciseLastDone(lastWorkout))
                             .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                     }
-                    .foregroundStyle(color ?? themeManager.effectiveTheme.mutedForeground)
+                    .foregroundStyle(info?.color ?? themeManager.effectiveTheme.mutedForeground)
                 } else {
                     Text("No sets recorded")
                         .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
@@ -447,8 +436,11 @@ struct FilteredExerciseListView: View {
             }
             .padding(.top, 12)
         }
-        .padding(.leading, 14)
+        .padding(.vertical, 14)
+        .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .contentShape(Rectangle())
         .onTapGesture {
             navigationPath.append(exercise)

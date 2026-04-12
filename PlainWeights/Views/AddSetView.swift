@@ -46,36 +46,32 @@ struct SetTypePillSelector: View {
     @Environment(ThemeManager.self) private var themeManager
     @Binding var selectedType: SetTypeOption?
 
-    // 5 special set types in a 2-2-1 layout — the lone pill on the last row
-    // stays half-width via an empty spacer slot to match the grid rhythm.
-    private let gridRows: [[SetTypeOption]] = [
-        [.warmup, .dropset],
-        [.pause, .assisted],
-        [.timed]
-    ]
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Set Type")
                 .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
-            VStack(spacing: 8) {
-                ForEach(gridRows, id: \.first) { row in
-                    HStack(spacing: 8) {
-                        ForEach(row) { type in
-                            setTypePill(for: type)
-                                .frame(maxWidth: .infinity)
-                        }
-                        // Empty slot keeps the single pill at half-width
-                        if row.count < 2 {
-                            Color.clear
-                                .frame(maxWidth: .infinity)
-                        }
-                    }
+            // Grid keeps the rep-based modifiers in two balanced columns and
+            // gives Timed its own full-width row — it's a different category
+            // of set (duration-based), so the visual split is intentional.
+            Grid(horizontalSpacing: 8, verticalSpacing: 8) {
+                GridRow {
+                    setTypePill(for: .warmup)
+                    setTypePill(for: .dropset)
+                }
+                GridRow {
+                    setTypePill(for: .pause)
+                    setTypePill(for: .assisted)
+                }
+                GridRow {
+                    setTypePill(for: .timed)
+                    Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
                 }
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Set Type")
     }
 
     @ViewBuilder
@@ -115,6 +111,7 @@ struct SetTypePillSelector: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 

@@ -30,6 +30,10 @@ When the user says **"acp"**, immediately run `git add .`, commit with an approp
 | abc1234 | Commit message here |
 ```
 
+## Conflicting Advice
+
+Multiple skills and plugins may offer different guidance on the same topic (e.g., Axiom vs standalone SwiftUI/SwiftData skills). **If you receive contradicting advice from different sources, do not silently pick one.** Instead, present both options to the user with a brief explanation of the trade-off so they can choose.
+
 ## Agent Role
 
 You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and related frameworks. Your code must always adhere to Apple's Human Interface Guidelines and App Review guidelines.

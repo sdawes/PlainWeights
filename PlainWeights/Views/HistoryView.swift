@@ -22,8 +22,9 @@ private struct PeriodMetrics {
     let setCount: Int           // Working sets only
     let totalVolume: Double     // Sum of weight × reps
     let pbCount: Int            // Sets where isPB == true
+    let avgRestSeconds: Double? // Average rest time across sets with rest data
 
-    static let empty = PeriodMetrics(dayCount: 0, exerciseCount: 0, setCount: 0, totalVolume: 0, pbCount: 0)
+    static let empty = PeriodMetrics(dayCount: 0, exerciseCount: 0, setCount: 0, totalVolume: 0, pbCount: 0, avgRestSeconds: nil)
 }
 
 /// Lightweight exercise summary for period view
@@ -329,8 +330,10 @@ struct HistoryView: View {
 
     @ViewBuilder
     private var periodSummaryCard: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header with period description and date range
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
+
+        VStack(alignment: .leading, spacing: 8) {
+            // Header
             HStack(spacing: 0) {
                 Text(periodDescription)
                     .font(themeManager.effectiveTheme.interFont(size: 16, weight: .semibold))
@@ -340,53 +343,22 @@ struct HistoryView: View {
                     .font(themeManager.effectiveTheme.interFont(size: 12, weight: .regular).italic())
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
 
-            // Row 1: Workout Days, Exercises, Sets
-            HStack(spacing: 0) {
-                metricCell(label: "Workout Days", value: "\(cachedPeriodMetrics.dayCount)")
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.dividerColor)
-                    .frame(width: 1)
-                    .padding(.vertical, 5)
-                metricCell(label: "Exercises", value: "\(cachedPeriodMetrics.exerciseCount)")
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.dividerColor)
-                    .frame(width: 1)
-                    .padding(.vertical, 5)
-                metricCell(label: "Sets", value: "\(cachedPeriodMetrics.setCount)")
+            // 6 mini cards grid
+            LazyVGrid(columns: columns, spacing: 8) {
+                miniMetricCard(label: "Workout Days", value: "\(cachedPeriodMetrics.dayCount)")
+                miniMetricCard(label: "Exercises", value: "\(cachedPeriodMetrics.exerciseCount)")
+                miniMetricCard(label: "Sets", value: "\(cachedPeriodMetrics.setCount)")
+                miniMetricCard(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(cachedPeriodMetrics.totalVolume))) \(themeManager.weightUnit.displayName)")
+                pbMiniCard(pbCount: cachedPeriodMetrics.pbCount)
+                miniMetricCard(label: "Avg Rest", value: cachedPeriodMetrics.avgRestSeconds.map { formatRestTime($0) } ?? "—")
             }
 
-            // Content divider between rows
-            Rectangle()
-                .fill(themeManager.effectiveTheme.dividerColor)
-                .frame(height: 1)
-                .padding(.horizontal, 5)
-
-            // Row 2: Volume, PBs
-            HStack(spacing: 0) {
-                metricCell(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(cachedPeriodMetrics.totalVolume))) \(themeManager.weightUnit.displayName)")
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.dividerColor)
-                    .frame(width: 1)
-                    .padding(.vertical, 5)
-                pbMetricCell(pbCount: cachedPeriodMetrics.pbCount)
-            }
-
-            // Workout frequency bar — shows workout days as % of available days
+            // Workout frequency bar — only for period views
             if selectedPeriod != .lastSession {
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.dividerColor)
-                    .frame(height: 1)
-                    .padding(.horizontal, 5)
-
                 workoutFrequencyBar
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(themeManager.effectiveTheme.cardBackgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     /// Description of the current time period
@@ -596,12 +568,16 @@ struct HistoryView: View {
         let volume = workingSets.reduce(0.0) { $0 + ($1.weight * Double($1.reps)) }
         let pbs = workingSets.filter { $0.isPB }.count
 
+        let restValues = sets.compactMap { $0.restSeconds }.map { Double($0) }
+        let avgRest: Double? = restValues.isEmpty ? nil : restValues.reduce(0, +) / Double(restValues.count)
+
         return PeriodMetrics(
             dayCount: uniqueDays.count,
             exerciseCount: uniqueExercises.count,
             setCount: workingSets.count,
             totalVolume: volume,
-            pbCount: pbs
+            pbCount: pbs,
+            avgRestSeconds: avgRest
         )
     }
 
@@ -662,8 +638,9 @@ struct HistoryView: View {
         let pbCount = allSetsForDay.filter { $0.isPB }.count
         let sessionDuration = SessionStatsCalculator.getSessionDurationMinutes(from: allSetsForDay)
         let sessionAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: allSetsForDay)
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
 
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 8) {
             // Header with date and duration
             HStack(spacing: 8) {
                 Text(day.date, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
@@ -674,75 +651,38 @@ struct HistoryView: View {
                     .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                 Spacer()
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
 
-            // Row 1: Exercises, Sets, PBs
-            HStack(spacing: 0) {
-                metricCell(label: "Exercises", value: "\(day.exerciseCount)")
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.dividerColor)
-                    .frame(width: 1)
-                    .padding(.vertical, 5)
-                metricCell(label: "Sets", value: "\(day.totalSets)")
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.dividerColor)
-                    .frame(width: 1)
-                    .padding(.vertical, 5)
-                pbMetricCell(pbCount: pbCount)
-            }
-
-            // Content divider between rows
-            Rectangle()
-                .fill(themeManager.effectiveTheme.dividerColor)
-                .frame(height: 1)
-                .padding(.horizontal, 5)
-
-            // Row 2: Volume, Avg Rest
-            HStack(spacing: 0) {
-                metricCell(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(day.totalVolume))) \(themeManager.weightUnit.displayName)")
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.dividerColor)
-                    .frame(width: 1)
-                    .padding(.vertical, 5)
-                metricCell(
-                    label: "Avg Rest",
-                    value: sessionAvgRest.map { formatRestTime($0) } ?? "—"
-                )
+            // 6 mini cards grid
+            LazyVGrid(columns: columns, spacing: 8) {
+                miniMetricCard(label: "Workout Days", value: "1")
+                miniMetricCard(label: "Exercises", value: "\(day.exerciseCount)")
+                miniMetricCard(label: "Sets", value: "\(day.totalSets)")
+                miniMetricCard(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(day.totalVolume))) \(themeManager.weightUnit.displayName)")
+                pbMiniCard(pbCount: pbCount)
+                miniMetricCard(label: "Avg Rest", value: sessionAvgRest.map { formatRestTime($0) } ?? "—")
             }
         }
+    }
+
+    @ViewBuilder
+    private func miniMetricCard(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(themeManager.effectiveTheme.captionFont)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            Text(value)
+                .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    @ViewBuilder
-    private func metricCell(label: String, value: String) -> some View {
-        HStack(spacing: 0) {
-            // Left spacer (matches delta cells: 8pt spacer + 3pt bar space)
-            Color.clear.frame(width: 11)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(label)
-                    .font(themeManager.effectiveTheme.captionFont)
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                Text(value)
-                    .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
-                    .monospacedDigit()
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-            .padding(.leading, 8)
-            .padding(.trailing, 16)
-            .padding(.vertical, 12)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(themeManager.effectiveTheme.cardBackgroundColor)
-    }
-
-    @ViewBuilder
-    private func pbMetricCell(pbCount: Int) -> some View {
+    private func pbMiniCard(pbCount: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("PBs")
                 .font(themeManager.effectiveTheme.captionFont)
@@ -750,20 +690,19 @@ struct HistoryView: View {
             HStack(alignment: .center, spacing: 0) {
                 Text("\(pbCount)")
                     .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
-                    .monospacedDigit()
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
                 Text(" × ")
                     .font(themeManager.effectiveTheme.interFont(size: 14))
                     .foregroundStyle(.secondary)
                 Image(systemName: "star.fill")
-                    .font(.system(size: 15))
+                    .font(.system(size: 13))
                     .foregroundStyle(themeManager.effectiveTheme.pbColor)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private var exercisesHeader: some View {
@@ -789,6 +728,12 @@ struct HistoryView: View {
         .padding(.top, 16)
         .padding(.bottom, 10)
         .padding(.leading, 8)
+    }
+
+    /// Format rest time from Double: converts to Int and delegates
+    private func formatRestTime(_ seconds: Double?) -> String {
+        guard let seconds else { return "—" }
+        return formatRestTime(Int(seconds))
     }
 
     /// Format rest time: "45s" if under 1 min, "1m 30s" if over

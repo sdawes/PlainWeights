@@ -450,13 +450,15 @@ struct HistoryView: View {
     private func periodDayHeader(for date: Date) -> some View {
         HStack {
             Text(date, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
-                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                .textCase(.uppercase)
+                .tracking(0.8)
             Spacer()
         }
         .padding(.top, 12)
-        .padding(.bottom, 8)
-        .padding(.leading, 8)
+        .padding(.bottom, 6)
+        .padding(.leading, 4)
     }
 
     @ViewBuilder

@@ -615,17 +615,17 @@ struct HistoryView: View {
                 showTagBreakdown.toggle()
             }
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: 4) {
                 Text("Muscle Breakdown")
-                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                    .foregroundStyle(showTagBreakdown
-                        ? themeManager.effectiveTheme.mutedForeground
-                        : themeManager.effectiveTheme.tertiaryText)
+                    .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                    .textCase(.uppercase)
+                    .tracking(0.8)
                 ChevronDisclosureButton(isExpanded: showTagBreakdown)
             }
-            .padding(.top, 20)
+            .padding(.top, 12)
             .padding(.bottom, 4)
-            .padding(.leading, 8)
+            .padding(.leading, 4)
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
@@ -706,17 +706,19 @@ struct HistoryView: View {
     }
 
     private var exercisesHeader: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 4) {
             Text("Exercises")
-                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                .textCase(.uppercase)
+                .tracking(0.8)
 
             Button {
                 showingDeltaInfo = true
             } label: {
                 Image(systemName: "info.circle")
-                    .font(.system(size: 12))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground.opacity(0.6))
+                    .font(.system(size: 10))
+                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
             }
             .buttonStyle(.plain)
             .popover(isPresented: $showingDeltaInfo) {
@@ -725,9 +727,9 @@ struct HistoryView: View {
 
             Spacer()
         }
-        .padding(.top, 16)
-        .padding(.bottom, 10)
-        .padding(.leading, 8)
+        .padding(.top, 12)
+        .padding(.bottom, 6)
+        .padding(.leading, 4)
     }
 
     /// Format rest time from Double: converts to Int and delegates

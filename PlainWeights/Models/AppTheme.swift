@@ -64,7 +64,7 @@ enum AppTheme: String, CaseIterable {
 
     var surfaceColor: Color {
         switch self {
-        case .light, .system: return Color(red: 0.95, green: 0.95, blue: 0.96) // #f2f2f5
+        case .light, .system: return Color(red: 0.96, green: 0.96, blue: 0.97) // #f5f5f7
         case .dark: return Color(red: 0.08, green: 0.08, blue: 0.08)  // #141414
         }
     }

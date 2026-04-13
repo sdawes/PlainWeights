@@ -507,14 +507,14 @@ struct HistoryView: View {
 
                 // Column 2: PB star
                 Image(systemName: "star.fill")
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                     .foregroundStyle(hasPB ? themeManager.effectiveTheme.pbColor : .clear)
                     .frame(width: 20, alignment: .leading)
                     .offset(x: -3)
 
                 // Column 3: Exercise name
                 Text(name)
-                    .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
                 Spacer()
@@ -524,7 +524,7 @@ struct HistoryView: View {
                     DeltaIndicatorsView(deltas: deltas)
                 }
             }
-            .padding(.vertical, 10)
+            .padding(.vertical, 14)
             .padding(.horizontal, 12)
         }
     }
@@ -756,7 +756,7 @@ struct HistoryView: View {
                     .font(themeManager.effectiveTheme.interFont(size: 14))
                     .foregroundStyle(.secondary)
                 Image(systemName: "star.fill")
-                    .font(.system(size: 16))
+                    .font(.system(size: 15))
                     .foregroundStyle(themeManager.effectiveTheme.pbColor)
             }
         }

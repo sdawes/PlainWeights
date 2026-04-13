@@ -65,7 +65,7 @@ struct SetRowView: View {
                     // Col 2: PB indicator or spacer
                     if set.isPB {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 14))
+                            .font(.system(size: 13))
                             .foregroundStyle(themeManager.effectiveTheme.pbColor)
                             .frame(width: 24, alignment: setNumber >= 10 ? .center : .leading)
                             .offset(x: setNumber >= 10 ? 0 : -4)

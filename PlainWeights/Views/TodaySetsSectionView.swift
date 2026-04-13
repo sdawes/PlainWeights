@@ -57,7 +57,7 @@ struct TodaySetsSectionView: View {
 
                 if set.isPB {
                     Image(systemName: "star.fill")
-                        .font(.system(size: 14))
+                        .font(.system(size: 13))
                         .foregroundStyle(themeManager.effectiveTheme.pbColor)
                 }
 

@@ -83,6 +83,11 @@ enum ExerciseSetService {
         // Single save for all mutations (insert + rest time + PB)
         try context.save()
 
+        // Start Live Activity rest timer in Dynamic Island
+        Task { @MainActor in
+            RestTimerActivityManager.startTimer(exerciseName: exercise.name, startTime: set.timestamp)
+        }
+
         // Notify observers that set data changed
         notifySetDataChanged()
     }
@@ -141,6 +146,9 @@ enum ExerciseSetService {
     ) throws {
         set.restSeconds = min(seconds, 180)
         try context.save()
+
+        // Stop Live Activity rest timer
+        Task { @MainActor in RestTimerActivityManager.stopTimer() }
     }
 
     /// Update rest time on a set (called when timer expires at 180s)
@@ -153,6 +161,9 @@ enum ExerciseSetService {
     ) throws {
         set.restSeconds = 180
         try context.save()
+
+        // Stop Live Activity rest timer
+        Task { @MainActor in RestTimerActivityManager.stopTimer() }
     }
 
     // MARK: - Delete Set

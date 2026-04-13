@@ -6,7 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1F84645B2F8D84FC0048682D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F84645A2F8D84FC0048682D /* WidgetKit.framework */; };
+		1F84645D2F8D84FC0048682D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F84645C2F8D84FC0048682D /* SwiftUI.framework */; };
+		1F84646C2F8D84FE0048682D /* PlainWeightsTimerExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1F8464582F8D84FC0048682D /* PlainWeightsTimerExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		1F84646A2F8D84FE0048682D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1FB1C4FE2E50DA530053C668 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1F8464572F8D84FC0048682D;
+			remoteInfo = PlainWeightsTimerExtension;
+		};
 		1FB1C5152E50DA540053C668 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1FB1C4FE2E50DA530053C668 /* Project object */;
@@ -16,7 +29,25 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		1F84646D2F8D84FE0048682D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1F84646C2F8D84FE0048682D /* PlainWeightsTimerExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		1F8464582F8D84FC0048682D /* PlainWeightsTimerExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PlainWeightsTimerExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F84645A2F8D84FC0048682D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		1F84645C2F8D84FC0048682D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		1F8464722F8D85720048682D /* PlainWeightsTimerExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PlainWeightsTimerExtension.entitlements; sourceTree = "<group>"; };
 		1FB1C5062E50DA530053C668 /* PlainWeights.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlainWeights.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FB1C5142E50DA540053C668 /* PlainWeightsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlainWeightsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -29,13 +60,36 @@
 			);
 			target = 1FB1C5052E50DA530053C668 /* PlainWeights */;
 		};
+		1F8464712F8D84FE0048682D /* Exceptions for "PlainWeightsTimer" folder in "PlainWeightsTimerExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1F8464572F8D84FC0048682D /* PlainWeightsTimerExtension */;
+		};
+		1F8464782F8D87960048682D /* Exceptions for "PlainWeights" folder in "PlainWeightsTimerExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/RestTimerAttributes.swift,
+			);
+			target = 1F8464572F8D84FC0048682D /* PlainWeightsTimerExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		1F84645E2F8D84FC0048682D /* PlainWeightsTimer */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1F8464712F8D84FE0048682D /* Exceptions for "PlainWeightsTimer" folder in "PlainWeightsTimerExtension" target */,
+			);
+			path = PlainWeightsTimer;
+			sourceTree = "<group>";
+		};
 		1FB1C5082E50DA530053C668 /* PlainWeights */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				1F36B1312F158C7B0019B8FE /* Exceptions for "PlainWeights" folder in "PlainWeights" target */,
+				1F8464782F8D87960048682D /* Exceptions for "PlainWeights" folder in "PlainWeightsTimerExtension" target */,
 			);
 			path = PlainWeights;
 			sourceTree = "<group>";
@@ -43,6 +97,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1F8464552F8D84FC0048682D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F84645D2F8D84FC0048682D /* SwiftUI.framework in Frameworks */,
+				1F84645B2F8D84FC0048682D /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1FB1C5032E50DA530053C668 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -60,10 +123,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1F8464592F8D84FC0048682D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1F84645A2F8D84FC0048682D /* WidgetKit.framework */,
+				1F84645C2F8D84FC0048682D /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		1FB1C4FD2E50DA530053C668 = {
 			isa = PBXGroup;
 			children = (
+				1F8464722F8D85720048682D /* PlainWeightsTimerExtension.entitlements */,
 				1FB1C5082E50DA530053C668 /* PlainWeights */,
+				1F84645E2F8D84FC0048682D /* PlainWeightsTimer */,
+				1F8464592F8D84FC0048682D /* Frameworks */,
 				1FB1C5072E50DA530053C668 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -73,6 +148,7 @@
 			children = (
 				1FB1C5062E50DA530053C668 /* PlainWeights.app */,
 				1FB1C5142E50DA540053C668 /* PlainWeightsTests.xctest */,
+				1F8464582F8D84FC0048682D /* PlainWeightsTimerExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,6 +156,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1F8464572F8D84FC0048682D /* PlainWeightsTimerExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1F8464702F8D84FE0048682D /* Build configuration list for PBXNativeTarget "PlainWeightsTimerExtension" */;
+			buildPhases = (
+				1F8464542F8D84FC0048682D /* Sources */,
+				1F8464552F8D84FC0048682D /* Frameworks */,
+				1F8464562F8D84FC0048682D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1F84645E2F8D84FC0048682D /* PlainWeightsTimer */,
+			);
+			name = PlainWeightsTimerExtension;
+			packageProductDependencies = (
+			);
+			productName = PlainWeightsTimerExtension;
+			productReference = 1F8464582F8D84FC0048682D /* PlainWeightsTimerExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		1FB1C5052E50DA530053C668 /* PlainWeights */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1FB1C5282E50DA540053C668 /* Build configuration list for PBXNativeTarget "PlainWeights" */;
@@ -87,10 +185,12 @@
 				1FB1C5022E50DA530053C668 /* Sources */,
 				1FB1C5032E50DA530053C668 /* Frameworks */,
 				1FB1C5042E50DA530053C668 /* Resources */,
+				1F84646D2F8D84FE0048682D /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1F84646B2F8D84FE0048682D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				1FB1C5082E50DA530053C668 /* PlainWeights */,
@@ -129,9 +229,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1640;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					1F8464572F8D84FC0048682D = {
+						CreatedOnToolsVersion = 26.4;
+					};
 					1FB1C5052E50DA530053C668 = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -157,11 +260,19 @@
 			targets = (
 				1FB1C5052E50DA530053C668 /* PlainWeights */,
 				1FB1C5132E50DA540053C668 /* PlainWeightsTests */,
+				1F8464572F8D84FC0048682D /* PlainWeightsTimerExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1F8464562F8D84FC0048682D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1FB1C5042E50DA530053C668 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -179,6 +290,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1F8464542F8D84FC0048682D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1FB1C5022E50DA530053C668 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -196,6 +314,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1F84646B2F8D84FE0048682D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1F8464572F8D84FC0048682D /* PlainWeightsTimerExtension */;
+			targetProxy = 1F84646A2F8D84FE0048682D /* PBXContainerItemProxy */;
+		};
 		1FB1C5162E50DA540053C668 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1FB1C5052E50DA530053C668 /* PlainWeights */;
@@ -204,6 +327,73 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		1F84646E2F8D84FE0048682D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = PlainWeightsTimerExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 5GD9WZ2Y4S;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PlainWeightsTimer/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PlainWeightsTimer;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stevolution.PlainWeights.PlainWeightsTimer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1F84646F2F8D84FE0048682D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = PlainWeightsTimerExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 5GD9WZ2Y4S;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PlainWeightsTimer/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PlainWeightsTimer;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stevolution.PlainWeights.PlainWeightsTimer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		1FB1C5262E50DA540053C668 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -342,7 +532,9 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PlainWeights/Info.plist;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -387,7 +579,9 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PlainWeights/Info.plist;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -467,6 +661,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1F8464702F8D84FE0048682D /* Build configuration list for PBXNativeTarget "PlainWeightsTimerExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F84646E2F8D84FE0048682D /* Debug */,
+				1F84646F2F8D84FE0048682D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1FB1C5012E50DA530053C668 /* Build configuration list for PBXProject "PlainWeights" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

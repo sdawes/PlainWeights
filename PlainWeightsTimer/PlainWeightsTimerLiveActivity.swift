@@ -27,8 +27,11 @@ struct PlainWeightsTimerLiveActivity: Widget {
                         .fixedSize(horizontal: true, vertical: false)
                 }
             } compactLeading: {
-                Text("⏱")
-                    .font(.system(size: 12))
+                Image("Timer_Icon")
+                    .resizable()
+                    .renderingMode(.template)
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundStyle(.green)
             } compactTrailing: {
                 Text(timerInterval: context.attributes.startTime...context.attributes.startTime.addingTimeInterval(context.attributes.maxDuration),
                      countsDown: false)

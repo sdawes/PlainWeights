@@ -12,15 +12,11 @@ import Foundation
 @MainActor
 enum RestTimerActivityManager {
 
-    /// The currently running Live Activity, if any
     private(set) static var currentActivity: Activity<RestTimerAttributes>?
 
-    /// Start a rest timer Live Activity
     static func startTimer(exerciseName: String, startTime: Date) {
-        // End any existing timer first
         stopTimer()
 
-        // Check if Live Activities are available
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
         let attributes = RestTimerAttributes(
@@ -39,11 +35,10 @@ enum RestTimerActivityManager {
             )
             currentActivity = activity
         } catch {
-            // Silently fail — Live Activities are a nice-to-have, not critical
+            print("[RestTimer] Failed to start Live Activity: \(error)")
         }
     }
 
-    /// Stop the current rest timer Live Activity
     static func stopTimer() {
         guard let activity = currentActivity else { return }
 

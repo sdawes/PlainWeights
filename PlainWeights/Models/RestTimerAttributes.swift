@@ -7,15 +7,14 @@
 //
 
 import ActivityKit
-import Foundation
+import SwiftUI
 
 struct RestTimerAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         var timerRunning: Bool
     }
 
-    // Static data — set when activity starts, never changes
     var exerciseName: String
     var startTime: Date
-    var maxDuration: TimeInterval  // 180 seconds
+    var maxDuration: TimeInterval
 }

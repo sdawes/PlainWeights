@@ -23,7 +23,7 @@ struct PlainWeightsTimerLiveActivity: Widget {
                     Text(timerInterval: context.attributes.startTime...context.attributes.startTime.addingTimeInterval(context.attributes.maxDuration),
                          countsDown: false)
                         .font(.system(size: 22, weight: .semibold).monospacedDigit())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(context.state.timerColor)
                         .fixedSize(horizontal: true, vertical: false)
                 }
             } compactLeading: {
@@ -36,12 +36,12 @@ struct PlainWeightsTimerLiveActivity: Widget {
                 Text(timerInterval: context.attributes.startTime...context.attributes.startTime.addingTimeInterval(context.attributes.maxDuration),
                      countsDown: false)
                     .font(.system(size: 14, weight: .semibold).monospacedDigit())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(context.state.timerColor)
                     .frame(width: 50, alignment: .trailing)
                     .clipped()
             } minimal: {
                 Circle()
-                    .fill(.white)
+                    .fill(context.state.timerColor)
                     .frame(width: 8, height: 8)
             }
         }
@@ -51,5 +51,5 @@ struct PlainWeightsTimerLiveActivity: Widget {
 #Preview("Notification", as: .content, using: RestTimerAttributes(exerciseName: "Bench Press", startTime: Date(), maxDuration: 180)) {
     PlainWeightsTimerLiveActivity()
 } contentStates: {
-    RestTimerAttributes.ContentState(timerRunning: true)
+    RestTimerAttributes.ContentState(timerRunning: true, phase: .normal)
 }

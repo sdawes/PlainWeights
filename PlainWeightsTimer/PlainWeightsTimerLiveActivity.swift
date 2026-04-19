@@ -35,14 +35,18 @@ struct PlainWeightsTimerLiveActivity: Widget {
             } compactTrailing: {
                 Text(timerInterval: context.attributes.startTime...context.attributes.startTime.addingTimeInterval(context.attributes.maxDuration),
                      countsDown: false)
-                    .font(.system(size: 14, weight: .semibold).monospacedDigit())
+                    .font(.system(size: 14, weight: .bold).monospacedDigit())
                     .foregroundStyle(context.state.timerColor)
                     .frame(width: 50, alignment: .trailing)
                     .clipped()
             } minimal: {
-                Circle()
-                    .fill(context.state.timerColor)
-                    .frame(width: 8, height: 8)
+                Text(timerInterval: context.attributes.startTime...context.attributes.startTime.addingTimeInterval(context.attributes.maxDuration),
+                     countsDown: false)
+                    .font(.system(size: 12, weight: .bold).monospacedDigit())
+                    .foregroundStyle(context.state.timerColor)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 36, alignment: .center)
+                    .clipped()
             }
         }
     }

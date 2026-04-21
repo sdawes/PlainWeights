@@ -13,9 +13,32 @@ import SwiftUI
 struct PlainWeightsTimerLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: RestTimerAttributes.self) { context in
-            Color.clear
-                .frame(height: 1)
-                .activityBackgroundTint(.black)
+            HStack(spacing: 14) {
+                Image("Timer_Icon")
+                    .resizable()
+                    .renderingMode(.template)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 18, height: 18)
+                    .foregroundStyle(.green)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("RESTING")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.35))
+                        .tracking(0.8)
+                    Text(context.attributes.exerciseName)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                }
+                Spacer()
+                Text(timerInterval: context.attributes.startTime...context.attributes.startTime.addingTimeInterval(context.attributes.maxDuration),
+                     countsDown: false)
+                    .font(.system(size: 28, weight: .bold).monospacedDigit())
+                    .foregroundStyle(context.isStale ? .gray : context.state.timerColor)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .activityBackgroundTint(.black)
 
         } dynamicIsland: { context in
             DynamicIsland {

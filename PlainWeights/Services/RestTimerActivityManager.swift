@@ -8,6 +8,7 @@
 
 import ActivityKit
 import Foundation
+import UIKit
 
 @MainActor
 enum RestTimerActivityManager {
@@ -65,11 +66,19 @@ enum RestTimerActivityManager {
         phaseUpdateTask?.cancel()
 
         phaseUpdateTask = Task {
+            var bgTask = UIBackgroundTaskIdentifier.invalid
+            bgTask = await UIApplication.shared.beginBackgroundTask {
+                UIApplication.shared.endBackgroundTask(bgTask)
+            }
+
             let warningDelay = startTime.addingTimeInterval(60).timeIntervalSinceNow
             if warningDelay > 0 {
                 try? await Task.sleep(for: .seconds(warningDelay))
             }
-            guard !Task.isCancelled, let activity = currentActivity else { return }
+            guard !Task.isCancelled, let activity = currentActivity else {
+                UIApplication.shared.endBackgroundTask(bgTask)
+                return
+            }
 
             let warningState = RestTimerAttributes.ContentState(timerRunning: true, phase: .warning)
             await activity.update(ActivityContent(state: warningState, staleDate: staleDate))
@@ -78,10 +87,26 @@ enum RestTimerActivityManager {
             if urgentDelay > 0 {
                 try? await Task.sleep(for: .seconds(urgentDelay))
             }
-            guard !Task.isCancelled, let activity = currentActivity else { return }
+            guard !Task.isCancelled, let activity = currentActivity else {
+                UIApplication.shared.endBackgroundTask(bgTask)
+                return
+            }
 
             let urgentState = RestTimerAttributes.ContentState(timerRunning: true, phase: .urgent)
             await activity.update(ActivityContent(state: urgentState, staleDate: staleDate))
+
+            // Auto-dismiss at 180s
+            let dismissDelay = startTime.addingTimeInterval(180).timeIntervalSinceNow
+            if dismissDelay > 0 {
+                try? await Task.sleep(for: .seconds(dismissDelay))
+            }
+            guard !Task.isCancelled else {
+                UIApplication.shared.endBackgroundTask(bgTask)
+                return
+            }
+
+            stopTimer()
+            UIApplication.shared.endBackgroundTask(bgTask)
         }
     }
 }

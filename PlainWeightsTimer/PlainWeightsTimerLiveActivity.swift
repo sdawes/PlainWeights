@@ -31,6 +31,7 @@ struct PlainWeightsTimerLiveActivity: Widget {
                     .resizable()
                     .renderingMode(.template)
                     .aspectRatio(contentMode: .fit)
+                    .frame(width: 16, height: 16)
                     .foregroundStyle(.green)
             } compactTrailing: {
                 Text(timerInterval: context.attributes.startTime...context.attributes.startTime.addingTimeInterval(context.attributes.maxDuration),

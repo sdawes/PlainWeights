@@ -15,7 +15,33 @@ enum RestTimerActivityManager {
 
     private(set) static var currentActivity: Activity<RestTimerAttributes>?
 
-    private static var phaseUpdateTask: Task<Void, Never>?
+    private static var foregroundObserver: NSObjectProtocol?
+
+    static func reconnectIfNeeded() {
+        guard currentActivity == nil else { return }
+        guard let activity = Activity<RestTimerAttributes>.activities.first else { return }
+
+        let startTime = activity.attributes.startTime
+        let elapsed = Date().timeIntervalSince(startTime)
+
+        if elapsed >= 180 {
+            Task { await activity.end(nil, dismissalPolicy: .immediate) }
+            return
+        }
+
+        currentActivity = activity
+        let staleDate = startTime.addingTimeInterval(180)
+
+        let phase: RestTimerPhase
+        if elapsed >= 120 { phase = .urgent }
+        else if elapsed >= 60 { phase = .warning }
+        else { phase = .normal }
+
+        let state = RestTimerAttributes.ContentState(timerRunning: true, phase: phase)
+        Task { await activity.update(ActivityContent(state: state, staleDate: staleDate)) }
+
+        observeForeground(startTime: startTime, staleDate: staleDate)
+    }
 
     static func startTimer(exerciseName: String, startTime: Date) {
         stopTimer()
@@ -38,15 +64,15 @@ enum RestTimerActivityManager {
                 pushType: nil
             )
             currentActivity = activity
-            schedulePhaseUpdates(startTime: startTime, staleDate: staleDate)
-        } catch {
-            print("[RestTimer] Failed to start Live Activity: \(error)")
-        }
+            observeForeground(startTime: startTime, staleDate: staleDate)
+        } catch { }
     }
 
     static func stopTimer() {
-        phaseUpdateTask?.cancel()
-        phaseUpdateTask = nil
+        if let observer = foregroundObserver {
+            NotificationCenter.default.removeObserver(observer)
+            foregroundObserver = nil
+        }
 
         guard let activity = currentActivity else { return }
 
@@ -62,51 +88,36 @@ enum RestTimerActivityManager {
         currentActivity = nil
     }
 
-    private static func schedulePhaseUpdates(startTime: Date, staleDate: Date) {
-        phaseUpdateTask?.cancel()
-
-        phaseUpdateTask = Task {
-            var bgTask = UIBackgroundTaskIdentifier.invalid
-            bgTask = await UIApplication.shared.beginBackgroundTask {
-                UIApplication.shared.endBackgroundTask(bgTask)
+    private static func observeForeground(startTime: Date, staleDate: Date) {
+        foregroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in
+                updatePhaseForElapsedTime(startTime: startTime, staleDate: staleDate)
             }
+        }
+    }
 
-            let warningDelay = startTime.addingTimeInterval(60).timeIntervalSinceNow
-            if warningDelay > 0 {
-                try? await Task.sleep(for: .seconds(warningDelay))
-            }
-            guard !Task.isCancelled, let activity = currentActivity else {
-                UIApplication.shared.endBackgroundTask(bgTask)
-                return
-            }
+    static func updatePhaseForElapsedTime(startTime: Date, staleDate: Date) {
+        guard currentActivity != nil else { return }
 
-            let warningState = RestTimerAttributes.ContentState(timerRunning: true, phase: .warning)
-            await activity.update(ActivityContent(state: warningState, staleDate: staleDate))
+        let elapsed = Date().timeIntervalSince(startTime)
 
-            let urgentDelay = startTime.addingTimeInterval(120).timeIntervalSinceNow
-            if urgentDelay > 0 {
-                try? await Task.sleep(for: .seconds(urgentDelay))
-            }
-            guard !Task.isCancelled, let activity = currentActivity else {
-                UIApplication.shared.endBackgroundTask(bgTask)
-                return
-            }
-
-            let urgentState = RestTimerAttributes.ContentState(timerRunning: true, phase: .urgent)
-            await activity.update(ActivityContent(state: urgentState, staleDate: staleDate))
-
-            // Auto-dismiss at 180s
-            let dismissDelay = startTime.addingTimeInterval(180).timeIntervalSinceNow
-            if dismissDelay > 0 {
-                try? await Task.sleep(for: .seconds(dismissDelay))
-            }
-            guard !Task.isCancelled else {
-                UIApplication.shared.endBackgroundTask(bgTask)
-                return
-            }
-
+        if elapsed >= 180 {
             stopTimer()
-            UIApplication.shared.endBackgroundTask(bgTask)
+            return
+        }
+
+        let phase: RestTimerPhase
+        if elapsed >= 120 { phase = .urgent }
+        else if elapsed >= 60 { phase = .warning }
+        else { phase = .normal }
+
+        let state = RestTimerAttributes.ContentState(timerRunning: true, phase: phase)
+        Task {
+            await currentActivity?.update(ActivityContent(state: state, staleDate: staleDate))
         }
     }
 }

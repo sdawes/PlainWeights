@@ -31,6 +31,9 @@ struct PlainWeightsApp: App {
         WindowGroup {
             ThemeAwareContentView(themeManager: themeManager)
                 .dynamicTypeSize(.large)
+                .onAppear {
+                    RestTimerActivityManager.reconnectIfNeeded()
+                }
         }
         .modelContainer(container)
     }

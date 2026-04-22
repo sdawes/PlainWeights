@@ -35,6 +35,8 @@ struct PlainWeightsTimerLiveActivity: Widget {
                      countsDown: false)
                     .font(.system(size: 28, weight: .bold).monospacedDigit())
                     .foregroundStyle(context.isStale ? .gray : context.state.timerColor)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 80, alignment: .trailing)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)

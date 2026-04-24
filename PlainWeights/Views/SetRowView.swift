@@ -102,7 +102,7 @@ struct SetRowView: View {
         }
         .background(cardPosition != nil ? themeManager.effectiveTheme.cardBackgroundColor : Color.clear)
         .clipShape(cardPosition != nil ? RoundedCorner(radius: 12, corners: cardCorners) : RoundedCorner(radius: 0, corners: []))
-        .overlay(cardBorderOverlay)
+        .overlay { cardBorderOverlay }
         .listRowBackground(rowBackground)
         .listRowInsets(cardPosition != nil ? EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16) : EdgeInsets())
         .listRowSeparator(cardPosition != nil ? .hidden : (isFirst ? .hidden : .visible), edges: .top)

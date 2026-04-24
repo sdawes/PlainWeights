@@ -318,11 +318,11 @@ struct FilteredExerciseListView: View {
                         navigationPath.append(HistoryDestination.history)
                     }
                 } label: {
-                    Image(systemName: "chart.bar.xaxis")
+                    Image(systemName: "clock.arrow.circlepath")
                         .font(.body)
                         .fontWeight(.medium)
                 }
-                .accessibilityLabel("View analytics")
+                .accessibilityLabel("View history")
             }
         }
         .sheet(isPresented: $showingAddExercise) {

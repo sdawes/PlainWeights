@@ -119,7 +119,7 @@ struct HistoryView: View {
             }
         }
         .background(AnimatedGradientBackground())
-        .navigationTitle("Analytics")
+        .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackgroundVisibility(.visible, for: .navigationBar)
         .onAppear {

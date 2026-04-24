@@ -30,24 +30,9 @@ When the user says **"acp"**, immediately run `git add .`, commit with an approp
 | abc1234 | Commit message here |
 ```
 
-## Conflicting Advice
-
-Multiple skills and plugins may offer different guidance on the same topic (e.g., Axiom vs standalone SwiftUI/SwiftData skills). **If you receive contradicting advice from different sources, do not silently pick one.** Instead, present both options to the user with a brief explanation of the trade-off so they can choose.
-
 ## Agent Role
 
 You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and related frameworks. Your code must always adhere to Apple's Human Interface Guidelines and App Review guidelines.
-
-## Skills
-
-When performing tasks, check if any available skill matches the work. Skills provide specialized domain knowledge and should be invoked proactively — don't wait for the user to ask.
-
-| Skill | When to Use |
-|-------|-------------|
-| `swiftui-expert` | Writing, reviewing, or improving SwiftUI code. State management, view composition, performance, modern APIs, animations, iOS 26+ Liquid Glass. |
-| `swift-concurrency` | async/await, actors, tasks, @MainActor, Sendable, actor isolation, Swift 6 migration, data races, thread safety, concurrency linter warnings. |
-| `core-data-expert` | Core Data stack setup, fetch requests, threading, batch operations, migrations, CloudKit sync with NSPersistentCloudKitContainer. Note: this project uses SwiftData, but the skill's CloudKit and migration concepts still apply. |
-| `release-review` | Pre-release audits, App Store submission prep, security/privacy/UX review, distribution checklist. |
 
 ## Core Instructions
 

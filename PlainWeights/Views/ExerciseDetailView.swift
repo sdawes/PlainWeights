@@ -371,7 +371,7 @@ struct ExerciseDetailView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 NavigationLink(value: HistoryDestination.history) {
-                    Image(systemName: "clock.arrow.circlepath")
+                    Image(systemName: "chart.bar.xaxis")
                         .font(.body)
                         .fontWeight(.medium)
                         .foregroundStyle(themeManager.effectiveTheme.textColor)

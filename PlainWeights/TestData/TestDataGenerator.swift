@@ -272,7 +272,7 @@ class TestDataGenerator {
         print("            // Recalculate PB flags for all exercises (safety net to ensure correctness)")
         print("            for (_, exercise) in exercises {")
         print("                // Get all sets for this exercise and recalculate PBs")
-        print("                for set in (exercise.sets ?? []) where !set.isWarmUp {")
+        print("                for set in (exercise.sets ?? []) {")
         print("                    try ExerciseSetService.detectAndMarkPB(for: set, exercise: exercise, context: modelContext)")
         print("                }")
         print("            }")

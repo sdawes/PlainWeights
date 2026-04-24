@@ -19,9 +19,9 @@ enum RepsAnalytics {
 
     /// Get total reps from today's session
     /// - Parameter sets: Array of ExerciseSet
-    /// - Returns: Sum of reps from today only (excluding warm-ups)
+    /// - Returns: Sum of reps from today only
     static func getTodayTotalReps(from sets: [ExerciseSet]) -> Int {
-        let todaySets = sets.filter { Calendar.current.isDateInToday($0.timestamp) && !$0.isWarmUp }
+        let todaySets = sets.filter { Calendar.current.isDateInToday($0.timestamp) }
         return calculateTotalReps(from: todaySets)
     }
 
@@ -53,9 +53,9 @@ enum RepsAnalytics {
     static func getLastSessionTotalRepsVolume(from sets: [ExerciseSet]) -> Int {
         let calendar = Calendar.current
 
-        // Filter out today's sets and warm-ups
+        // Filter out today's sets
         let historicWorkingSets = sets.filter {
-            !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp
+            !calendar.isDateInToday($0.timestamp)
         }
 
         // Group by day
@@ -85,9 +85,9 @@ enum RepsAnalytics {
     static func getBestSessionTotalReps(from sets: [ExerciseSet]) -> Int {
         let calendar = Calendar.current
 
-        // Filter out today's sets and warm-ups
+        // Filter out today's sets
         let historicWorkingSets = sets.filter {
-            !calendar.isDateInToday($0.timestamp) && !$0.isWarmUp
+            !calendar.isDateInToday($0.timestamp)
         }
 
         // Group by day

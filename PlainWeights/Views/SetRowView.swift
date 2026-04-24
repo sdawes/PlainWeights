@@ -228,7 +228,7 @@ struct SetRowView: View {
     }
 
     private var weightRepsAttributedString: AttributedString {
-        let valueColor: Color = set.isWarmUp ? .secondary : .primary
+        let valueColor: Color = .primary
         let valueFont = themeManager.effectiveTheme.dataFont(size: 20, weight: .medium)
         let separatorFont = themeManager.effectiveTheme.interFont(size: 14)
 

@@ -20,20 +20,19 @@ enum TodaySessionCalculator {
         return sets.filter { calendar.startOfDay(for: $0.timestamp) == today }
     }
 
-    /// Get today's most recent (newest) working set
+    /// Get today's most recent (newest) set
     static func getTodaysMostRecentSet(from sets: [ExerciseSet]) -> ExerciseSet? {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
         return sets
-            .filter { calendar.startOfDay(for: $0.timestamp) == today && !$0.isWarmUp }
+            .filter { calendar.startOfDay(for: $0.timestamp) == today }
             .first  // Sets are already sorted by timestamp descending
     }
 
     // MARK: - Today's Metrics
 
     /// Calculate total volume lifted today (updates live as sets are added)
-    /// Excludes warm-up sets from volume calculation
     static func getTodaysVolume(from sets: [ExerciseSet]) -> Double {
         let todaySets = getTodaysSets(from: sets)
         let workingSets = todaySets.workingSets
@@ -41,7 +40,6 @@ enum TodaySessionCalculator {
     }
 
     /// Get session metrics for today's session
-    /// Excludes warm-up sets from metrics calculation
     static func getTodaySessionMetrics(from sets: [ExerciseSet]) -> SessionMetrics? {
         let todaySets = getTodaysSets(from: sets)
         let workingSets = todaySets.workingSets
@@ -102,7 +100,7 @@ enum TodaySessionCalculator {
         return max(1, Int(duration / 60))  // Minimum 1 minute (for single set: ~3 min)
     }
 
-    /// Get today's total reps (sum of working sets only - excludes warm-up)
+    /// Get today's total reps
     static func getTodaysTotalReps(from sets: [ExerciseSet]) -> Int {
         let todaySets = getTodaysSets(from: sets)
         return todaySets.workingSets.reduce(0) { $0 + $1.reps }

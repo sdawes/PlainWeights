@@ -210,7 +210,7 @@ enum ExerciseSetService {
     static func recalculatePB(for exercise: Exercise, context: ModelContext) throws {
         let exerciseID = exercise.persistentModelID
 
-        // Clear PB flags on ALL sets (including warm-up/bonus that may have stale flags)
+        // Clear PB flags on ALL sets (including bonus/stale flags)
         let allSetsDescriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
                 set.exercise?.persistentModelID == exerciseID && set.isPB == true
@@ -220,19 +220,19 @@ enum ExerciseSetService {
             set.isPB = false
         }
 
-        // Find new PB among working sets only
-        let workingDescriptor = FetchDescriptor<ExerciseSet>(
+        // Find new PB among all sets for this exercise
+        let allDescriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
-                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp
+                set.exercise?.persistentModelID == exerciseID
             }
         )
-        let allWorkingSets = try context.fetch(workingDescriptor)
+        let allSets = try context.fetch(allDescriptor)
 
-        guard let maxWeight = allWorkingSets.map({ $0.weight }).max() else {
-            // No working sets — PB flags already cleared above
+        guard let maxWeight = allSets.map({ $0.weight }).max() else {
+            // No sets — PB flags already cleared above
             return
         }
-        let setsAtMaxWeight = allWorkingSets.filter { $0.weight == maxWeight }
+        let setsAtMaxWeight = allSets.filter { $0.weight == maxWeight }
         guard let maxReps = setsAtMaxWeight.map({ $0.reps }).max() else {
             return
         }
@@ -289,7 +289,7 @@ enum ExerciseSetService {
         set.isTimedSet = isTimedSet
         set.tempoSeconds = tempoSeconds
 
-        // Recalculate PBs since values or warm-up status may have changed
+        // Recalculate PBs since weight or reps may have changed
         if let exercise = set.exercise {
             try detectAndMarkPB(for: set, exercise: exercise, context: context)
         }
@@ -312,13 +312,6 @@ enum ExerciseSetService {
         context: ModelContext
     ) throws {
         set.isWarmUp.toggle()
-
-        // Recalculate PBs since warm-up status affects eligibility
-        if let exercise = set.exercise {
-            try detectAndMarkPB(for: set, exercise: exercise, context: context)
-        }
-
-        // Single save for all mutations (toggle + PB recalc)
         try context.save()
 
         // Notify observers that set data changed
@@ -350,7 +343,7 @@ enum ExerciseSetService {
     /// 1. Weight takes precedence (highest weight wins)
     /// 2. If multiple sets at same max weight, highest reps wins
     /// 3. If same weight AND reps, earliest timestamp keeps PB
-    /// 4. Warm-up sets are excluded from PB consideration
+    /// 4. All sets are eligible, including warm-ups
     ///
     /// - Parameters:
     ///   - newSet: The newly added set to evaluate
@@ -361,17 +354,9 @@ enum ExerciseSetService {
         exercise: Exercise,
         context: ModelContext
     ) throws {
-        // Only working sets can be PBs (exclude warm-ups)
-        guard !newSet.isWarmUp else {
-            // Recalculate to clear any stale PB flags (including on this set)
-            try recalculatePB(for: exercise, context: context)
-            return
-        }
-
-        // Fetch all working sets for this exercise
         let exerciseID = exercise.persistentModelID
 
-        // Clear PB flags on ALL sets first (including warm-up/bonus with stale flags)
+        // Clear PB flags on ALL sets first (including bonus/stale flags)
         let allSetsDescriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
                 set.exercise?.persistentModelID == exerciseID && set.isPB == true
@@ -381,23 +366,23 @@ enum ExerciseSetService {
             set.isPB = false
         }
 
-        // Find PB among working sets only
+        // Find PB among all sets for this exercise
         let descriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
-                set.exercise?.persistentModelID == exerciseID && !set.isWarmUp
+                set.exercise?.persistentModelID == exerciseID
             },
             sortBy: [SortDescriptor(\.weight, order: .reverse), SortDescriptor(\.reps, order: .reverse), SortDescriptor(\.timestamp)]
         )
 
-        let allWorkingSets = try context.fetch(descriptor)
+        let allSets = try context.fetch(descriptor)
 
-        guard !allWorkingSets.isEmpty else {
-            // No working sets — PB flags already cleared above
+        guard !allSets.isEmpty else {
+            // No sets — PB flags already cleared above
             return
         }
 
         // First set is the PB due to sort order
-        let currentPB = allWorkingSets[0]
+        let currentPB = allSets[0]
 
         // Mark the winner
         currentPB.isPB = true

@@ -16,7 +16,7 @@ final class ExerciseSet {
     var timestamp: Date = Date()
     var weight: Double = 0   // kg (or lbs) — Double is fine for 0.25 increments
     var reps: Int = 0
-    var isWarmUp: Bool = false       // flag to exclude from performance calculations
+    var isWarmUp: Bool = false       // flag to show the warm-up icon on the set row
     var isBonus: Bool = false        // DEPRECATED: kept for CloudKit compatibility, no longer used in UI
     var isDropSet: Bool = false      // flag to indicate drop set (included in performance calculations)
     var isAssisted: Bool = false     // flag to indicate assisted set (e.g., spotter help)
@@ -46,9 +46,9 @@ final class ExerciseSet {
 // MARK: - Array Extension for Working Sets
 
 extension Array where Element == ExerciseSet {
-    /// Working sets are sets that count towards metrics (excludes warm-up sets)
+    /// All sets count towards metrics, including warm-ups.
     var workingSets: [ExerciseSet] {
-        filter { !$0.isWarmUp }
+        self
     }
 }
 

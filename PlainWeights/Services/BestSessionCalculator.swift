@@ -43,18 +43,14 @@ enum BestSessionCalculator {
     /// - Finds the set with the highest weight
     /// - If multiple sets have the same max weight, returns the one with highest reps
     /// - For bodyweight exercises (0kg), returns the set with highest reps
-    /// - Excludes warm-up sets from calculations
-    /// - Returns nil if no working sets exist
+    /// - Returns nil if no sets exist
     ///
     /// Performance: O(n) single pass through sets array
     ///
     /// - Parameter sets: Array of exercise sets to analyze
-    /// - Returns: PersonalRecord with best weight/reps combination, or nil if no working sets
+    /// - Returns: PersonalRecord with best weight/reps combination, or nil if no sets
     static func calculateAllTimePR(from sets: [ExerciseSet]) -> PersonalRecord? {
-        // Filter out warm-up sets
         let workingSets = sets.workingSets
-
-        // Return nil if no working sets
         guard !workingSets.isEmpty else { return nil }
 
         // Check if this is a bodyweight exercise (all sets have 0 weight)
@@ -110,9 +106,8 @@ enum BestSessionCalculator {
     /// Performance: O(n) for filtering + O(n) for finding best set
     ///
     /// - Parameter sets: Array of exercise sets to analyze (including today's sets)
-    /// - Returns: BestDayMetrics with max weight, best reps, and total volume (0 for bodyweight), or nil if no working sets
+    /// - Returns: BestDayMetrics with max weight, best reps, and total volume (0 for bodyweight), or nil if no sets
     static func calculateBestDayMetrics(from sets: [ExerciseSet]) -> BestDayMetrics? {
-        // Filter out warm-up sets
         let workingSets = sets.workingSets
         guard !workingSets.isEmpty else { return nil }
 

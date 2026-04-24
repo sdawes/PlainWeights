@@ -53,7 +53,7 @@ struct HelpView: View {
 
                     helpSection(
                         title: "Personal Bests",
-                        body: "When you lift a heavier weight than ever before on an exercise, the set is marked with a star. Personal bests are based on working sets only. Warm-ups don't count."
+                        body: "When you lift a heavier weight than ever before on an exercise, the set is marked with a star. Every set counts — including warm-ups."
                     )
 
                     helpSection(

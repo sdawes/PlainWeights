@@ -117,7 +117,7 @@ struct ComparisonMetricsCard: View {
                 let todaysMaxWeight = TodaySessionCalculator.getTodaysMaxWeight(from: sets)
                 let todaysMaxReps = TodaySessionCalculator.getTodaysMaxReps(from: sets)
                 let todaysVolume = TodaySessionCalculator.getTodaysVolume(from: sets)
-                let todaysTotalReps = todaysSets.workingSets.reduce(0) { $0 + $1.reps }
+                let todaysTotalReps = todaysSets.reduce(0) { $0 + $1.reps }
 
                 lastModeIndicators = ProgressTracker.LastModeIndicators.compare(
                     todaysMaxWeight: todaysMaxWeight,
@@ -158,8 +158,8 @@ struct ComparisonMetricsCard: View {
             lastModeIndicators: lastModeIndicators,
             bestModeIndicators: bestModeIndicators,
             todaysVolume: TodaySessionCalculator.getTodaysVolume(from: sets),
-            todaysTotalReps: todaysSets.workingSets.reduce(0) { $0 + $1.reps },
-            lastSetWeight: todaysSets.first(where: { !$0.isWarmUp })?.weight,
+            todaysTotalReps: todaysSets.reduce(0) { $0 + $1.reps },
+            lastSetWeight: todaysSets.first?.weight,
             todaysBestWeight: TodaySessionCalculator.getTodaysMaxWeight(from: sets),
             todaysBestReps: TodaySessionCalculator.getTodaysHighestReps(from: sets)
         )
@@ -216,14 +216,14 @@ struct ComparisonMetricsCard: View {
         return metrics.maxWeight == 0
     }
 
-    // Most recent working set from today (sets are sorted most-recent-first)
+    // Most recent set from today (sets are sorted most-recent-first)
     private var mostRecentWorkingSet: ExerciseSet? {
-        todaysSets.first(where: { !$0.isWarmUp })
+        todaysSets.first
     }
 
-    // Check if today has working sets
+    // Check if today has any sets
     private var hasWorkingSets: Bool {
-        todaysSets.contains { !$0.isWarmUp }
+        !todaysSets.isEmpty
     }
 
     var body: some View {
@@ -335,7 +335,7 @@ struct ComparisonMetricsCard: View {
     /// Build the bar column data from cached metrics for the VerticalBarComparison
     private func buildBarColumns(from metrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)) -> [BarColumnData] {
         let lastSet = mostRecentWorkingSet
-        let workingSetCount = todaysSets.filter { !$0.isWarmUp }.count
+        let workingSetCount = todaysSets.count
         let isLastSession = comparisonMode == .lastSession
         let tol = ProgressTracker.weightTolerance
 

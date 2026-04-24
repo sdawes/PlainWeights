@@ -220,7 +220,7 @@ struct ExerciseDetailView: View {
                             isLast: isLast,
                             onTap: { addSetConfig = .edit(set: set, exercise: exercise) },
                             onDelete: { deleteSet(set) },
-                            allSets: set.isWarmUp ? nil : cachedAllSets,
+                            allSets: cachedAllSets,
                             showTimer: index == 0,
                             cardPosition: isLast ? .bottom : .middle,
                             isFirstInCard: index == 0,
@@ -518,7 +518,7 @@ struct ExerciseDetailView: View {
         cachedIsWeightedExercise = workingSets.contains { $0.weight > 0 }
 
         // Last set weight for reps remaining hint (derive from already-computed todaySets)
-        cachedLastSetWeight = todaySets.first(where: { !$0.isWarmUp })?.weight
+        cachedLastSetWeight = todaySets.first?.weight
 
         // Delta indicators comparing today vs last session and best ever
         let lastIsRepsOnly = !cachedIsWeightedExercise

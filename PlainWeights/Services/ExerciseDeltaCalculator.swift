@@ -62,8 +62,8 @@ enum ExerciseDeltaCalculator {
                 continue
             }
 
-            // Previous session values (use working sets only for consistency)
-            let prevWorkingSets = previousDaySets.filter { !$0.isWarmUp }
+            // Previous session values
+            let prevWorkingSets = previousDaySets
             let prevMaxWeight: Double = prevWorkingSets.map(\.weight).max() ?? 0
             // Reps at max weight (consistent with card display), or overall max reps for reps-only
             let prevMaxReps: Int
@@ -146,13 +146,12 @@ enum ExerciseDeltaCalculator {
         return ExerciseDeltas(weight: weightDir, reps: repsDir, volume: volumeDir)
     }
 
-    /// Build a dictionary index of working sets grouped by exercise ID.
+    /// Build a dictionary index of sets grouped by exercise ID.
     /// Called once before processing multiple days to avoid repeated O(N) scans.
     static func buildWorkingSetIndex(from allSets: [ExerciseSet]) -> [PersistentIdentifier: [ExerciseSet]] {
         var index: [PersistentIdentifier: [ExerciseSet]] = [:]
         for set in allSets {
-            guard let exerciseID = set.exercise?.persistentModelID,
-                  !set.isWarmUp else { continue }
+            guard let exerciseID = set.exercise?.persistentModelID else { continue }
             index[exerciseID, default: []].append(set)
         }
         return index

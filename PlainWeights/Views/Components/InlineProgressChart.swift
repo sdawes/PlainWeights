@@ -221,7 +221,6 @@ struct InlineProgressChart: View {
     private static func computeChartState(from sets: [ExerciseSet], timeRange: ChartTimeRange) -> CachedChartState {
         let calendar = Calendar.current
 
-        // Filter out warm-up and bonus sets
         var workingSets = sets.workingSets
 
         // Compute isRepsOnly once here (all working sets have weight == 0)

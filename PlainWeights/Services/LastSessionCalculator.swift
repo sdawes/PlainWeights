@@ -63,7 +63,7 @@ enum LastSessionCalculator {
 
         let calendar = Calendar.current
         let lastSessionSets = sets.filter { set in
-            calendar.startOfDay(for: set.timestamp) == calendar.startOfDay(for: lastSessionInfo.date) && !set.isWarmUp
+            calendar.startOfDay(for: set.timestamp) == calendar.startOfDay(for: lastSessionInfo.date)
         }
 
         return ExerciseVolumeCalculator.getSessionMetrics(for: lastSessionSets, date: lastSessionInfo.date)
@@ -90,7 +90,7 @@ enum LastSessionCalculator {
         // Calculate total reps from last session
         let calendar = Calendar.current
         let lastSessionSets = sets.filter { set in
-            calendar.startOfDay(for: set.timestamp) == calendar.startOfDay(for: lastDayInfo.date) && !set.isWarmUp
+            calendar.startOfDay(for: set.timestamp) == calendar.startOfDay(for: lastDayInfo.date)
         }
         let totalReps = lastSessionSets.reduce(0) { $0 + $1.reps }
 

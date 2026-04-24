@@ -13,7 +13,7 @@ enum VolumeAnalytics {
 
     // MARK: - Volume Calculations
 
-    /// Calculate volume for a specific set of exercise sets (excludes warm-up sets)
+    /// Calculate volume for a specific set of exercise sets
     static func calculateVolume(for sets: [ExerciseSet]) -> Double {
         sets.workingSets.reduce(0) { $0 + $1.weight * Double($1.reps) }
     }

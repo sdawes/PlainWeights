@@ -21,7 +21,7 @@ struct TodaySetsSectionView: View {
             HStack(alignment: .bottom) {
                 Text(ExerciseSetFormatters.formatSet(set, unit: themeManager.weightUnit))
                     .font(themeManager.effectiveTheme.bodyFont)
-                    .foregroundStyle(set.isWarmUp ? .secondary : .primary)
+                    .foregroundStyle(.primary)
 
                 Spacer()
 

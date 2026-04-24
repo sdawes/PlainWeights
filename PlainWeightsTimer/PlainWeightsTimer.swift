@@ -76,9 +76,4 @@ struct PlainWeightsTimer: Widget {
     }
 }
 
-#Preview(as: .systemSmall) {
-    PlainWeightsTimer()
-} timeline: {
-    SimpleEntry(date: .now, emoji: "😀")
-    SimpleEntry(date: .now, emoji: "🤩")
-}
+

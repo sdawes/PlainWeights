@@ -19,6 +19,15 @@ enum DeltaDirection {
         case .noData: return .gray.opacity(0.3)
         }
     }
+
+    var arrowSymbol: String {
+        switch self {
+        case .up: return "arrow.up"
+        case .down: return "arrow.down"
+        case .same: return "arrow.right"
+        case .noData: return "minus"
+        }
+    }
 }
 
 /// Deltas for an exercise compared to previous session

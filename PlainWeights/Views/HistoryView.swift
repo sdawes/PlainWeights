@@ -92,11 +92,11 @@ struct HistoryView: View {
     @State private var cachedExerciseDeltas: [PersistentIdentifier: ExerciseDeltas] = [:]
     @State private var cachedExercisePBFlags: [PersistentIdentifier: Bool] = [:]
 
-    // Show delta symbols info popover
-    @State private var showingDeltaInfo = false
-
     // Selected content view tab (Summary / Muscle / Exercises)
     @State private var selectedView: HistoryViewTab = .summary
+
+    // Delta legend popover visibility
+    @State private var showingDeltaInfo = false
 
     private var hasTodaySets: Bool {
         allSets.contains { Calendar.current.isDateInToday($0.timestamp) }
@@ -130,22 +130,6 @@ struct HistoryView: View {
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackgroundVisibility(.visible, for: .navigationBar)
-        .toolbar {
-            if selectedView == .exercises {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingDeltaInfo = true
-                    } label: {
-                        Image(systemName: "info.circle")
-                            .font(.body)
-                            .fontWeight(.medium)
-                    }
-                    .popover(isPresented: $showingDeltaInfo) {
-                        DeltaInfoPopover()
-                    }
-                }
-            }
-        }
         .onAppear {
             updateCaches()
         }
@@ -251,6 +235,10 @@ struct HistoryView: View {
         if selectedPeriod == .lastSession {
             if let day = cachedDisplayDay {
                 List {
+                    Section { deltaLegendHeader }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                     Section {
                         VStack(spacing: 0) {
                             ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
@@ -277,7 +265,7 @@ struct HistoryView: View {
                 .listStyle(.plain)
                 .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
-                .contentMargins(.top, 12, for: .scrollContent)
+                .contentMargins(.top, 4, for: .scrollContent)
             } else {
                 emptyState("Complete your first workout to see exercises here.")
             }
@@ -287,6 +275,11 @@ struct HistoryView: View {
                     let visibleDays = Array(cachedPeriodDays.prefix(visiblePeriodDaysCount))
                     let hasMoreDays = cachedPeriodDays.count > visiblePeriodDaysCount
                     let remainingCount = cachedPeriodDays.count - visiblePeriodDaysCount
+
+                    Section { deltaLegendHeader }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
 
                     ForEach(visibleDays) { daySummary in
                         Section {
@@ -340,11 +333,44 @@ struct HistoryView: View {
                 .listStyle(.plain)
                 .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
-                .contentMargins(.top, 12, for: .scrollContent)
+                .contentMargins(.top, 4, for: .scrollContent)
             } else {
                 emptyState("No workouts recorded for \(periodDescription.lowercased()).")
             }
         }
+    }
+
+    @ViewBuilder
+    private var deltaLegendHeader: some View {
+        HStack(spacing: 0) {
+            Button {
+                showingDeltaInfo = true
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 11))
+                    Text("Legend")
+                        .font(themeManager.effectiveTheme.interFont(size: 11, weight: .medium))
+                }
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: $showingDeltaInfo) {
+                DeltaInfoPopover()
+            }
+
+            Spacer()
+
+            HStack(spacing: 0) {
+                Text("W").frame(width: 20)
+                Text("R").frame(width: 20)
+                Text("V").frame(width: 20)
+            }
+            .font(themeManager.effectiveTheme.interFont(size: 10, weight: .semibold))
+            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+        }
+        .padding(.horizontal, 12)
     }
 
     private var currentTagDistribution: [(tag: String, percentage: Double)] {

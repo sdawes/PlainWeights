@@ -2,82 +2,84 @@
 //  DeltaIndicatorsView.swift
 //  PlainWeights
 //
-//  Displays three delta indicator icons showing whether max weight,
+//  Displays three delta indicator arrows showing whether max weight,
 //  max reps, and total volume improved vs the previous session.
 //
 
 import SwiftUI
 
-/// Row of three delta indicator icons (weight, reps, volume)
+/// Row of three delta indicator arrows (weight, reps, volume)
 struct DeltaIndicatorsView: View {
-    @Environment(ThemeManager.self) private var themeManager
     let deltas: ExerciseDeltas
 
     var body: some View {
         HStack(spacing: 0) {
-            deltaIcon("scalemass.fill", direction: deltas.weight)
+            deltaIcon(direction: deltas.weight)
                 .frame(width: 20)
-            deltaIcon("repeat", direction: deltas.reps)
+            deltaIcon(direction: deltas.reps)
                 .frame(width: 20)
-            deltaIcon("chart.bar.fill", direction: deltas.volume)
+            deltaIcon(direction: deltas.volume)
                 .frame(width: 20)
         }
     }
 
     @ViewBuilder
-    private func deltaIcon(_ symbolName: String, direction: DeltaDirection) -> some View {
-        Image(systemName: symbolName)
-            .font(.system(size: 10, weight: .bold))
+    private func deltaIcon(direction: DeltaDirection) -> some View {
+        Image(systemName: direction.arrowSymbol)
+            .font(.system(size: 11, weight: .bold))
             .foregroundStyle(direction.color)
     }
 }
 
-/// Info popover explaining what the delta indicators mean
+/// Info popover explaining what the W / R / V column arrows mean
 struct DeltaInfoPopover: View {
     @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Compared to previous session")
                 .font(themeManager.effectiveTheme.interFont(size: 14, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
             VStack(alignment: .leading, spacing: 8) {
-                infoRow(symbol: "scalemass.fill", label: "Max weight")
-                infoRow(symbol: "repeat", label: "Max reps")
-                infoRow(symbol: "chart.bar.fill", label: "Total volume")
+                columnRow(letter: "W", label: "Max weight")
+                columnRow(letter: "R", label: "Max reps")
+                columnRow(letter: "V", label: "Total volume")
             }
 
             Divider()
 
-            HStack(spacing: 16) {
-                legendItem(color: DeltaDirection.up.color, label: "Increase")
-                legendItem(color: DeltaDirection.down.color, label: "Decrease")
-                legendItem(color: DeltaDirection.same.color, label: "No change")
+            VStack(alignment: .leading, spacing: 8) {
+                directionRow(direction: .up, label: "Increased")
+                directionRow(direction: .down, label: "Decreased")
+                directionRow(direction: .same, label: "No change")
             }
-            .foregroundStyle(themeManager.effectiveTheme.secondaryText)
         }
         .padding(16)
         .presentationCompactAdaptation(.popover)
     }
 
-    private func infoRow(symbol: String, label: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: symbol)
-                .font(.system(size: 12))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                .frame(width: 20)
+    private func columnRow(letter: String, label: String) -> some View {
+        HStack(spacing: 10) {
+            Text(letter)
+                .font(themeManager.effectiveTheme.interFont(size: 12, weight: .semibold))
+                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
+                .frame(width: 16, alignment: .center)
             Text(label)
-                .font(themeManager.effectiveTheme.interFont(size: 13, weight: .regular))
+                .font(themeManager.effectiveTheme.interFont(size: 13))
                 .foregroundStyle(themeManager.effectiveTheme.secondaryText)
         }
     }
 
-    private func legendItem(color: Color, label: String) -> some View {
-        HStack(spacing: 4) {
-            Circle().fill(color).frame(width: 8, height: 8)
+    private func directionRow(direction: DeltaDirection, label: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: direction.arrowSymbol)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(direction.color)
+                .frame(width: 16, alignment: .center)
             Text(label)
-                .font(themeManager.effectiveTheme.captionFont)
+                .font(themeManager.effectiveTheme.interFont(size: 13))
+                .foregroundStyle(themeManager.effectiveTheme.secondaryText)
         }
     }
 }

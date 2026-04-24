@@ -15,6 +15,12 @@ enum HistoryTimePeriod: String, CaseIterable {
     case year = "Year"          // Rolling 365 days
 }
 
+enum HistoryViewTab: String, CaseIterable {
+    case summary = "Summary"
+    case muscle = "Muscle"
+    case exercises = "Exercises"
+}
+
 /// Aggregate metrics for a time period summary
 private struct PeriodMetrics {
     let dayCount: Int           // Unique workout days
@@ -89,10 +95,8 @@ struct HistoryView: View {
     // Show delta symbols info popover
     @State private var showingDeltaInfo = false
 
-
-
-    // Tag breakdown visibility toggle (default from setting)
-    @State private var showTagBreakdown = false
+    // Selected content view tab (Summary / Muscle / Exercises)
+    @State private var selectedView: HistoryViewTab = .summary
 
     private var hasTodaySets: Bool {
         allSets.contains { Calendar.current.isDateInToday($0.timestamp) }
@@ -110,20 +114,39 @@ struct HistoryView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
 
-            if selectedPeriod == .lastSession {
-                // Detailed last session view
-                lastSessionDetailView
-            } else {
-                // Period summary view
-                periodSummaryView
+            // View tab bar (Summary / Muscle / Exercises)
+            underlinedTabBar
+
+            // Content for the selected tab
+            Group {
+                switch selectedView {
+                case .summary: summaryTabContent
+                case .muscle: muscleTabContent
+                case .exercises: exercisesTabContent
+                }
             }
         }
         .background(AnimatedGradientBackground())
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackgroundVisibility(.visible, for: .navigationBar)
+        .toolbar {
+            if selectedView == .exercises {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingDeltaInfo = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .font(.body)
+                            .fontWeight(.medium)
+                    }
+                    .popover(isPresented: $showingDeltaInfo) {
+                        DeltaInfoPopover()
+                    }
+                }
+            }
+        }
         .onAppear {
-            showTagBreakdown = themeManager.tagBreakdownVisible
             updateCaches()
         }
         .onChange(of: allSets.count) { _, _ in
@@ -140,47 +163,95 @@ struct HistoryView: View {
         }
     }
 
-    // MARK: - Last Session Detail View
+    // MARK: - View Tab Bar
+
+    private var underlinedTabBar: some View {
+        HStack(spacing: 0) {
+            ForEach(HistoryViewTab.allCases, id: \.self) { tab in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedView = tab
+                    }
+                } label: {
+                    VStack(spacing: 0) {
+                        Text(tab.rawValue)
+                            .font(themeManager.effectiveTheme.interFont(
+                                size: 13,
+                                weight: selectedView == tab ? .semibold : .medium
+                            ))
+                            .foregroundStyle(
+                                selectedView == tab
+                                    ? themeManager.effectiveTheme.primaryText
+                                    : themeManager.effectiveTheme.mutedForeground
+                            )
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+
+                        Rectangle()
+                            .fill(selectedView == tab
+                                ? themeManager.effectiveTheme.primaryText
+                                : themeManager.effectiveTheme.dividerColor)
+                            .frame(height: 2)
+                    }
+                    .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 4)
+    }
+
+    // MARK: - Tab Content
 
     @ViewBuilder
-    private var lastSessionDetailView: some View {
-        if let day = cachedDisplayDay {
-            List {
-                    // Session info card
+    private var summaryTabContent: some View {
+        ScrollView {
+            if selectedPeriod == .lastSession {
+                if let day = cachedDisplayDay {
+                    sessionInfoCard(for: day)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                } else {
+                    emptyState("Complete your first workout to see a summary here.")
+                }
+            } else {
+                if cachedPeriodMetrics.dayCount > 0 {
+                    periodSummaryCard
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                } else {
+                    emptyState("No workouts recorded for \(periodDescription.lowercased()).")
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    @ViewBuilder
+    private var muscleTabContent: some View {
+        let tagDist = currentTagDistribution
+        ScrollView {
+            if !tagDist.isEmpty {
+                TagDistributionBar(data: tagDist)
+                    .frame(maxWidth: .infinity)
+                    .background(themeManager.effectiveTheme.cardBackgroundColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+            } else {
+                emptyState("No muscle breakdown data available.")
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    @ViewBuilder
+    private var exercisesTabContent: some View {
+        if selectedPeriod == .lastSession {
+            if let day = cachedDisplayDay {
+                List {
                     Section {
-                        sessionInfoCard(for: day)
-                    }
-                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-
-                    // Tag distribution chart (only if setting enabled and there are tagged exercises)
-                    let daySets = day.exercises.flatMap { $0.sets }
-                    let tagDistribution = ExerciseService.tagDistribution(from: daySets)
-                    if !tagDistribution.isEmpty {
-                        Section {
-                            tagBreakdownToggleButton
-
-                            if showTagBreakdown {
-                                TagDistributionBar(data: tagDistribution)
-                                    .frame(maxWidth: .infinity)
-                                    .background(themeManager.effectiveTheme.cardBackgroundColor)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .padding(.top, 4)
-                            }
-                        }
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                    }
-
-                    // Exercises section
-                    Section {
-                        exercisesHeader
-                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-
                         VStack(spacing: 0) {
                             ForEach(day.exercises.enumerated(), id: \.element.id) { index, exercise in
                                 let hasPB = cachedExercisePBFlags[exercise.exercise.persistentModelID] ?? false
@@ -197,129 +268,97 @@ struct HistoryView: View {
                         }
                         .background(themeManager.effectiveTheme.cardBackgroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
                     }
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                 }
-                .id(themeManager.systemColorScheme) // Force List re-render on theme change
+                .id("lastSession-\(themeManager.systemColorScheme)")
                 .listStyle(.plain)
                 .scrollIndicators(.hidden)
                 .scrollContentBackground(.hidden)
                 .contentMargins(.top, 12, for: .scrollContent)
-                .id(selectedPeriod)  // Force scroll to top when period changes
             } else {
-                Text("Complete your first workout to see a summary here.")
-                    .font(themeManager.effectiveTheme.subheadlineFont)
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, 40)
-                Spacer()
+                emptyState("Complete your first workout to see exercises here.")
+            }
+        } else {
+            if cachedPeriodMetrics.dayCount > 0 {
+                List {
+                    let visibleDays = Array(cachedPeriodDays.prefix(visiblePeriodDaysCount))
+                    let hasMoreDays = cachedPeriodDays.count > visiblePeriodDaysCount
+                    let remainingCount = cachedPeriodDays.count - visiblePeriodDaysCount
+
+                    ForEach(visibleDays) { daySummary in
+                        Section {
+                            periodDayHeader(for: daySummary.date)
+
+                            VStack(spacing: 0) {
+                                ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
+                                    Button {
+                                        var newPath = NavigationPath()
+                                        newPath.append(exercise.exercise)
+                                        navigationPath = newPath
+                                    } label: {
+                                        periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .background(themeManager.effectiveTheme.cardBackgroundColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    }
+
+                    if hasMoreDays {
+                        Section {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    visiblePeriodDaysCount += 10
+                                }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Text("See \(remainingCount) more days")
+                                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                                        .foregroundStyle(themeManager.effectiveTheme.primary)
+                                    ChevronDisclosureButton(isExpanded: false)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(themeManager.effectiveTheme.primary.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                        }
+                        .listRowInsets(EdgeInsets(top: 16, leading: 24, bottom: 8, trailing: 24))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    }
+                }
+                .id("\(selectedPeriod.rawValue)-\(themeManager.systemColorScheme)")
+                .listStyle(.plain)
+                .scrollIndicators(.hidden)
+                .scrollContentBackground(.hidden)
+                .contentMargins(.top, 12, for: .scrollContent)
+            } else {
+                emptyState("No workouts recorded for \(periodDescription.lowercased()).")
             }
         }
+    }
 
-    // MARK: - Period Summary View
+    private var currentTagDistribution: [(tag: String, percentage: Double)] {
+        if selectedPeriod == .lastSession {
+            guard let day = cachedDisplayDay else { return [] }
+            return ExerciseService.tagDistribution(from: day.exercises.flatMap { $0.sets })
+        }
+        return cachedPeriodTagDistribution
+    }
 
     @ViewBuilder
-    private var periodSummaryView: some View {
-        if cachedPeriodMetrics.dayCount > 0 {
-            List {
-                // Summary card section
-                Section {
-                    periodSummaryCard
-                }
-                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-
-                // Tag distribution chart (only if setting enabled and there are tagged exercises)
-                if !cachedPeriodTagDistribution.isEmpty {
-                    Section {
-                        tagBreakdownToggleButton
-
-                        if showTagBreakdown {
-                            TagDistributionBar(data: cachedPeriodTagDistribution)
-                                .frame(maxWidth: .infinity)
-                                .background(themeManager.effectiveTheme.cardBackgroundColor)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                                .padding(.top, 4)
-                        }
-                    }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                }
-
-                // Exercise list by day (paginated)
-                let visibleDays = Array(cachedPeriodDays.prefix(visiblePeriodDaysCount))
-                let hasMoreDays = cachedPeriodDays.count > visiblePeriodDaysCount
-                let remainingCount = cachedPeriodDays.count - visiblePeriodDaysCount
-
-                // Exercises label with info button (once, above all days)
-                Section {
-                    exercisesHeader
-                }
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-
-                ForEach(visibleDays) { daySummary in
-                    Section {
-                        periodDayHeader(for: daySummary.date)
-
-                        VStack(spacing: 0) {
-                            ForEach(daySummary.exercises.enumerated(), id: \.element.id) { index, exercise in
-                                Button {
-                                    var newPath = NavigationPath()
-                                    newPath.append(exercise.exercise)
-                                    navigationPath = newPath
-                                } label: {
-                                    periodExerciseRow(number: index + 1, name: exercise.name, hasPB: exercise.hasPB, isFirst: index == 0, deltas: exercise.deltas)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .background(themeManager.effectiveTheme.cardBackgroundColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                }
-
-                // "See more days" button when more history exists
-                if hasMoreDays {
-                    Section {
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                visiblePeriodDaysCount += 10
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Text("See \(remainingCount) more days")
-                                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                                    .foregroundStyle(themeManager.effectiveTheme.primary)
-                                ChevronDisclosureButton(isExpanded: false)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(themeManager.effectiveTheme.primary.opacity(0.08))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                    }
-                    .listRowInsets(EdgeInsets(top: 16, leading: 24, bottom: 8, trailing: 24))
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                }
-            }
-            .id("\(selectedPeriod.rawValue)-\(themeManager.systemColorScheme)") // Force scroll to top when period changes & re-render on theme change
-            .listStyle(.plain)
-            .scrollIndicators(.hidden)
-            .scrollContentBackground(.hidden)
-            .contentMargins(.top, 12, for: .scrollContent)
-            .id(selectedPeriod)  // Force scroll to top when period changes
-        } else {
-            Text("No workouts recorded for \(periodDescription.lowercased()).")
+    private func emptyState(_ text: String) -> some View {
+        VStack {
+            Text(text)
                 .font(themeManager.effectiveTheme.subheadlineFont)
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -330,9 +369,7 @@ struct HistoryView: View {
 
     @ViewBuilder
     private var periodSummaryCard: some View {
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
-
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(spacing: 0) {
             // Header
             HStack(spacing: 0) {
                 Text(periodDescription)
@@ -343,22 +380,34 @@ struct HistoryView: View {
                     .font(themeManager.effectiveTheme.interFont(size: 12, weight: .regular).italic())
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(themeManager.effectiveTheme.muted.opacity(0.3))
 
-            // 6 mini cards grid
-            LazyVGrid(columns: columns, spacing: 8) {
-                miniMetricCard(label: "Workout Days", value: "\(cachedPeriodMetrics.dayCount)")
-                miniMetricCard(label: "Exercises", value: "\(cachedPeriodMetrics.exerciseCount)")
-                miniMetricCard(label: "Sets", value: "\(cachedPeriodMetrics.setCount)")
-                miniMetricCard(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(cachedPeriodMetrics.totalVolume))) \(themeManager.weightUnit.displayName)")
-                pbMiniCard(pbCount: cachedPeriodMetrics.pbCount)
-                miniMetricCard(label: "Avg Rest", value: cachedPeriodMetrics.avgRestSeconds.map { formatRestTime($0) } ?? "—")
-            }
+            Rectangle()
+                .fill(themeManager.effectiveTheme.dividerColor)
+                .frame(height: 1)
+                .padding(.horizontal, 5)
 
-            // Workout frequency bar — only for period views
+            scoreboardGrid(
+                workoutDays: cachedPeriodMetrics.dayCount,
+                exercises: cachedPeriodMetrics.exerciseCount,
+                sets: cachedPeriodMetrics.setCount,
+                volume: cachedPeriodMetrics.totalVolume,
+                pbs: cachedPeriodMetrics.pbCount,
+                avgRest: cachedPeriodMetrics.avgRestSeconds
+            )
+
             if selectedPeriod != .lastSession {
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.dividerColor)
+                    .frame(height: 1)
+                    .padding(.horizontal, 5)
                 workoutFrequencyBar
             }
         }
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     /// Description of the current time period
@@ -611,127 +660,119 @@ struct HistoryView: View {
 
     // MARK: - View Components
 
-    private var tagBreakdownToggleButton: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                showTagBreakdown.toggle()
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Text("Muscle Breakdown")
-                    .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
-                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                    .textCase(.uppercase)
-                    .tracking(0.8)
-                ChevronDisclosureButton(isExpanded: showTagBreakdown)
-            }
-            .padding(.top, 12)
-            .padding(.bottom, 4)
-            .padding(.leading, 4)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-    }
-
     @ViewBuilder
     private func sessionInfoCard(for day: ExerciseDataGrouper.WorkoutDay) -> some View {
         let allSetsForDay = day.exercises.flatMap { $0.sets }
         let pbCount = allSetsForDay.filter { $0.isPB }.count
         let sessionDuration = SessionStatsCalculator.getSessionDurationMinutes(from: allSetsForDay)
         let sessionAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: allSetsForDay)
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
 
-        VStack(alignment: .leading, spacing: 8) {
-            // Header with date and duration
+        VStack(spacing: 0) {
+            // Header
             HStack(spacing: 8) {
                 Text(day.date, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
                     .font(themeManager.effectiveTheme.interFont(size: 16, weight: .semibold))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                Text(formatDuration(sessionDuration))
-                    .font(themeManager.effectiveTheme.dataFont(size: 14))
-                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
                 Spacer()
+                Text(formatDuration(sessionDuration))
+                    .font(themeManager.effectiveTheme.dataFont(size: 12))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(themeManager.effectiveTheme.muted.opacity(0.3))
 
-            // 6 mini cards grid
-            LazyVGrid(columns: columns, spacing: 8) {
-                miniMetricCard(label: "Workout Days", value: "1")
-                miniMetricCard(label: "Exercises", value: "\(day.exerciseCount)")
-                miniMetricCard(label: "Sets", value: "\(day.totalSets)")
-                miniMetricCard(label: "Volume", value: "\(Formatters.formatVolume(themeManager.displayWeight(day.totalVolume))) \(themeManager.weightUnit.displayName)")
-                pbMiniCard(pbCount: pbCount)
-                miniMetricCard(label: "Avg Rest", value: sessionAvgRest.map { formatRestTime($0) } ?? "—")
-            }
+            Rectangle()
+                .fill(themeManager.effectiveTheme.dividerColor)
+                .frame(height: 1)
+                .padding(.horizontal, 5)
+
+            scoreboardGrid(
+                workoutDays: 1,
+                exercises: day.exerciseCount,
+                sets: day.totalSets,
+                volume: day.totalVolume,
+                pbs: pbCount,
+                avgRest: sessionAvgRest.map(Double.init)
+            )
+        }
+        .background(themeManager.effectiveTheme.cardBackgroundColor)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    @ViewBuilder
+    private func scoreboardGrid(workoutDays: Int, exercises: Int, sets: Int, volume: Double, pbs: Int, avgRest: Double?) -> some View {
+        VStack(spacing: 0) {
+            scoreCell(value: "\(workoutDays)", label: "Workout Days", isFirst: true)
+            scoreCell(value: "\(exercises) / \(sets)", label: "Exercises / Sets")
+            scoreCell(
+                value: Formatters.formatVolume(themeManager.displayWeight(volume)),
+                unit: themeManager.weightUnit.displayName,
+                label: "Volume"
+            )
+            scorePBCell(count: pbs)
+            scoreCell(value: avgRest.map { formatRestTime($0) } ?? "—", label: "Avg Rest")
         }
     }
 
     @ViewBuilder
-    private func miniMetricCard(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(themeManager.effectiveTheme.captionFont)
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            Text(value)
-                .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+    private func scoreCell(value: String, unit: String? = nil, label: String, isFirst: Bool = false) -> some View {
+        VStack(spacing: 0) {
+            if !isFirst {
+                Rectangle()
+                    .fill(themeManager.effectiveTheme.dividerColor)
+                    .frame(height: 1)
+                    .padding(.horizontal, 5)
+            }
+            HStack(alignment: .firstTextBaseline) {
+                Text(label)
+                    .font(themeManager.effectiveTheme.interFont(size: 13))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                Spacer()
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text(value)
+                        .font(themeManager.effectiveTheme.dataFont(size: 17, weight: .semibold))
+                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    if let unit {
+                        Text(unit)
+                            .font(themeManager.effectiveTheme.interFont(size: 13))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    }
+                }
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.5)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(themeManager.effectiveTheme.cardBackgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    private func pbMiniCard(pbCount: Int) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("PBs")
-                .font(themeManager.effectiveTheme.captionFont)
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            HStack(alignment: .center, spacing: 0) {
-                Text("\(pbCount)")
-                    .font(themeManager.effectiveTheme.dataFont(size: 20, weight: .semibold))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                Text(" × ")
-                    .font(themeManager.effectiveTheme.interFont(size: 14))
-                    .foregroundStyle(.secondary)
-                Image(systemName: "star.fill")
-                    .font(.system(size: 13))
-                    .foregroundStyle(themeManager.effectiveTheme.pbColor)
+    @ViewBuilder
+    private func scorePBCell(count: Int) -> some View {
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(themeManager.effectiveTheme.dividerColor)
+                .frame(height: 1)
+                .padding(.horizontal, 5)
+            HStack(alignment: .firstTextBaseline) {
+                Text("PBs")
+                    .font(themeManager.effectiveTheme.interFont(size: 13))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                Spacer()
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text("\(count)")
+                        .font(themeManager.effectiveTheme.dataFont(size: 17, weight: .semibold))
+                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(themeManager.effectiveTheme.pbColor)
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(themeManager.effectiveTheme.cardBackgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    private var exercisesHeader: some View {
-        HStack(spacing: 4) {
-            Text("Exercises")
-                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
-                .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                .textCase(.uppercase)
-                .tracking(0.8)
-
-            Button {
-                showingDeltaInfo = true
-            } label: {
-                Image(systemName: "info.circle")
-                    .font(.system(size: 10))
-                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-            }
-            .buttonStyle(.plain)
-            .popover(isPresented: $showingDeltaInfo) {
-                DeltaInfoPopover()
-            }
-
-            Spacer()
-        }
-        .padding(.top, 12)
-        .padding(.bottom, 6)
-        .padding(.leading, 4)
     }
 
     /// Format rest time from Double: converts to Int and delegates

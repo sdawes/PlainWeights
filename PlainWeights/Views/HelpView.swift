@@ -62,6 +62,16 @@ struct HelpView: View {
                     )
 
                     helpSection(
+                        title: "History",
+                        body: "Tap the clock icon to open History. Pick a time period — Last, Week, Month or Year — and switch between Summary, Muscle and Exercises to see your totals, your training split, and every exercise day by day."
+                    )
+
+                    helpSection(
+                        title: "Compared to last session",
+                        body: "On the Exercises tab in History, each row shows three small arrows for max weight (W), max reps (R) and total volume (V). Green up means you improved, red down means it dropped, amber right means no change. Tap Legend at the top of the list for the full key."
+                    )
+
+                    helpSection(
                         title: "iCloud Sync",
                         body: "Your data syncs automatically via iCloud. If you delete and reinstall the app, or switch to a new device, your workout history will restore on its own."
                     )

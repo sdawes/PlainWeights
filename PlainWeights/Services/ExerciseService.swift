@@ -135,8 +135,23 @@ enum ExerciseService {
 
     // MARK: - Tag Suggestions
 
-    /// Fetch all unique tags across all exercises, sorted alphabetically
-    /// Returns combined set of primary and secondary tags (tags are often used in both)
+    /// Curated list of muscle / body-part tags merged into autocomplete suggestions
+    /// so brand-new users get useful suggestions before they've built up their own vocabulary.
+    /// Stored lowercase to match the normalization in TagInputSection.addTag().
+    /// Suggestion-only — these are NOT written to any Exercise, so they don't affect
+    /// analytics, tag distribution, or search.
+    static let defaultMuscleTags: [String] = [
+        "chest", "upper chest", "lower chest", "inner chest",
+        "delts", "front delts", "mid delts", "rear delts",
+        "back", "lats", "upper back", "traps", "lower back",
+        "biceps", "triceps", "forearms",
+        "core", "abs", "upper abs", "lower abs", "obliques",
+        "quads", "hamstrings", "glutes", "calves", "hip flexors", "adductors", "neck"
+    ]
+
+    /// Fetch all unique tags for autocomplete suggestions, sorted alphabetically.
+    /// Combines primary + secondary tags from all existing exercises with the curated
+    /// `defaultMuscleTags` list. Set-based union dedupes any overlap.
     static func allUniqueTags(context: ModelContext) -> [String] {
         let descriptor = FetchDescriptor<Exercise>()
         let exercises = (try? context.fetch(descriptor)) ?? []
@@ -146,6 +161,7 @@ enum ExerciseService {
             allTags.formUnion(exercise.tags)
             allTags.formUnion(exercise.secondaryTags)
         }
+        allTags.formUnion(defaultMuscleTags)
 
         return allTags.sorted()
     }

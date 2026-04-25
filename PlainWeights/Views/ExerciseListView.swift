@@ -219,39 +219,59 @@ struct FilteredExerciseListView: View {
         List {
             // Exercises section
             if exercises.isEmpty && searchText.isEmpty {
-                // Empty state — hint to add exercises
+                // Empty state — faux exercise card pointing to the + button
                 Section {
-                    HStack {
-                        Text("Tap + to add your first exercise")
-                            .font(themeManager.effectiveTheme.bodyFont)
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    HStack(alignment: .center) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Add your first exercise")
+                                .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
+                                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+                            Text("Tap the + at the bottom to start logging.")
+                                .font(themeManager.effectiveTheme.interFont(size: 14))
+                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        }
 
                         Spacer()
 
-                        Image(systemName: "arrow.turn.right.down")
+                        Image(systemName: "arrow.down")
                             .font(.title3)
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            .padding(.trailing, 5)
+                            .foregroundStyle(themeManager.effectiveTheme.chartColor1)
                     }
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 8)
-                    .listRowBackground(Color.clear)
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(themeManager.effectiveTheme.cardBackgroundColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                 .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
 
-                // iCloud sync hint — separate row, left-aligned under the hint above
+                // iCloud sync hint — pale blue info box below the card
                 Section {
-                    HStack(spacing: 6) {
+                    HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "icloud.and.arrow.down")
-                            .font(.system(size: 12))
-                        Text("If you have existing data, iCloud sync may take a few minutes")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.blue)
+                        Text("If you've used the app before, your data may take a few minutes to sync from iCloud. Otherwise, add an exercise to get started.")
                             .font(themeManager.effectiveTheme.captionFont)
+                            .foregroundStyle(themeManager.effectiveTheme.secondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
-                    .padding(.horizontal, 8)
-                    .listRowBackground(Color.clear)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.blue.opacity(0.10))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10)
+                            .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1)
+                    }
                 }
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             } else if cachedSortedExercises.isEmpty && !searchText.isEmpty {
                 // No results for search query
                 Section {

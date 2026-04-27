@@ -17,8 +17,8 @@ enum HistoryTimePeriod: String, CaseIterable {
 
 enum HistoryViewTab: String, CaseIterable {
     case summary = "Summary"
-    case muscle = "Muscle"
     case exercises = "Exercises"
+    case muscle = "Muscle"
 }
 
 /// Aggregate metrics for a time period summary

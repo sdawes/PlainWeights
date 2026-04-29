@@ -114,8 +114,8 @@ struct HistoryView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
 
-            // View tab bar (Summary / Muscle / Exercises)
-            underlinedTabBar
+            // Date headline + sub-tab pills
+            headerRow
 
             // Content for the selected tab
             Group {
@@ -147,43 +147,89 @@ struct HistoryView: View {
         }
     }
 
-    // MARK: - View Tab Bar
+    // MARK: - Header Row
 
-    private var underlinedTabBar: some View {
-        HStack(spacing: 0) {
+    private var headerRow: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(headerPrimaryText)
+                    .font(themeManager.effectiveTheme.interFont(size: 18, weight: .bold))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                if let secondary = headerSecondaryText {
+                    Text(secondary)
+                        .font(themeManager.effectiveTheme.interFont(size: 12))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            Spacer(minLength: 8)
+            subTabPills
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
+        .padding(.bottom, 4)
+    }
+
+    private var subTabPills: some View {
+        HStack(spacing: 2) {
             ForEach(HistoryViewTab.allCases, id: \.self) { tab in
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         selectedView = tab
                     }
                 } label: {
-                    VStack(spacing: 0) {
-                        Text(tab.rawValue)
-                            .font(themeManager.effectiveTheme.interFont(
-                                size: 13,
-                                weight: selectedView == tab ? .semibold : .medium
-                            ))
-                            .foregroundStyle(
-                                selectedView == tab
-                                    ? themeManager.effectiveTheme.primaryText
-                                    : themeManager.effectiveTheme.mutedForeground
-                            )
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-
-                        Rectangle()
-                            .fill(selectedView == tab
+                    Text(tab.rawValue)
+                        .font(themeManager.effectiveTheme.interFont(
+                            size: 12,
+                            weight: selectedView == tab ? .semibold : .regular
+                        ))
+                        .foregroundStyle(
+                            selectedView == tab
                                 ? themeManager.effectiveTheme.primaryText
-                                : themeManager.effectiveTheme.dividerColor)
-                            .frame(height: 2)
-                    }
-                    .contentShape(.rect)
+                                : themeManager.effectiveTheme.mutedForeground
+                        )
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            selectedView == tab
+                                ? themeManager.effectiveTheme.cardBackgroundColor
+                                : Color.clear
+                        )
+                        .clipShape(.capsule)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 4)
+        .padding(2)
+        .background(themeManager.effectiveTheme.muted)
+        .clipShape(.capsule)
+    }
+
+    private var headerPrimaryText: String {
+        switch selectedPeriod {
+        case .lastSession:
+            if let day = cachedDisplayDay {
+                return day.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+            }
+            return hasTodaySets ? "Today" : "Last"
+        case .week, .month, .year:
+            return periodDescription
+        }
+    }
+
+    private var headerSecondaryText: String? {
+        switch selectedPeriod {
+        case .lastSession:
+            guard let day = cachedDisplayDay else { return nil }
+            let allSetsForDay = day.exercises.flatMap { $0.sets }
+            guard let duration = SessionStatsCalculator.getSessionDurationMinutes(from: allSetsForDay) else { return nil }
+            return formatDuration(duration)
+        case .week, .month, .year:
+            return periodDateRange
+        }
     }
 
     // MARK: - Tab Content
@@ -396,25 +442,6 @@ struct HistoryView: View {
     @ViewBuilder
     private var periodSummaryCard: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack(spacing: 0) {
-                Text(periodDescription)
-                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .semibold))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                Spacer()
-                Text(periodDateRange)
-                    .font(themeManager.effectiveTheme.interFont(size: 12, weight: .regular).italic())
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(themeManager.effectiveTheme.muted.opacity(0.3))
-
-            Rectangle()
-                .fill(themeManager.effectiveTheme.dividerColor)
-                .frame(height: 1)
-                .padding(.horizontal, 5)
-
             scoreboardGrid(
                 workoutDays: cachedPeriodMetrics.dayCount,
                 exercises: cachedPeriodMetrics.exerciseCount,
@@ -487,11 +514,11 @@ struct HistoryView: View {
         case .lastSession:
             return "" // Not used for last session
         case .week:
-            return "Past 7 Days"
+            return "Past 7 days"
         case .month:
-            return "Past 30 Days"
+            return "Past 30 days"
         case .year:
-            return "Past 365 Days"
+            return "Past 12 months"
         }
     }
 
@@ -690,29 +717,9 @@ struct HistoryView: View {
     private func sessionInfoCard(for day: ExerciseDataGrouper.WorkoutDay) -> some View {
         let allSetsForDay = day.exercises.flatMap { $0.sets }
         let pbCount = allSetsForDay.filter { $0.isPB }.count
-        let sessionDuration = SessionStatsCalculator.getSessionDurationMinutes(from: allSetsForDay)
         let sessionAvgRest = SessionStatsCalculator.getAverageRestSeconds(from: allSetsForDay)
 
         VStack(spacing: 0) {
-            // Header
-            HStack(spacing: 8) {
-                Text(day.date, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
-                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .semibold))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                Spacer()
-                Text(formatDuration(sessionDuration))
-                    .font(themeManager.effectiveTheme.dataFont(size: 12))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(themeManager.effectiveTheme.muted.opacity(0.3))
-
-            Rectangle()
-                .fill(themeManager.effectiveTheme.dividerColor)
-                .frame(height: 1)
-                .padding(.horizontal, 5)
-
             scoreboardGrid(
                 workoutDays: 1,
                 exercises: day.exerciseCount,

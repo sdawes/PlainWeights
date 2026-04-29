@@ -52,7 +52,7 @@ struct VerticalBarComparison: View {
     @Environment(ThemeManager.self) private var themeManager
     let columns: [BarColumnData]
 
-    private let barHeight: CGFloat = 8
+    private let barHeight: CGFloat = 11
 
     /// Whether any column has a last set value (determines if deltas row shows)
     private var hasAnyLastSet: Bool {
@@ -117,7 +117,7 @@ struct VerticalBarComparison: View {
 
             ZStack(alignment: .leading) {
                 // Grey track — represents the reference value (always full width)
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: barHeight / 2)
                     .fill(themeManager.effectiveTheme.muted)
                     .frame(width: totalWidth, height: barHeight)
 
@@ -140,14 +140,14 @@ struct VerticalBarComparison: View {
                         let overlap: CGFloat = 4
                         let greenWidth = bestWidth - fillWidth + overlap
 
-                        UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: 4, topTrailingRadius: 4)
+                        UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: barHeight / 2, topTrailingRadius: barHeight / 2)
                             .fill(Color.green.opacity(0.4))
                             .frame(width: greenWidth, height: barHeight)
                             .offset(x: fillWidth - overlap)
                     }
 
                     // Colored fill — drawn AFTER green so it renders on top
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: barHeight / 2)
                         .fill(barColor)
                         .frame(width: fillWidth, height: barHeight)
                 }
@@ -196,7 +196,7 @@ struct VerticalBarComparison: View {
         Group {
             if let hintColumn = columns.first(where: { $0.volumeHint != nil }) {
                 Text(hintColumn.volumeHint ?? "")
-                    .font(themeManager.effectiveTheme.interFont(size: 17, weight: .regular))
+                    .font(themeManager.effectiveTheme.interFont(size: 17, weight: .semibold))
                     .foregroundStyle(hintColumn.isUp || hintColumn.isSame ? .green : .red)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)

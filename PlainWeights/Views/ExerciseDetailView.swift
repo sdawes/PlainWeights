@@ -150,49 +150,18 @@ struct ExerciseDetailView: View {
                 .listRowBackground(Color.clear)
             }
 
-            // Comparison mode toggle - card style buttons
+            // Comparison card with built-in mode picker in its header
             Section {
-                HStack(spacing: 4) {
-                    ForEach(ComparisonMode.allCases, id: \.self) { mode in
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                comparisonMode = mode
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: mode == .lastSession ? "calendar.badge.clock" : "star.fill")
-                                    .font(.system(size: 14))
-                                Text(mode == .lastSession ? "Last" : "Best Ever")
-                                    .font(themeManager.effectiveTheme.interFont(size: 13, weight: .medium))
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .foregroundStyle(
-                                comparisonMode == mode
-                                    ? themeManager.effectiveTheme.primaryText
-                                    : themeManager.effectiveTheme.mutedForeground
-                            )
-                            .background(
-                                comparisonMode == mode
-                                    ? themeManager.effectiveTheme.muted
-                                    : Color.clear
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(5)
-                .background(themeManager.effectiveTheme.cardBackgroundColor)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                ComparisonMetricsCard(
+                    comparisonMode: $comparisonMode,
+                    sets: cachedAllSets,
+                    todayDeltas: comparisonMode == .lastSession ? cachedLastSessionDeltas : cachedBestEverDeltas
+                )
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
             .id("comparisonButtons")
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-
-            // Comparison metrics card (responds to toggle)
-            comparisonSection
 
             // Today's Sets Section (unified card appearance)
             Section {
@@ -471,21 +440,6 @@ struct ExerciseDetailView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .ignoresSafeArea(edges: .bottom)
             }
-        }
-    }
-
-    // MARK: - Extracted Sections
-
-    private var comparisonSection: some View {
-        Section {
-            ComparisonMetricsCard(
-                comparisonMode: comparisonMode,
-                sets: cachedAllSets,
-                todayDeltas: comparisonMode == .lastSession ? cachedLastSessionDeltas : cachedBestEverDeltas
-            )
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
         }
     }
 

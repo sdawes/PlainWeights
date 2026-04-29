@@ -28,7 +28,7 @@ enum ComparisonMode: String, CaseIterable {
 
 struct ComparisonMetricsCard: View {
     @Environment(ThemeManager.self) private var themeManager
-    let comparisonMode: ComparisonMode
+    @Binding var comparisonMode: ComparisonMode
     let sets: [ExerciseSet]
     var todayDeltas: ExerciseDeltas = .empty
 
@@ -45,13 +45,13 @@ struct ComparisonMetricsCard: View {
     @State private var cachedTodaysBestWeight: Double
     @State private var cachedTodaysBestReps: Int
 
-    init(comparisonMode: ComparisonMode, sets: [ExerciseSet], todayDeltas: ExerciseDeltas = .empty) {
-        self.comparisonMode = comparisonMode
+    init(comparisonMode: Binding<ComparisonMode>, sets: [ExerciseSet], todayDeltas: ExerciseDeltas = .empty) {
+        self._comparisonMode = comparisonMode
         self.sets = sets
         self.todayDeltas = todayDeltas
 
         // Pre-compute all metrics during init
-        let computed = Self.computeAllMetrics(sets: sets, comparisonMode: comparisonMode)
+        let computed = Self.computeAllMetrics(sets: sets, comparisonMode: comparisonMode.wrappedValue)
         _cachedTodaysSets = State(initialValue: computed.todaysSets)
         _cachedSetsExcludingToday = State(initialValue: computed.setsExcludingToday)
         _cachedLastSessionMetrics = State(initialValue: computed.lastSessionMetrics)
@@ -201,13 +201,13 @@ struct ComparisonMetricsCard: View {
         }
     }
 
-    // Header text with date (derived - cheap)
+    // Header text — mode label with date in brackets
     private var headerText: String {
         guard let metrics = currentMetrics, let date = metrics.date else {
-            return comparisonMode == .lastSession ? "Last Session" : "All-Time Best"
+            return comparisonMode == .lastSession ? "Last Session" : "PB"
         }
-        let dateStr = date.formatted(.dateTime.month(.abbreviated).day())
-        return comparisonMode == .lastSession ? "Last Session (\(dateStr))" : "All-Time Best (\(dateStr))"
+        let dateStr = date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+        return comparisonMode == .lastSession ? "Last Session (\(dateStr))" : "PB (\(dateStr))"
     }
 
     // Whether the reference session was reps-only (bodyweight exercise)
@@ -228,21 +228,30 @@ struct ComparisonMetricsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Card Header — mode icon, title with date, weight unit
+            // Card Header — icon + "Last Session (date)" / "PB (date)" on left, mode picker on right
             HStack(spacing: 8) {
                 Image(systemName: comparisonMode == .lastSession ? "calendar.badge.clock" : "star.fill")
                     .font(.system(size: 14))
+                    .foregroundStyle(comparisonMode == .lastSession
+                        ? themeManager.effectiveTheme.primaryText
+                        : themeManager.effectiveTheme.pbColor)
                     .frame(width: 20)
                 Text(headerText)
                     .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
 
-                Spacer()
+                Spacer(minLength: 8)
 
-                Text(themeManager.weightUnit == .kg ? "kgs" : "lbs")
-                    .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                Picker("Comparison Mode", selection: $comparisonMode) {
+                    ForEach(ComparisonMode.allCases, id: \.self) { mode in
+                        Text(mode == .lastSession ? "Last" : "PB").tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 120)
             }
-            .foregroundStyle(themeManager.effectiveTheme.primaryText)
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
@@ -288,11 +297,12 @@ struct ComparisonMetricsCard: View {
     @ViewBuilder
     private func referenceValuesRow(metrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)) -> some View {
         let isLastSession = comparisonMode == .lastSession
+        let unit = themeManager.weightUnit == .kg ? "kg" : "lbs"
 
         HStack(spacing: 0) {
             if !isRepsOnlyComparison {
                 referenceMetric(
-                    label: isLastSession ? "Max Weight" : "Weight",
+                    label: "\(isLastSession ? "Max Weight" : "Weight") (\(unit))",
                     value: Formatters.formatWeight(themeManager.displayWeight(metrics.maxWeight))
                 )
             }
@@ -303,7 +313,9 @@ struct ComparisonMetricsCard: View {
             )
 
             referenceMetric(
-                label: isRepsOnlyComparison ? "Total Reps" : "Total Volume",
+                label: isRepsOnlyComparison
+                    ? "Total Reps"
+                    : "Total Volume (\(unit))",
                 value: isRepsOnlyComparison
                     ? "\(metrics.totalReps)"
                     : Formatters.formatVolume(themeManager.displayWeight(metrics.totalVolume))
@@ -319,6 +331,8 @@ struct ComparisonMetricsCard: View {
             Text(label)
                 .font(themeManager.effectiveTheme.captionFont)
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(value)
                 .font(themeManager.effectiveTheme.dataFont(size: 30, weight: .bold))
                 .foregroundStyle(themeManager.effectiveTheme.primaryText)

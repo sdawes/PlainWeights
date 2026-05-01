@@ -2,18 +2,14 @@
 //  AISummaryView.swift
 //  PlainWeights
 //
-//  Sheet that asks AISummaryService to generate a summary of the most
-//  recent workout, then renders the result. UI only — all AI logic
-//  lives in AISummaryService.
+//  Sheet that asks AISummaryService to generate a structured WorkoutAnalysis
+//  and renders each field as a labelled section. UI only.
 //
 
 import SwiftUI
 import SwiftData
 
 struct AISummaryView: View {
-    /// Which slice of training data to summarise.
-    let scope: AISummaryScope
-
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeManager.self) private var themeManager
 
@@ -22,7 +18,7 @@ struct AISummaryView: View {
     @Query private var allSets: [ExerciseSet]
 
     /// One of these will be set when the task completes.
-    @State private var summary: String?
+    @State private var analysis: WorkoutAnalysis?
     @State private var errorMessage: String?
     @State private var isLoading = false
 
@@ -30,7 +26,7 @@ struct AISummaryView: View {
         VStack(alignment: .leading, spacing: 24) {
             // Header — title + dismiss
             HStack {
-                Text(scope.rawValue)
+                Text("Workout insights")
                     .font(themeManager.effectiveTheme.title3Font)
                 Spacer()
                 Button { dismiss() } label: {
@@ -41,22 +37,22 @@ struct AISummaryView: View {
                 .buttonStyle(.plain)
             }
 
-            // One of three states: loading, summary, error
             if isLoading {
                 VStack(spacing: 12) {
                     ProgressView()
-                    Text("Generating summary…")
+                    Text("Generating insights…")
                         .font(themeManager.effectiveTheme.captionFont)
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, 40)
-            } else if let summary {
+            } else if let analysis {
                 ScrollView {
-                    Text(summary)
-                        .font(themeManager.effectiveTheme.bodyFont)
-                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 24) {
+                        section(eyebrow: "WHAT YOU TRAINED", body: analysis.coverage)
+                        section(eyebrow: "PROGRESS", body: analysis.progress)
+                        section(eyebrow: "RECOMMENDATION", body: analysis.recommendation)
+                    }
                 }
                 .scrollIndicators(.hidden)
             } else if let errorMessage {
@@ -76,12 +72,27 @@ struct AISummaryView: View {
         }
     }
 
+    @ViewBuilder
+    private func section(eyebrow: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(eyebrow)
+                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+                .tracking(0.8)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            Text(body)
+                .font(themeManager.effectiveTheme.bodyFont)
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineSpacing(3)
+        }
+    }
+
     private func generate() async {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            summary = try await AISummaryService.generateLastSessionSummary(
+            analysis = try await AISummaryService.generateAnalysis(
                 from: allSets,
                 weightUnit: themeManager.weightUnit
             )

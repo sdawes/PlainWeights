@@ -75,9 +75,7 @@ struct FilteredExerciseListView: View {
     let searchScope: ExerciseSearchScope
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
-    /// Non-nil while an AI summary sheet is presented; the value is the
-    /// scope the user picked from the menu.
-    @State private var aiSummaryScope: AISummaryScope?
+    @State private var showingAISummary = false
     @State private var exerciseToDelete: Exercise?
     @State private var showError = false
 
@@ -323,14 +321,8 @@ struct FilteredExerciseListView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Menu("AI summary", systemImage: "sparkles") {
-                    Section("AI Summary") {
-                        ForEach(AISummaryScope.allCases) { scope in
-                            Button(scope.rawValue) {
-                                aiSummaryScope = scope
-                            }
-                        }
-                    }
+                Button("AI summary", systemImage: "sparkles") {
+                    showingAISummary = true
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -370,8 +362,8 @@ struct FilteredExerciseListView: View {
             SettingsView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
-        .sheet(item: $aiSummaryScope) { scope in
-            AISummaryView(scope: scope)
+        .sheet(isPresented: $showingAISummary) {
+            AISummaryView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .alert("Something Went Wrong", isPresented: $showError) {
@@ -405,6 +397,9 @@ struct FilteredExerciseListView: View {
         .onAppear {
             rebuildSortedExercisesCache()
             rebuildStalenessCache()
+            // Warm up the on-device summarisation model so the first tap
+            // of the AI button has lower latency.
+            AISummaryService.prewarm()
         }
         .onChange(of: exercises) { _, _ in
             rebuildSortedExercisesCache()

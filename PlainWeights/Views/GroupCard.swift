@@ -42,68 +42,67 @@ struct GroupCard: View {
             return aDate > bDate
         }
 
+        // Most recent workout across all exercises in the group.
+        let mostRecentDate = exercises.compactMap { $0.lastWorkoutDate }.max()
+
         VStack(alignment: .leading, spacing: 0) {
-            // Header — tappable, drives expansion via the parent's closure.
-            Button(action: onToggle) {
-                HStack(alignment: .center, spacing: 12) {
+            // Header — split into expand tap target (name/count) and
+            // ellipsis Menu (always visible, left of chevron).
+            HStack(alignment: .center, spacing: 0) {
+                // Name + count + staleness: tapping anywhere here toggles expansion.
+                Button(action: onToggle) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(group.name)
                             .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                        Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
-                            .font(themeManager.effectiveTheme.captionFont)
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        subtitleRow(exercises: exercises, mostRecentDate: mostRecentDate)
                     }
-                    Spacer()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+
+                // Ellipsis menu — always visible, independent tap target.
+                Menu {
+                    Button("Rename", systemImage: "pencil") {
+                        showingRenameSheet = true
+                    }
+                    Button("Edit exercises", systemImage: "list.bullet") {
+                        onEditExercises()
+                    }
+                    Divider()
+                    Button("Delete group", systemImage: "trash", role: .destructive) {
+                        showingDeleteConfirmation = true
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .frame(width: 28, height: 28)
+                        .background(themeManager.effectiveTheme.muted)
+                        .clipShape(Circle())
+                }
+
+                // Chevron — part of the expand button visually but
+                // rendered outside it to keep the Menu tap target clean.
+                Button(action: onToggle) {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .padding(.leading, 12)
+                        .contentShape(.rect)
                 }
-                .padding(.vertical, 14)
-                .padding(.horizontal, 14)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(.rect)
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 14)
 
-            // Body — divider + ellipsis menu + exercise rows when expanded.
-            // Opacity transition; height changes are animated by the
-            // .animation(_:value:) below, which scopes the timing.
+            // Body — exercise rows only when expanded.
             if isExpanded {
                 VStack(spacing: 0) {
-                    // Thin divider with trailing ellipsis menu.
-                    HStack(spacing: 10) {
-                        Rectangle()
-                            .fill(themeManager.effectiveTheme.borderColor)
-                            .frame(height: 1)
-
-                        Menu {
-                            Button("Rename", systemImage: "pencil") {
-                                showingRenameSheet = true
-                            }
-                            Button("Edit exercises", systemImage: "list.bullet") {
-                                onEditExercises()
-                            }
-                            Divider()
-                            Button("Delete group", systemImage: "trash", role: .destructive) {
-                                showingDeleteConfirmation = true
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                                .frame(width: 28, height: 28)
-                                .background(themeManager.effectiveTheme.muted)
-                                .clipShape(Circle())
-                        }
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.top, 10)
-                    .padding(.bottom, 10)
-
                     if exercises.isEmpty {
-                        Text("No exercises yet. Tap ••• above to edit.")
+                        Text("No exercises yet. Tap ··· to edit.")
                             .font(themeManager.effectiveTheme.subheadlineFont)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -151,6 +150,52 @@ struct GroupCard: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("The exercises themselves are kept — they just leave this group.")
+        }
+    }
+
+    // MARK: - Subtitle row
+
+    /// Exercise count + optional staleness dot and relative date.
+    @ViewBuilder
+    private func subtitleRow(exercises: [Exercise], mostRecentDate: Date?) -> some View {
+        HStack(spacing: 6) {
+            Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
+                .font(themeManager.effectiveTheme.captionFont)
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+
+            if let date = mostRecentDate {
+                Text("·")
+                    .font(themeManager.effectiveTheme.captionFont)
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+
+                Circle()
+                    .fill(stalenessColor(for: date))
+                    .frame(width: 6, height: 6)
+
+                Text(relativeDateString(for: date))
+                    .font(themeManager.effectiveTheme.captionFont)
+                    .foregroundStyle(stalenessColor(for: date))
+            }
+        }
+    }
+
+    // MARK: - Staleness helpers
+
+    /// Green = today, orange = 14+ days, red = 30+ days, muted otherwise.
+    private func stalenessColor(for date: Date) -> Color {
+        let days = Calendar.current.dateComponents([.day], from: date, to: .now).day ?? 0
+        if days == 0 { return .green }
+        if days >= 30 { return .red }
+        if days >= 14 { return .orange }
+        return themeManager.effectiveTheme.mutedForeground
+    }
+
+    private func relativeDateString(for date: Date) -> String {
+        let days = Calendar.current.dateComponents([.day], from: date, to: .now).day ?? 0
+        switch days {
+        case 0: return "Today"
+        case 1: return "Yesterday"
+        default: return "\(days) days ago"
         }
     }
 

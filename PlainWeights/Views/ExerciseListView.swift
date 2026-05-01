@@ -400,16 +400,6 @@ struct FilteredExerciseListView: View {
                 }
             } else {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("AI summary", systemImage: "sparkles") {
-                        showingAISummary = true
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Groups", systemImage: "rectangle.stack.fill") {
-                        navigationPath.append(GroupsDestination.groupsList)
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
                     Button { showingSettings = true } label: {
                         Image(systemName: "gearshape")
                             .font(.body)
@@ -417,6 +407,11 @@ struct FilteredExerciseListView: View {
                             .foregroundStyle(themeManager.effectiveTheme.textColor)
                     }
                     .accessibilityLabel("Settings")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("AI summary", systemImage: "sparkles") {
+                        showingAISummary = true
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -433,6 +428,11 @@ struct FilteredExerciseListView: View {
                             .fontWeight(.medium)
                     }
                     .accessibilityLabel("View history")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Groups", systemImage: "rectangle.stack.fill") {
+                        navigationPath.append(GroupsDestination.groupsList)
+                    }
                 }
             }
         }

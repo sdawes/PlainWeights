@@ -52,7 +52,7 @@ enum AISummaryService {
             case .unavailable:
                 return "AI summary isn't available on this device. Check Apple Intelligence is enabled in Settings."
             case .noWorkouts:
-                return "Record a workout first, then come back for a summary."
+                return "Add an exercise and log a few sets, then come back for insights."
             case .generationFailed:
                 return "Couldn't generate summary. Please try again."
             }

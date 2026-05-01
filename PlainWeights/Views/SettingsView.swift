@@ -14,6 +14,7 @@ struct SettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
 
     @State private var showingDeleteAllAlert = false
+    @State private var showingDeleteAllGroupsAlert = false
     @State private var showError = false
     @State private var showingThemePicker = false
     @State private var showingHelp = false
@@ -127,6 +128,15 @@ struct SettingsView: View {
                         ) {
                             showingDeleteAllAlert = true
                         }
+
+                        settingsRow(
+                            icon: "rectangle.stack.badge.minus",
+                            title: "Delete All Groups",
+                            value: nil,
+                            isDestructive: true
+                        ) {
+                            showingDeleteAllGroupsAlert = true
+                        }
                     }
 
                     #if DEBUG
@@ -191,6 +201,14 @@ struct SettingsView: View {
             }
         } message: {
             Text("This will permanently delete ALL your exercises and workout history. This action cannot be undone.")
+        }
+        .alert("Delete All Groups?", isPresented: $showingDeleteAllGroupsAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete All Groups", role: .destructive) {
+                deleteAllGroups()
+            }
+        } message: {
+            Text("This removes all groups. Your exercises and their history are not affected.")
         }
         #if DEBUG
         .alert("Generate Test Data?", isPresented: $showingGenerateDataAlert) {
@@ -417,6 +435,15 @@ struct SettingsView: View {
     private func deleteAllExercises() {
         do {
             try modelContext.delete(model: Exercise.self)
+            try modelContext.save()
+        } catch {
+            showError = true
+        }
+    }
+
+    private func deleteAllGroups() {
+        do {
+            try modelContext.delete(model: ExerciseGroup.self)
             try modelContext.save()
         } catch {
             showError = true

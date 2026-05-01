@@ -15,7 +15,7 @@ struct PlainWeightsApp: App {
 
     init() {
         do {
-            let schema = Schema([Exercise.self, ExerciseSet.self])
+            let schema = Schema([Exercise.self, ExerciseSet.self, ExerciseGroup.self])
             let config = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: false,

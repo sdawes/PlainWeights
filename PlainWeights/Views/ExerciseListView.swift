@@ -13,6 +13,11 @@ enum HistoryDestination: Hashable {
     case history
 }
 
+// Navigation destination type for the saved groups list
+enum GroupsDestination: Hashable {
+    case groupsList
+}
+
 // Search scope for filtering exercises by name or tags
 enum ExerciseSearchScope: String, CaseIterable {
     case name = "Name"
@@ -33,11 +38,11 @@ struct ExerciseListView: View {
                 .navigationDestination(for: Exercise.self) { exercise in
                     ExerciseDetailView(exercise: exercise)
                 }
-                .navigationDestination(for: HistoryDestination.self) { destination in
-                    switch destination {
-                    case .history:
-                        HistoryView(navigationPath: $navigationPath)
-                    }
+                .navigationDestination(for: HistoryDestination.self) { _ in
+                    HistoryView(navigationPath: $navigationPath)
+                }
+                .navigationDestination(for: GroupsDestination.self) { _ in
+                    ExerciseGroupsView(navigationPath: $navigationPath)
                 }
         }
     }
@@ -82,6 +87,8 @@ struct FilteredExerciseListView: View {
     @State private var isGroupingMode = false
     /// Exercise IDs the user has selected while in grouping mode.
     @State private var selectedGroupingIDs: Set<PersistentIdentifier> = []
+    /// Drives the "name your group" sheet.
+    @State private var showingSaveGroupSheet = false
     @State private var exerciseToDelete: Exercise?
     @State private var showError = false
 
@@ -146,17 +153,6 @@ struct FilteredExerciseListView: View {
         if isDoneToday(exercise) {
             return isDark ? Color(red: 0.40, green: 0.90, blue: 0.50) : .green
         }
-        return nil
-    }
-
-    /// Get staleness pill info (colour + label) for an exercise
-    private func stalenessInfo(for exercise: Exercise) -> (color: Color, label: String)? {
-        guard let lastWorkout = exercise.lastWorkoutDate else { return nil }
-        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: lastWorkout), to: Calendar.current.startOfDay(for: Date())).day ?? 0
-        if days == 0 { return (.green, "Today") }
-        let isDark = themeManager.currentTheme == .dark
-        if days >= 30 { return (isDark ? Color(red: 1.0, green: 0.40, blue: 0.40) : .red, "30d+") }
-        if days >= 14 { return (isDark ? Color(red: 1.0, green: 0.70, blue: 0.30) : .orange, "\(days / 7) wks") }
         return nil
     }
 
@@ -335,6 +331,12 @@ struct FilteredExerciseListView: View {
                     }
                     .disabled(selectedGroupingIDs.isEmpty)
                 }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Save group", systemImage: "rectangle.stack.badge.plus") {
+                        showingSaveGroupSheet = true
+                    }
+                    .disabled(selectedGroupingIDs.isEmpty)
+                }
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("AI summary", systemImage: "sparkles") {
@@ -344,6 +346,11 @@ struct FilteredExerciseListView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Group exercises", systemImage: "checklist") {
                     isGroupingMode.toggle()
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Saved groups", systemImage: "rectangle.stack.fill") {
+                    navigationPath.append(GroupsDestination.groupsList)
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -386,6 +393,12 @@ struct FilteredExerciseListView: View {
         .sheet(isPresented: $showingAISummary) {
             AISummaryView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        }
+        .sheet(isPresented: $showingSaveGroupSheet) {
+            SaveGroupSheet(
+                exerciseCount: selectedGroupingIDs.count,
+                onSave: saveSelectedAsGroup
+            )
         }
         .alert("Something Went Wrong", isPresented: $showError) {
             Button("OK", role: .cancel) { }
@@ -439,10 +452,8 @@ struct FilteredExerciseListView: View {
     /// A single exercise row extracted from body to reduce compiler type-check complexity
     @ViewBuilder
     private func exerciseRow(_ exercise: Exercise) -> some View {
-        let isDoneToday = cachedDoneToday.contains(exercise.persistentModelID)
-        let info = stalenessInfo(for: exercise)
-        let tagHighlight = searchScope == .tags ? searchText : ""
         let isSelected = selectedGroupingIDs.contains(exercise.persistentModelID)
+        let cachedDone = cachedDoneToday.contains(exercise.persistentModelID)
 
         HStack(spacing: 12) {
             // Selection circle — only visible while in grouping mode.
@@ -463,53 +474,13 @@ struct FilteredExerciseListView: View {
                 .accessibilityLabel(isSelected ? "Selected" : "Not selected")
             }
 
-            VStack(alignment: .leading, spacing: 0) {
-                Text(highlightedName(exercise.name))
-                    .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-
-                // Tag pills
-                if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
-                    TagPillsRow(
-                        tags: exercise.tags,
-                        secondaryTags: exercise.secondaryTags,
-                        highlightText: tagHighlight
-                    )
-                    .padding(.top, 6)
-                }
-
-                // Last workout line with dot
-                HStack(spacing: 6) {
-                    if let info {
-                        Circle()
-                            .fill(info.color)
-                            .frame(width: 6, height: 6)
-                    }
-
-                    if isDoneToday {
-                        HStack(spacing: 0) {
-                            Text("Last: ")
-                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                            Text("Today")
-                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                        }
-                        .foregroundStyle(info?.color ?? .green)
-                    } else if let lastWorkout = exercise.lastWorkoutDate {
-                        HStack(spacing: 0) {
-                            Text("Last: ")
-                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                            Text(Formatters.formatExerciseLastDone(lastWorkout))
-                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
-                        }
-                        .foregroundStyle(info?.color ?? themeManager.effectiveTheme.mutedForeground)
-                    } else {
-                        Text("No sets recorded")
-                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                    }
-                }
-                .padding(.top, 12)
-            }
+            ExerciseCard(
+                exercise: exercise,
+                cachedIsDoneToday: cachedDone,
+                nameAttributed: searchText.isEmpty ? nil : highlightedName(exercise.name),
+                tagHighlight: searchScope == .tags ? searchText : "",
+                compact: false
+            )
         }
         .padding(.vertical, 14)
         .padding(.horizontal, 14)
@@ -538,6 +509,27 @@ struct FilteredExerciseListView: View {
             selectedGroupingIDs.remove(id)
         } else {
             selectedGroupingIDs.insert(id)
+        }
+    }
+
+    /// Persist the current selection as a new ExerciseGroup with the given
+    /// name, then exit grouping mode and clear the selection.
+    private func saveSelectedAsGroup(named name: String) {
+        let selected = exercises.filter { selectedGroupingIDs.contains($0.persistentModelID) }
+        guard !selected.isEmpty else { return }
+
+        let group = ExerciseGroup(name: name, exercises: selected)
+        modelContext.insert(group)
+        do {
+            try modelContext.save()
+        } catch {
+            showError = true
+            return
+        }
+
+        withAnimation {
+            selectedGroupingIDs.removeAll()
+            isGroupingMode = false
         }
     }
 

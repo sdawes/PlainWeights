@@ -28,6 +28,13 @@ final class Exercise {
     @Relationship(deleteRule: .cascade, inverse: \ExerciseSet.exercise)
     var sets: [ExerciseSet]? = []
 
+    // Many-to-many: an Exercise can belong to multiple ExerciseGroups
+    // (e.g. "Bench Press" is in "Push Day" and "Hardship Day"). Default
+    // delete rule (nullify) so deleting an exercise just removes it from
+    // any groups, doesn't delete the groups themselves.
+    @Relationship(inverse: \ExerciseGroup.exercises)
+    var groups: [ExerciseGroup]? = []
+
     init(name: String, tags: [String] = [], secondaryTags: [String] = [], note: String? = nil, createdDate: Date = .init()) {
         self.name = name
         self.tags = tags

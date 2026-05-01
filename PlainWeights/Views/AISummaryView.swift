@@ -11,6 +11,9 @@ import SwiftUI
 import SwiftData
 
 struct AISummaryView: View {
+    /// Which slice of training data to summarise.
+    let scope: AISummaryScope
+
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeManager.self) private var themeManager
 
@@ -27,7 +30,7 @@ struct AISummaryView: View {
         VStack(alignment: .leading, spacing: 24) {
             // Header — title + dismiss
             HStack {
-                Text("Workout Summary")
+                Text(scope.rawValue)
                     .font(themeManager.effectiveTheme.title3Font)
                 Spacer()
                 Button { dismiss() } label: {

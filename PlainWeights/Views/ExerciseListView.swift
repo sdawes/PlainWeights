@@ -75,7 +75,9 @@ struct FilteredExerciseListView: View {
     let searchScope: ExerciseSearchScope
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
-    @State private var showingAISummary = false
+    /// Non-nil while an AI summary sheet is presented; the value is the
+    /// scope the user picked from the menu.
+    @State private var aiSummaryScope: AISummaryScope?
     @State private var exerciseToDelete: Exercise?
     @State private var showError = false
 
@@ -320,16 +322,16 @@ struct FilteredExerciseListView: View {
             .padding(.bottom, 3)
         }
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showingAISummary = true } label: {
-                    Image(systemName: "sparkles")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundStyle(themeManager.effectiveTheme.textColor)
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu("AI summary", systemImage: "sparkles") {
+                    ForEach(AISummaryScope.allCases) { scope in
+                        Button(scope.rawValue) {
+                            aiSummaryScope = scope
+                        }
+                    }
                 }
-                .accessibilityLabel("AI summary")
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button { showingSettings = true } label: {
                     Image(systemName: "gearshape")
                         .font(.body)
@@ -338,7 +340,7 @@ struct FilteredExerciseListView: View {
                 }
                 .accessibilityLabel("Settings")
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     // Check if any exercise has sets
                     let hasSets = exercises.contains { !($0.sets?.isEmpty ?? true) }
@@ -366,8 +368,8 @@ struct FilteredExerciseListView: View {
             SettingsView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
-        .sheet(isPresented: $showingAISummary) {
-            AISummaryView()
+        .sheet(item: $aiSummaryScope) { scope in
+            AISummaryView(scope: scope)
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .alert("Something Went Wrong", isPresented: $showError) {

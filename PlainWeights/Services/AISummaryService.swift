@@ -10,6 +10,18 @@
 import Foundation
 import FoundationModels
 
+/// Scope of an AI-generated summary. The user picks one from the menu in
+/// the exercise list toolbar; the service uses it to decide which slice
+/// of training data to feed into the prompt.
+enum AISummaryScope: String, CaseIterable, Identifiable {
+    case lastSession = "Last session"
+    case lastWeek = "Last week"
+    case lastMonth = "Last month"
+    case lastYear = "Last year"
+
+    var id: String { rawValue }
+}
+
 enum AISummaryService {
 
     /// User-facing errors. Sanitised so view code never has to know about

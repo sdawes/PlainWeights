@@ -233,7 +233,7 @@ struct ComparisonMetricsCard: View {
                 Image(systemName: comparisonMode == .lastSession ? "calendar.badge.clock" : "star.fill")
                     .font(.system(size: 14))
                     .foregroundStyle(comparisonMode == .lastSession
-                        ? themeManager.effectiveTheme.primaryText
+                        ? themeManager.effectiveTheme.chartColor2
                         : themeManager.effectiveTheme.pbColor)
                     .frame(width: 20)
                 Text(headerText)

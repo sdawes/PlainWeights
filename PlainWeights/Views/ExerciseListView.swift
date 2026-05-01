@@ -310,13 +310,13 @@ struct FilteredExerciseListView: View {
                     .font(.title2)
                     .foregroundStyle(themeManager.effectiveTheme.background)
             }
-            .frame(width: 52, height: 52)
+            .frame(width: 55, height: 55)
             .background(themeManager.effectiveTheme.primary)
             .clipShape(Circle())
             .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
             .accessibilityLabel("Add exercise")
             .padding(.trailing, 20)
-            .padding(.bottom, 8)
+            .padding(.bottom, 3)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

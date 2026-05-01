@@ -426,12 +426,12 @@ struct ExerciseDetailView: View {
                     .font(.title2)
                     .foregroundStyle(themeManager.effectiveTheme.background)
             }
-            .frame(width: 52, height: 52)
+            .frame(width: 55, height: 55)
             .background(themeManager.effectiveTheme.primary)
             .clipShape(Circle())
             .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
             .padding(.trailing, 20)
-            .padding(.bottom, 46)
+            .padding(.bottom, 41)
         }
         .overlay(alignment: .bottom) {
             if let timerSet = restTimerSet {

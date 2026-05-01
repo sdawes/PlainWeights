@@ -76,6 +76,12 @@ struct FilteredExerciseListView: View {
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
     @State private var showingAISummary = false
+    /// When true, a selection circle is shown to the left of every exercise
+    /// row. Toggled by the checklist toolbar button. Selection state is
+    /// preserved across toggles — hiding the selectors does not clear them.
+    @State private var isGroupingMode = false
+    /// Exercise IDs the user has selected while in grouping mode.
+    @State private var selectedGroupingIDs: Set<PersistentIdentifier> = []
     @State private var exerciseToDelete: Exercise?
     @State private var showError = false
 
@@ -320,9 +326,24 @@ struct FilteredExerciseListView: View {
             .padding(.bottom, 3)
         }
         .toolbar {
+            if isGroupingMode {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Clear selection", systemImage: "xmark.circle") {
+                        withAnimation {
+                            selectedGroupingIDs.removeAll()
+                        }
+                    }
+                    .disabled(selectedGroupingIDs.isEmpty)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("AI summary", systemImage: "sparkles") {
                     showingAISummary = true
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Group exercises", systemImage: "checklist") {
+                    isGroupingMode.toggle()
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -421,53 +442,74 @@ struct FilteredExerciseListView: View {
         let isDoneToday = cachedDoneToday.contains(exercise.persistentModelID)
         let info = stalenessInfo(for: exercise)
         let tagHighlight = searchScope == .tags ? searchText : ""
+        let isSelected = selectedGroupingIDs.contains(exercise.persistentModelID)
 
-        VStack(alignment: .leading, spacing: 0) {
-            Text(highlightedName(exercise.name))
-                .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
-                .foregroundStyle(themeManager.effectiveTheme.primaryText)
-
-            // Tag pills
-            if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
-                TagPillsRow(
-                    tags: exercise.tags,
-                    secondaryTags: exercise.secondaryTags,
-                    highlightText: tagHighlight
-                )
-                .padding(.top, 6)
+        HStack(spacing: 12) {
+            // Selection circle — only visible while in grouping mode.
+            if isGroupingMode {
+                Button {
+                    toggleGroupingSelection(for: exercise)
+                } label: {
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 22))
+                        .foregroundStyle(
+                            isSelected
+                                ? themeManager.effectiveTheme.primary
+                                : themeManager.effectiveTheme.mutedForeground
+                        )
+                        .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isSelected ? "Selected" : "Not selected")
             }
 
-            // Last workout line with dot
-            HStack(spacing: 6) {
-                if let info {
-                    Circle()
-                        .fill(info.color)
-                        .frame(width: 6, height: 6)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(highlightedName(exercise.name))
+                    .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
+                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
+
+                // Tag pills
+                if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
+                    TagPillsRow(
+                        tags: exercise.tags,
+                        secondaryTags: exercise.secondaryTags,
+                        highlightText: tagHighlight
+                    )
+                    .padding(.top, 6)
                 }
 
-                if isDoneToday {
-                    HStack(spacing: 0) {
-                        Text("Last: ")
-                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                        Text("Today")
-                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                // Last workout line with dot
+                HStack(spacing: 6) {
+                    if let info {
+                        Circle()
+                            .fill(info.color)
+                            .frame(width: 6, height: 6)
                     }
-                    .foregroundStyle(info?.color ?? .green)
-                } else if let lastWorkout = exercise.lastWorkoutDate {
-                    HStack(spacing: 0) {
-                        Text("Last: ")
+
+                    if isDoneToday {
+                        HStack(spacing: 0) {
+                            Text("Last: ")
+                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                            Text("Today")
+                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                        }
+                        .foregroundStyle(info?.color ?? .green)
+                    } else if let lastWorkout = exercise.lastWorkoutDate {
+                        HStack(spacing: 0) {
+                            Text("Last: ")
+                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
+                            Text(Formatters.formatExerciseLastDone(lastWorkout))
+                                .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                        }
+                        .foregroundStyle(info?.color ?? themeManager.effectiveTheme.mutedForeground)
+                    } else {
+                        Text("No sets recorded")
                             .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                        Text(Formatters.formatExerciseLastDone(lastWorkout))
-                            .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                     }
-                    .foregroundStyle(info?.color ?? themeManager.effectiveTheme.mutedForeground)
-                } else {
-                    Text("No sets recorded")
-                        .font(themeManager.effectiveTheme.interFont(size: 14, weight: .regular))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
+                .padding(.top, 12)
             }
-            .padding(.top, 12)
         }
         .padding(.vertical, 14)
         .padding(.horizontal, 14)
@@ -488,6 +530,16 @@ struct FilteredExerciseListView: View {
     }
 
     // MARK: - Helper Functions
+
+    /// Toggle membership of an exercise in the grouping selection set.
+    private func toggleGroupingSelection(for exercise: Exercise) {
+        let id = exercise.persistentModelID
+        if selectedGroupingIDs.contains(id) {
+            selectedGroupingIDs.remove(id)
+        } else {
+            selectedGroupingIDs.insert(id)
+        }
+    }
 
     /// Delete an exercise and all its associated sets (cascade delete)
     private func deleteExercise(_ exercise: Exercise) {

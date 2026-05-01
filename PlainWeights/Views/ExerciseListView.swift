@@ -24,6 +24,41 @@ enum ExerciseSearchScope: String, CaseIterable {
     case tags = "Tags"
 }
 
+/// Mode that drives `FilteredExerciseListView`.
+///
+/// `.browse` is the default — tapping a row pushes the exercise detail,
+/// the FAB is visible, and the AI / Groups / Settings / History toolbar
+/// items are shown.
+///
+/// `.selectingForGroup` is used when the view is presented modally from
+/// the Groups screen as a picker. Selection circles are always visible,
+/// tapping a row toggles selection (does not navigate), the FAB is
+/// hidden, and Cancel + Done replace the browse toolbar.
+enum SelectionMode {
+    case browse
+    case selectingForGroup(
+        contextLabel: String,
+        initialSelection: Set<PersistentIdentifier>,
+        /// Whether to render an explicit Cancel button. Pass `false`
+        /// when this view is pushed onto a navigation stack (i.e. there
+        /// is already an automatic Back button), `true` when it's the
+        /// stack's root.
+        showsCancel: Bool,
+        onSubmit: ([Exercise]) -> Void,
+        onCancel: () -> Void
+    )
+
+    var isSelectingForGroup: Bool {
+        if case .selectingForGroup = self { return true }
+        return false
+    }
+
+    var contextLabel: String? {
+        if case let .selectingForGroup(label, _, _, _, _) = self { return label }
+        return nil
+    }
+}
+
 struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allExercises: [Exercise]
@@ -53,7 +88,8 @@ struct ExerciseListView: View {
             searchText: searchText,
             searchScope: searchScope,
             showingAddExercise: $showingAddExercise,
-            navigationPath: $navigationPath
+            navigationPath: $navigationPath,
+            mode: .browse
         )
 
         // Only show search bar when exercises exist
@@ -78,17 +114,14 @@ struct FilteredExerciseListView: View {
     @Binding var navigationPath: NavigationPath
     let searchText: String
     let searchScope: ExerciseSearchScope
+    let mode: SelectionMode
+
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
     @State private var showingAISummary = false
-    /// When true, a selection circle is shown to the left of every exercise
-    /// row. Toggled by the checklist toolbar button. Selection state is
-    /// preserved across toggles — hiding the selectors does not clear them.
-    @State private var isGroupingMode = false
-    /// Exercise IDs the user has selected while in grouping mode.
-    @State private var selectedGroupingIDs: Set<PersistentIdentifier> = []
-    /// Drives the "name your group" sheet.
-    @State private var showingSaveGroupSheet = false
+    /// Exercise IDs currently ticked. Initialised from `mode.initialSelection`
+    /// in `.selectingForGroup`, otherwise empty (and unused).
+    @State private var selectedGroupingIDs: Set<PersistentIdentifier>
     @State private var exerciseToDelete: Exercise?
     @State private var showError = false
 
@@ -100,11 +133,25 @@ struct FilteredExerciseListView: View {
     /// Pre-sorted exercises to avoid expensive lastWorkoutDate lookups on every render
     @State private var cachedSortedExercises: [Exercise] = []
 
-    init(searchText: String, searchScope: ExerciseSearchScope, showingAddExercise: Binding<Bool>, navigationPath: Binding<NavigationPath>) {
+    init(
+        searchText: String,
+        searchScope: ExerciseSearchScope,
+        showingAddExercise: Binding<Bool>,
+        navigationPath: Binding<NavigationPath>,
+        mode: SelectionMode = .browse
+    ) {
         self.searchText = searchText
         self.searchScope = searchScope
         self._showingAddExercise = showingAddExercise
         self._navigationPath = navigationPath
+        self.mode = mode
+
+        // Pre-tick the user's existing selection when editing an existing group.
+        if case .selectingForGroup(_, let initial, _, _, _) = mode {
+            _selectedGroupingIDs = State(initialValue: initial)
+        } else {
+            _selectedGroupingIDs = State(initialValue: [])
+        }
 
         // Fetch all exercises — filtering by search text + scope happens in the sorted cache
         _exercises = Query(
@@ -305,78 +352,88 @@ struct FilteredExerciseListView: View {
         .scrollContentBackground(.hidden)
         .background(AnimatedGradientBackground())
         .scrollDismissesKeyboard(.immediately)
+        .navigationTitle(mode.contextLabel.map { "Add to \($0)" } ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackgroundVisibility(.visible, for: .navigationBar)
         .safeAreaInset(edge: .bottom, alignment: .trailing, spacing: 0) {
-            Button(action: { showingAddExercise = true }) {
-                Image(systemName: "plus")
-                    .font(.title2)
-                    .foregroundStyle(themeManager.effectiveTheme.background)
+            // FAB only in browse mode — selection mode hides it.
+            if !mode.isSelectingForGroup {
+                Button(action: { showingAddExercise = true }) {
+                    Image(systemName: "plus")
+                        .font(.title2)
+                        .foregroundStyle(themeManager.effectiveTheme.background)
+                }
+                .frame(width: 55, height: 55)
+                .background(themeManager.effectiveTheme.primary)
+                .clipShape(Circle())
+                .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
+                .accessibilityLabel("Add exercise")
+                .padding(.trailing, 20)
+                .padding(.bottom, 3)
             }
-            .frame(width: 55, height: 55)
-            .background(themeManager.effectiveTheme.primary)
-            .clipShape(Circle())
-            .shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
-            .accessibilityLabel("Add exercise")
-            .padding(.trailing, 20)
-            .padding(.bottom, 3)
         }
         .toolbar {
-            if isGroupingMode {
+            if case .selectingForGroup(_, _, let showsCancel, let onSubmit, let onCancel) = mode {
+                if showsCancel {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Cancel") {
+                            onCancel()
+                        }
+                    }
+                }
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Clear selection", systemImage: "xmark.circle") {
+                    Button("Deselect all", systemImage: "xmark.circle") {
                         withAnimation {
                             selectedGroupingIDs.removeAll()
                         }
                     }
                     .disabled(selectedGroupingIDs.isEmpty)
                 }
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Save group", systemImage: "rectangle.stack.badge.plus") {
-                        showingSaveGroupSheet = true
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        let selected = exercises.filter {
+                            selectedGroupingIDs.contains($0.persistentModelID)
+                        }
+                        onSubmit(selected)
                     }
-                    .disabled(selectedGroupingIDs.isEmpty)
+                    .fontWeight(.semibold)
                 }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("AI summary", systemImage: "sparkles") {
-                    showingAISummary = true
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Group exercises", systemImage: "checklist") {
-                    isGroupingMode.toggle()
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Saved groups", systemImage: "rectangle.stack.fill") {
-                    navigationPath.append(GroupsDestination.groupsList)
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showingSettings = true } label: {
-                    Image(systemName: "gearshape")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundStyle(themeManager.effectiveTheme.textColor)
-                }
-                .accessibilityLabel("Settings")
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    // Check if any exercise has sets
-                    let hasSets = exercises.contains { !($0.sets?.isEmpty ?? true) }
-                    if !hasSets {
-                        showingNoSessionAlert = true
-                    } else {
-                        navigationPath.append(HistoryDestination.history)
+            } else {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("AI summary", systemImage: "sparkles") {
+                        showingAISummary = true
                     }
-                } label: {
-                    Image(systemName: "clock.arrow.circlepath")
-                        .font(.body)
-                        .fontWeight(.medium)
                 }
-                .accessibilityLabel("View history")
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Groups", systemImage: "rectangle.stack.fill") {
+                        navigationPath.append(GroupsDestination.groupsList)
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showingSettings = true } label: {
+                        Image(systemName: "gearshape")
+                            .font(.body)
+                            .fontWeight(.medium)
+                            .foregroundStyle(themeManager.effectiveTheme.textColor)
+                    }
+                    .accessibilityLabel("Settings")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        // Check if any exercise has sets
+                        let hasSets = exercises.contains { !($0.sets?.isEmpty ?? true) }
+                        if !hasSets {
+                            showingNoSessionAlert = true
+                        } else {
+                            navigationPath.append(HistoryDestination.history)
+                        }
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.body)
+                            .fontWeight(.medium)
+                    }
+                    .accessibilityLabel("View history")
+                }
             }
         }
         .sheet(isPresented: $showingAddExercise) {
@@ -393,12 +450,6 @@ struct FilteredExerciseListView: View {
         .sheet(isPresented: $showingAISummary) {
             AISummaryView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        }
-        .sheet(isPresented: $showingSaveGroupSheet) {
-            SaveGroupSheet(
-                exerciseCount: selectedGroupingIDs.count,
-                onSave: saveSelectedAsGroup
-            )
         }
         .alert("Something Went Wrong", isPresented: $showError) {
             Button("OK", role: .cancel) { }
@@ -454,24 +505,19 @@ struct FilteredExerciseListView: View {
     private func exerciseRow(_ exercise: Exercise) -> some View {
         let isSelected = selectedGroupingIDs.contains(exercise.persistentModelID)
         let cachedDone = cachedDoneToday.contains(exercise.persistentModelID)
+        let inSelectionMode = mode.isSelectingForGroup
 
         HStack(spacing: 12) {
-            // Selection circle — only visible while in grouping mode.
-            if isGroupingMode {
-                Button {
-                    toggleGroupingSelection(for: exercise)
-                } label: {
-                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 22))
-                        .foregroundStyle(
-                            isSelected
-                                ? themeManager.effectiveTheme.primary
-                                : themeManager.effectiveTheme.mutedForeground
-                        )
-                        .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(isSelected ? "Selected" : "Not selected")
+            // Selection circle — visible whenever the view is in selection mode.
+            if inSelectionMode {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 22))
+                    .foregroundStyle(
+                        isSelected
+                            ? themeManager.effectiveTheme.primary
+                            : themeManager.effectiveTheme.mutedForeground
+                    )
+                    .accessibilityLabel(isSelected ? "Selected" : "Not selected")
             }
 
             ExerciseCard(
@@ -489,13 +535,21 @@ struct FilteredExerciseListView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .contentShape(Rectangle())
         .onTapGesture {
-            navigationPath.append(exercise)
+            if inSelectionMode {
+                toggleGroupingSelection(for: exercise)
+            } else {
+                navigationPath.append(exercise)
+            }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive) {
-                exerciseToDelete = exercise
-            } label: {
-                Label("Delete", systemImage: "trash")
+            // No swipe-to-delete in selection mode — it would conflict with
+            // the selection gesture and isn't relevant to the picking task.
+            if !inSelectionMode {
+                Button(role: .destructive) {
+                    exerciseToDelete = exercise
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
             }
         }
     }
@@ -509,27 +563,6 @@ struct FilteredExerciseListView: View {
             selectedGroupingIDs.remove(id)
         } else {
             selectedGroupingIDs.insert(id)
-        }
-    }
-
-    /// Persist the current selection as a new ExerciseGroup with the given
-    /// name, then exit grouping mode and clear the selection.
-    private func saveSelectedAsGroup(named name: String) {
-        let selected = exercises.filter { selectedGroupingIDs.contains($0.persistentModelID) }
-        guard !selected.isEmpty else { return }
-
-        let group = ExerciseGroup(name: name, exercises: selected)
-        modelContext.insert(group)
-        do {
-            try modelContext.save()
-        } catch {
-            showError = true
-            return
-        }
-
-        withAnimation {
-            selectedGroupingIDs.removeAll()
-            isGroupingMode = false
         }
     }
 
@@ -566,4 +599,3 @@ struct FilteredExerciseListView: View {
         return attributedString
     }
 }
-

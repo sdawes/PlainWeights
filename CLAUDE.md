@@ -145,11 +145,13 @@ PlainWeights/
 │   ├── HelpView.swift             # Help/about screen
 │   ├── SetRowView.swift           # Individual set display row
 │   ├── TodaySetsSectionView.swift # Today's sets section
+│   ├── AISummaryView.swift        # AI workout-summary sheet (UI only)
 │   └── Components/               # Reusable components (see Components section)
 ├── Services/                      # Business logic (enums with static methods)
 │   ├── ExerciseSetService.swift   # Core set CRUD, PB detection, rest time
 │   ├── ExerciseService.swift      # Tag distribution, duplicate checks
 │   ├── CSVExportService.swift     # CSV data export
+│   ├── AISummaryService.swift     # On-device AI summaries via Foundation Models
 │   ├── BestSessionCalculator.swift
 │   ├── LastSessionCalculator.swift
 │   ├── TodaySessionCalculator.swift
@@ -1273,6 +1275,35 @@ The app uses SwiftData with automatic CloudKit sync. User data is backed up to t
 - ❌ Cannot change property types (e.g. String → Int)
 - ❌ Cannot add `@Attribute(.unique)` retroactively
 - ❌ Cannot change relationship delete rules
+
+### On-Device AI (Foundation Models)
+
+The app uses Apple's **Foundation Models** framework (iOS 26+) for AI features — currently a workout summary triggered from the sparkles button in the exercise list toolbar. All inference runs **on-device** via Apple Intelligence: no network, no API keys, no monthly cost, user data never leaves the iPhone.
+
+**Architecture pattern:**
+
+- **Service layer** (`Services/AISummaryService.swift`) — owns all AI logic: capability gating, prompt construction, `LanguageModelSession` calls, error mapping. Pure logic, no SwiftUI types.
+- **View layer** (`Views/AISummaryView.swift`) — UI-only. Three states (loading / summary / error), drives a `.task` that calls the service.
+
+The split mirrors the existing Services pattern (enums with `static` methods, no UI dependencies).
+
+**Required ingredients for any new AI feature:**
+1. **Capability gate**: `guard case .available = SystemLanguageModel.default.availability else { throw … }`. Required — older devices and disabled Apple Intelligence will fail otherwise.
+2. **Prompt builder**: filter SwiftData down to *only* the relevant subset before any heavy work (e.g. find the most recent day first, then filter, then group). Avoids touching the whole training history for a single-day query.
+3. **Session call**: `LanguageModelSession()` then `try await session.respond(to: prompt)`. One-shot is fine for single-button features; reuse the session for multi-turn.
+4. **Sanitised errors**: throw a domain-specific `LocalizedError` enum from the service. Never surface raw `FoundationModels` error strings to the user — log them to console for debugging only.
+
+**Performance:**
+- Filter sets to the relevant time window *before* calling `ExerciseDataGrouper.createWorkoutJournal(from:)`. Grouping the entire history is expensive for long-term users.
+- Cold-start the model has a small one-time cost (a few seconds on first call after launch). Subsequent calls within the same session are faster.
+- Keep prompts short. Don't dump the whole database — pull just what's needed for the question.
+
+**Security & privacy:**
+- Foundation Models is on-device only. No data leaves the phone, so there's no API-key handling, no transport security to worry about, and no App Review questions about third-party AI providers.
+- Never `print(error)` raw framework errors in production paths — they can leak prompt content or system state. Diagnostics-only, gated behind a guard or `#if DEBUG` if needed.
+
+**UX pattern: pre-built prompts, not a chat box.**
+The 3B-param on-device model is reliable for **curated, narrow questions** with templated prompts ("summarise the last session", "what muscles did I miss this week"). It is NOT reliable for free-form user-typed questions. Add new AI features as tappable cards/buttons that map to a specific service method — never a "ask me anything" text field. This avoids hallucinations, prompt-injection edge cases, and protects users from the model's limits.
 
 ---
 

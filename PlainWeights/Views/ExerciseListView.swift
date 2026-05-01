@@ -75,6 +75,7 @@ struct FilteredExerciseListView: View {
     let searchScope: ExerciseSearchScope
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
+    @State private var showingAISummary = false
     @State private var exerciseToDelete: Exercise?
     @State private var showError = false
 
@@ -320,6 +321,15 @@ struct FilteredExerciseListView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
+                Button { showingAISummary = true } label: {
+                    Image(systemName: "sparkles")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundStyle(themeManager.effectiveTheme.textColor)
+                }
+                .accessibilityLabel("AI summary")
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showingSettings = true } label: {
                     Image(systemName: "gearshape")
                         .font(.body)
@@ -354,6 +364,10 @@ struct FilteredExerciseListView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+                .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        }
+        .sheet(isPresented: $showingAISummary) {
+            AISummaryView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .alert("Something Went Wrong", isPresented: $showError) {

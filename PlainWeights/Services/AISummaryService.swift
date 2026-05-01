@@ -15,9 +15,9 @@ import FoundationModels
 /// of training data to feed into the prompt.
 enum AISummaryScope: String, CaseIterable, Identifiable {
     case lastSession = "Last session"
-    case lastWeek = "Last week"
-    case lastMonth = "Last month"
-    case lastYear = "Last year"
+    case lastWeek = "Past 7 days"
+    case lastMonth = "Past 30 days"
+    case lastYear = "Past 12 months"
 
     var id: String { rawValue }
 }

@@ -324,9 +324,11 @@ struct FilteredExerciseListView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu("AI summary", systemImage: "sparkles") {
-                    ForEach(AISummaryScope.allCases) { scope in
-                        Button(scope.rawValue) {
-                            aiSummaryScope = scope
+                    Section("AI Summary") {
+                        ForEach(AISummaryScope.allCases) { scope in
+                            Button(scope.rawValue) {
+                                aiSummaryScope = scope
+                            }
                         }
                     }
                 }

@@ -31,24 +31,10 @@ struct GroupExerciseRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Top row — name + done indicator
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(exercise.name)
-                    .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
-                    .foregroundStyle(themeManager.effectiveTheme.primaryText)
-
-                Spacer(minLength: 8)
-
-                if isDoneFromGroupToday {
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 12))
-                        Text("Logged")
-                            .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-                    }
-                    .foregroundStyle(.green)
-                }
-            }
+            // Name
+            Text(exercise.name)
+                .font(themeManager.effectiveTheme.interFont(size: 16, weight: .medium))
+                .foregroundStyle(themeManager.effectiveTheme.primaryText)
 
             // Tag pills (when present)
             if !exercise.tags.isEmpty || !exercise.secondaryTags.isEmpty {
@@ -58,18 +44,33 @@ struct GroupExerciseRow: View {
                 )
             }
 
-            // Plain "Last: ..." line — purely informational, no colour
-            // logic, no dots. Mirrors what the main list shows but
-            // stripped down so it doesn't compete with the green
-            // "Logged" badge above.
-            if let lastWorkout = exercise.lastWorkoutDate {
-                HStack(spacing: 0) {
-                    Text("Last: ")
-                        .font(themeManager.effectiveTheme.interFont(size: 13, weight: .regular))
-                    Text(Formatters.formatExerciseLastDone(lastWorkout))
-                        .font(themeManager.effectiveTheme.interFont(size: 13, weight: .medium))
+            // Bottom row — "Last: ..." on the left, optional green
+            // "Logged" badge on the right. Only rendered when at least
+            // one of those is present.
+            if exercise.lastWorkoutDate != nil || isDoneFromGroupToday {
+                HStack(alignment: .firstTextBaseline) {
+                    if let lastWorkout = exercise.lastWorkoutDate {
+                        HStack(spacing: 0) {
+                            Text("Last: ")
+                                .font(themeManager.effectiveTheme.interFont(size: 13, weight: .regular))
+                            Text(Formatters.formatExerciseLastDone(lastWorkout))
+                                .font(themeManager.effectiveTheme.interFont(size: 13, weight: .medium))
+                        }
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    }
+
+                    Spacer(minLength: 8)
+
+                    if isDoneFromGroupToday {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 12))
+                            Text("Logged")
+                                .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
+                        }
+                        .foregroundStyle(.green)
+                    }
                 }
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 .padding(.top, 2)
             }
         }

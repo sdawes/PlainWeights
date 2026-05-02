@@ -172,50 +172,55 @@ struct GroupCard: View {
     @ViewBuilder
     private func subtitleRow(exercises: [Exercise], doneIDsToday: Set<PersistentIdentifier>) -> some View {
         let status = groupSessionStatus(exercises: exercises, doneIDsToday: doneIDsToday)
-        HStack(spacing: 6) {
-            switch status {
-            case .completedToday:
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.green)
-                Text("Logged today")
-                    .font(themeManager.effectiveTheme.captionFont)
-                    .foregroundStyle(.green)
+        let lastDate = lastLoggedDate()
 
-            case .inProgress(let done, let total):
-                Image(systemName: "arrow.right.circle.fill")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.orange)
-                Text("\(done)/\(total) logged today")
-                    .font(themeManager.effectiveTheme.captionFont)
-                    .foregroundStyle(.orange)
-
-            case .idle:
-                Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
-                    .font(themeManager.effectiveTheme.captionFont)
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-
-                if let date = lastCompletedDate() {
-                    Text("·")
-                        .font(themeManager.effectiveTheme.captionFont)
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+        VStack(alignment: .leading, spacing: 2) {
+            // Primary status line — today's state
+            HStack(spacing: 6) {
+                switch status {
+                case .completedToday:
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 12))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                    Text("Logged \(relativeDateString(for: date))")
+                        .foregroundStyle(.green)
+                    Text("Logged today")
                         .font(themeManager.effectiveTheme.captionFont)
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                } else if !exercises.isEmpty {
-                    Text("·")
-                        .font(themeManager.effectiveTheme.captionFont)
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                    Image(systemName: "circle.dashed")
+                        .foregroundStyle(.green)
+
+                case .inProgress(let done, let total):
+                    Image(systemName: "arrow.right.circle.fill")
                         .font(.system(size: 12))
-                        .foregroundStyle(.red)
-                    Text("Nothing logged yet")
+                        .foregroundStyle(.orange)
+                    Text("\(done)/\(total) logged today")
                         .font(themeManager.effectiveTheme.captionFont)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(.orange)
+
+                case .idle:
+                    Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
+                        .font(themeManager.effectiveTheme.captionFont)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+
+                    if !exercises.isEmpty {
+                        Text("·")
+                            .font(themeManager.effectiveTheme.captionFont)
+                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        Image(systemName: "circle.dashed")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.red)
+                        Text(lastDate == nil ? "Nothing logged yet" : "Nothing logged today")
+                            .font(themeManager.effectiveTheme.captionFont)
+                            .foregroundStyle(.red)
+                    }
                 }
+            }
+
+            // Secondary line — when this group was last touched at all.
+            // Only shown in idle state when there's history; today's
+            // green/orange states already convey "right now" so the
+            // historical line would be redundant.
+            if case .idle = status, let date = lastDate {
+                Text("Last logged \(relativeDateString(for: date))")
+                    .font(themeManager.effectiveTheme.interFont(size: 11, weight: .regular))
+                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
             }
         }
     }
@@ -239,24 +244,12 @@ struct GroupCard: View {
         return .inProgress(done: doneCount, total: allIDs.count)
     }
 
-    /// Most recent day on which every exercise in the group had at least
-    /// one set logged within this group's context.
-    private func lastCompletedDate() -> Date? {
-        guard let exercises = group.exercises, !exercises.isEmpty,
-              let groupSets = group.groupSets, !groupSets.isEmpty else { return nil }
-
-        let allIDs = Set(exercises.map { $0.id })
-        let calendar = Calendar.current
-        let byDay = Dictionary(grouping: groupSets) {
-            calendar.startOfDay(for: $0.timestamp)
-        }
-        return byDay
-            .filter { (_, sets) in
-                let covered = Set(sets.compactMap { $0.exercise?.id })
-                return allIDs.isSubset(of: covered)
-            }
-            .keys
-            .max()
+    /// Most recent date on which *any* set was logged with this group as
+    /// its sourceGroup. Used for the secondary "Last logged X" line —
+    /// reflects activity, not necessarily full completion.
+    private func lastLoggedDate() -> Date? {
+        guard let groupSets = group.groupSets, !groupSets.isEmpty else { return nil }
+        return groupSets.map(\.timestamp).max()
     }
 
     // MARK: - Date helpers

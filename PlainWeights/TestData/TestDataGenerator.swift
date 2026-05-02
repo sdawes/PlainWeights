@@ -28,6 +28,11 @@ class TestDataGenerator {
             return
         }
 
+        // Fetch all groups
+        let groupSort = SortDescriptor(\ExerciseGroup.createdDate)
+        let groupDescriptor = FetchDescriptor<ExerciseGroup>(sortBy: [groupSort])
+        let groups = (try? modelContext.fetch(groupDescriptor)) ?? []
+
         // Collect all sets from all exercises
         var allSets: [(exercise: Exercise, set: ExerciseSet)] = []
         for exercise in exercises {
@@ -159,35 +164,63 @@ class TestDataGenerator {
         print("            modelContext.insert(exercise)")
         print("        }")
         print("")
+        print("        // Group definitions — name, member exercise names, createdDate")
+        print("        let groupData: [(name: String, exerciseNames: [String], createdDate: Date)] = [")
+        for group in groups {
+            let calendar = Calendar.current
+            let gY = calendar.component(.year, from: group.createdDate)
+            let gM = calendar.component(.month, from: group.createdDate)
+            let gD = calendar.component(.day, from: group.createdDate)
+            let gH = calendar.component(.hour, from: group.createdDate)
+            let gMin = calendar.component(.minute, from: group.createdDate)
+            let gS = calendar.component(.second, from: group.createdDate)
+            let memberNames = (group.exercises ?? []).map { "\"\($0.name)\"" }.joined(separator: ", ")
+            print("    (name: \"\(group.name)\", exerciseNames: [\(memberNames)], createdDate: date(\(gY), \(gM), \(gD), \(gH), \(gMin), \(gS))),")
+        }
+        print("        ]")
+        print("")
+        print("        // Create groups and link member exercises")
+        print("        var groups: [String: ExerciseGroup] = [:]")
+        print("        for data in groupData {")
+        print("            let members = data.exerciseNames.compactMap { exercises[$0] }")
+        print("            let group = ExerciseGroup(name: data.name, exercises: members, createdDate: data.createdDate)")
+        print("            groups[data.name] = group")
+        print("            modelContext.insert(group)")
+        print("        }")
+        print("")
         print("        // Helper function to add a working set")
-        print("        func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
+        print("        func addSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, sourceGroup: String? = nil) {")
         print("            guard let ex = exercises[exercise] else { return }")
         print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isDropSet: false, isAssisted: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)")
         print("            set.restSeconds = restSeconds")
+        print("            set.sourceGroup = sourceGroup.flatMap { groups[$0] }")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add a warm-up set")
-        print("        func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0) {")
+        print("        func addWarmUpSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, sourceGroup: String? = nil) {")
         print("            guard let ex = exercises[exercise] else { return }")
         print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: true, isDropSet: false, isAssisted: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: false, exercise: ex)")
         print("            set.restSeconds = restSeconds")
+        print("            set.sourceGroup = sourceGroup.flatMap { groups[$0] }")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add a drop set")
-        print("        func addDropSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
+        print("        func addDropSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, sourceGroup: String? = nil) {")
         print("            guard let ex = exercises[exercise] else { return }")
         print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isDropSet: true, isAssisted: false, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)")
         print("            set.restSeconds = restSeconds")
+        print("            set.sourceGroup = sourceGroup.flatMap { groups[$0] }")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
         print("        // Helper function to add an assisted set")
-        print("        func addAssistedSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false) {")
+        print("        func addAssistedSet(exercise: String, weight: Double, reps: Int, timestamp: Date, restSeconds: Int? = nil, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, sourceGroup: String? = nil) {")
         print("            guard let ex = exercises[exercise] else { return }")
         print("            let set = ExerciseSet(timestamp: timestamp, weight: weight, reps: reps, isWarmUp: false, isDropSet: false, isAssisted: true, isPauseAtTop: isPauseAtTop, isTimedSet: isTimedSet, tempoSeconds: tempoSeconds, isPB: isPB, exercise: ex)")
         print("            set.restSeconds = restSeconds")
+        print("            set.sourceGroup = sourceGroup.flatMap { groups[$0] }")
         print("            modelContext.insert(set)")
         print("        }")
         print("")
@@ -248,6 +281,10 @@ class TestDataGenerator {
                             if item.set.isPB {
                                 optionalParams += ", isPB: true"
                             }
+                            if let groupName = item.set.sourceGroup?.name {
+                                let escapedName = groupName.replacing("\"", with: "\\\"")
+                                optionalParams += ", sourceGroup: \"\(escapedName)\""
+                            }
 
                             if item.set.isWarmUp {
                                 print("        addWarmUpSet(exercise: \"\(item.exercise.name)\", weight: \(item.set.weight), reps: \(item.set.reps), timestamp: date(\(y), \(m), \(d), \(h), \(min), \(s))\(optionalParams))")
@@ -286,6 +323,7 @@ class TestDataGenerator {
         print("")
         print("    private static func clearAllData(modelContext: ModelContext) {")
         print("        do {")
+        print("            try modelContext.delete(model: ExerciseGroup.self)")
         print("            try modelContext.delete(model: Exercise.self)")
         print("            try modelContext.delete(model: ExerciseSet.self)")
         print("            try modelContext.save()")
@@ -307,6 +345,7 @@ class TestDataGenerator {
         do {
             let deleteContext = ModelContext(container)
             try deleteContext.delete(model: ExerciseSet.self)
+            try deleteContext.delete(model: ExerciseGroup.self)
             try deleteContext.delete(model: Exercise.self)
             try deleteContext.save()
             logger.info("All data cleared")

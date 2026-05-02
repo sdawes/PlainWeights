@@ -60,8 +60,15 @@ struct ExerciseGroupsView: View {
     @Binding var navigationPath: NavigationPath
 
     /// Which group cards are currently expanded. UUID-keyed so the state
-    /// survives reorderings of `groups`.
-    @State private var expandedGroupIDs: Set<UUID> = []
+    /// survives reorderings of `groups`. Persisted via AppStorage as a
+    /// comma-joined UUID string so expansion state survives both
+    /// navigation away from the Groups screen and app restarts —
+    /// groups stay open until the user explicitly collapses them.
+    @AppStorage("expandedGroupIDs") private var expandedGroupIDsRaw: String = ""
+
+    private var expandedGroupIDs: Set<UUID> {
+        Set(expandedGroupIDsRaw.split(separator: ",").compactMap { UUID(uuidString: String($0)) })
+    }
 
     /// Non-nil while the selection cover is presented. Drives both the
     /// create flow and the edit-existing flow.
@@ -116,6 +123,33 @@ struct ExerciseGroupsView: View {
             )
             .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
+        .task {
+            // Heal untagged today's sets every time the Groups screen
+            // appears. Only claims sets where the exercise belongs to
+            // exactly one group — ambiguous cases (multi-group
+            // exercises) are left for explicit user action via Edit.
+            autoClaimUnambiguousTodaysSets()
+        }
+    }
+
+    /// Sweep across all groups and stamp today's untagged sets onto
+    /// their owning group, but only when the exercise is a member of
+    /// exactly one group (so the association is unambiguous).
+    private func autoClaimUnambiguousTodaysSets() {
+        let cutoff = Calendar.current.startOfDay(for: .now)
+        var changed = false
+        for group in groups {
+            for exercise in group.exercises ?? [] {
+                guard (exercise.groups ?? []).count == 1 else { continue }
+                for set in exercise.sets ?? [] where set.sourceGroup == nil && set.timestamp >= cutoff {
+                    set.sourceGroup = group
+                    changed = true
+                }
+            }
+        }
+        if changed {
+            try? modelContext.save()
+        }
     }
 
     // MARK: - Flow handlers
@@ -125,20 +159,47 @@ struct ExerciseGroupsView: View {
         case .create(let name, let exercises):
             let group = ExerciseGroup(name: name, exercises: exercises)
             modelContext.insert(group)
+            claimTodaysUntaggedSets(for: exercises, into: group)
+
         case .update(let group, let exercises):
             group.exercises = exercises
+            // Run the claim against ALL current members, not just
+            // newly-added ones. This heals cases where an existing
+            // member has untagged sets logged from outside the group
+            // context (e.g. logged from the main list earlier today).
+            claimTodaysUntaggedSets(for: exercises, into: group)
         }
         try? modelContext.save()
         draftContext = nil
     }
 
-    private func toggleExpansion(for group: ExerciseGroup) {
-        withAnimation(.easeInOut(duration: 0.22)) {
-            if expandedGroupIDs.contains(group.id) {
-                expandedGroupIDs.remove(group.id)
-            } else {
-                expandedGroupIDs.insert(group.id)
+    /// For each exercise, scan its sets logged since the start of today
+    /// that have no `sourceGroup` and stamp them with this group.
+    /// Handles two scenarios:
+    /// 1. User did the exercise mid-workout and added it to the group
+    ///    afterwards (any time later in the same day).
+    /// 2. Existing group member has same-day sets that never got tagged
+    ///    because they were logged outside the group context.
+    /// Never overrides sets already tagged to a different group.
+    private func claimTodaysUntaggedSets(for exercises: [Exercise], into group: ExerciseGroup) {
+        guard !exercises.isEmpty else { return }
+        let cutoff = Calendar.current.startOfDay(for: .now)
+        for exercise in exercises {
+            for set in exercise.sets ?? [] where set.sourceGroup == nil && set.timestamp >= cutoff {
+                set.sourceGroup = group
             }
+        }
+    }
+
+    private func toggleExpansion(for group: ExerciseGroup) {
+        var ids = expandedGroupIDs
+        if ids.contains(group.id) {
+            ids.remove(group.id)
+        } else {
+            ids.insert(group.id)
+        }
+        withAnimation(.easeInOut(duration: 0.22)) {
+            expandedGroupIDsRaw = ids.map(\.uuidString).joined(separator: ",")
         }
     }
 

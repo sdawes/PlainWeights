@@ -279,15 +279,6 @@ struct ComparisonMetricsCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(
-                    comparisonMode == .lastSession
-                        ? themeManager.effectiveTheme.chartColor2
-                        : themeManager.effectiveTheme.pbColor,
-                    lineWidth: 1.5
-                )
-        )
         .animation(.easeInOut(duration: 0.2), value: comparisonMode)
         .onChange(of: sets) { _, _ in
             updateCache()

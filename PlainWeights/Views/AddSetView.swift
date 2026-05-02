@@ -123,6 +123,7 @@ struct AddSetView: View {
     @Environment(ThemeManager.self) private var themeManager
     let exercise: Exercise
     let setToEdit: ExerciseSet?
+    let sourceGroup: ExerciseGroup?
 
     @State private var weightText = ""
     @State private var repsText = ""
@@ -136,9 +137,10 @@ struct AddSetView: View {
         case weight, reps
     }
 
-    init(exercise: Exercise, initialWeight: Double? = nil, initialReps: Int? = nil, setToEdit: ExerciseSet? = nil) {
+    init(exercise: Exercise, initialWeight: Double? = nil, initialReps: Int? = nil, setToEdit: ExerciseSet? = nil, sourceGroup: ExerciseGroup? = nil) {
         self.exercise = exercise
         self.setToEdit = setToEdit
+        self.sourceGroup = sourceGroup
 
         // If editing, pre-populate all fields from the set
         if let set = setToEdit {
@@ -372,6 +374,7 @@ struct AddSetView: View {
                     isTimedSet: isTimedSet,
                     tempoSeconds: 0,
                     to: exercise,
+                    sourceGroup: sourceGroup,
                     context: context
                 )
             }

@@ -27,6 +27,9 @@ final class ExerciseSet {
     var isPB: Bool = false           // flag to indicate personal best (highest weight, then reps, then earliest timestamp)
     var restSeconds: Int? = nil       // seconds rested after this set (nil for first set or not yet captured)
     var exercise: Exercise?  // parent (optional to handle cascade delete properly)
+    /// Set when the user logs this set while working through a specific
+    /// group. Nil for sets logged outside a group context.
+    var sourceGroup: ExerciseGroup? = nil
 
     init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isDropSet: Bool = false, isAssisted: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, exercise: Exercise) {
         self.timestamp = timestamp

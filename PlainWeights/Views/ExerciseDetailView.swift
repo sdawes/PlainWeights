@@ -15,6 +15,9 @@ struct ExerciseDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeManager.self) private var themeManager
     let exercise: Exercise
+    /// Non-nil when navigated to from a GroupCard. Passed through to
+    /// AddSetView so new sets are tagged to this group.
+    var sourceGroup: ExerciseGroup? = nil
     @Query private var sets: [ExerciseSet]
     @State private var addSetConfig: AddSetConfig?
 
@@ -98,8 +101,9 @@ struct ExerciseDetailView: View {
         return minutes > 0 ? minutes : nil
     }
 
-    init(exercise: Exercise) {
+    init(exercise: Exercise, sourceGroup: ExerciseGroup? = nil) {
         self.exercise = exercise
+        self.sourceGroup = sourceGroup
         let id = exercise.persistentModelID
         _sets = Query(
             filter: #Predicate<ExerciseSet> { $0.exercise?.persistentModelID == id },
@@ -379,7 +383,8 @@ struct ExerciseDetailView: View {
                 exercise: config.exercise,
                 initialWeight: config.initialWeight,
                 initialReps: config.initialReps,
-                setToEdit: config.setToEdit
+                setToEdit: config.setToEdit,
+                sourceGroup: sourceGroup
             )
             .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }

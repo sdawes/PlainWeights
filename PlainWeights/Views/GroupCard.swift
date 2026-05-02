@@ -42,8 +42,16 @@ struct GroupCard: View {
             return aDate > bDate
         }
 
-        // Most recent workout across all exercises in the group.
-        let mostRecentDate = exercises.compactMap { $0.lastWorkoutDate }.max()
+        // Set of exercise IDs that have at least one set logged today
+        // with `sourceGroup` equal to this group. Used to render the
+        // per-row "Done" indicator and to drive the group session
+        // status — computed once per render, not per row.
+        let today = Calendar.current.startOfDay(for: .now)
+        let doneExerciseIDsToday: Set<PersistentIdentifier> = Set(
+            (group.groupSets ?? [])
+                .filter { Calendar.current.startOfDay(for: $0.timestamp) == today }
+                .compactMap { $0.exercise?.id }
+        )
 
         VStack(alignment: .leading, spacing: 0) {
             // Header — split into expand tap target (name/count) and
@@ -55,7 +63,7 @@ struct GroupCard: View {
                         Text(group.name)
                             .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                        subtitleRow(exercises: exercises, mostRecentDate: mostRecentDate)
+                        subtitleRow(exercises: exercises, doneIDsToday: doneExerciseIDsToday)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(.rect)
@@ -69,6 +77,9 @@ struct GroupCard: View {
                     }
                     Button("Edit exercises", systemImage: "list.bullet") {
                         onEditExercises()
+                    }
+                    Button("Duplicate group", systemImage: "plus.square.on.square") {
+                        duplicateGroup()
                     }
                     Divider()
                     Button("Delete group", systemImage: "trash", role: .destructive) {
@@ -112,15 +123,18 @@ struct GroupCard: View {
                         VStack(spacing: 8) {
                             ForEach(exercises) { exercise in
                                 Button {
-                                    navigationPath.append(exercise)
+                                    navigationPath.append(GroupExerciseDestination(exercise: exercise, group: group))
                                 } label: {
-                                    ExerciseCard(exercise: exercise, compact: true)
-                                        .padding(.vertical, 10)
-                                        .padding(.horizontal, 12)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(themeManager.effectiveTheme.muted.opacity(0.35))
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                                        .contentShape(.rect)
+                                    GroupExerciseRow(
+                                        exercise: exercise,
+                                        isDoneFromGroupToday: doneExerciseIDsToday.contains(exercise.id)
+                                    )
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(themeManager.effectiveTheme.muted.opacity(0.35))
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .contentShape(.rect)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -155,51 +169,120 @@ struct GroupCard: View {
 
     // MARK: - Subtitle row
 
-    /// Exercise count + optional staleness dot and relative date.
     @ViewBuilder
-    private func subtitleRow(exercises: [Exercise], mostRecentDate: Date?) -> some View {
+    private func subtitleRow(exercises: [Exercise], doneIDsToday: Set<PersistentIdentifier>) -> some View {
+        let status = groupSessionStatus(exercises: exercises, doneIDsToday: doneIDsToday)
         HStack(spacing: 6) {
-            Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
-                .font(themeManager.effectiveTheme.captionFont)
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            switch status {
+            case .completedToday:
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.green)
+                Text("Logged today")
+                    .font(themeManager.effectiveTheme.captionFont)
+                    .foregroundStyle(.green)
 
-            if let date = mostRecentDate {
-                Text("·")
+            case .inProgress(let done, let total):
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.orange)
+                Text("\(done)/\(total) logged today")
+                    .font(themeManager.effectiveTheme.captionFont)
+                    .foregroundStyle(.orange)
+
+            case .idle:
+                Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
                     .font(themeManager.effectiveTheme.captionFont)
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
 
-                Circle()
-                    .fill(stalenessColor(for: date))
-                    .frame(width: 6, height: 6)
-
-                Text(relativeDateString(for: date))
-                    .font(themeManager.effectiveTheme.captionFont)
-                    .foregroundStyle(stalenessColor(for: date))
+                if let date = lastCompletedDate() {
+                    Text("·")
+                        .font(themeManager.effectiveTheme.captionFont)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    Text("Logged \(relativeDateString(for: date))")
+                        .font(themeManager.effectiveTheme.captionFont)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                } else if !exercises.isEmpty {
+                    Text("·")
+                        .font(themeManager.effectiveTheme.captionFont)
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                    Image(systemName: "circle.dashed")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.red)
+                    Text("Nothing logged yet")
+                        .font(themeManager.effectiveTheme.captionFont)
+                        .foregroundStyle(.red)
+                }
             }
         }
     }
 
-    // MARK: - Staleness helpers
+    // MARK: - Group session status
 
-    /// Green = today, orange = 14+ days, red = 30+ days, muted otherwise.
-    private func stalenessColor(for date: Date) -> Color {
-        let days = Calendar.current.dateComponents([.day], from: date, to: .now).day ?? 0
-        if days == 0 { return .green }
-        if days >= 30 { return .red }
-        if days >= 14 { return .orange }
-        return themeManager.effectiveTheme.mutedForeground
+    private enum GroupSessionStatus {
+        case idle
+        case inProgress(done: Int, total: Int)
+        case completedToday
     }
+
+    private func groupSessionStatus(exercises: [Exercise], doneIDsToday: Set<PersistentIdentifier>) -> GroupSessionStatus {
+        guard !exercises.isEmpty else { return .idle }
+        guard !doneIDsToday.isEmpty else { return .idle }
+
+        let allIDs = Set(exercises.map { $0.id })
+        let doneCount = allIDs.intersection(doneIDsToday).count
+        if doneCount == 0 { return .idle }
+        if doneCount >= allIDs.count { return .completedToday }
+        return .inProgress(done: doneCount, total: allIDs.count)
+    }
+
+    /// Most recent day on which every exercise in the group had at least
+    /// one set logged within this group's context.
+    private func lastCompletedDate() -> Date? {
+        guard let exercises = group.exercises, !exercises.isEmpty,
+              let groupSets = group.groupSets, !groupSets.isEmpty else { return nil }
+
+        let allIDs = Set(exercises.map { $0.id })
+        let calendar = Calendar.current
+        let byDay = Dictionary(grouping: groupSets) {
+            calendar.startOfDay(for: $0.timestamp)
+        }
+        return byDay
+            .filter { (_, sets) in
+                let covered = Set(sets.compactMap { $0.exercise?.id })
+                return allIDs.isSubset(of: covered)
+            }
+            .keys
+            .max()
+    }
+
+    // MARK: - Date helpers
 
     private func relativeDateString(for date: Date) -> String {
         let days = Calendar.current.dateComponents([.day], from: date, to: .now).day ?? 0
         switch days {
-        case 0: return "Today"
-        case 1: return "Yesterday"
+        case 0: return "today"
+        case 1: return "yesterday"
         default: return "\(days) days ago"
         }
     }
 
     // MARK: - Actions
+
+    /// Create a copy of the group with the same exercises. The duplicate
+    /// is inserted immediately so it appears in the list; the user can
+    /// rename and edit it from there.
+    private func duplicateGroup() {
+        let copy = ExerciseGroup(
+            name: "\(group.name) (copy)",
+            exercises: group.exercises ?? []
+        )
+        modelContext.insert(copy)
+        try? modelContext.save()
+    }
 
     /// Persist the new name. The sheet has already trimmed and validated.
     private func commitRename(_ newName: String) {

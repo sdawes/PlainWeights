@@ -37,6 +37,26 @@ struct AISummaryView: View {
                 .buttonStyle(.plain)
             }
 
+            // On-device AI disclaimer
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.purple)
+                Text("Powered by Apple Intelligence. Everything runs on your device — your data never leaves your phone. Summaries are a smart best guess and may occasionally miss context.")
+                    .font(themeManager.effectiveTheme.captionFont)
+                    .foregroundStyle(themeManager.effectiveTheme.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.purple.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .strokeBorder(Color.purple.opacity(0.2), lineWidth: 1)
+            }
+
             if isLoading {
                 VStack(spacing: 12) {
                     ProgressView()

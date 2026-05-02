@@ -28,7 +28,7 @@ import FoundationModels
 /// dramatically more reliable than asking the model to format prose.
 @Generable
 struct WorkoutAnalysis {
-    @Guide(description: "Two to three sentences describing what muscle groups and exercises were trained over the past 30 days. Focus on muscle coverage and balance. Determine muscle groups primarily from exercise names. Call out obvious gaps. Plain prose, no bullets, no markdown.")
+    @Guide(description: "Two to three sentences describing what muscle groups and exercises were trained over the past 30 days. Use the exact exercise names from the data — do not paraphrase or substitute them. Focus on muscle coverage and balance. If an entire muscle group (e.g. legs, back) appears absent from the data, flag it — but only based on what is actually missing from the provided exercise list, not from general gym knowledge. Plain prose, no bullets, no markdown.")
     var coverage: String
 
     @Guide(description: "Two to three sentences on progress vs the prior 30 days. Are you lifting more weight, doing more reps, hitting more total volume, or slipping? Reference one to two specific exercises with concrete numbers from the data only — never invent numbers. Plain prose.")
@@ -64,9 +64,14 @@ enum AISummaryService {
     private static let systemPrompt: String = """
     You are a knowledgeable gym coach. You see the user's training over the past 30 days plus stats from the prior 30 days for comparison. Address the user as "you". Be direct and factual. Use clear gym terminology (compound lift, antagonist, push/pull split, accessory work). No emoji, no hype, no preambles.
 
-    Determine muscle groups primarily from the EXERCISE NAME (e.g. "Bench press" implies chest, triceps, front delts). Tags in brackets are supplementary only; if the name and tags conflict, trust the name.
+    CRITICAL — exercise names:
+    - Every exercise name in your response MUST appear verbatim in the "EXERCISES TRAINED IN PAST 30 DAYS" section of the data below.
+    - NEVER mention an exercise by a name that is not listed there. Do not substitute, generalise, or invent exercise names (e.g. do not say "deadlift" if only "Romanian Deadlift" appears in the data — they are different entries).
+    - If you want to say an exercise was not done, it must appear in the "EXERCISES TRAINED IN PRIOR 30 DAYS BUT NOT THIS PERIOD" section. Do not flag an exercise as missing based on your own knowledge of muscle groups.
 
-    Use only numbers that appear in the data provided — do not invent or estimate values that aren't there.
+    Determine muscle groups from the EXERCISE NAME (e.g. "Bench press" implies chest, triceps, front delts). Tags in brackets are supplementary context only.
+
+    Use only numbers that appear in the data — do not invent or estimate values that aren't there.
     """
 
     // MARK: - Public API

@@ -19,6 +19,22 @@ enum HistoryViewTab: String, CaseIterable {
     case summary = "Summary"
     case exercises = "Exercises"
     case muscle = "Muscle"
+
+    var icon: String {
+        switch self {
+        case .summary:   return "chart.bar.fill"
+        case .exercises: return "dumbbell.fill"
+        case .muscle:    return "figure.arms.open"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .summary:   return .orange
+        case .exercises: return .blue
+        case .muscle:    return .green
+        }
+    }
 }
 
 /// Aggregate metrics for a time period summary
@@ -176,36 +192,26 @@ struct HistoryView: View {
     private var subTabPills: some View {
         HStack(spacing: 2) {
             ForEach(HistoryViewTab.allCases, id: \.self) { tab in
+                let isActive = selectedView == tab
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         selectedView = tab
                     }
                 } label: {
-                    Text(tab.rawValue)
-                        .font(themeManager.effectiveTheme.interFont(
-                            size: 12,
-                            weight: selectedView == tab ? .semibold : .regular
-                        ))
-                        .foregroundStyle(
-                            selectedView == tab
-                                ? themeManager.effectiveTheme.primaryText
-                                : themeManager.effectiveTheme.mutedForeground
-                        )
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(
-                            selectedView == tab
-                                ? themeManager.effectiveTheme.cardBackgroundColor
-                                : Color.clear
-                        )
-                        .clipShape(.capsule)
+                    Image(systemName: tab.icon)
+                        .font(.system(size: 16, weight: isActive ? .semibold : .regular))
+                        .foregroundStyle(isActive ? tab.color : themeManager.effectiveTheme.mutedForeground)
+                        .frame(width: 40, height: 34)
+                        .background(isActive ? tab.color.opacity(0.12) : Color.clear)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(tab.rawValue)
             }
         }
-        .padding(2)
+        .padding(3)
         .background(themeManager.effectiveTheme.muted)
-        .clipShape(.capsule)
+        .clipShape(RoundedRectangle(cornerRadius: 11))
     }
 
     private var headerPrimaryText: String {

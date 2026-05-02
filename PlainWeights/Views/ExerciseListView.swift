@@ -73,6 +73,9 @@ struct ExerciseListView: View {
                 .navigationDestination(for: Exercise.self) { exercise in
                     ExerciseDetailView(exercise: exercise)
                 }
+                .navigationDestination(for: GroupExerciseDestination.self) { dest in
+                    ExerciseDetailView(exercise: dest.exercise, sourceGroup: dest.group)
+                }
                 .navigationDestination(for: HistoryDestination.self) { _ in
                     HistoryView(navigationPath: $navigationPath)
                 }

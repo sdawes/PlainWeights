@@ -51,6 +51,7 @@ enum ExerciseSetService {
         isTimedSet: Bool = false,
         tempoSeconds: Int = 0,
         to exercise: Exercise,
+        sourceGroup: ExerciseGroup? = nil,
         context: ModelContext
     ) throws {
         // Validation happens in validateInput, but double-check here
@@ -70,6 +71,7 @@ enum ExerciseSetService {
             tempoSeconds: tempoSeconds,
             exercise: exercise
         )
+        set.sourceGroup = sourceGroup
 
         context.insert(set)
         exercise.lastUpdated = set.timestamp

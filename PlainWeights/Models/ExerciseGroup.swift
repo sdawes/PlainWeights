@@ -26,6 +26,11 @@ final class ExerciseGroup {
     /// compatibility. The inverse is declared on Exercise.
     @Relationship var exercises: [Exercise]? = []
 
+    /// All sets logged while the user was working through this group.
+    /// Used to compute session status (in-progress / complete) on the
+    /// group card. Optional for CloudKit compatibility.
+    @Relationship(inverse: \ExerciseSet.sourceGroup) var groupSets: [ExerciseSet]? = []
+
     init(name: String, exercises: [Exercise] = [], createdDate: Date = .init()) {
         self.name = name
         self.exercises = exercises

@@ -62,7 +62,12 @@ enum AISummaryService {
     // MARK: - System Prompt
 
     private static let systemPrompt: String = """
-    You are a knowledgeable gym coach. You see the user's training over the past 30 days plus stats from the prior 30 days for comparison. Address the user as "you". Be direct and factual. Use clear gym terminology (compound lift, antagonist, push/pull split, accessory work). No emoji, no hype, no preambles.
+    You are a knowledgeable gym coach. You see the user's training over the past 30 days plus stats from the prior 30 days for comparison. Address the user as "you". Be direct and factual. Use clear gym terminology (compound lift, antagonist, push/pull split, accessory work).
+
+    OUTPUT FORMAT — strict rules:
+    - Plain prose only. The output is rendered as raw text — formatting characters appear literally.
+    - DO NOT use markdown of any kind: no asterisks (**, *), no underscores (__, _), no backticks, no hash headers, no bullets (-, *, +) at the start of lines, no numbered lists.
+    - DO NOT use emoji, hype, or preambles.
 
     CRITICAL — exercise names:
     - Every exercise name in your response MUST appear verbatim in the "EXERCISES TRAINED IN PAST 30 DAYS" section of the data below.
@@ -84,11 +89,14 @@ enum AISummaryService {
     }
 
     /// Generate a workout analysis covering the past 30 days, with progress
-    /// observations vs the prior 30 days. Output is deterministic for a
-    /// given input thanks to greedy sampling + zero temperature.
+    /// observations vs the prior 30 days. Default call uses greedy
+    /// sampling + zero temperature for deterministic output. Pass
+    /// `regenerate: true` to use a varied sampling — useful when the
+    /// user taps "Try again" and wants a different rephrasing.
     static func generateAnalysis(
         from sets: [ExerciseSet],
-        weightUnit: WeightUnit
+        weightUnit: WeightUnit,
+        regenerate: Bool = false
     ) async throws -> WorkoutAnalysis {
 
         guard SystemLanguageModel.default.isAvailable else {
@@ -125,12 +133,11 @@ enum AISummaryService {
             unit: weightUnit
         )
 
-        // Deterministic sampling — same data should give the same analysis
-        // every time the user taps the button.
-        let options = GenerationOptions(
-            sampling: .greedy,
-            temperature: 0.0
-        )
+        // Default is deterministic; regenerate path uses non-zero
+        // temperature so a "Try again" actually produces fresh wording.
+        let options: GenerationOptions = regenerate
+            ? GenerationOptions(temperature: 0.6)
+            : GenerationOptions(sampling: .greedy, temperature: 0.0)
 
         do {
             let session = LanguageModelSession(instructions: systemPrompt)
@@ -139,11 +146,26 @@ enum AISummaryService {
                 generating: WorkoutAnalysis.self,
                 options: options
             )
-            return analysis.content
+            var content = analysis.content
+            content.coverage = sanitize(content.coverage)
+            content.progress = sanitize(content.progress)
+            content.recommendation = sanitize(content.recommendation)
+            return content
         } catch {
             print("❌ AISummaryService — FoundationModels error: \(error)")
             throw SummaryError.generationFailed
         }
+    }
+
+    // MARK: - Output sanitisation
+
+    /// Strip the markdown markers most likely to leak through from the
+    /// model. Bold (`**`, `__`) is by far the most common offender.
+    /// Other markdown (lists, headers) is much rarer and harder to
+    /// strip safely without false positives, so we leave it to the
+    /// prompt to suppress.
+    private static func sanitize(_ text: String) -> String {
+        text.replacing("**", with: "").replacing("__", with: "")
     }
 
     // MARK: - Stats

@@ -1,24 +1,23 @@
 //
-//  AISummaryView.swift
+//  ExerciseAnalysisView.swift
 //  PlainWeights
 //
-//  Sheet that asks AISummaryService to generate a structured WorkoutAnalysis
-//  and renders each field as a labelled section. UI only.
+//  Sheet that asks ExerciseAnalysisService to generate a structured
+//  ExerciseAnalysis for a single exercise and renders each field as a
+//  labelled section. UI only — sister to AISummaryView, scoped to one
+//  exercise instead of the whole training history.
 //
 
 import SwiftUI
 import SwiftData
 
-struct AISummaryView: View {
+struct ExerciseAnalysisView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeManager.self) private var themeManager
 
-    /// Sourced from SwiftData so the sheet can be presented anywhere
-    /// without needing the parent to pass data in.
-    @Query private var allSets: [ExerciseSet]
+    let exercise: Exercise
 
-    /// One of these will be set when the task completes.
-    @State private var analysis: WorkoutAnalysis?
+    @State private var analysis: ExerciseAnalysis?
     @State private var errorMessage: String?
     @State private var isLoading = false
 
@@ -26,7 +25,7 @@ struct AISummaryView: View {
         VStack(alignment: .leading, spacing: 24) {
             // Header — title + dismiss
             HStack {
-                Text("Workout insights")
+                Text("Exercise insights")
                     .font(themeManager.effectiveTheme.title3Font)
                 Spacer()
                 Button { dismiss() } label: {
@@ -60,7 +59,7 @@ struct AISummaryView: View {
             if isLoading {
                 VStack(spacing: 12) {
                     ProgressView()
-                    Text("Generating insights…")
+                    Text("Analysing \(exercise.name)…")
                         .font(themeManager.effectiveTheme.captionFont)
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
                 }
@@ -69,8 +68,8 @@ struct AISummaryView: View {
             } else if let analysis {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        section(eyebrow: "WHAT YOU TRAINED", body: analysis.coverage)
-                        section(eyebrow: "PROGRESS", body: analysis.progress)
+                        section(eyebrow: "PROGRESSION", body: analysis.progression)
+                        section(eyebrow: "EFFORT", body: analysis.effort)
                         section(eyebrow: "RECOMMENDATION", body: analysis.recommendation)
                     }
                 }
@@ -85,7 +84,7 @@ struct AISummaryView: View {
             Spacer()
 
             // Try-again — visible whenever a result or error is showing.
-            // Uses a varied sampling so the user actually gets fresh
+            // Uses varied sampling so retries actually produce different
             // wording instead of the same deterministic output.
             if !isLoading && (analysis != nil || errorMessage != nil) {
                 Button {
@@ -137,8 +136,8 @@ struct AISummaryView: View {
         defer { isLoading = false }
 
         do {
-            analysis = try await AISummaryService.generateAnalysis(
-                from: allSets,
+            analysis = try await ExerciseAnalysisService.generateAnalysis(
+                for: exercise,
                 weightUnit: themeManager.weightUnit,
                 regenerate: regenerate
             )

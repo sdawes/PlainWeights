@@ -130,28 +130,35 @@ PlainWeights/
 ├── ContentView.swift              # Root NavigationStack wrapper
 ├── Models/
 │   ├── Exercise.swift             # @Model - exercise entity
-│   ├── ExerciseSet.swift          # @Model - set entity (weight, reps, flags)
+│   ├── ExerciseSet.swift          # @Model - set entity (weight, reps, flags, sourceGroup)
+│   ├── ExerciseGroup.swift        # @Model - named bundle of exercises (many-to-many)
+│   ├── GroupExerciseDestination.swift # Hashable nav destination wrapping (exercise, group)
 │   ├── AppTheme.swift             # Theme enum with colors, fonts, chart colors
 │   ├── AddSetConfig.swift         # Sheet state enum for add/edit set
 │   └── WeightUnit.swift           # kg/lbs enum with conversion
 ├── Views/
-│   ├── ExerciseListView.swift     # Main exercise list with search
+│   ├── ExerciseListView.swift     # Main exercise list with search + selection mode
 │   ├── ExerciseDetailView.swift   # Exercise detail with metrics + chart
+│   ├── ExerciseGroupsView.swift   # Groups screen (accordion of GroupCards)
+│   ├── GroupCard.swift            # Single-group accordion card with status indicators
+│   ├── GroupNameSheet.swift       # Sheet for create / rename group flows
 │   ├── AddSetView.swift           # Add/edit set sheet
 │   ├── AddExerciseView.swift      # Add/edit exercise sheet
-│   ├── SettingsView.swift         # Settings/preferences
+│   ├── SettingsView.swift         # Settings/preferences (incl. Delete All Groups)
 │   ├── HistoryView.swift          # Historical workout journal
 │   ├── TagAnalyticsView.swift     # Tag distribution analytics
 │   ├── HelpView.swift             # Help/about screen
 │   ├── SetRowView.swift           # Individual set display row
 │   ├── TodaySetsSectionView.swift # Today's sets section
-│   ├── AISummaryView.swift        # AI workout-summary sheet (UI only)
-│   └── Components/               # Reusable components (see Components section)
+│   ├── AISummaryView.swift        # AI workout-wide summary sheet (UI only)
+│   ├── ExerciseAnalysisView.swift # AI single-exercise analysis sheet (UI only)
+│   └── Components/               # Reusable components (incl. GroupExerciseRow)
 ├── Services/                      # Business logic (enums with static methods)
-│   ├── ExerciseSetService.swift   # Core set CRUD, PB detection, rest time
+│   ├── ExerciseSetService.swift   # Core set CRUD, PB detection, rest time, sourceGroup stamping
 │   ├── ExerciseService.swift      # Tag distribution, duplicate checks
 │   ├── CSVExportService.swift     # CSV data export
-│   ├── AISummaryService.swift     # On-device AI summaries via Foundation Models
+│   ├── AISummaryService.swift     # On-device AI workout-wide summary
+│   ├── ExerciseAnalysisService.swift # On-device AI single-exercise analysis
 │   ├── BestSessionCalculator.swift
 │   ├── LastSessionCalculator.swift
 │   ├── TodaySessionCalculator.swift
@@ -1276,34 +1283,115 @@ The app uses SwiftData with automatic CloudKit sync. User data is backed up to t
 - ❌ Cannot add `@Attribute(.unique)` retroactively
 - ❌ Cannot change relationship delete rules
 
+### Exercise Groups
+
+A "group" is a user-defined named bundle of exercises (e.g. "Push Day", "Back & Biceps"). Groups are pure UI organisation — exercises remain reusable across multiple groups, and all set logging / PB tracking flows through the one underlying `Exercise` regardless of which group the user came from.
+
+**Data model:**
+
+- `Models/ExerciseGroup.swift` — `@Model` with id, name, createdDate, and a many-to-many `exercises: [Exercise]?` relationship. Also exposes `groupSets: [ExerciseSet]?` as the inverse of `ExerciseSet.sourceGroup`.
+- `Models/Exercise.swift` — owns the inverse `groups: [ExerciseGroup]?` relationship.
+- `Models/ExerciseSet.swift` — has an optional `sourceGroup: ExerciseGroup?` property. When the user taps an exercise *from inside a group card*, navigation carries the group context and any sets logged in that session get stamped with `sourceGroup = thatGroup`. Sets logged from the main exercise list have `sourceGroup = nil`.
+- `Models/GroupExerciseDestination.swift` — `Hashable` struct wrapping `(exercise, group)` used as a navigation destination so the same `ExerciseDetailView` can be opened with or without group context.
+
+**Why per-set group tagging matters:**
+
+The same exercise can belong to several groups. If we only tracked per-exercise activity, doing Bench Press would light up *every* group containing it. Tagging each set with its `sourceGroup` lets the same Bench Press session contribute to one group, both, or neither — depending on how the user navigated to log it.
+
+**Group card status states:**
+
+`Views/GroupCard.swift` derives the card's status from two passes over `group.groupSets`:
+
+1. `doneExerciseIDsToday` — Set of exercise IDs with at least one set today whose `sourceGroup == this group`.
+2. `lastLoggedDate()` — most recent timestamp across `group.groupSets` (any historical activity, not just full completion).
+
+Resulting states:
+- **green ✓ "Logged today"** — every member exercise has a today's set tagged to this group.
+- **orange → "X/Y logged today"** — partial coverage today.
+- **red ⊘ "Nothing logged yet"** — never any group-tagged activity.
+- **red ⊘ "Nothing logged today" + grey "Last logged X days ago"** — has history but nothing today.
+
+**In-group exercise rows use a separate component:**
+
+`Views/Components/GroupExerciseRow.swift` (NOT the main list's `ExerciseCard`). Reason: the in-group row reflects *group-level* state — the green ✓ Logged badge appears only when a set was logged from this group's context. Reusing `ExerciseCard` caused user confusion when shared exercises had been logged via a different group.
+
+**Auto-claim of today's untagged sets:**
+
+Users often log an exercise from the main list and only then decide to add it to a group. To avoid forcing manual re-tagging, two layers of automatic claiming run in `Views/ExerciseGroupsView.swift`:
+
+1. **On Edit submit** (`handleCommit(.update)`) — for every member exercise (not just newly-added), scan today's sets where `sourceGroup == nil` and stamp them with this group. Heals same-day untagged activity in bulk.
+2. **On Groups view appear** (`.task`) — sweep all groups; for every member exercise that belongs to *exactly one* group, claim its today's untagged sets. Skips ambiguous (multi-group) exercises so we never guess wrong.
+
+**Safety rules — both layers:**
+- Only claim sets where `sourceGroup == nil`. Never override sets already tagged to a different group.
+- Only claim sets within today (`timestamp >= startOfDay`). Never reach back into yesterday.
+
+**Persistent group expansion:**
+
+Group card expanded/collapsed state is persisted via `@AppStorage("expandedGroupIDs")` as a comma-joined UUID string. Survives navigation away and app restarts — only an explicit collapse re-closes the card.
+
+**Performance characteristics:**
+
+- `GroupCard.body` does two `O(groupSets)` passes per render (doneExerciseIDsToday Set + lastLoggedDate max). For typical groups (≤1000 historical sets) this is sub-millisecond. Cards are inside a `LazyVStack` so only visible cards re-render.
+- The on-appear auto-claim sweep is `O(groups × exercises × sets)` but runs once per Groups-view appearance and only calls `modelContext.save()` if it actually mutated anything. No effect on scroll perf.
+- `Exercise.lastWorkoutDate` is reused from the existing computed property — no new perf characteristics introduced.
+- Per-row state (`isDoneFromGroupToday`) is computed once at the parent `GroupCard` level and passed down as a `Bool` — `GroupExerciseRow` does no scans of its own.
+
+**Test data export integration:**
+
+`TestData/TestDataGenerator.swift`'s "Print Data to Console" output now also emits:
+- A `groupData: [(name, exerciseNames, createdDate)]` array and the construction loop that creates `ExerciseGroup` instances with their member exercises.
+- An optional `sourceGroup: String?` parameter on every `addSet` / `addWarmUpSet` / `addDropSet` / `addAssistedSet` helper, plus per-set output that includes `sourceGroup: "Group Name"` when applicable.
+- An updated `clearAllData` that also wipes `ExerciseGroup`.
+
+This means group session history survives the print-and-paste round-trip into `TestData.swift`.
+
 ### On-Device AI (Foundation Models)
 
-The app uses Apple's **Foundation Models** framework (iOS 26+) for AI features — currently a workout summary triggered from the sparkles button in the exercise list toolbar. All inference runs **on-device** via Apple Intelligence: no network, no API keys, no monthly cost, user data never leaves the iPhone.
+The app uses Apple's **Foundation Models** framework (iOS 26+) for two AI surfaces: a workout-wide summary (sparkles button on the main exercise list) and a single-exercise analysis (sparkles button on the exercise detail view). All inference runs **on-device** via Apple Intelligence: no network, no API keys, no monthly cost, user data never leaves the iPhone.
 
-**Architecture pattern:**
+**Two services, identical architecture:**
 
-- **Service layer** (`Services/AISummaryService.swift`) — owns all AI logic: capability gating, prompt construction, `LanguageModelSession` calls, error mapping. Pure logic, no SwiftUI types.
-- **View layer** (`Views/AISummaryView.swift`) — UI-only. Three states (loading / summary / error), drives a `.task` that calls the service.
+- `Services/AISummaryService.swift` — workout-wide. Looks at the past 30 days vs the prior 30 days. Returns a `WorkoutAnalysis` with three fields: `coverage`, `progress`, `recommendation`.
+- `Services/ExerciseAnalysisService.swift` — single exercise. Analyses recent sessions for one lift. Returns an `ExerciseAnalysis` with three fields: `progression`, `effort`, `recommendation`.
 
-The split mirrors the existing Services pattern (enums with `static` methods, no UI dependencies).
+Each service has a sister view (`Views/AISummaryView.swift` / `Views/ExerciseAnalysisView.swift`) that follows the same template: header + purple disclaimer box + three labelled sections + Try-again button.
 
 **Required ingredients for any new AI feature:**
-1. **Capability gate**: `guard case .available = SystemLanguageModel.default.availability else { throw … }`. Required — older devices and disabled Apple Intelligence will fail otherwise.
-2. **Prompt builder**: filter SwiftData down to *only* the relevant subset before any heavy work (e.g. find the most recent day first, then filter, then group). Avoids touching the whole training history for a single-day query.
-3. **Session call**: `LanguageModelSession()` then `try await session.respond(to: prompt)`. One-shot is fine for single-button features; reuse the session for multi-turn.
-4. **Sanitised errors**: throw a domain-specific `LocalizedError` enum from the service. Never surface raw `FoundationModels` error strings to the user — log them to console for debugging only.
+
+1. **Capability gate**: `guard SystemLanguageModel.default.isAvailable else { throw ... }`. Older devices and disabled Apple Intelligence will fail otherwise.
+2. **Structured output via `@Generable`**: define a struct with `@Guide(description:)` on each field. The framework constrains output to the schema, eliminating template leaks and making rendering trivial — no string parsing.
+3. **Deterministic sampling for the default call**: `GenerationOptions(sampling: .greedy, temperature: 0.0)`. The same input data should produce the same output every time the user taps the button.
+4. **Varied retry path**: thread a `regenerate: Bool = false` parameter through the service. When `true`, drop greedy and use `GenerationOptions(temperature: 0.6)` so a "Try again" button actually produces fresh wording. Greedy + retry = same output, which is useless for the retry UX.
+5. **Sanitise output**: strip `**` and `__` from each field of the structured response before returning. The 3B model occasionally leaks markdown bold; we render plain `Text` so the markers would otherwise show literally on screen.
+6. **Sanitised errors**: throw a domain-specific `LocalizedError` enum from the service. Never surface raw `FoundationModels` error strings to the user — log them to console for debugging only.
+
+**Prompt rules learned the hard way:**
+
+- **Forbid markdown explicitly**. Without an "OUTPUT FORMAT — strict rules" section saying *"Plain prose only. The output is rendered as raw text — formatting characters appear literally. DO NOT use markdown of any kind"*, the 3B model frequently outputs `**bold**`, leading bullets, and similar. The strip in step 5 is a safety net, not a substitute.
+- **Forbid invented entities**. *"Every exercise name in your response MUST appear verbatim in the data section. NEVER mention an exercise by a name that is not listed there."* Without this, the model says "you haven't done deadlifts" when the user actually does Romanian Deadlifts under that exact name.
+- **Forbid invented numbers**. *"Use only numbers that appear in the data — do not invent or estimate values that aren't there."*
+- **Use clear, narrow gym vocabulary**: compound lift, antagonist, push/pull split, accessory work, intensity, working set, rep range, accumulated volume, plateau.
+
+**View patterns shared by both AI sheets:**
+
+- **Purple disclaimer box** at the top. `Color.purple.opacity(0.08)` background, `Color.purple.opacity(0.2)` border, sparkles icon, copy explaining on-device processing + best-guess caveat. Sets the right user expectations.
+- **Try-again button** — capsule, muted background, `arrow.clockwise` icon. Visible whenever a result or error is showing (not during loading). Calls the service with `regenerate: true`.
+- **Three labelled sections** — eyebrow text in 11pt semibold uppercase + body in body font.
 
 **Performance:**
-- Filter sets to the relevant time window *before* calling `ExerciseDataGrouper.createWorkoutJournal(from:)`. Grouping the entire history is expensive for long-term users.
-- Cold-start the model has a small one-time cost (a few seconds on first call after launch). Subsequent calls within the same session are faster.
+
+- Filter SwiftData down to *only* the relevant subset before any heavy work. For workout-wide: pre-partition into current/prior 30-day windows in a single pass. For single-exercise: take the most recent ≤10 sessions only.
+- Cold-start has a small one-time cost (a few seconds on first call after launch). Subsequent calls within the same session are faster.
 - Keep prompts short. Don't dump the whole database — pull just what's needed for the question.
 
 **Security & privacy:**
+
 - Foundation Models is on-device only. No data leaves the phone, so there's no API-key handling, no transport security to worry about, and no App Review questions about third-party AI providers.
-- Never `print(error)` raw framework errors in production paths — they can leak prompt content or system state. Diagnostics-only, gated behind a guard or `#if DEBUG` if needed.
+- Never `print(error)` raw framework errors in production paths — they can leak prompt content or system state. Diagnostics-only.
 
 **UX pattern: pre-built prompts, not a chat box.**
-The 3B-param on-device model is reliable for **curated, narrow questions** with templated prompts ("summarise the last session", "what muscles did I miss this week"). It is NOT reliable for free-form user-typed questions. Add new AI features as tappable cards/buttons that map to a specific service method — never a "ask me anything" text field. This avoids hallucinations, prompt-injection edge cases, and protects users from the model's limits.
+The 3B-param on-device model is reliable for **curated, narrow questions** with templated prompts ("summarise the last 30 days", "analyse this one exercise"). It is NOT reliable for free-form user-typed questions. Add new AI features as tappable cards/buttons that map to a specific service method — never a "ask me anything" text field. This avoids hallucinations, prompt-injection edge cases, and protects users from the model's limits.
 
 ---
 

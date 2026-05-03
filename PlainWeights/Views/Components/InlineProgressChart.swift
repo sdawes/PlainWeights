@@ -909,7 +909,7 @@ struct InlineProgressChart: View {
                     }
                 } else {
                     lineLegendItem(color: themeManager.effectiveTheme.chartColor1, label: "Max Weight (\(themeManager.weightUnit.displayName))", isDashed: false)
-                    lineLegendItem(color: themeManager.effectiveTheme.chartColor2, label: "Max Reps", isDashed: true)
+                    lineLegendItem(color: themeManager.effectiveTheme.chartColor2, label: "Reps", isDashed: true)
                     if showTrendLine, cachedState.regressionSlope != nil {
                         lineLegendItem(color: themeManager.effectiveTheme.chartColor1.opacity(0.6), label: "Trend", isDashed: false)
                     }

@@ -31,6 +31,9 @@ struct GroupCard: View {
     @State private var showingRenameSheet = false
     /// Drives the delete-group confirmation dialog.
     @State private var showingDeleteConfirmation = false
+    /// Drives the "Add new exercise" sheet — creates a brand-new
+    /// exercise and adds it to this group in one flow.
+    @State private var showingAddNewExercise = false
 
     var body: some View {
         // Sort by most recent activity first — same rule as the main
@@ -72,14 +75,17 @@ struct GroupCard: View {
 
                 // Ellipsis menu — always visible, independent tap target.
                 Menu {
-                    Button("Rename", systemImage: "pencil") {
-                        showingRenameSheet = true
-                    }
-                    Button("Edit exercises", systemImage: "list.bullet") {
+                    Button("Add or remove exercises", systemImage: "checklist") {
                         onEditExercises()
+                    }
+                    Button("Create new exercise", systemImage: "plus") {
+                        showingAddNewExercise = true
                     }
                     Button("Duplicate group", systemImage: "plus.square.on.square") {
                         duplicateGroup()
+                    }
+                    Button("Rename", systemImage: "pencil") {
+                        showingRenameSheet = true
                     }
                     Divider()
                     Button("Delete group", systemImage: "trash", role: .destructive) {
@@ -153,6 +159,12 @@ struct GroupCard: View {
             GroupNameSheet(mode: .rename(currentName: group.name)) { newName in
                 commitRename(newName)
             }
+        }
+        .sheet(isPresented: $showingAddNewExercise) {
+            AddExerciseView { newExercise in
+                addNewExerciseToGroup(newExercise)
+            }
+            .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .alert(
             "Delete \(group.name)?",
@@ -264,6 +276,18 @@ struct GroupCard: View {
     }
 
     // MARK: - Actions
+
+    /// Add a freshly-created exercise to this group, save, and navigate
+    /// into it with group context so any sets logged immediately get
+    /// stamped with this group's `sourceGroup`. The Exercise itself was
+    /// already inserted by AddExerciseView before this callback ran.
+    private func addNewExerciseToGroup(_ exercise: Exercise) {
+        var members = group.exercises ?? []
+        members.append(exercise)
+        group.exercises = members
+        try? modelContext.save()
+        navigationPath.append(GroupExerciseDestination(exercise: exercise, group: group))
+    }
 
     /// Create a copy of the group with the same exercises. The duplicate
     /// is inserted immediately so it appears in the list; the user can

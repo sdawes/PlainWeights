@@ -84,7 +84,7 @@ struct GhostChartPreview: View {
                             .frame(width: 4, height: 2)
                     }
                 }
-                Text("Max Reps")
+                Text("Reps")
             }
         }
         .font(themeManager.effectiveTheme.captionFont)

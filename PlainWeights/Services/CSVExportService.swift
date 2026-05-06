@@ -8,14 +8,51 @@
 import Foundation
 import SwiftData
 
+/// User-selectable time range for the CSV export.
+enum CSVExportRange: String, CaseIterable, Identifiable {
+    case sixMonths = "Last 6 months"
+    case oneYear   = "Last year"
+    case threeYears = "Last 3 years"
+    case all       = "All data"
+
+    var id: String { rawValue }
+
+    /// Inclusive lower-bound timestamp. `nil` means "no filter — all data".
+    var cutoff: Date? {
+        let now = Date()
+        let calendar = Calendar.current
+        switch self {
+        case .sixMonths:  return calendar.date(byAdding: .month, value: -6, to: now)
+        case .oneYear:    return calendar.date(byAdding: .year,  value: -1, to: now)
+        case .threeYears: return calendar.date(byAdding: .year,  value: -3, to: now)
+        case .all:        return nil
+        }
+    }
+
+    /// Short suffix used in the exported filename.
+    var fileSuffix: String {
+        switch self {
+        case .sixMonths:  return "6mo"
+        case .oneYear:    return "1yr"
+        case .threeYears: return "3yr"
+        case .all:        return "all"
+        }
+    }
+}
+
 enum CSVExportService {
 
-    /// Export all workout data to a CSV file.
+    /// Export workout data to a CSV file.
     /// - Parameters:
     ///   - container: The SwiftData model container
     ///   - weightUnit: User's preferred weight unit (kg/lbs)
+    ///   - range: Time range to include. `.all` exports every set ever logged.
     /// - Returns: URL of the temporary CSV file
-    static func exportToCSV(container: ModelContainer, weightUnit: WeightUnit) throws -> sending URL {
+    static func exportToCSV(
+        container: ModelContainer,
+        weightUnit: WeightUnit,
+        range: CSVExportRange = .all
+    ) throws -> sending URL {
         let context = ModelContext(container)
         context.autosaveEnabled = false
 
@@ -35,8 +72,14 @@ enum CSVExportService {
         timeFormatter.dateFormat = "HH:mm"
         timeFormatter.locale = Locale(identifier: "en_US_POSIX")
 
+        let cutoff = range.cutoff
+
         for exercise in exercises {
-            let sets = (exercise.sets ?? []).sorted { $0.timestamp < $1.timestamp }
+            let allSets = (exercise.sets ?? []).sorted { $0.timestamp < $1.timestamp }
+            let sets = cutoff.map { c in allSets.filter { $0.timestamp >= c } } ?? allSets
+            // Skip exercises that have no sets in the selected range so
+            // the CSV doesn't pad with empty exercise rows.
+            guard !sets.isEmpty else { continue }
             let escapedName = escapeCSVField(exercise.name)
             let allTags = exercise.tags + exercise.secondaryTags
             let escapedTags = escapeCSVField(allTags.joined(separator: ", "))
@@ -62,7 +105,7 @@ enum CSVExportService {
             }
         }
 
-        let fileName = "PlainWeights-Export-\(dateFormatter.string(from: Date())).csv"
+        let fileName = "PlainWeights-Export-\(dateFormatter.string(from: Date()))-\(range.fileSuffix).csv"
         let fileURL = FileManager.default.temporaryDirectory.appending(path: fileName)
         try csv.write(to: fileURL, atomically: true, encoding: .utf8)
 

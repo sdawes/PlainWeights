@@ -20,6 +20,8 @@ struct SettingsView: View {
     @State private var showingHelp = false
     @State private var isExporting = false
     @State private var exportedFile: IdentifiableURL?
+    /// Drives the time-range chooser shown before the CSV is generated.
+    @State private var showingExportRangePicker = false
 
     #if DEBUG
     @State private var showingGenerateDataAlert = false
@@ -376,26 +378,7 @@ struct SettingsView: View {
     private func exportDataRow() -> some View {
         Button {
             guard !isExporting else { return }
-            isExporting = true
-            let container = modelContext.container
-            let unit = themeManager.weightUnit
-            Task.detached {
-                do {
-                    let url = try CSVExportService.exportToCSV(
-                        container: container,
-                        weightUnit: unit
-                    )
-                    await MainActor.run {
-                        exportedFile = IdentifiableURL(url)
-                        isExporting = false
-                    }
-                } catch {
-                    await MainActor.run {
-                        isExporting = false
-                        showError = true
-                    }
-                }
-            }
+            showingExportRangePicker = true
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "square.and.arrow.up")
@@ -425,10 +408,47 @@ struct SettingsView: View {
         }
         .buttonStyle(.plain)
         .disabled(isExporting)
+        .confirmationDialog(
+            "Export data as CSV",
+            isPresented: $showingExportRangePicker,
+            titleVisibility: .visible
+        ) {
+            ForEach(CSVExportRange.allCases) { range in
+                Button(range.rawValue) { performExport(range: range) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Choose how much data to include.")
+        }
         .sheet(item: $exportedFile) { file in
             ActivityViewController(activityItems: [file.url])
                 .presentationDetents([.medium, .large])
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        }
+    }
+
+    private func performExport(range: CSVExportRange) {
+        guard !isExporting else { return }
+        isExporting = true
+        let container = modelContext.container
+        let unit = themeManager.weightUnit
+        Task.detached {
+            do {
+                let url = try CSVExportService.exportToCSV(
+                    container: container,
+                    weightUnit: unit,
+                    range: range
+                )
+                await MainActor.run {
+                    exportedFile = IdentifiableURL(url)
+                    isExporting = false
+                }
+            } catch {
+                await MainActor.run {
+                    isExporting = false
+                    showError = true
+                }
+            }
         }
     }
 

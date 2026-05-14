@@ -121,7 +121,6 @@ struct FilteredExerciseListView: View {
 
     @State private var showingSettings = false
     @State private var showingNoSessionAlert = false
-    @State private var showingAISummary = false
     /// Exercise IDs currently ticked. Initialised from `mode.initialSelection`
     /// in `.selectingForGroup`, otherwise empty (and unused).
     @State private var selectedGroupingIDs: Set<PersistentIdentifier>
@@ -403,11 +402,6 @@ struct FilteredExerciseListView: View {
                 }
             } else {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("AI summary", systemImage: "sparkles") {
-                        showingAISummary = true
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
                     Button { showingSettings = true } label: {
                         Image(systemName: "gearshape")
                             .font(.body)
@@ -450,10 +444,6 @@ struct FilteredExerciseListView: View {
             SettingsView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
-        .sheet(isPresented: $showingAISummary) {
-            AISummaryView()
-                .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        }
         .alert("Something Went Wrong", isPresented: $showError) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -485,9 +475,6 @@ struct FilteredExerciseListView: View {
         .onAppear {
             rebuildSortedExercisesCache()
             rebuildStalenessCache()
-            // Warm up the on-device summarisation model so the first tap
-            // of the AI button has lower latency.
-            AISummaryService.prewarm()
         }
         .onChange(of: exercises) { _, _ in
             rebuildSortedExercisesCache()

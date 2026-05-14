@@ -29,7 +29,6 @@ struct ExerciseDetailView: View {
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
     @State private var showChart: Bool = true  // Will be set in onAppear from setting
-    @State private var showingAnalysis: Bool = false
 
     // Cached data for performance - updated only when sets change
     @State private var todaySets: [ExerciseSet] = []
@@ -304,17 +303,6 @@ struct ExerciseDetailView: View {
         .contentMargins(.top, 0, for: .scrollContent)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showingAnalysis = true }) {
-                    Image(systemName: "sparkles")
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundStyle(themeManager.effectiveTheme.textColor)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("AI analysis")
-                .disabled(sets.isEmpty)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
                     let willShow = !showChart
                     withAnimation(.easeInOut(duration: 0.3)) {
@@ -402,10 +390,6 @@ struct ExerciseDetailView: View {
         }
         .sheet(isPresented: $showingEditSheet) {
             AddExerciseView(exerciseToEdit: exercise)
-                .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        }
-        .sheet(isPresented: $showingAnalysis) {
-            ExerciseAnalysisView(exercise: exercise)
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
         }
         .onAppear {

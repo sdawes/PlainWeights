@@ -150,15 +150,11 @@ PlainWeights/
 │   ├── HelpView.swift             # Help/about screen
 │   ├── SetRowView.swift           # Individual set display row
 │   ├── TodaySetsSectionView.swift # Today's sets section
-│   ├── AISummaryView.swift        # AI workout-wide summary sheet (UI only)
-│   ├── ExerciseAnalysisView.swift # AI single-exercise analysis sheet (UI only)
 │   └── Components/               # Reusable components (incl. GroupExerciseRow)
 ├── Services/                      # Business logic (enums with static methods)
 │   ├── ExerciseSetService.swift   # Core set CRUD, PB detection, rest time, sourceGroup stamping
 │   ├── ExerciseService.swift      # Tag distribution, duplicate checks
 │   ├── CSVExportService.swift     # CSV data export
-│   ├── AISummaryService.swift     # On-device AI workout-wide summary
-│   ├── ExerciseAnalysisService.swift # On-device AI single-exercise analysis
 │   ├── BestSessionCalculator.swift
 │   ├── LastSessionCalculator.swift
 │   ├── TodaySessionCalculator.swift
@@ -1346,52 +1342,11 @@ Group card expanded/collapsed state is persisted via `@AppStorage("expandedGroup
 
 This means group session history survives the print-and-paste round-trip into `TestData.swift`.
 
-### On-Device AI (Foundation Models)
+### AI Features — Not Used
 
-The app uses Apple's **Foundation Models** framework (iOS 26+) for two AI surfaces: a workout-wide summary (sparkles button on the main exercise list) and a single-exercise analysis (sparkles button on the exercise detail view). All inference runs **on-device** via Apple Intelligence: no network, no API keys, no monthly cost, user data never leaves the iPhone.
+The app does **not** use AI features of any kind. Earlier versions briefly included on-device summaries and per-exercise analysis built on Apple's Foundation Models framework, but they were removed because they added no real function or value for users.
 
-**Two services, identical architecture:**
-
-- `Services/AISummaryService.swift` — workout-wide. Looks at the past 30 days vs the prior 30 days. Returns a `WorkoutAnalysis` with three fields: `coverage`, `progress`, `recommendation`.
-- `Services/ExerciseAnalysisService.swift` — single exercise. Analyses recent sessions for one lift. Returns an `ExerciseAnalysis` with three fields: `progression`, `effort`, `recommendation`.
-
-Each service has a sister view (`Views/AISummaryView.swift` / `Views/ExerciseAnalysisView.swift`) that follows the same template: header + purple disclaimer box + three labelled sections + Try-again button.
-
-**Required ingredients for any new AI feature:**
-
-1. **Capability gate**: `guard SystemLanguageModel.default.isAvailable else { throw ... }`. Older devices and disabled Apple Intelligence will fail otherwise.
-2. **Structured output via `@Generable`**: define a struct with `@Guide(description:)` on each field. The framework constrains output to the schema, eliminating template leaks and making rendering trivial — no string parsing.
-3. **Deterministic sampling for the default call**: `GenerationOptions(sampling: .greedy, temperature: 0.0)`. The same input data should produce the same output every time the user taps the button.
-4. **Varied retry path**: thread a `regenerate: Bool = false` parameter through the service. When `true`, drop greedy and use `GenerationOptions(temperature: 0.6)` so a "Try again" button actually produces fresh wording. Greedy + retry = same output, which is useless for the retry UX.
-5. **Sanitise output**: strip `**` and `__` from each field of the structured response before returning. The 3B model occasionally leaks markdown bold; we render plain `Text` so the markers would otherwise show literally on screen.
-6. **Sanitised errors**: throw a domain-specific `LocalizedError` enum from the service. Never surface raw `FoundationModels` error strings to the user — log them to console for debugging only.
-
-**Prompt rules learned the hard way:**
-
-- **Forbid markdown explicitly**. Without an "OUTPUT FORMAT — strict rules" section saying *"Plain prose only. The output is rendered as raw text — formatting characters appear literally. DO NOT use markdown of any kind"*, the 3B model frequently outputs `**bold**`, leading bullets, and similar. The strip in step 5 is a safety net, not a substitute.
-- **Forbid invented entities**. *"Every exercise name in your response MUST appear verbatim in the data section. NEVER mention an exercise by a name that is not listed there."* Without this, the model says "you haven't done deadlifts" when the user actually does Romanian Deadlifts under that exact name.
-- **Forbid invented numbers**. *"Use only numbers that appear in the data — do not invent or estimate values that aren't there."*
-- **Use clear, narrow gym vocabulary**: compound lift, antagonist, push/pull split, accessory work, intensity, working set, rep range, accumulated volume, plateau.
-
-**View patterns shared by both AI sheets:**
-
-- **Purple disclaimer box** at the top. `Color.purple.opacity(0.08)` background, `Color.purple.opacity(0.2)` border, sparkles icon, copy explaining on-device processing + best-guess caveat. Sets the right user expectations.
-- **Try-again button** — capsule, muted background, `arrow.clockwise` icon. Visible whenever a result or error is showing (not during loading). Calls the service with `regenerate: true`.
-- **Three labelled sections** — eyebrow text in 11pt semibold uppercase + body in body font.
-
-**Performance:**
-
-- Filter SwiftData down to *only* the relevant subset before any heavy work. For workout-wide: pre-partition into current/prior 30-day windows in a single pass. For single-exercise: take the most recent ≤10 sessions only.
-- Cold-start has a small one-time cost (a few seconds on first call after launch). Subsequent calls within the same session are faster.
-- Keep prompts short. Don't dump the whole database — pull just what's needed for the question.
-
-**Security & privacy:**
-
-- Foundation Models is on-device only. No data leaves the phone, so there's no API-key handling, no transport security to worry about, and no App Review questions about third-party AI providers.
-- Never `print(error)` raw framework errors in production paths — they can leak prompt content or system state. Diagnostics-only.
-
-**UX pattern: pre-built prompts, not a chat box.**
-The 3B-param on-device model is reliable for **curated, narrow questions** with templated prompts ("summarise the last 30 days", "analyse this one exercise"). It is NOT reliable for free-form user-typed questions. Add new AI features as tappable cards/buttons that map to a specific service method — never a "ask me anything" text field. This avoids hallucinations, prompt-injection edge cases, and protects users from the model's limits.
+**Do not reintroduce AI features without an explicit request from the user.** No Foundation Models, no third-party LLMs, no chat surfaces, no "AI summary" or "analysis" buttons.
 
 ---
 

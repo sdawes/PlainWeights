@@ -27,7 +27,7 @@ enum ExerciseSearchScope: String, CaseIterable {
 /// Mode that drives `FilteredExerciseListView`.
 ///
 /// `.browse` is the default — tapping a row pushes the exercise detail,
-/// the FAB is visible, and the AI / Groups / Settings / History toolbar
+/// the FAB is visible, and the Groups / Settings / History toolbar
 /// items are shown.
 ///
 /// `.selectingForGroup` is used when the view is presented modally from

@@ -128,7 +128,8 @@ struct HistoryView: View {
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.top, 8)
+            .padding(.bottom, 20)
 
             // Date headline + sub-tab pills
             headerRow
@@ -741,77 +742,122 @@ struct HistoryView: View {
 
     @ViewBuilder
     private func scoreboardGrid(workoutDays: Int, exercises: Int, sets: Int, volume: Double, pbs: Int, avgRest: Double?) -> some View {
-        VStack(spacing: 0) {
-            scoreCell(value: "\(workoutDays)", label: "Workout Days", isFirst: true)
-            scoreCell(value: "\(exercises) / \(sets)", label: "Exercises / Sets")
-            scoreCell(
-                value: Formatters.formatVolume(themeManager.displayWeight(volume)),
-                unit: themeManager.weightUnit.displayName,
-                label: "Volume"
-            )
-            scorePBCell(count: pbs)
-            scoreCell(value: avgRest.map { formatRestTime($0) } ?? "—", label: "Avg Rest")
-        }
-    }
+        let valueFont = themeManager.effectiveTheme.dataFont(size: 17, weight: .semibold)
+        let labelFont = themeManager.effectiveTheme.interFont(size: 13)
+        let unitFont = themeManager.effectiveTheme.interFont(size: 13)
+        let primary = themeManager.effectiveTheme.primaryText
+        let muted = themeManager.effectiveTheme.mutedForeground
+        let dividerColor = themeManager.effectiveTheme.dividerColor
 
-    @ViewBuilder
-    private func scoreCell(value: String, unit: String? = nil, label: String, isFirst: Bool = false) -> some View {
-        VStack(spacing: 0) {
-            if !isFirst {
-                Rectangle()
-                    .fill(themeManager.effectiveTheme.dividerColor)
-                    .frame(height: 1)
-                    .padding(.horizontal, 5)
+        Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 0) {
+            GridRow(alignment: .firstTextBaseline) {
+                Text("Workout Days")
+                    .font(labelFont)
+                    .foregroundStyle(muted)
+                Text("\(workoutDays)")
+                    .font(valueFont)
+                    .foregroundStyle(primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
             }
-            HStack(alignment: .firstTextBaseline) {
-                Text(label)
-                    .font(themeManager.effectiveTheme.interFont(size: 13))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                Spacer()
+            .padding(.vertical, 14)
+
+            Rectangle()
+                .fill(dividerColor)
+                .frame(height: 1)
+                .gridCellColumns(2)
+
+            GridRow(alignment: .firstTextBaseline) {
+                Text("Exercises")
+                    .font(labelFont)
+                    .foregroundStyle(muted)
+                Text("\(exercises)")
+                    .font(valueFont)
+                    .foregroundStyle(primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
+            .padding(.vertical, 14)
+
+            Rectangle()
+                .fill(dividerColor)
+                .frame(height: 1)
+                .gridCellColumns(2)
+
+            GridRow(alignment: .firstTextBaseline) {
+                Text("Sets")
+                    .font(labelFont)
+                    .foregroundStyle(muted)
+                Text("\(sets)")
+                    .font(valueFont)
+                    .foregroundStyle(primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
+            .padding(.vertical, 14)
+
+            Rectangle()
+                .fill(dividerColor)
+                .frame(height: 1)
+                .gridCellColumns(2)
+
+            GridRow(alignment: .firstTextBaseline) {
+                Text("Volume")
+                    .font(labelFont)
+                    .foregroundStyle(muted)
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
-                    Text(value)
-                        .font(themeManager.effectiveTheme.dataFont(size: 17, weight: .semibold))
-                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                    if let unit {
-                        Text(unit)
-                            .font(themeManager.effectiveTheme.interFont(size: 13))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                    }
+                    Text(Formatters.formatVolume(themeManager.displayWeight(volume)))
+                        .font(valueFont)
+                        .foregroundStyle(primary)
+                    Text(themeManager.weightUnit.displayName)
+                        .font(unitFont)
+                        .foregroundStyle(muted)
                 }
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
             }
-            .padding(.horizontal, 16)
             .padding(.vertical, 14)
-        }
-    }
 
-    @ViewBuilder
-    private func scorePBCell(count: Int) -> some View {
-        VStack(spacing: 0) {
             Rectangle()
-                .fill(themeManager.effectiveTheme.dividerColor)
+                .fill(dividerColor)
                 .frame(height: 1)
-                .padding(.horizontal, 5)
-            HStack(alignment: .firstTextBaseline) {
-                Text("PBs")
-                    .font(themeManager.effectiveTheme.interFont(size: 13))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                Spacer()
+                .gridCellColumns(2)
+
+            GridRow(alignment: .firstTextBaseline) {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("\(count)")
-                        .font(themeManager.effectiveTheme.dataFont(size: 17, weight: .semibold))
-                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                    Text("PBs")
+                        .font(labelFont)
+                        .foregroundStyle(muted)
                     Image(systemName: "star.fill")
                         .font(.system(size: 13))
                         .foregroundStyle(themeManager.effectiveTheme.pbColor)
                 }
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
+                Text("\(pbs)")
+                    .font(valueFont)
+                    .foregroundStyle(primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
             }
-            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            Rectangle()
+                .fill(dividerColor)
+                .frame(height: 1)
+                .gridCellColumns(2)
+
+            GridRow(alignment: .firstTextBaseline) {
+                Text("Avg Rest")
+                    .font(labelFont)
+                    .foregroundStyle(muted)
+                Text(avgRest.map { formatRestTime($0) } ?? "—")
+                    .font(valueFont)
+                    .foregroundStyle(primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
             .padding(.vertical, 14)
         }
+        .padding(.horizontal, 16)
     }
 
     /// Format rest time from Double: converts to Int and delegates

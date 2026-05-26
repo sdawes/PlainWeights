@@ -119,8 +119,13 @@ struct InlineProgressChart: View {
     // Animation state - start true so chart appears immediately with container
     @State private var isAnimating = true
 
-    // Time range selection - default to 6 months for daily granularity
-    @State private var selectedTimeRange: ChartTimeRange = .sixMonths
+    // Time range selection - initialised in init() to the smallest range that
+    // contains at least 2 working sets, so exercises with old history aren't shown
+    // as a single dot under the 6M default. If the chart is first created before
+    // sets have loaded, `hasAppliedAutoDefault` lets us re-apply the smart default
+    // the first time real data arrives via onChange.
+    @State private var selectedTimeRange: ChartTimeRange
+    @State private var hasAppliedAutoDefault: Bool
 
     // Chart mode selection - Max (default) shows max weight/reps, Volume shows total
     @State private var chartMode: ChartMode = .max
@@ -133,8 +138,38 @@ struct InlineProgressChart: View {
 
     init(sets: [ExerciseSet]) {
         self.sets = sets
+        // Pick the smallest time range that actually contains enough data to plot a
+        // line. Prevents the "single-dot" empty-looking chart when the only recent
+        // session is within 6M but earlier sessions are older.
+        // If sets is empty at init time (parent's cache hasn't loaded yet), this
+        // returns .sixMonths as a fallback, and onChange(of: sets) below re-applies
+        // the smart default the first time real data arrives.
+        let defaultRange = Self.bestDefaultTimeRange(for: sets)
+        _selectedTimeRange = State(initialValue: defaultRange)
+        _hasAppliedAutoDefault = State(initialValue: !sets.isEmpty)
         // Compute chart state during init to prevent layout shift on appear
-        _cachedState = State(initialValue: Self.computeChartState(from: sets, timeRange: .sixMonths))
+        _cachedState = State(initialValue: Self.computeChartState(from: sets, timeRange: defaultRange))
+    }
+
+    /// Returns the smallest `ChartTimeRange` whose window contains at least 2 distinct
+    /// session days (because the chart groups sets per day/week/month — multiple sets on
+    /// the same day still render as a single point). Falls back to `.sixMonths` if the
+    /// exercise has fewer than 2 distinct session days overall.
+    private static func bestDefaultTimeRange(for sets: [ExerciseSet]) -> ChartTimeRange {
+        let workingSets = sets.workingSets
+        let calendar = Calendar.current
+        let candidates: [ChartTimeRange] = [.sixMonths, .oneYear, .threeYears, .max]
+        for range in candidates {
+            let inRange: [ExerciseSet]
+            if let cutoff = range.cutoffDate {
+                inRange = workingSets.filter { $0.timestamp >= cutoff }
+            } else {
+                inRange = workingSets
+            }
+            let distinctDays = Set(inRange.map { calendar.startOfDay(for: $0.timestamp) })
+            if distinctDays.count >= 2 { return range }
+        }
+        return .sixMonths
     }
 
     // MARK: - Linear Regression
@@ -450,8 +485,14 @@ struct InlineProgressChart: View {
         .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .onChange(of: sets) { _, _ in
-            cachedState = Self.computeChartState(from: sets, timeRange: selectedTimeRange)
+        .onChange(of: sets) { _, newSets in
+            // First time real data arrives (parent's cache populated post-init),
+            // apply the smart default time range before recomputing chart state.
+            if !hasAppliedAutoDefault && !newSets.isEmpty {
+                selectedTimeRange = Self.bestDefaultTimeRange(for: newSets)
+                hasAppliedAutoDefault = true
+            }
+            cachedState = Self.computeChartState(from: newSets, timeRange: selectedTimeRange)
         }
         .onChange(of: selectedTimeRange) { _, newRange in
             withAnimation(.easeInOut(duration: 0.2)) {

@@ -26,8 +26,9 @@ struct SetRowView: View {
     let isFirstInCard: Bool  // True for first set after header (no top divider needed)
     let isLastSetInDay: Bool  // True for last set in a day (shows 3:00 if no restSeconds)
     let isToday: Bool  // True for today's sets - rest time keeps timer colour
+    let pbFlashOpacity: Double  // Drives the yellow PB-flash border
 
-    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true, isLastSetInDay: Bool = false, isToday: Bool = false) {
+    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true, isLastSetInDay: Bool = false, isToday: Bool = false, pbFlashOpacity: Double = 0) {
         self.set = set
         self.setNumber = setNumber
         self.isFirst = isFirst
@@ -40,6 +41,7 @@ struct SetRowView: View {
         self.isFirstInCard = isFirstInCard
         self.isLastSetInDay = isLastSetInDay
         self.isToday = isToday
+        self.pbFlashOpacity = pbFlashOpacity
     }
 
     var body: some View {
@@ -140,10 +142,22 @@ struct SetRowView: View {
         }
     }
 
-    /// Border overlay based on card position (borderless — surface color contrast provides separation)
+    /// Border overlay based on card position. Normally borderless; animated yellow/orange
+    /// gradient stroke appears briefly when `pbFlashOpacity > 0` to highlight a new PB.
     @ViewBuilder
     private var cardBorderOverlay: some View {
-        EmptyView()
+        if let position = cardPosition {
+            switch position {
+            case .top:
+                PBFlashBorder(shape: TopOpenBorder(radius: 12), opacity: pbFlashOpacity)
+            case .middle:
+                PBFlashBorder(shape: SidesOnlyBorder(), opacity: pbFlashOpacity)
+            case .bottom:
+                PBFlashBorder(shape: BottomOpenBorder(radius: 12), opacity: pbFlashOpacity)
+            case .single:
+                PBFlashBorder(shape: RoundedRectangle(cornerRadius: 12), opacity: pbFlashOpacity)
+            }
+        }
     }
 
     /// Effective tint color for accent bar/background (not PBs — they use star + number colour only)

@@ -8,6 +8,13 @@
 import SwiftUI
 import SwiftData
 
+/// Snapshot of the current PB set used to detect transitions across updates.
+private struct PBSignature: Equatable {
+    let id: PersistentIdentifier
+    let weight: Double
+    let reps: Int
+}
+
 // MARK: - ExerciseDetailView
 
 struct ExerciseDetailView: View {
@@ -29,6 +36,9 @@ struct ExerciseDetailView: View {
     @State private var showingEditSheet = false
     @State private var comparisonMode: ComparisonMode = .lastSession
     @State private var showChart: Bool = true  // Will be set in onAppear from setting
+    @State private var pbFlashOpacity: Double = 0  // PB-flash border opacity
+    @State private var previousPBSignature: PBSignature? = nil  // For detecting PB changes
+    @State private var hasInitializedPBTracking: Bool = false  // Suppresses flash on first load
 
     // Cached data for performance - updated only when sets change
     @State private var todaySets: [ExerciseSet] = []
@@ -176,7 +186,8 @@ struct ExerciseDetailView: View {
                     isWeightedExercise: isWeightedExercise,
                     totalReps: todaysTotalReps,
                     setCount: todaySets.count,
-                    hasSetsBelow: !todaySets.isEmpty
+                    hasSetsBelow: !todaySets.isEmpty,
+                    pbFlashOpacity: pbFlashOpacity
                 )
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .listRowSeparator(.hidden)
@@ -197,7 +208,8 @@ struct ExerciseDetailView: View {
                             showTimer: index == 0,
                             cardPosition: isLast ? .bottom : .middle,
                             isFirstInCard: index == 0,
-                            isToday: true
+                            isToday: true,
+                            pbFlashOpacity: pbFlashOpacity
                         )
                         .id(index == 0 ? "latestSet" : nil)
                     }
@@ -401,9 +413,10 @@ struct ExerciseDetailView: View {
         .onChange(of: sets) { _, newSets in
             let oldCount = previousTodaySetsCount
             updateCachedData()
-            // Scroll to show latest set when a new set is added
+            // Scroll to show latest set when a new set is added.
+            // PB-flash detection lives in updateCachedData so it also fires on edits.
             if todaySets.count > oldCount {
-                Task { @MainActor in
+                Task {
                     try? await Task.sleep(for: .milliseconds(150))
                     withAnimation(.easeInOut(duration: 0.3)) {
                         scrollProxy.scrollTo("comparisonButtons", anchor: .top)
@@ -444,6 +457,23 @@ struct ExerciseDetailView: View {
                     .padding(.bottom, 33)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .ignoresSafeArea(edges: .bottom)
+            }
+        }
+    }
+
+    // MARK: - PB Flash
+
+    /// Briefly outline the today's-sets card in gold to celebrate a new PB:
+    /// fade in over 1s, hold for 3s, fade out over 1s.
+    private func triggerPBFlash() {
+        withAnimation(.easeInOut(duration: 1.0)) {
+            pbFlashOpacity = 1.0
+        } completion: {
+            Task {
+                try? await Task.sleep(for: .seconds(3))
+                withAnimation(.easeInOut(duration: 1.0)) {
+                    pbFlashOpacity = 0
+                }
             }
         }
     }
@@ -499,6 +529,23 @@ struct ExerciseDetailView: View {
             isRepsOnly: bestMetrics?.isBodyweight ?? lastIsRepsOnly
         )
 
+        // Flash the today's card if the PB signature changed AND the new PB is one of
+        // today's sets. Signature = (id, weight, reps) so we catch every PB transition:
+        //   - a new set is added that beats the PB (id changes)
+        //   - a non-PB set is edited so it becomes the PB (id changes)
+        //   - the current PB set itself is edited to a higher weight/reps (id same, w/r change)
+        // Suppressed on first load via hasInitializedPBTracking.
+        let currentPBSig = allSets.first(where: { $0.isPB }).map {
+            PBSignature(id: $0.persistentModelID, weight: $0.weight, reps: $0.reps)
+        }
+        if hasInitializedPBTracking,
+           let newSig = currentPBSig,
+           newSig != previousPBSignature,
+           todaysData.contains(where: { $0.persistentModelID == newSig.id }) {
+            triggerPBFlash()
+        }
+        previousPBSignature = currentPBSig
+        hasInitializedPBTracking = true
     }
 
     private func deleteSet(_ set: ExerciseSet) {

@@ -193,6 +193,26 @@ enum AppTheme: String, CaseIterable {
         pbColor.opacity(isDark ? 0.20 : 0.12)
     }
 
+    /// Yellow/orange colour stops for the PB-flash gradient border on today's card.
+    /// The actual `LinearGradient` is built per-frame inside `PBFlashBorder` so the
+    /// gradient direction can animate while the flash is visible.
+    var pbGradientColors: [Color] {
+        switch self {
+        case .light, .system:
+            return [
+                Color(red: 1.0, green: 0.95, blue: 0.35),  // bright yellow
+                Color(red: 1.0, green: 0.78, blue: 0.15),  // gold
+                Color(red: 1.0, green: 0.60, blue: 0.10)   // orange
+            ]
+        case .dark:
+            return [
+                Color(red: 1.0, green: 0.95, blue: 0.50),  // bright yellow
+                Color(red: 1.0, green: 0.80, blue: 0.30),  // gold
+                Color(red: 1.0, green: 0.65, blue: 0.25)   // orange
+            ]
+        }
+    }
+
     // MARK: - Tag Pill Colors
 
     /// Primary tag pill background (pastel blue)

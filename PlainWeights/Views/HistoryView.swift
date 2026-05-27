@@ -749,23 +749,39 @@ struct HistoryView: View {
         let muted = themeManager.effectiveTheme.mutedForeground
         let dividerColor = themeManager.effectiveTheme.dividerColor
 
-        Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 0) {
-            GridRow(alignment: .firstTextBaseline) {
+        Grid(alignment: .leading, horizontalSpacing: 4, verticalSpacing: 0) {
+            // Invisible reference row pins the label column to "Workout Days" width so
+            // every period (Last / Week / Month / Year) lines its labels up identically.
+            // The row is forced to 0 height + 0 opacity so it takes no visual space.
+            GridRow {
                 Text("Workout Days")
                     .font(labelFont)
-                    .foregroundStyle(muted)
-                Text("\(workoutDays)")
+                Text("0")
                     .font(valueFont)
-                    .foregroundStyle(primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
             }
-            .padding(.vertical, 14)
+            .frame(height: 0)
+            .opacity(0)
+            .accessibilityHidden(true)
 
-            Rectangle()
-                .fill(dividerColor)
-                .frame(height: 1)
-                .gridCellColumns(2)
+            // Workout Days only makes sense across a multi-day window — hide it on Last.
+            if selectedPeriod != .lastSession {
+                GridRow(alignment: .firstTextBaseline) {
+                    Text("Workout Days")
+                        .font(labelFont)
+                        .foregroundStyle(muted)
+                    Text("\(workoutDays)")
+                        .font(valueFont)
+                        .foregroundStyle(primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                }
+                .padding(.vertical, 14)
+
+                Rectangle()
+                    .fill(dividerColor)
+                    .frame(height: 1)
+                    .gridCellColumns(2)
+            }
 
             GridRow(alignment: .firstTextBaseline) {
                 Text("Exercises")

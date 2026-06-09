@@ -400,8 +400,8 @@ struct InlineProgressChart: View {
         let regression = isRepsOnly ? nil : calculateLinearRegression(points: dataPoints)
         // Calculate linear regression for volume trend line (only if not reps-only)
         let volumeRegression = isRepsOnly ? nil : calculateVolumeRegression(points: dataPoints)
-        // Calculate linear regression for reps trend line (only if reps-only)
-        let repsRegression = isRepsOnly ? calculateRepsRegression(points: dataPoints) : nil
+        // Calculate linear regression for reps trend line (used in both reps-only and weighted Max mode)
+        let repsRegression = calculateRepsRegression(points: dataPoints)
         // Calculate linear regression for total reps trend line (only if reps-only)
         let totalRepsRegression = isRepsOnly ? calculateTotalRepsRegression(points: dataPoints) : nil
 
@@ -440,25 +440,34 @@ struct InlineProgressChart: View {
 
                 Spacer()
 
-                // Trend line toggle button
+                // Trend line toggle button (styled to mimic a single-segment picker)
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         showTrendLine.toggle()
                     }
                 } label: {
-                    Image(systemName: "line.diagonal")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(showTrendLine ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.mutedForeground)
-                        .frame(width: 28, height: 28)
-                        .background(showTrendLine ? themeManager.effectiveTheme.borderColor : themeManager.effectiveTheme.cardBackgroundColor)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle()
-                                .stroke(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-                        )
+                    Text("Trend")
+                        .font(.system(size: 13, weight: showTrendLine ? .semibold : .regular))
+                        .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                        .frame(width: 56, height: 28)
+                        .background {
+                            ZStack {
+                                // Container — light grey chassis like a segmented picker
+                                Capsule()
+                                    .fill(themeManager.effectiveTheme.muted)
+                                // Selected inner pill — white with subtle shadow
+                                if showTrendLine {
+                                    Capsule()
+                                        .fill(themeManager.effectiveTheme.background)
+                                        .padding(2)
+                                        .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
+                                }
+                            }
+                        }
                 }
                 .buttonStyle(.plain)
-                .padding(.trailing, 5)
+
+                Spacer()
 
                 // Time range picker
                 Picker("Time Range", selection: $selectedTimeRange) {
@@ -752,6 +761,25 @@ struct InlineProgressChart: View {
                         .lineStyle(StrokeStyle(lineWidth: 1.5))
                     }
                 }
+
+                // Linear regression trend line for reps (only draw at first and last points)
+                if showTrendLine,
+                   let slope = cachedState.repsRegressionSlope,
+                   let intercept = cachedState.repsRegressionIntercept,
+                   cachedState.dataPoints.count >= 2 {
+                    let lastIndex = cachedState.dataPoints.count - 1
+                    if point.index == 0 || point.index == lastIndex {
+                        let trendY = slope * Double(point.index) + intercept
+                        let clampedY = max(0, min(1, trendY))
+                        LineMark(
+                            x: .value("Index", point.index),
+                            y: .value("RepsTrend", clampedY),
+                            series: .value("Type", "RepsTrend")
+                        )
+                        .foregroundStyle(themeManager.effectiveTheme.chartColor2.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 0.5, dash: [5, 3]))
+                    }
+                }
             }
 
             // PB indicator: vertical line through the point + star at top
@@ -951,8 +979,12 @@ struct InlineProgressChart: View {
                 } else {
                     lineLegendItem(color: themeManager.effectiveTheme.chartColor1, label: "Max Weight (\(themeManager.weightUnit.displayName))", isDashed: false)
                     lineLegendItem(color: themeManager.effectiveTheme.chartColor2, label: "Reps", isDashed: true)
-                    if showTrendLine, cachedState.regressionSlope != nil {
-                        lineLegendItem(color: themeManager.effectiveTheme.chartColor1.opacity(0.6), label: "Trend", isDashed: false)
+                    if showTrendLine,
+                       cachedState.regressionSlope != nil || cachedState.repsRegressionSlope != nil {
+                        combinedTrendLegendItem(
+                            weightColor: themeManager.effectiveTheme.chartColor1.opacity(0.6),
+                            repsColor: themeManager.effectiveTheme.chartColor2.opacity(0.6)
+                        )
                     }
                 }
             } else {
@@ -993,6 +1025,24 @@ struct InlineProgressChart: View {
                     .frame(width: 16, height: 2)
             }
             Text(label)
+        }
+    }
+
+    /// Combined trend legend entry: solid weight-coloured line + dashed reps-coloured line, then "Trend"
+    @ViewBuilder
+    private func combinedTrendLegendItem(weightColor: Color, repsColor: Color) -> some View {
+        HStack(spacing: 4) {
+            Rectangle()
+                .fill(weightColor)
+                .frame(width: 16, height: 2)
+            HStack(spacing: 2) {
+                ForEach(0..<3, id: \.self) { _ in
+                    Rectangle()
+                        .fill(repsColor)
+                        .frame(width: 4, height: 2)
+                }
+            }
+            Text("Trend")
         }
     }
 }

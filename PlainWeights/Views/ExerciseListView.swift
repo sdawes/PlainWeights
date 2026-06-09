@@ -134,6 +134,11 @@ struct FilteredExerciseListView: View {
     @State private var cachedDoneToday: Set<PersistentIdentifier> = []
     /// Pre-sorted exercises to avoid expensive lastWorkoutDate lookups on every render
     @State private var cachedSortedExercises: [Exercise] = []
+    /// Whether any exercise in the database has at least one set. Read by the
+    /// History toolbar button to decide whether to push History or show the
+    /// "complete your first workout" alert. Recomputed in the same pass as
+    /// the staleness cache instead of re-scanning on every toolbar render.
+    @State private var cachedAnyExerciseHasSets: Bool = false
 
     init(
         searchText: String,
@@ -242,12 +247,19 @@ struct FilteredExerciseListView: View {
 
         var colors: [PersistentIdentifier: Color?] = [:]
         var doneToday: Set<PersistentIdentifier> = []
+        var anyHasSets = false
 
         for exercise in exercises {
             let id = exercise.persistentModelID
+            let lastWorkout = exercise.lastWorkoutDate
+
+            // Any non-nil lastWorkoutDate means the exercise has at least one
+            // set. Folding the check in here avoids a separate scan from the
+            // History toolbar button.
+            if lastWorkout != nil { anyHasSets = true }
 
             // Compute staleness color
-            if let lastWorkout = exercise.lastWorkoutDate {
+            if let lastWorkout {
                 if lastWorkout < oneMonthAgo {
                     colors[id] = .red
                 } else if lastWorkout < twoWeeksAgo {
@@ -265,6 +277,7 @@ struct FilteredExerciseListView: View {
 
         cachedStalenessColors = colors
         cachedDoneToday = doneToday
+        cachedAnyExerciseHasSets = anyHasSets
     }
 
     var body: some View {
@@ -348,7 +361,7 @@ struct FilteredExerciseListView: View {
         }
         .id(themeManager.systemColorScheme) // Force List re-render on theme change
         .listStyle(.plain)
-        .contentMargins(.top, 12, for: .scrollContent)
+        .contentMargins(.top, 6, for: .scrollContent)
         .scrollIndicators(.hidden)
         .listSectionSpacing(6)
         .scrollContentBackground(.hidden)
@@ -412,9 +425,7 @@ struct FilteredExerciseListView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        // Check if any exercise has sets
-                        let hasSets = exercises.contains { !($0.sets?.isEmpty ?? true) }
-                        if !hasSets {
+                        if !cachedAnyExerciseHasSets {
                             showingNoSessionAlert = true
                         } else {
                             navigationPath.append(HistoryDestination.history)

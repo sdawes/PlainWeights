@@ -102,9 +102,13 @@ struct ExerciseCard: View {
             }
             .foregroundStyle(info?.color ?? themeManager.effectiveTheme.mutedForeground)
         } else {
+            // No history at all — flag in red so brand-new exercises stand
+            // out alongside the stale-staleness reds elsewhere in the list.
+            let isDark = themeManager.currentTheme == .dark
+            let red: Color = isDark ? Color(red: 1.0, green: 0.40, blue: 0.40) : .red
             Text("No sets recorded")
                 .font(lastDoneFontRegular)
-                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                .foregroundStyle(red)
         }
     }
 

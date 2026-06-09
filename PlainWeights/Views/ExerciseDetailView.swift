@@ -413,16 +413,17 @@ struct ExerciseDetailView: View {
         .onChange(of: sets) { _, newSets in
             let oldCount = previousTodaySetsCount
             updateCachedData()
-            // Scroll to show latest set when a new set is added.
-            // PB-flash detection lives in updateCachedData so it also fires on edits.
-            if todaySets.count > oldCount {
-                Task {
-                    try? await Task.sleep(for: .milliseconds(150))
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        scrollProxy.scrollTo("comparisonButtons", anchor: .top)
-                    }
-                }
-            }
+            // Auto-scroll on set add temporarily disabled — trialling no-scroll behaviour.
+            // PB-flash detection lives in updateCachedData so it still fires on edits.
+            // if todaySets.count > oldCount {
+            //     Task {
+            //         try? await Task.sleep(for: .milliseconds(150))
+            //         withAnimation(.easeInOut(duration: 0.3)) {
+            //             scrollProxy.scrollTo("comparisonButtons", anchor: .top)
+            //         }
+            //     }
+            // }
+            _ = oldCount
             previousTodaySetsCount = todaySets.count
         }
         .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in

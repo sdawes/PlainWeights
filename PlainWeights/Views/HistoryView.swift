@@ -22,17 +22,17 @@ enum HistoryViewTab: String, CaseIterable {
 
     var icon: String {
         switch self {
-        case .summary:   return "chart.bar.fill"
-        case .exercises: return "dumbbell.fill"
-        case .muscle:    return "figure.arms.open"
+        case .summary:   return "square.grid.2x2.fill"
+        case .exercises: return "arrow.up.arrow.down"
+        case .muscle:    return "figure.stand"
         }
     }
 
     var color: Color {
         switch self {
-        case .summary:   return .orange
-        case .exercises: return .blue
-        case .muscle:    return .green
+        case .summary:   return Color(red: 0.949, green: 0.451, blue: 0.055) // #F2730E
+        case .exercises: return Color(red: 0.188, green: 0.447, blue: 0.753) // #3072C0
+        case .muscle:    return Color(red: 0.180, green: 0.667, blue: 0.325) // #2EAA53
         }
     }
 }
@@ -108,8 +108,11 @@ struct HistoryView: View {
     @State private var cachedExerciseDeltas: [PersistentIdentifier: ExerciseDeltas] = [:]
     @State private var cachedExercisePBFlags: [PersistentIdentifier: Bool] = [:]
 
-    // Selected content view tab (Summary / Muscle / Exercises)
-    @State private var selectedView: HistoryViewTab = .summary
+    // Selected content view tab (Summary / Exercises / Muscle).
+    // Persisted via @AppStorage so the last-chosen sub-tab survives across History
+    // visits and app launches. On a fresh install the key is absent and falls back
+    // to .summary.
+    @AppStorage("historySelectedSubTab") private var selectedView: HistoryViewTab = .summary
 
     // Delta legend popover visibility
     @State private var showingDeltaInfo = false

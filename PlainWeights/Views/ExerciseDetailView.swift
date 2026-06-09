@@ -107,9 +107,8 @@ struct ExerciseDetailView: View {
     // Calculate session duration in minutes for a set of sets
     // Duration = time from first set to last set + 3 min rest after last set
     private func calculateSessionDuration(for sets: [ExerciseSet]) -> Int? {
-        guard !sets.isEmpty else { return nil }
-        let sortedSets = sets.sorted { $0.timestamp < $1.timestamp }
-        guard let first = sortedSets.first, let last = sortedSets.last else { return nil }
+        guard let first = sets.min(by: { $0.timestamp < $1.timestamp }),
+              let last  = sets.max(by: { $0.timestamp < $1.timestamp }) else { return nil }
         let duration = last.timestamp.timeIntervalSince(first.timestamp) + 180
         let minutes = Int(round(duration / 60))
         return minutes > 0 ? minutes : nil

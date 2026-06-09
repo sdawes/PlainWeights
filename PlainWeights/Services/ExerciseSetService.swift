@@ -254,7 +254,7 @@ enum ExerciseSetService {
         // Clear PB flags on ALL sets (including bonus/stale flags)
         let allSetsDescriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
-                set.exercise?.persistentModelID == exerciseID && set.isPB == true
+                set.exercise?.persistentModelID == exerciseID && set.isPB
             }
         )
         for set in try context.fetch(allSetsDescriptor) {
@@ -402,7 +402,7 @@ enum ExerciseSetService {
         // Clear PB flags on ALL sets first (including bonus/stale flags)
         let allSetsDescriptor = FetchDescriptor<ExerciseSet>(
             predicate: #Predicate<ExerciseSet> { set in
-                set.exercise?.persistentModelID == exerciseID && set.isPB == true
+                set.exercise?.persistentModelID == exerciseID && set.isPB
             }
         )
         for set in try context.fetch(allSetsDescriptor) {

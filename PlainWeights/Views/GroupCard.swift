@@ -35,6 +35,11 @@ struct GroupCard: View {
     /// exercise and adds it to this group in one flow.
     @State private var showingAddNewExercise = false
 
+    /// Fixed-width column for the "X exercises" count, so the trailing
+    /// separator dot, status icon, and status text line up across cards
+    /// regardless of how many exercises the group contains.
+    private let countColumnWidth: CGFloat = 90
+
     var body: some View {
         // Sort by most recent activity first — same rule as the main
         // exercise list. Falls back to lastUpdated when an exercise has
@@ -186,36 +191,42 @@ struct GroupCard: View {
         let status = groupSessionStatus(exercises: exercises, doneIDsToday: doneIDsToday)
         let lastDate = lastLoggedDate()
 
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 6) {
             // Primary status line — today's state
             HStack(spacing: 6) {
                 switch status {
                 case .completedToday:
+                    Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
+                        .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .frame(minWidth: countColumnWidth, alignment: .leading)
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 12))
                         .foregroundStyle(.green)
-                    Text("Logged today")
+                    Text("All exercises logged")
                         .font(themeManager.effectiveTheme.captionFont)
                         .foregroundStyle(.green)
 
                 case .inProgress(let done, let total):
+                    Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
+                        .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .frame(minWidth: countColumnWidth, alignment: .leading)
                     Image(systemName: "arrow.right.circle.fill")
                         .font(.system(size: 12))
                         .foregroundStyle(.orange)
-                    Text("\(done)/\(total) logged today")
+                    Text("\(done)/\(total) logged")
                         .font(themeManager.effectiveTheme.captionFont)
                         .foregroundStyle(.orange)
 
                 case .idle:
                     Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
-                        .font(themeManager.effectiveTheme.captionFont)
+                        .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .frame(minWidth: countColumnWidth, alignment: .leading)
 
                     if !exercises.isEmpty {
-                        Text("·")
-                            .font(themeManager.effectiveTheme.captionFont)
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        Image(systemName: "circle.dashed")
+                        Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 12))
                             .foregroundStyle(.red)
                         Text(lastDate == nil ? "Nothing logged yet" : "Nothing logged today")
@@ -226,10 +237,10 @@ struct GroupCard: View {
             }
 
             // Secondary line — when this group was last touched at all.
-            // Only shown in idle state when there's history; today's
-            // green/orange states already convey "right now" so the
-            // historical line would be redundant.
-            if case .idle = status, let date = lastDate {
+            // Shown for every state when there's any history, so every
+            // card has the same two-line shape (count + status, then
+            // last-logged date).
+            if let date = lastDate {
                 Text("Last logged \(relativeDateString(for: date))")
                     .font(themeManager.effectiveTheme.interFont(size: 11, weight: .regular))
                     .foregroundStyle(themeManager.effectiveTheme.mutedForeground)

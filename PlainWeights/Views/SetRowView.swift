@@ -214,7 +214,7 @@ struct SetRowView: View {
 
     @ViewBuilder
     private var badgesView: some View {
-        // Priority order: warm-up → drop → assisted → pause → timed
+        // Priority order: warm-up → drop → assisted → pause → timed → superset
         // Inline check instead of building an array just to read .first
         if set.isWarmUp {
             Image(systemName: "flame.fill")
@@ -236,6 +236,10 @@ struct SetRowView: View {
             Image(systemName: "metronome.fill")
                 .font(.system(size: 14))
                 .foregroundStyle(AppTheme.timedSetColor)
+        } else if set.isSuperset {
+            Image(systemName: "arrow.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(AppTheme.supersetColor)
         } else {
             Color.clear
         }
@@ -299,7 +303,7 @@ struct SetRowView: View {
     private func staticRestTimeView(seconds: Int) -> some View {
         let color = isToday ? restTimeColor(for: seconds) : themeManager.effectiveTheme.tertiaryText
         HStack(spacing: 4) {
-            Image(systemName: "moon.zzz")
+            Image(systemName: "zzz")
                 .font(.caption)
                 .foregroundStyle(color)
             Text(Formatters.formatDuration(Double(seconds)))

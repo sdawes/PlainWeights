@@ -55,6 +55,12 @@ struct TodaySetsSectionView: View {
                     }
                 }
 
+                if set.isSuperset {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.primary)
+                }
+
                 if set.isPB {
                     Image(systemName: "star.fill")
                         .font(.system(size: 13))

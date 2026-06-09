@@ -60,7 +60,7 @@ enum CSVExportService {
         let exercises = try context.fetch(exerciseDescriptor).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
 
         let weightHeader = "Weight (\(weightUnit.rawValue))"
-        let header = "Exercise,Muscle Tags,Date,Time,\(weightHeader),Reps,Warm Up,Drop Set,Assisted,Pause at Top,Timed Set,Tempo (s),PB,Rest (s),Notes\n"
+        let header = "Exercise,Muscle Tags,Date,Time,\(weightHeader),Reps,Warm Up,Drop Set,Assisted,Pause at Top,Timed Set,Superset,Tempo (s),PB,Rest (s),Notes\n"
 
         var csv = header
 
@@ -96,11 +96,12 @@ enum CSVExportService {
                 let assisted = set.isAssisted ? "Yes" : ""
                 let pauseAtTop = set.isPauseAtTop ? "Yes" : ""
                 let timedSet = set.isTimedSet ? "Yes" : ""
+                let superset = set.isSuperset ? "Yes" : ""
                 let tempo = set.isTimedSet && set.tempoSeconds > 0 ? String(set.tempoSeconds) : ""
                 let pb = set.isPB ? "Yes" : ""
                 let rest = set.restSeconds.map { String($0) } ?? ""
 
-                let row = "\(escapedName),\(escapedTags),\(date),\(time),\(weightString),\(reps),\(warmUp),\(dropSet),\(assisted),\(pauseAtTop),\(timedSet),\(tempo),\(pb),\(rest),\(escapedNotes)\n"
+                let row = "\(escapedName),\(escapedTags),\(date),\(time),\(weightString),\(reps),\(warmUp),\(dropSet),\(assisted),\(pauseAtTop),\(timedSet),\(superset),\(tempo),\(pb),\(rest),\(escapedNotes)\n"
                 csv.append(row)
             }
         }

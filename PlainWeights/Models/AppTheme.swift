@@ -258,11 +258,14 @@ enum AppTheme: String, CaseIterable {
     /// Color for assisted sets (pink)
     static var assistedColor: Color { Color(red: 1.0, green: 0.2, blue: 0.5) }
 
-    /// Color for timed/tempo sets
-    static var timedSetColor: Color { .gray }
+    /// Color for timed/tempo sets — fixed darker grey for stronger contrast on light backgrounds
+    static var timedSetColor: Color { Color(red: 0.35, green: 0.35, blue: 0.35) }
 
     /// Color for pause-at-top sets
     static var pauseAtTopColor: Color { .indigo }
+
+    /// Color for superset sets (teal — adapts to light/dark mode)
+    static var supersetColor: Color { .teal }
 
     // MARK: - Inter Font
 

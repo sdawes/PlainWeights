@@ -352,6 +352,9 @@ struct ComparisonMetricsCard: View {
         let workingSetCount = todaysSets.count
         let isLastSession = comparisonMode == .lastSession
         let tol = ProgressTracker.weightTolerance
+        // Reference qualifier used in the footer hint copy so it reads as
+        // "X reps over last total volume" / "X reps over PB total volume".
+        let refLabel = isLastSession ? "last" : "PB"
 
         if isRepsOnlyComparison {
             let lastSetReps = lastSet.map { Double($0.reps) }
@@ -369,13 +372,13 @@ struct ComparisonMetricsCard: View {
             let repsHint: String? = {
                 guard hasWorkingSets else { return nil }
                 if Int(totalRepsDelta) == 0 {
-                    return "Total reps matched"
+                    return "\(refLabel.capitalized) total reps matched"
                 } else if totalRepsDelta > 0 {
                     let count = Int(totalRepsDelta)
-                    return "\(count) \(count == 1 ? "rep" : "reps") over total reps"
+                    return "\(count) \(count == 1 ? "rep" : "reps") over \(refLabel) total reps"
                 } else {
                     let count = Int(abs(totalRepsDelta)) + 1
-                    return "\(count) \(count == 1 ? "rep" : "reps") to beat total reps"
+                    return "\(count) \(count == 1 ? "rep" : "reps") to beat \(refLabel) total reps"
                 }
             }()
 
@@ -434,18 +437,18 @@ struct ComparisonMetricsCard: View {
         let volumeHint: String? = {
             guard hasWorkingSets else { return nil }
             if abs(volumeDelta) < tol {
-                return "Total volume matched"
+                return "\(refLabel.capitalized) total volume matched"
             }
             if let weight = cachedLastSetWeight, weight > 0 {
                 let displayWeight = themeManager.displayWeight(weight)
                 if volumeDelta > tol {
                     let repsOver = Int(volumeDelta / displayWeight)
                     if repsOver > 0 {
-                        return "\(repsOver) \(repsOver == 1 ? "rep" : "reps") over total volume"
+                        return "\(repsOver) \(repsOver == 1 ? "rep" : "reps") over \(refLabel) total volume"
                     }
                 } else if volumeDelta < -tol {
                     let repsNeeded = Int(abs(volumeDelta) / displayWeight) + 1
-                    return "\(repsNeeded) \(repsNeeded == 1 ? "rep" : "reps") to beat total volume"
+                    return "\(repsNeeded) \(repsNeeded == 1 ? "rep" : "reps") to beat \(refLabel) total volume"
                 }
             }
             return nil

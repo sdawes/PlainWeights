@@ -16,6 +16,7 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
     case assisted = "Assisted"
     case pause = "Pause"
     case timed = "Timed"
+    case superset = "Superset"
 
     var id: String { rawValue }
 
@@ -26,6 +27,7 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
         case .assisted: return "hand.raised.fill"
         case .pause: return "pause.fill"
         case .timed: return "metronome.fill"
+        case .superset: return "arrow.right"
         }
     }
 
@@ -36,6 +38,7 @@ enum SetTypeOption: String, CaseIterable, Identifiable {
         case .assisted: return AppTheme.assistedColor
         case .pause: return AppTheme.pauseAtTopColor
         case .timed: return AppTheme.timedSetColor
+        case .superset: return AppTheme.supersetColor
         }
     }
 }
@@ -66,7 +69,7 @@ struct SetTypePillSelector: View {
                 }
                 GridRow {
                     setTypePill(for: .timed)
-                    Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                    setTypePill(for: .superset)
                 }
             }
         }
@@ -164,6 +167,7 @@ struct AddSetView: View {
         if set.isAssisted { return .assisted }
         if set.isPauseAtTop { return .pause }
         if set.isTimedSet { return .timed }
+        if set.isSuperset { return .superset }
         return nil  // Normal set = no selection
     }
 
@@ -346,6 +350,7 @@ struct AddSetView: View {
         let isAssisted = selectedType == .assisted
         let isPauseAtTop = selectedType == .pause
         let isTimedSet = selectedType == .timed
+        let isSuperset = selectedType == .superset
 
         do {
             if let setToEdit = setToEdit {
@@ -359,6 +364,7 @@ struct AddSetView: View {
                     isAssisted: isAssisted,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
+                    isSuperset: isSuperset,
                     tempoSeconds: 0,
                     context: context
                 )
@@ -372,6 +378,7 @@ struct AddSetView: View {
                     isAssisted: isAssisted,
                     isPauseAtTop: isPauseAtTop,
                     isTimedSet: isTimedSet,
+                    isSuperset: isSuperset,
                     tempoSeconds: 0,
                     to: exercise,
                     sourceGroup: sourceGroup,

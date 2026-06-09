@@ -49,6 +49,7 @@ enum ExerciseSetService {
         isAssisted: Bool = false,
         isPauseAtTop: Bool = false,
         isTimedSet: Bool = false,
+        isSuperset: Bool = false,
         tempoSeconds: Int = 0,
         to exercise: Exercise,
         sourceGroup: ExerciseGroup? = nil,
@@ -68,6 +69,7 @@ enum ExerciseSetService {
             isAssisted: isAssisted,
             isPauseAtTop: isPauseAtTop,
             isTimedSet: isTimedSet,
+            isSuperset: isSuperset,
             tempoSeconds: tempoSeconds,
             exercise: exercise
         )
@@ -306,6 +308,7 @@ enum ExerciseSetService {
         isAssisted: Bool,
         isPauseAtTop: Bool,
         isTimedSet: Bool,
+        isSuperset: Bool,
         tempoSeconds: Int,
         context: ModelContext
     ) throws {
@@ -326,6 +329,7 @@ enum ExerciseSetService {
         set.isAssisted = isAssisted
         set.isPauseAtTop = isPauseAtTop
         set.isTimedSet = isTimedSet
+        set.isSuperset = isSuperset
         set.tempoSeconds = tempoSeconds
 
         // Recalculate PBs since weight or reps may have changed

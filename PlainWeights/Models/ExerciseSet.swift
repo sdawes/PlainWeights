@@ -22,6 +22,7 @@ final class ExerciseSet {
     var isAssisted: Bool = false     // flag to indicate assisted set (e.g., spotter help)
     var isPauseAtTop: Bool = false   // flag to indicate pause at top technique
     var isTimedSet: Bool = false     // flag to indicate timed/tempo set (slow controlled movement)
+    var isSuperset: Bool = false     // flag to indicate this set was performed as a superset paired with another exercise
     var isToFailure: Bool = false     // DEPRECATED: kept for CloudKit compatibility, no longer used in UI
     var tempoSeconds: Int = 0        // tempo duration in seconds (only used when isTimedSet is true)
     var isPB: Bool = false           // flag to indicate personal best (highest weight, then reps, then earliest timestamp)
@@ -31,7 +32,7 @@ final class ExerciseSet {
     /// group. Nil for sets logged outside a group context.
     var sourceGroup: ExerciseGroup? = nil
 
-    init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isDropSet: Bool = false, isAssisted: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, exercise: Exercise) {
+    init(timestamp: Date = .init(), weight: Double, reps: Int, isWarmUp: Bool = false, isDropSet: Bool = false, isAssisted: Bool = false, isPauseAtTop: Bool = false, isTimedSet: Bool = false, isSuperset: Bool = false, tempoSeconds: Int = 0, isPB: Bool = false, exercise: Exercise) {
         self.timestamp = timestamp
         self.weight = weight
         self.reps = reps
@@ -40,6 +41,7 @@ final class ExerciseSet {
         self.isAssisted = isAssisted
         self.isPauseAtTop = isPauseAtTop
         self.isTimedSet = isTimedSet
+        self.isSuperset = isSuperset
         self.tempoSeconds = tempoSeconds
         self.isPB = isPB
         self.exercise = exercise

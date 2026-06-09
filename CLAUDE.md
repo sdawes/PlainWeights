@@ -596,7 +596,7 @@ A 2px colored left border with light tinted background, used to visually highlig
 #### Use Cases
 - **PBs (red)**: Exercise cards/rows containing personal bests
 - **Staleness indicators**: Exercise list items (orange = 14+ days, red = 30+ days, green = today)
-- **Set type badges**: Warm-up (orange), Drop set (blue), Assisted (pink), Timed (gray), Pause (indigo)
+- **Set type badges**: Warm-up (orange), Drop set (blue), Assisted (pink), Timed (gray), Pause (indigo), Superset (teal)
 
 #### Visual Specification
 ```

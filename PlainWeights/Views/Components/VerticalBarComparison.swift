@@ -43,6 +43,18 @@ struct BarColumnData: Equatable {
         if isSame { return DeltaDirection.same.color }
         return isUp ? DeltaDirection.up.color : DeltaDirection.down.color
     }
+
+    /// Colour for the session-best backing bar.
+    /// Compares session best vs reference (not vs latest set), mirroring the
+    /// same green/amber/red logic as the main fill — so a session best that's
+    /// still under the reference reads as light red, not green.
+    var sessionBestColor: Color {
+        guard let best = sessionBestValue else { return DeltaDirection.up.color }
+        let tol: Double = formatAsWeight ? ProgressTracker.weightTolerance : 0.5
+        let diff = best - referenceValue
+        if abs(diff) < tol { return DeltaDirection.same.color }
+        return diff > 0 ? DeltaDirection.up.color : DeltaDirection.down.color
+    }
 }
 
 // MARK: - Session Comparison Gauges
@@ -128,8 +140,10 @@ struct VerticalBarComparison: View {
 
                     let barColor = data.barColor
 
-                    // Session best shading — drawn FIRST so the colored fill overlaps it
-                    // Only show when last set is under the reference (not when same/equal)
+                    // Session best shading — drawn FIRST so the colored fill overlaps it.
+                    // Only show when last set is under the reference (not when same/equal).
+                    // Tint reflects how the session best compares to the reference:
+                    // green if it exceeds, amber if matched, light red if still under.
                     if data.showSessionBest,
                        !data.isSame,
                        let bestValue = data.sessionBestValue,
@@ -138,11 +152,11 @@ struct VerticalBarComparison: View {
                         let bestWidth = CGFloat(bestRatio) * totalWidth
                         // Overlap under the colored fill by 4px to eliminate gap
                         let overlap: CGFloat = 4
-                        let greenWidth = bestWidth - fillWidth + overlap
+                        let backingWidth = bestWidth - fillWidth + overlap
 
                         UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: barHeight / 2, topTrailingRadius: barHeight / 2)
-                            .fill(Color.green.opacity(0.4))
-                            .frame(width: greenWidth, height: barHeight)
+                            .fill(data.sessionBestColor.opacity(0.4))
+                            .frame(width: backingWidth, height: barHeight)
                             .offset(x: fillWidth - overlap)
                     }
 

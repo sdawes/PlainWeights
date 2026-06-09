@@ -104,6 +104,10 @@ struct HistoryView: View {
     // Cached tag distribution for period summary
     @State private var cachedPeriodTagDistribution: [(tag: String, percentage: Double)] = []
 
+    // Cached tag distribution for the Last Session view. Computed once per
+    // data/period change so the Muscle tab doesn't re-aggregate every render.
+    @State private var cachedLastSessionTagDistribution: [(tag: String, percentage: Double)] = []
+
     // Cached exercise deltas for last session (keyed by exercise persistent ID)
     @State private var cachedExerciseDeltas: [PersistentIdentifier: ExerciseDeltas] = [:]
     @State private var cachedExercisePBFlags: [PersistentIdentifier: Bool] = [:]
@@ -117,16 +121,18 @@ struct HistoryView: View {
     // Delta legend popover visibility
     @State private var showingDeltaInfo = false
 
-    private var hasTodaySets: Bool {
-        allSets.contains { Calendar.current.isDateInToday($0.timestamp) }
-    }
+    /// Cached "are there any sets logged today" flag. The naive computed
+    /// form scans every set in the database and is read multiple times per
+    /// body render (header + picker), so we recompute it only when the
+    /// underlying data changes via updateCaches().
+    @State private var cachedHasTodaySets: Bool = false
 
     var body: some View {
         VStack(spacing: 0) {
             // Time period picker
             Picker("Time Period", selection: $selectedPeriod) {
                 ForEach(HistoryTimePeriod.allCases, id: \.self) { period in
-                    Text(period == .lastSession && hasTodaySets ? "Today" : period.rawValue).tag(period)
+                    Text(period == .lastSession && cachedHasTodaySets ? "Today" : period.rawValue).tag(period)
                 }
             }
             .pickerStyle(.segmented)
@@ -224,7 +230,7 @@ struct HistoryView: View {
             if let day = cachedDisplayDay {
                 return day.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
             }
-            return hasTodaySets ? "Today" : "Last"
+            return cachedHasTodaySets ? "Today" : "Last"
         case .week, .month, .year:
             return periodDescription
         }
@@ -430,11 +436,7 @@ struct HistoryView: View {
     }
 
     private var currentTagDistribution: [(tag: String, percentage: Double)] {
-        if selectedPeriod == .lastSession {
-            guard let day = cachedDisplayDay else { return [] }
-            return ExerciseService.tagDistribution(from: day.exercises.flatMap { $0.sets })
-        }
-        return cachedPeriodTagDistribution
+        selectedPeriod == .lastSession ? cachedLastSessionTagDistribution : cachedPeriodTagDistribution
     }
 
     @ViewBuilder
@@ -619,6 +621,9 @@ struct HistoryView: View {
 
     /// Update all cached values - called on appear and when data/period changes
     private func updateCaches() {
+        // Recompute the today-set flag once per data change rather than per body render.
+        cachedHasTodaySets = allSets.contains { Calendar.current.isDateInToday($0.timestamp) }
+
         if selectedPeriod == .lastSession {
             // Compute display day for detailed view
             let day = Self.computeDisplayDay(from: allSets)
@@ -633,9 +638,15 @@ struct HistoryView: View {
                     pbFlags[exercise.exercise.persistentModelID] = exercise.sets.workingSets.contains { $0.isPB }
                 }
                 cachedExercisePBFlags = pbFlags
+                // Cache the muscle breakdown for this session so the Muscle tab
+                // doesn't re-aggregate on every render.
+                cachedLastSessionTagDistribution = ExerciseService.tagDistribution(
+                    from: day.exercises.flatMap { $0.sets }
+                )
             } else {
                 cachedExerciseDeltas = [:]
                 cachedExercisePBFlags = [:]
+                cachedLastSessionTagDistribution = []
             }
         } else {
             // Compute period summary metrics

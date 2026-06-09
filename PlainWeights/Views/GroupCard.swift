@@ -40,27 +40,16 @@ struct GroupCard: View {
     /// regardless of how many exercises the group contains.
     private let countColumnWidth: CGFloat = 90
 
+    /// Cached sort + status derived from `group`. Computing these inline in
+    /// `body` is expensive (lastWorkoutDate scans an exercise's sets for
+    /// each comparison) and body fires on every theme/app-storage tick.
+    /// Rebuilt on appear, when membership changes, and when set data
+    /// changes via the `.setDataChanged` notification.
+    @State private var sortedExercises: [Exercise] = []
+    @State private var doneExerciseIDsToday: Set<PersistentIdentifier> = []
+    @State private var cachedLastLoggedDate: Date? = nil
+
     var body: some View {
-        // Sort by most recent activity first — same rule as the main
-        // exercise list. Falls back to lastUpdated when an exercise has
-        // no sets yet.
-        let exercises = (group.exercises ?? []).sorted { a, b in
-            let aDate = a.lastWorkoutDate ?? a.lastUpdated
-            let bDate = b.lastWorkoutDate ?? b.lastUpdated
-            return aDate > bDate
-        }
-
-        // Set of exercise IDs that have at least one set logged today
-        // with `sourceGroup` equal to this group. Used to render the
-        // per-row "Done" indicator and to drive the group session
-        // status — computed once per render, not per row.
-        let today = Calendar.current.startOfDay(for: .now)
-        let doneExerciseIDsToday: Set<PersistentIdentifier> = Set(
-            (group.groupSets ?? [])
-                .filter { Calendar.current.startOfDay(for: $0.timestamp) == today }
-                .compactMap { $0.exercise?.id }
-        )
-
         VStack(alignment: .leading, spacing: 0) {
             // Header — split into expand tap target (name/count) and
             // ellipsis Menu (always visible, left of chevron).
@@ -71,7 +60,7 @@ struct GroupCard: View {
                         Text(group.name)
                             .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                        subtitleRow(exercises: exercises, doneIDsToday: doneExerciseIDsToday)
+                        subtitleRow(exercises: sortedExercises, doneIDsToday: doneExerciseIDsToday)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(.rect)
@@ -111,7 +100,7 @@ struct GroupCard: View {
             // Body — exercise rows only when expanded.
             if isExpanded {
                 VStack(spacing: 0) {
-                    if exercises.isEmpty {
+                    if sortedExercises.isEmpty {
                         Text("No exercises yet. Tap ··· to edit.")
                             .font(themeManager.effectiveTheme.subheadlineFont)
                             .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
@@ -120,7 +109,7 @@ struct GroupCard: View {
                             .padding(.bottom, 14)
                     } else {
                         VStack(spacing: 8) {
-                            ForEach(exercises) { exercise in
+                            ForEach(sortedExercises) { exercise in
                                 Button {
                                     navigationPath.append(GroupExerciseDestination(exercise: exercise, group: group))
                                 } label: {
@@ -148,6 +137,11 @@ struct GroupCard: View {
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .animation(.easeInOut(duration: 0.22), value: isExpanded)
+        .onAppear { rebuildCaches() }
+        .onChange(of: group.exercises?.count) { _, _ in rebuildCaches() }
+        .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in
+            rebuildCaches()
+        }
         .sheet(isPresented: $showingRenameSheet) {
             GroupNameSheet(mode: .rename(currentName: group.name)) { newName in
                 commitRename(newName)
@@ -172,12 +166,35 @@ struct GroupCard: View {
         }
     }
 
+    // MARK: - Cache rebuild
+
+    /// Recompute the sorted exercises, today's done-IDs, and last-logged date
+    /// from the current group state. Cheap to run on demand; expensive when
+    /// run on every body invocation, which is what this avoids.
+    private func rebuildCaches() {
+        sortedExercises = (group.exercises ?? []).sorted { a, b in
+            let aDate = a.lastWorkoutDate ?? a.lastUpdated
+            let bDate = b.lastWorkoutDate ?? b.lastUpdated
+            return aDate > bDate
+        }
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        let groupSets = group.groupSets ?? []
+        doneExerciseIDsToday = Set(
+            groupSets
+                .filter { calendar.startOfDay(for: $0.timestamp) == today }
+                .compactMap { $0.exercise?.id }
+        )
+        cachedLastLoggedDate = groupSets.map(\.timestamp).max()
+    }
+
     // MARK: - Subtitle row
 
     @ViewBuilder
     private func subtitleRow(exercises: [Exercise], doneIDsToday: Set<PersistentIdentifier>) -> some View {
         let status = groupSessionStatus(exercises: exercises, doneIDsToday: doneIDsToday)
-        let lastDate = lastLoggedDate()
+        let lastDate = cachedLastLoggedDate
 
         VStack(alignment: .leading, spacing: 6) {
             // Primary status line — today's state
@@ -253,14 +270,6 @@ struct GroupCard: View {
         if doneCount == 0 { return .idle }
         if doneCount >= allIDs.count { return .completedToday }
         return .inProgress(done: doneCount, total: allIDs.count)
-    }
-
-    /// Most recent date on which *any* set was logged with this group as
-    /// its sourceGroup. Used for the secondary "Last logged X" line —
-    /// reflects activity, not necessarily full completion.
-    private func lastLoggedDate() -> Date? {
-        guard let groupSets = group.groupSets, !groupSets.isEmpty else { return nil }
-        return groupSets.map(\.timestamp).max()
     }
 
     // MARK: - Date helpers

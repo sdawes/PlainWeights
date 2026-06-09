@@ -34,7 +34,11 @@ struct ExerciseDetailView: View {
     @State private var showError = false
     @State private var showNotes: Bool = false
     @State private var showingEditSheet = false
-    @State private var comparisonMode: ComparisonMode = .lastSession
+    // Comparison mode persists across exercise visits and app launches via
+    // @AppStorage, so picking PB once makes it the default everywhere until
+    // the user picks Last Session again. On fresh install the key is absent
+    // and falls back to .lastSession.
+    @AppStorage("exerciseComparisonMode") private var comparisonMode: ComparisonMode = .lastSession
     @State private var showChart: Bool = true  // Will be set in onAppear from setting
     @State private var pbFlashOpacity: Double = 0  // PB-flash border opacity
     @State private var previousPBSignature: PBSignature? = nil  // For detecting PB changes

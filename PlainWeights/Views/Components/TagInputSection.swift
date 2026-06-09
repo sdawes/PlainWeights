@@ -115,14 +115,18 @@ struct TagInputSection<Accessory: View>: View {
             return
         }
         cachedFilteredSuggestions = suggestions
-            .filter { $0.localizedStandardContains(trimmed) && !tags.contains($0) }
+            .filter { suggestion in
+                suggestion.localizedStandardContains(trimmed)
+                && !tags.contains(where: { $0.caseInsensitiveCompare(suggestion) == .orderedSame })
+            }
             .prefix(5)
             .map { $0 }
     }
 
     private func addTag() {
         let trimmed = input.trimmingCharacters(in: .whitespaces).lowercased()
-        if !trimmed.isEmpty && !tags.contains(trimmed) && tags.count < 10 && trimmed.count <= 20 {
+        let alreadyAdded = tags.contains { $0.caseInsensitiveCompare(trimmed) == .orderedSame }
+        if !trimmed.isEmpty && !alreadyAdded && tags.count < 10 && trimmed.count <= 20 {
             withAnimation {
                 tags.append(trimmed)
             }
@@ -131,9 +135,11 @@ struct TagInputSection<Accessory: View>: View {
     }
 
     private func selectSuggestion(_ suggestion: String) {
-        guard !tags.contains(suggestion) && tags.count < 10 else { return }
+        let normalised = suggestion.lowercased()
+        let alreadyAdded = tags.contains { $0.caseInsensitiveCompare(normalised) == .orderedSame }
+        guard !alreadyAdded && tags.count < 10 else { return }
         withAnimation {
-            tags.append(suggestion)
+            tags.append(normalised)
         }
         input = ""
     }

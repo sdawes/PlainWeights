@@ -104,18 +104,6 @@ struct GroupCard: View {
                         .background(themeManager.effectiveTheme.muted)
                         .clipShape(Circle())
                 }
-
-                // Chevron — part of the expand button visually but
-                // rendered outside it to keep the Menu tap target clean.
-                Button(action: onToggle) {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
-                        .padding(.leading, 12)
-                        .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
             }
             .padding(.vertical, 14)
             .padding(.horizontal, 14)
@@ -203,7 +191,7 @@ struct GroupCard: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 12))
                         .foregroundStyle(.green)
-                    Text("All exercises logged")
+                    Text("\(exercises.count)/\(exercises.count) logged today")
                         .font(themeManager.effectiveTheme.captionFont)
                         .foregroundStyle(.green)
 
@@ -215,7 +203,7 @@ struct GroupCard: View {
                     Image(systemName: "arrow.right.circle.fill")
                         .font(.system(size: 12))
                         .foregroundStyle(.orange)
-                    Text("\(done)/\(total) logged")
+                    Text("\(done)/\(total) logged today")
                         .font(themeManager.effectiveTheme.captionFont)
                         .foregroundStyle(.orange)
 

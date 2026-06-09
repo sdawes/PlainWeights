@@ -156,12 +156,15 @@ enum ExerciseService {
         let descriptor = FetchDescriptor<Exercise>()
         let exercises = (try? context.fetch(descriptor)) ?? []
 
+        // Normalise everything to lowercase so older capitalised data
+        // doesn't appear as a separate suggestion from its lowercase twin
+        // (e.g. "Triceps" merging into "triceps").
         var allTags = Set<String>()
         for exercise in exercises {
-            allTags.formUnion(exercise.tags)
-            allTags.formUnion(exercise.secondaryTags)
+            for tag in exercise.tags { allTags.insert(tag.lowercased()) }
+            for tag in exercise.secondaryTags { allTags.insert(tag.lowercased()) }
         }
-        allTags.formUnion(defaultMuscleTags)
+        for tag in defaultMuscleTags { allTags.insert(tag.lowercased()) }
 
         return allTags.sorted()
     }

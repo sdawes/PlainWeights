@@ -79,6 +79,10 @@ enum ExerciseSetService {
         // Capture rest time on the previous set (how long since that set until this one)
         try captureRestTimeOnPreviousSet(currentSet: set, exercise: exercise, context: context)
 
+        // Finalise any still-running timers on OTHER exercises — starting this set means
+        // the user has moved on, so stop their in-app timers (mirrors the Dynamic Island).
+        try captureOtherRunningTimers(excluding: set, now: set.timestamp, context: context)
+
         // Detect and mark PB after adding the set
         try detectAndMarkPB(for: set, exercise: exercise, context: context)
 
@@ -134,6 +138,39 @@ enum ExerciseSetService {
         // Cap at 180 seconds (3 minutes)
         previousSet.restSeconds = min(restTime, 180)
         // Note: caller is responsible for saving
+    }
+
+    /// Finalise still-running rest timers on any OTHER today's sets when a new set is logged.
+    ///
+    /// When the user logs a set on a different exercise, the previous exercise's in-app timer
+    /// would otherwise keep ticking (its set's `restSeconds` stays nil). This captures the
+    /// elapsed rest (capped at 180s) on every today's set that still has `restSeconds == nil`,
+    /// excluding the newly added set. The same-exercise previous set is handled separately by
+    /// `captureRestTimeOnPreviousSet`, which runs first, so it's already non-nil and skipped here.
+    ///
+    /// - Parameters:
+    ///   - newSet: The newly added set (excluded from finalisation)
+    ///   - now: Reference time for elapsed calculation (the new set's timestamp)
+    ///   - context: SwiftData model context
+    /// Note: caller is responsible for saving.
+    static func captureOtherRunningTimers(
+        excluding newSet: ExerciseSet,
+        now: Date,
+        context: ModelContext
+    ) throws {
+        let startOfToday = Calendar.current.startOfDay(for: now)
+
+        let descriptor = FetchDescriptor<ExerciseSet>(
+            predicate: #Predicate<ExerciseSet> { set in
+                set.restSeconds == nil && set.timestamp >= startOfToday
+            }
+        )
+
+        let newSetID = newSet.persistentModelID
+        for set in try context.fetch(descriptor) where set.persistentModelID != newSetID {
+            let elapsed = Int(now.timeIntervalSince(set.timestamp))
+            set.restSeconds = min(max(elapsed, 0), 180)
+        }
     }
 
     /// Manually capture rest time (user tapped the timer to stop it)

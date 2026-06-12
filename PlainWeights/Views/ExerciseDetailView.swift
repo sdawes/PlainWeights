@@ -145,6 +145,7 @@ struct ExerciseDetailView: View {
             .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
+            .listSectionSpacing(16)  // tighter gap below the title so the next visible card sits closer
 
             // Inline Notes - conditional based on toggle
             if showNotes {

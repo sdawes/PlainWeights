@@ -436,7 +436,7 @@ struct InlineProgressChart: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 120)
+                .frame(width: 110)
 
                 Spacer()
 
@@ -476,7 +476,7 @@ struct InlineProgressChart: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 160)
+                .frame(width: 140)
             }
             .opacity(cachedState.dataPoints.isEmpty ? 0.3 : 1.0)
             .disabled(cachedState.dataPoints.isEmpty)
@@ -722,7 +722,7 @@ struct InlineProgressChart: View {
                     series: .value("Type", "Reps")
                 )
                 .foregroundStyle(themeManager.effectiveTheme.chartColor2)
-                .lineStyle(StrokeStyle(lineWidth: 1.0, dash: [5, 3]))
+                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
                 .interpolationMethod(.monotone)
 
                 // Endpoint dots: first and last data points
@@ -777,7 +777,7 @@ struct InlineProgressChart: View {
                             series: .value("Type", "RepsTrend")
                         )
                         .foregroundStyle(themeManager.effectiveTheme.chartColor2.opacity(0.6))
-                        .lineStyle(StrokeStyle(lineWidth: 0.5, dash: [5, 3]))
+                        .lineStyle(StrokeStyle(lineWidth: 1.25, dash: [5, 3]))
                     }
                 }
             }

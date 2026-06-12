@@ -25,9 +25,18 @@ struct DeltaIndicatorsView: View {
 
     @ViewBuilder
     private func deltaIcon(direction: DeltaDirection) -> some View {
-        Image(systemName: direction.arrowSymbol)
-            .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(direction.color)
+        if case .noData = direction {
+            // No comparison available (brand-new exercise) — show an
+            // em-dash. Using Text instead of the SF "minus" symbol so it
+            // sits in the vertical centre of the row.
+            Text("—")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(direction.color)
+        } else {
+            Image(systemName: direction.arrowSymbol)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(direction.color)
+        }
     }
 }
 

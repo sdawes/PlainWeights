@@ -15,6 +15,19 @@ enum HistoryTimePeriod: String, CaseIterable {
     case year = "Year"          // Rolling 365 days
 }
 
+/// The three sub views on the History screen, switched via the sub-tab pills.
+/// Canonical names for reference in code, comments, and conversations:
+///
+///   .summary   → "History Summary sub view"
+///                Scoreboard of workout days, sets, volume, PBs, avg rest.
+///
+///   .exercises → "History Progress sub view"
+///                Per-exercise list with green/amber/red delta arrows
+///                showing weight / reps / volume change vs previous session.
+///
+///   .muscle    → "History Muscle Breakdown sub view"
+///                Tag-distribution bar showing proportion of work per
+///                muscle group across the selected period.
 enum HistoryViewTab: String, CaseIterable {
     case summary = "Summary"
     case exercises = "Exercises"
@@ -250,6 +263,7 @@ struct HistoryView: View {
 
     // MARK: - Tab Content
 
+    // MARK: History Summary sub view
     @ViewBuilder
     private var summaryTabContent: some View {
         ScrollView {
@@ -274,6 +288,7 @@ struct HistoryView: View {
         .scrollIndicators(.hidden)
     }
 
+    // MARK: History Muscle Breakdown sub view
     @ViewBuilder
     private var muscleTabContent: some View {
         let tagDist = currentTagDistribution
@@ -292,6 +307,7 @@ struct HistoryView: View {
         .scrollIndicators(.hidden)
     }
 
+    // MARK: History Progress sub view
     @ViewBuilder
     private var exercisesTabContent: some View {
         if selectedPeriod == .lastSession {

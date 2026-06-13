@@ -14,7 +14,7 @@ struct PlainWeightsTimerLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: RestTimerAttributes.self) { context in
             HStack(spacing: 14) {
-                Image("Timer_Icon")
+                Image("RestTimerIcon")
                     .resizable()
                     .renderingMode(.template)
                     .aspectRatio(contentMode: .fit)
@@ -52,7 +52,7 @@ struct PlainWeightsTimerLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack(spacing: 14) {
-                        Image("Timer_Icon")
+                        Image("RestTimerIcon")
                             .resizable()
                             .renderingMode(.template)
                             .aspectRatio(contentMode: .fit)
@@ -78,7 +78,7 @@ struct PlainWeightsTimerLiveActivity: Widget {
                     }
                 }
             } compactLeading: {
-                Image("Timer_Icon")
+                Image("RestTimerIcon")
                     .resizable()
                     .renderingMode(.template)
                     .aspectRatio(contentMode: .fit)

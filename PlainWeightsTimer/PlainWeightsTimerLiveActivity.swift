@@ -103,9 +103,3 @@ struct PlainWeightsTimerLiveActivity: Widget {
         }
     }
 }
-
-#Preview("Notification", as: .content, using: RestTimerAttributes(exerciseName: "Bench Press", startTime: Date(), maxDuration: 180)) {
-    PlainWeightsTimerLiveActivity()
-} contentStates: {
-    RestTimerAttributes.ContentState(timerRunning: true, phase: .normal)
-}

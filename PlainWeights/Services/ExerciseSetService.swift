@@ -91,9 +91,13 @@ enum ExerciseSetService {
         // Single save for all mutations (insert + rest time + PB)
         try context.save()
 
-        // Start Live Activity rest timer in Dynamic Island
+        // Start Live Activity rest timer in Dynamic Island.
+        // Pull plain Sendable values out before the Task — SwiftData model
+        // instances must not be captured across actor isolation boundaries.
+        let exerciseName = exercise.name
+        let startTime = set.timestamp
         Task { @MainActor in
-            RestTimerActivityManager.startTimer(exerciseName: exercise.name, startTime: set.timestamp)
+            RestTimerActivityManager.startTimer(exerciseName: exerciseName, startTime: startTime)
         }
 
         // Notify observers that set data changed

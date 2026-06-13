@@ -6,7 +6,7 @@
 //  and Lock Screen. Starts when a set is added, stops when rest is captured.
 //
 
-import ActivityKit
+@preconcurrency import ActivityKit
 import Foundation
 import UIKit
 
@@ -25,7 +25,7 @@ enum RestTimerActivityManager {
         let elapsed = Date().timeIntervalSince(startTime)
 
         if elapsed >= 180 {
-            Task { await activity.end(nil, dismissalPolicy: .immediate) }
+            Task { @MainActor in await activity.end(nil, dismissalPolicy: .immediate) }
             return
         }
 
@@ -38,7 +38,7 @@ enum RestTimerActivityManager {
         else { phase = .normal }
 
         let state = RestTimerAttributes.ContentState(timerRunning: true, phase: phase)
-        Task { await activity.update(ActivityContent(state: state, staleDate: staleDate)) }
+        Task { @MainActor in await activity.update(ActivityContent(state: state, staleDate: staleDate)) }
 
         observeForeground(startTime: startTime, staleDate: staleDate)
     }
@@ -78,7 +78,7 @@ enum RestTimerActivityManager {
 
         let finalState = RestTimerAttributes.ContentState(timerRunning: false, phase: .normal)
 
-        Task {
+        Task { @MainActor in
             await activity.end(
                 ActivityContent(state: finalState, staleDate: nil),
                 dismissalPolicy: .immediate
@@ -116,7 +116,7 @@ enum RestTimerActivityManager {
         else { phase = .normal }
 
         let state = RestTimerAttributes.ContentState(timerRunning: true, phase: phase)
-        Task {
+        Task { @MainActor in
             await currentActivity?.update(ActivityContent(state: state, staleDate: staleDate))
         }
     }

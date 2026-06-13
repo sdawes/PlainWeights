@@ -244,11 +244,18 @@ struct GroupCard: View {
             // Secondary line — when this group was last touched at all.
             // Shown for every state when there's any history, so every
             // card has the same two-line shape (count + status, then
-            // last-logged date).
+            // last-logged date). Small green dot in front of the date,
+            // editorial information-design pattern borrowed from the
+            // museum reference.
             if let date = lastDate {
-                Text("Last logged \(relativeDateString(for: date))")
-                    .font(themeManager.effectiveTheme.interFont(size: 11, weight: .regular))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(.green)
+                        .frame(width: 5, height: 5)
+                    Text("Last logged \(relativeDateString(for: date))")
+                        .font(themeManager.effectiveTheme.interFont(size: 11, weight: .regular))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                }
             }
         }
     }

@@ -69,7 +69,9 @@ struct ExerciseCard: View {
                 .padding(.top, 6)
             }
 
-            // Last workout line with optional staleness dot
+            // Last workout line with optional staleness dot — green (today),
+            // orange (14+ days), red (30+ days). The 1-13 days "no callout"
+            // range and the no-sets case both render no dot.
             HStack(spacing: 6) {
                 if let info {
                     Circle()
@@ -90,17 +92,15 @@ struct ExerciseCard: View {
         info: (color: Color, label: String)?
     ) -> some View {
         if isDoneToday {
-            HStack(spacing: 0) {
-                Text("Last: ").font(lastDoneFontRegular)
-                Text("Today").font(lastDoneFontMedium)
-            }
-            .foregroundStyle(info?.color ?? .green)
+            Text("Last logged today")
+                .font(lastDoneFontRegular)
+                .foregroundStyle(info?.color ?? .green)
         } else if let lastWorkout = exercise.lastWorkoutDate {
-            HStack(spacing: 0) {
-                Text("Last: ").font(lastDoneFontRegular)
-                Text(Formatters.formatExerciseLastDone(lastWorkout)).font(lastDoneFontMedium)
-            }
-            .foregroundStyle(info?.color ?? themeManager.effectiveTheme.mutedForeground)
+            // The grey "no callout" 1-13 days range renders one step
+            // smaller, so the orange / red staleness states stand out.
+            Text("Last logged \(Formatters.formatExerciseLastDone(lastWorkout))")
+                .font(info == nil ? lastDoneFontSmall : lastDoneFontRegular)
+                .foregroundStyle(info?.color ?? themeManager.effectiveTheme.mutedForeground)
         } else {
             // No history at all — flag in red so brand-new exercises stand
             // out alongside the stale-staleness reds elsewhere in the list.
@@ -122,11 +122,17 @@ struct ExerciseCard: View {
     }
 
     private var lastDoneFontRegular: Font {
-        themeManager.effectiveTheme.interFont(size: compact ? 13 : 14, weight: .regular)
+        themeManager.effectiveTheme.interFont(size: compact ? 12 : 13, weight: .regular)
+    }
+
+    /// One step smaller — used for the grey "1-13 days" range so the
+    /// orange / red staleness states stand out more.
+    private var lastDoneFontSmall: Font {
+        themeManager.effectiveTheme.interFont(size: compact ? 11 : 12, weight: .regular)
     }
 
     private var lastDoneFontMedium: Font {
-        themeManager.effectiveTheme.interFont(size: compact ? 13 : 14, weight: .medium)
+        themeManager.effectiveTheme.interFont(size: compact ? 12 : 13, weight: .medium)
     }
 
     // MARK: - Staleness

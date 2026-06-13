@@ -37,10 +37,11 @@ You are a **Senior iOS Engineer**, specializing in SwiftUI, SwiftData, and relat
 ## Core Instructions
 
 - Target iOS 26.0 or later
-- Swift 6.2 or later, using modern Swift concurrency
+- Project is currently on `SWIFT_VERSION = 6.0`; target Swift 6.2+ idioms when writing new code (the next bump to 6.2 + `SWIFT_STRICT_CONCURRENCY = complete` is on the backlog)
 - SwiftUI backed by `@Observable` classes for shared data
 - Do not introduce third-party frameworks without asking first
 - Avoid UIKit unless requested
+- SwiftData `@Model` instances and `ModelContext` must never cross actor boundaries — snapshot the values you need (String, Date, etc.) into Sendable locals before sending them into a Task
 
 ## Swift Instructions
 
@@ -922,8 +923,9 @@ mutedForeground // #717182 (light) / #a0a0a0 (dark)
 warmUpColor     // .orange
 dropSetColor    // .blue
 assistedColor   // pink (1.0, 0.2, 0.5)
-timedSetColor   // .gray
+timedSetColor   // fixed mid-dark grey (0.35, 0.35, 0.35) — bumped darker than system .gray for legibility on light backgrounds
 pauseAtTopColor // .indigo
+supersetColor   // .teal — added when the superset set type was introduced
 ```
 
 **Location:** `PlainWeights/Models/AppTheme.swift`
@@ -1198,7 +1200,7 @@ When creating UI elements that may be reused (buttons, inputs, etc.), create the
 **Layout & Structure:**
 - `FlowLayout.swift` - Wrapping horizontal layout (Layout protocol)
 - `ListRowCard.swift` - Unified card border shapes (TopOpenBorder, SidesOnlyBorder, BottomOpenBorder)
-- `AnimatedGradientBackground.swift` - Theme-aware background
+- `AnimatedGradientBackground.swift` - Theme-aware page background. Despite the name, it now renders the theme's flat `surfaceColor` rather than a gradient — the gradient was removed during a perf pass. Renaming pending.
 
 **Input & Controls:**
 - `StepperButton.swift` - +/- buttons for numeric inputs
@@ -1210,11 +1212,15 @@ When creating UI elements that may be reused (buttons, inputs, etc.), create the
 
 **Data Display:**
 - `TagPillView.swift` - Tag display pills (primary/secondary styling)
+- `TagPillsRow.swift` - Row of tag pills with optional search highlighting
 - `MetricCell.swift` - Metric label + value cell
 - `ComparisonMetricsCard.swift` - Side-by-side metrics comparison
 - `VolumeProgressBar.swift` - Volume progress visualization
 - `TagDistributionBar.swift` - Tag distribution display
 - `InlineNotesComponent.swift` - Inline notes display
+- `DeltaIndicatorsView.swift` - Green/amber/red W/R/V arrows used in History's Progress sub view
+- `ExerciseCard.swift` - Shared exercise card rendering for main list and inside expanded groups
+- `GroupExerciseRow.swift` - In-group exercise row (distinct from ExerciseCard so the green "logged" badge reflects group-tagged sets only)
 
 **Charts:**
 - `InlineProgressChart.swift` - Progress chart with dual Y-axes
@@ -1240,8 +1246,10 @@ The app uses SwiftData with automatic CloudKit sync. User data is backed up to t
 **Configuration:**
 - ModelContainer uses `cloudKitDatabase: .automatic`
 - iCloud capability with CloudKit enabled
-- Background Modes with Remote Notifications enabled
 - CloudKit container: `iCloud.com.stevolution.PlainWeights`
+- App Group: `group.com.stevolution.PlainWeights` — shared with the rest-timer Live Activity widget extension
+- Live Activities supported via `NSSupportsLiveActivities` in Info.plist
+- **No push notifications**: the `aps-environment` entitlement and `UIBackgroundModes: remote-notification` were removed before release — the rest-timer Live Activity uses ActivityKit's local timeline, not APNs-driven updates
 
 **Model Requirements for CloudKit:**
 - All properties must have default values OR be optional
@@ -1250,9 +1258,10 @@ The app uses SwiftData with automatic CloudKit sync. User data is backed up to t
 - Delete rules cannot be `.deny`
 
 **Key Files:**
-- `PlainWeightsApp.swift` - ModelContainer with CloudKit config
+- `PlainWeightsApp.swift` - ModelContainer with CloudKit config (schema = `[Exercise, ExerciseSet, ExerciseGroup]`)
 - `Exercise.swift` - Model with CloudKit-compatible defaults
-- `ExerciseSet.swift` - Model with CloudKit-compatible defaults
+- `ExerciseSet.swift` - Model with CloudKit-compatible defaults (includes `sourceGroup`, `isSuperset`)
+- `ExerciseGroup.swift` - Model with CloudKit-compatible defaults (added 2026-05; needs Production schema deploy before App Store submission)
 
 **Testing CloudKit:**
 1. Must test on real device (Simulator is unreliable)
@@ -1269,6 +1278,10 @@ The app uses SwiftData with automatic CloudKit sync. User data is backed up to t
 - If a field needs changing, add a new field and deprecate the old one with a comment
 - Any model changes that add new properties will auto-deploy to Development on first run
 - New properties must be re-deployed to Production via CloudKit Dashboard before App Store submission
+
+**Outstanding before next App Store submission:**
+- `CD_ExerciseGroup` (added May 2026) and the `sourceGroup` field on `CD_ExerciseSet` need deploying to Production — they exist in Development from the first device launch but have not yet been pushed. Until that's done, App Store users won't get groups synced to iCloud.
+- `isSuperset` on `CD_ExerciseSet` (added later) needs the same Production deploy.
 
 **Schema Changes After Release — "Add-Only, No-Delete, No-Change":**
 - ✅ Can add new properties (must have default values)
@@ -1301,11 +1314,13 @@ The same exercise can belong to several groups. If we only tracked per-exercise 
 1. `doneExerciseIDsToday` — Set of exercise IDs with at least one set today whose `sourceGroup == this group`.
 2. `lastLoggedDate()` — most recent timestamp across `group.groupSets` (any historical activity, not just full completion).
 
-Resulting states:
-- **green ✓ "Logged today"** — every member exercise has a today's set tagged to this group.
-- **orange → "X/Y logged today"** — partial coverage today.
-- **red ⊘ "Nothing logged yet"** — never any group-tagged activity.
-- **red ⊘ "Nothing logged today" + grey "Last logged X days ago"** — has history but nothing today.
+Resulting states (icons are `checkmark.circle.fill`, `arrow.right.circle.fill`, `xmark.circle.fill`):
+- **green ✓ "N/N logged today"** — every member exercise has a today's set tagged to this group.
+- **orange → "X/N logged today"** — partial coverage today.
+- **red ✗ "Nothing logged yet"** — never any group-tagged activity (no secondary line).
+- **red ✗ "Nothing logged today" + muted "Last logged X days ago"** — has history but nothing today.
+
+The exercise count is rendered in a fixed-width column (`countColumnWidth = 90`) before the icon so the status text lines up across cards regardless of count, with `"X exercises"` in `interFont(12, .medium)` and `mutedForeground` colour. Every state shows the muted "Last logged …" secondary line when there's any history, including the completed-today state.
 
 **In-group exercise rows use a separate component:**
 

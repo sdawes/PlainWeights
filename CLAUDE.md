@@ -1249,7 +1249,46 @@ The app uses SwiftData with automatic CloudKit sync. User data is backed up to t
 - CloudKit container: `iCloud.com.stevolution.PlainWeights`
 - App Group: `group.com.stevolution.PlainWeights` — shared with the rest-timer Live Activity widget extension
 - Live Activities supported via `NSSupportsLiveActivities` in Info.plist
-- **No push notifications**: the `aps-environment` entitlement and `UIBackgroundModes: remote-notification` were removed before release — the rest-timer Live Activity uses ActivityKit's local timeline, not APNs-driven updates
+- **Push Notifications capability and `UIBackgroundModes: remote-notification` are REQUIRED for CloudKit sync.** SwiftData's CloudKit mirroring uses silent push internally to detect remote changes and to schedule background export tasks. Removing either of them silently breaks sync: writes stop reaching iCloud and fresh installs never pull data back down. Do not strip these as "unused" — they look unused (no APNs code in the app) but CloudKit needs them.
+- The `aps-environment` value in `PlainWeights.entitlements` is `development` for everyday dev work, and must be swapped to `production` before each App Store archive — see Pre-Release Checklist.
+
+### Release Configuration Guard — `verify-release-config.sh`
+
+A defence-in-depth Build Phase script that runs on every build of the main `PlainWeights` target and fails the build with a red error if any CloudKit-required configuration is missing or mismatched. Exists specifically because the project was previously rolled back from an App Store release after these entitlements were accidentally stripped during a "release review tidy-up", silently breaking CloudKit sync. The same mistake — or its equivalents — cannot pass an `xcodebuild` again.
+
+**Location:** `Scripts/verify-release-config.sh`
+
+**Wired up as:** Xcode → PlainWeights target → Build Phases → Run Script phase named **"Verify CloudKit Release Config"**. The Shell field calls `${SRCROOT}/Scripts/verify-release-config.sh`. The phase has **"Based on dependency analysis" unchecked** so it runs on every build (the whole point), and is dragged up to run early so it fails fast.
+
+**Sandboxing:** The `User Script Sandboxing` build setting on the main target must be **No** for this script to read its own file (Xcode 14+ defaults this to `Yes` for new projects). The setting is already configured correctly in the project file — do not flip it back to `Yes` without rewiring the script to declare itself as an input file.
+
+**What it checks:**
+
+Entitlements & Info.plist:
+- `aps-environment` key present in `PlainWeights.entitlements`
+- iCloud container ID is `iCloud.com.stevolution.PlainWeights`
+- CloudKit is declared in `icloud-services`
+- Main app's App Group is `group.com.stevolution.PlainWeights`
+- Widget extension's App Group matches (and is not double-dotted — see the typo incident)
+- `UIBackgroundModes` contains `remote-notification` in Info.plist
+- `NSSupportsLiveActivities` is `true`
+
+Swift code (grep-based, fragile but covers the obvious mistakes):
+- `PlainWeightsApp.swift` sets `cloudKitDatabase: .automatic` on its `ModelConfiguration`
+- `isStoredInMemoryOnly: false` is present (must be explicit, never `true`)
+- `Exercise`, `ExerciseSet`, and `ExerciseGroup` are all referenced in the `Schema` array
+- No `@Attribute(.unique)` anywhere in `Models/` (CloudKit forbids)
+- No `deleteRule: .deny` anywhere in `Models/` (CloudKit forbids)
+
+Build configuration:
+- Release builds with `aps-environment = development` fail (the release-rollback mistake)
+- Debug builds with `aps-environment = production` fail (the forgot-to-swap-back mirror mistake)
+
+**What it deliberately does NOT check** (still on the developer / checklist to verify):
+- That `CD_ExerciseGroup`, `sourceGroup`, and `isSuperset` have been deployed to the CloudKit Production environment (no programmatic way to ask Apple's servers).
+- Subtle CloudKit-incompatible model shape changes such as making a previously-optional relationship non-optional (grep can't reliably catch this).
+
+**Maintenance rule:** if the bundle identifier, App Group identifier, CloudKit container name, or model class names change, the corresponding string literals in this script must change with them. The script is the source of truth for "what does a healthy CloudKit-syncing PlainWeights build look like"; when those expectations evolve, the script evolves with them.
 
 **Model Requirements for CloudKit:**
 - All properties must have default values OR be optional
@@ -1368,6 +1407,18 @@ The app does **not** use AI features of any kind. Earlier versions briefly inclu
 ## Pre-Release Checklist
 
 **Before submitting to App Store, complete these steps:**
+
+### Swap aps-environment to production
+1. Open `PlainWeights/PlainWeights.entitlements`
+2. Find the `aps-environment` row (key) — its value will be `development`
+3. Change the value to `production`
+4. Save
+5. Archive (Product → Archive)
+6. **Immediately after the archive completes**, change `production` back to `development` and save, so everyday dev builds and TestFlight-from-Xcode flows keep working without push errors.
+
+If you forget step 1 and archive with `development`: App Store users won't receive CloudKit's silent push, which silently breaks sync (writes stop reaching iCloud, fresh installs see "Add your first exercise" forever). The archive will still upload and pass review — this is the kind of failure that only surfaces in production reviews from frustrated users. Don't skip this step.
+
+The `Scripts/verify-release-config.sh` Build Phase guard will catch step 1 if you forget — it fails any Release build that still has `aps-environment = development`. It will also catch step 6 by failing any Debug build that has `aps-environment = production`. Treat it as a safety net, not a substitute for following the swap procedure properly.
 
 ### CloudKit Schema Deployment
 1. Go to [CloudKit Dashboard](https://icloud.developer.apple.com/dashboard)

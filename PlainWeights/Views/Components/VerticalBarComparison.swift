@@ -205,19 +205,40 @@ struct VerticalBarComparison: View {
 
     // MARK: - Footer Hint Row
 
-    /// Footer row showing volume progress hint (e.g. "12 reps to beat total volume")
+    /// Footer row showing volume progress hint (e.g. "12 reps to beat total volume").
+    /// Only the leading count + "reps" portion is rendered semibold so the value
+    /// stands out from the rest of the sentence (e.g. **"12 reps"** to beat total
+    /// volume). For the "matched" copy that has no leading count, the whole string
+    /// is rendered in the regular weight.
     private var footerHintRow: some View {
         Group {
             if let hintColumn = columns.first(where: { $0.volumeHint != nil }) {
-                Text(hintColumn.volumeHint ?? "")
-                    .font(themeManager.effectiveTheme.interFont(size: 17, weight: .semibold))
-                    .foregroundStyle(hintColumn.barColor)
+                styledHint(hintColumn.volumeHint ?? "", color: hintColumn.barColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
         }
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
+    /// Split the hint at the trailing space after "X reps" (or "X rep") and render
+    /// the count portion semibold + the rest regular. Strings without a leading
+    /// count fall through as a plain regular-weight Text.
+    @ViewBuilder
+    private func styledHint(_ hint: String, color: Color) -> some View {
+        let regular = themeManager.effectiveTheme.interFont(size: 17, weight: .regular)
+        let semibold = themeManager.effectiveTheme.interFont(size: 17, weight: .semibold)
+        if let match = hint.range(of: #"^\d+ (rep|reps) "#, options: .regularExpression) {
+            let leading = String(hint[match])
+            let trailing = String(hint[match.upperBound...])
+            (Text(leading).font(semibold) + Text(trailing).font(regular))
+                .foregroundStyle(color)
+        } else {
+            Text(hint)
+                .font(regular)
+                .foregroundStyle(color)
+        }
     }
 
     // MARK: - Helpers

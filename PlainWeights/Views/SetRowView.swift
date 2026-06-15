@@ -26,9 +26,8 @@ struct SetRowView: View {
     let isFirstInCard: Bool  // True for first set after header (no top divider needed)
     let isLastSetInDay: Bool  // True for last set in a day (shows 3:00 if no restSeconds)
     let isToday: Bool  // True for today's sets - rest time keeps timer colour
-    let pbFlashOpacity: Double  // Drives the yellow PB-flash border
 
-    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true, isLastSetInDay: Bool = false, isToday: Bool = false, pbFlashOpacity: Double = 0) {
+    init(set: ExerciseSet, setNumber: Int, isFirst: Bool = false, isLast: Bool = false, onTap: @escaping () -> Void, onDelete: @escaping () -> Void, allSets: [ExerciseSet]? = nil, showTimer: Bool = false, cardPosition: ListRowCardPosition? = nil, isFirstInCard: Bool = true, isLastSetInDay: Bool = false, isToday: Bool = false) {
         self.set = set
         self.setNumber = setNumber
         self.isFirst = isFirst
@@ -41,7 +40,6 @@ struct SetRowView: View {
         self.isFirstInCard = isFirstInCard
         self.isLastSetInDay = isLastSetInDay
         self.isToday = isToday
-        self.pbFlashOpacity = pbFlashOpacity
     }
 
     var body: some View {
@@ -67,7 +65,7 @@ struct SetRowView: View {
                     // Col 2: PB indicator or spacer
                     if set.isPB {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 13))
+                            .font(.system(size: 14))
                             .foregroundStyle(themeManager.effectiveTheme.pbColor)
                             .frame(width: 24, alignment: setNumber >= 10 ? .center : .leading)
                             .offset(x: setNumber >= 10 ? 0 : -4)
@@ -104,7 +102,6 @@ struct SetRowView: View {
         }
         .background(cardPosition != nil ? themeManager.effectiveTheme.cardBackgroundColor : Color.clear)
         .clipShape(cardPosition != nil ? RoundedCorner(radius: 12, corners: cardCorners) : RoundedCorner(radius: 0, corners: []))
-        .overlay { cardBorderOverlay }
         .listRowBackground(rowBackground)
         .listRowInsets(cardPosition != nil ? EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16) : EdgeInsets())
         .listRowSeparator(cardPosition != nil ? .hidden : (isFirst ? .hidden : .visible), edges: .top)
@@ -142,23 +139,6 @@ struct SetRowView: View {
         }
     }
 
-    /// Border overlay based on card position. Normally borderless; animated yellow/orange
-    /// gradient stroke appears briefly when `pbFlashOpacity > 0` to highlight a new PB.
-    @ViewBuilder
-    private var cardBorderOverlay: some View {
-        if let position = cardPosition {
-            switch position {
-            case .top:
-                PBFlashBorder(shape: TopOpenBorder(radius: 12), opacity: pbFlashOpacity)
-            case .middle:
-                PBFlashBorder(shape: SidesOnlyBorder(), opacity: pbFlashOpacity)
-            case .bottom:
-                PBFlashBorder(shape: BottomOpenBorder(radius: 12), opacity: pbFlashOpacity)
-            case .single:
-                PBFlashBorder(shape: RoundedRectangle(cornerRadius: 12), opacity: pbFlashOpacity)
-            }
-        }
-    }
 
     /// Effective tint color for accent bar/background (not PBs — they use star + number colour only)
     private var effectiveTintColor: Color? {
@@ -301,15 +281,11 @@ struct SetRowView: View {
 
     @ViewBuilder
     private func staticRestTimeView(seconds: Int) -> some View {
-        let color = isToday ? restTimeColor(for: seconds) : themeManager.effectiveTheme.tertiaryText
-        HStack(spacing: 4) {
-            Image(systemName: "zzz")
-                .font(.caption)
-                .foregroundStyle(color)
-            Text(Formatters.formatDuration(Double(seconds)))
-                .font(themeManager.effectiveTheme.dataFont(size: 12))
-                .foregroundStyle(color)
-        }
+        // Captured / historic / expired rest times all read the same: grey
+        // text only, no icon. The colour signalling lives on the live timer.
+        Text(Formatters.formatDuration(Double(seconds)))
+            .font(themeManager.effectiveTheme.dataFont(size: 12))
+            .foregroundStyle(themeManager.effectiveTheme.tertiaryText)
     }
 
     @ViewBuilder
@@ -318,24 +294,21 @@ struct SetRowView: View {
             let elapsed = context.date.timeIntervalSince(set.timestamp)
 
             if elapsed >= 180 {
-                HStack(spacing: 4) {
-                    Image(systemName: "timer")
-                        .font(.caption)
-                        .foregroundStyle(restTimeColor(for: 180))
-                    Text("3:00")
-                        .font(themeManager.effectiveTheme.dataFont(size: 12))
-                        .foregroundStyle(restTimeColor(for: 180))
-                }
-                .onAppear {
-                    captureRestTimeExpiry()
-                }
+                // Crossed the 3-minute mark — fall through to the same
+                // grey "captured" appearance the row will keep using once
+                // captureRestTimeExpiry() persists the value.
+                staticRestTimeView(seconds: 180)
+                    .onAppear {
+                        captureRestTimeExpiry()
+                    }
             } else {
                 HStack(spacing: 4) {
                     Image(systemName: "timer")
                         .font(.caption)
+                        .bold()
                         .foregroundStyle(restTimeColor(for: Int(elapsed)))
                     Text(Formatters.formatDuration(elapsed))
-                        .font(themeManager.effectiveTheme.dataFont(size: 12))
+                        .font(themeManager.effectiveTheme.dataFont(size: 12, weight: .bold))
                         .foregroundStyle(restTimeColor(for: Int(elapsed)))
                 }
             }

@@ -16,7 +16,6 @@ struct TodaySessionCard: View {
     let totalReps: Int
     let setCount: Int
     let hasSetsBelow: Bool  // If true, only top corners rounded; if false, all corners
-    var pbFlashOpacity: Double = 0  // Drives the yellow PB-flash border
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -83,12 +82,5 @@ struct TodaySessionCard: View {
         }
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedCorner(radius: 12, corners: hasSetsBelow ? [.topLeft, .topRight] : .allCorners))
-        .overlay {
-            if hasSetsBelow {
-                PBFlashBorder(shape: TopOpenBorder(radius: 12), opacity: pbFlashOpacity)
-            } else {
-                PBFlashBorder(shape: RoundedRectangle(cornerRadius: 12), opacity: pbFlashOpacity)
-            }
-        }
     }
 }

@@ -222,22 +222,32 @@ struct VerticalBarComparison: View {
         .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
-    /// Split the hint at the trailing space after "X reps" (or "X rep") and render
-    /// the count portion semibold + the rest regular. Strings without a leading
-    /// count fall through as a plain regular-weight Text.
-    @ViewBuilder
+    /// Render the hint with its leading count portion ("X reps ") rendered
+    /// semibold and the rest of the sentence rendered regular. Replaces the
+    /// previous `Text + Text` concatenation which was deprecated in iOS 26.
     private func styledHint(_ hint: String, color: Color) -> some View {
+        Text(attributedHint(for: hint))
+            .foregroundStyle(color)
+    }
+
+    /// Build the per-span AttributedString. Kept separate from the ViewBuilder
+    /// `styledHint` because plain `var` mutations like `attr.font = ...` aren't
+    /// allowed inside a `@ViewBuilder` body.
+    private func attributedHint(for hint: String) -> AttributedString {
         let regular = themeManager.effectiveTheme.interFont(size: 17, weight: .regular)
         let semibold = themeManager.effectiveTheme.interFont(size: 17, weight: .semibold)
         if let match = hint.range(of: #"^\d+ (rep|reps) "#, options: .regularExpression) {
             let leading = String(hint[match])
             let trailing = String(hint[match.upperBound...])
-            (Text(leading).font(semibold) + Text(trailing).font(regular))
-                .foregroundStyle(color)
+            var leadingAttr = AttributedString(leading)
+            leadingAttr.font = semibold
+            var trailingAttr = AttributedString(trailing)
+            trailingAttr.font = regular
+            return leadingAttr + trailingAttr
         } else {
-            Text(hint)
-                .font(regular)
-                .foregroundStyle(color)
+            var attr = AttributedString(hint)
+            attr.font = regular
+            return attr
         }
     }
 

@@ -49,28 +49,20 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     // Appearance section
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Appearance")
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                            .padding(.top, 24)
-
+                        sectionLabel("Appearance")
+                            .padding(.top, 12)
                         themePickerRow()
                     }
 
                     // Display section
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Display")
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-
+                        sectionLabel("Display")
                         weightUnitPickerRow()
                     }
 
                     // Charts section
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Charts")
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        sectionLabel("Charts")
 
                         settingsToggleRow(
                             icon: "chart.line.uptrend.xyaxis",
@@ -116,9 +108,7 @@ struct SettingsView: View {
 
                     // Data section
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Data")
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        sectionLabel("Data")
 
                         exportDataRow()
 
@@ -144,9 +134,7 @@ struct SettingsView: View {
                     #if DEBUG
                     // Developer Tools section
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Developer Tools")
-                            .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
-                            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        sectionLabel("Developer Tools")
 
                         settingsRow(
                             icon: "terminal",
@@ -186,7 +174,7 @@ struct SettingsView: View {
             .scrollIndicators(.hidden)
         }
         .padding(24)
-        .background(themeManager.effectiveTheme.background)
+        .background(themeManager.effectiveTheme.surfaceColor)
         .sheet(isPresented: $showingHelp) {
             HelpView()
                 .preferredColorScheme(themeManager.currentTheme.colorScheme)
@@ -227,6 +215,18 @@ struct SettingsView: View {
 
     // MARK: - Settings Row Components
 
+    /// Section label that sits above each group of cards. Mirrors the small
+    /// uppercase + tracked label style used elsewhere in the redesigned views.
+    @ViewBuilder
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            .textCase(.uppercase)
+            .tracking(0.8)
+            .padding(.leading, 4)
+    }
+
     @ViewBuilder
     private func themePickerRow() -> some View {
         HStack(spacing: 12) {
@@ -257,10 +257,6 @@ struct SettingsView: View {
         .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        )
     }
 
     private var themeIcon: String {
@@ -324,10 +320,6 @@ struct SettingsView: View {
             .padding(16)
             .background(tinted ? themeManager.effectiveTheme.primary.opacity(0.08) : themeManager.effectiveTheme.cardBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-            )
         }
         .buttonStyle(.plain)
     }
@@ -368,10 +360,6 @@ struct SettingsView: View {
         .padding(16)
         .background(themeManager.effectiveTheme.cardBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-        )
     }
 
     @ViewBuilder
@@ -401,10 +389,6 @@ struct SettingsView: View {
             .padding(16)
             .background(themeManager.effectiveTheme.cardBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(themeManager.effectiveTheme.borderColor, lineWidth: 1)
-            )
         }
         .buttonStyle(.plain)
         .disabled(isExporting)

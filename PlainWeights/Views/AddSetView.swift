@@ -52,8 +52,11 @@ struct SetTypePillSelector: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Set Type")
-                .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
                 .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                .textCase(.uppercase)
+                .tracking(0.8)
+                .padding(.leading, 4)
 
             // Grid keeps the rep-based modifiers in two balanced columns and
             // gives Timed its own full-width row — it's a different category
@@ -105,13 +108,6 @@ struct SetTypePillSelector: View {
             .background(isSelected ? type.accentColor : themeManager.effectiveTheme.cardBackgroundColor)
             .foregroundStyle(isSelected ? selectedForeground : themeManager.effectiveTheme.primaryText)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(
-                        isSelected ? Color.clear : themeManager.effectiveTheme.borderColor,
-                        lineWidth: 1
-                    )
-            )
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
@@ -202,8 +198,11 @@ struct AddSetView: View {
                 // Weight input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Weight (\(themeManager.weightUnit.displayName))")
-                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                        .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .textCase(.uppercase)
+                        .tracking(0.8)
+                        .padding(.leading, 4)
 
                     TextField("0", text: $weightText)
                         .font(themeManager.effectiveTheme.dataFont(size: 20))
@@ -214,13 +213,6 @@ struct AddSetView: View {
                         .frame(height: 56)
                         .background(themeManager.effectiveTheme.cardBackgroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(
-                                    focusedField == .weight ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
-                                    lineWidth: focusedField == .weight ? 2 : 1
-                                )
-                        )
                         .onChange(of: weightText) { _, newValue in
                             // Allow only digits and one decimal point, max 6 chars (e.g., "100.25")
                             let filtered = newValue.filter { $0.isNumber || $0 == "." }
@@ -238,8 +230,11 @@ struct AddSetView: View {
                 // Reps input
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Reps")
-                        .font(themeManager.effectiveTheme.interFont(size: 15, weight: .medium))
+                        .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
                         .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .textCase(.uppercase)
+                        .tracking(0.8)
+                        .padding(.leading, 4)
 
                     TextField("0", text: $repsText)
                         .font(themeManager.effectiveTheme.dataFont(size: 20))
@@ -250,13 +245,6 @@ struct AddSetView: View {
                         .frame(height: 56)
                         .background(themeManager.effectiveTheme.cardBackgroundColor)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(
-                                    focusedField == .reps ? themeManager.effectiveTheme.primaryText : themeManager.effectiveTheme.borderColor,
-                                    lineWidth: focusedField == .reps ? 2 : 1
-                                )
-                        )
                         .onChange(of: repsText) { _, newValue in
                             // Allow only digits, max 3 chars
                             let filtered = newValue.filter { $0.isNumber }
@@ -288,7 +276,7 @@ struct AddSetView: View {
             Spacer()
         }
         .padding(24)
-        .background(themeManager.effectiveTheme.background)
+        .background(themeManager.effectiveTheme.surfaceColor)
         .onAppear {
             // Convert initial weight from kg to display unit (only once)
             if !hasConvertedInitialWeight {

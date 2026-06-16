@@ -55,21 +55,22 @@ final class ThemeManager {
     }
 
     init() {
-        let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.system.rawValue
-        self.currentTheme = AppTheme(rawValue: savedTheme) ?? .system
+        // Theme - defaults to light on first install (was .system previously).
+        let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.light.rawValue
+        self.currentTheme = AppTheme(rawValue: savedTheme) ?? .light
 
         // Weight unit - defaults to kg
         let savedUnit = UserDefaults.standard.string(forKey: Self.weightUnitKey) ?? WeightUnit.kg.rawValue
         self.weightUnit = WeightUnit(rawValue: savedUnit) ?? .kg
 
-        // Chart visibility - defaults to true (visible)
-        self.chartVisibleByDefault = UserDefaults.standard.object(forKey: Self.chartVisibleKey) as? Bool ?? true
+        // Chart visibility - defaults to false (hidden until enabled in settings).
+        self.chartVisibleByDefault = UserDefaults.standard.object(forKey: Self.chartVisibleKey) as? Bool ?? false
 
         // Tag breakdown visibility - defaults to false (hidden until enabled in settings)
         self.tagBreakdownVisible = UserDefaults.standard.object(forKey: Self.tagBreakdownVisibleKey) as? Bool ?? false
 
-        // Trend line visibility - defaults to true (visible)
-        self.showTrendLineByDefault = UserDefaults.standard.object(forKey: Self.showTrendLineKey) as? Bool ?? true
+        // Trend line visibility - defaults to false (hidden until enabled in settings).
+        self.showTrendLineByDefault = UserDefaults.standard.object(forKey: Self.showTrendLineKey) as? Bool ?? false
     }
 
     // MARK: - Weight Conversion Helpers

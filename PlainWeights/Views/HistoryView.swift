@@ -100,7 +100,10 @@ struct HistoryView: View {
     @Query private var allSets: [ExerciseSet]
     @Binding var navigationPath: NavigationPath
     // Selected time period
-    @State private var selectedPeriod: HistoryTimePeriod = .lastSession
+    // Persisted via @AppStorage so the chosen time period survives History
+    // revisits and app launches (mirrors the sub-tab persistence below).
+    // Fresh installs fall back to .lastSession.
+    @AppStorage("historySelectedPeriod") private var selectedPeriod: HistoryTimePeriod = .lastSession
 
     // Cached display day - prevents expensive recomputation on every render
     @State private var cachedDisplayDay: ExerciseDataGrouper.WorkoutDay?

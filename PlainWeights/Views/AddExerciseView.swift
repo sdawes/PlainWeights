@@ -131,7 +131,7 @@ struct AddExerciseView: View {
 
                             InlineTagSection(
                                 title: "Primary Muscles",
-                                emptyHint: "tap to add primary muscles",
+                                emptyHint: "add tag, e.g. chest",
                                 tags: $tags,
                                 input: $tagInput,
                                 isFocused: $tagFieldFocused,
@@ -155,7 +155,7 @@ struct AddExerciseView: View {
 
                             InlineTagSection(
                                 title: "Secondary Muscles",
-                                emptyHint: "tap to add secondary muscles",
+                                emptyHint: "add tag, e.g. triceps",
                                 tags: $secondaryTags,
                                 input: $secondaryTagInput,
                                 isFocused: $secondaryTagFieldFocused,

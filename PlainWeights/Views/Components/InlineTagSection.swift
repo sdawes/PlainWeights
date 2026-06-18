@@ -61,8 +61,9 @@ struct InlineTagSection<Accessory: View>: View {
                     }
                 }
 
-                // Inline text field
-                TextField("", text: $input, prompt: Text("add tag…").foregroundStyle(themeManager.effectiveTheme.primary.opacity(0.18)))
+                // Inline text field — uses `emptyHint` as the placeholder so each
+                // caller can supply a context-specific example (e.g. "add tag, e.g. chest").
+                TextField("", text: $input, prompt: Text(emptyHint).foregroundStyle(themeManager.effectiveTheme.primary.opacity(0.18)))
                     .focused(isFocused)
                     .font(themeManager.effectiveTheme.interFont(size: 14))
                     .foregroundStyle(themeManager.effectiveTheme.primaryText)

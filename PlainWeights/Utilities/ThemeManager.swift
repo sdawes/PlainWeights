@@ -13,7 +13,6 @@ final class ThemeManager {
     private static let themeKey = "selectedTheme"
     private static let chartVisibleKey = "chartVisibleByDefault"
     private static let weightUnitKey = "weightUnit"
-    private static let tagBreakdownVisibleKey = "tagBreakdownVisible"
     private static let showTrendLineKey = "showTrendLineByDefault"
 
     var currentTheme: AppTheme {
@@ -42,12 +41,6 @@ final class ThemeManager {
         }
     }
 
-    var tagBreakdownVisible: Bool {
-        didSet {
-            UserDefaults.standard.set(tagBreakdownVisible, forKey: Self.tagBreakdownVisibleKey)
-        }
-    }
-
     var showTrendLineByDefault: Bool {
         didSet {
             UserDefaults.standard.set(showTrendLineByDefault, forKey: Self.showTrendLineKey)
@@ -55,9 +48,9 @@ final class ThemeManager {
     }
 
     init() {
-        // Theme - defaults to light on first install (was .system previously).
-        let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.light.rawValue
-        self.currentTheme = AppTheme(rawValue: savedTheme) ?? .light
+        // Theme - defaults to .system on first install so it follows the device's light/dark setting.
+        let savedTheme = UserDefaults.standard.string(forKey: Self.themeKey) ?? AppTheme.system.rawValue
+        self.currentTheme = AppTheme(rawValue: savedTheme) ?? .system
 
         // Weight unit - defaults to kg
         let savedUnit = UserDefaults.standard.string(forKey: Self.weightUnitKey) ?? WeightUnit.kg.rawValue
@@ -65,9 +58,6 @@ final class ThemeManager {
 
         // Chart visibility - defaults to false (hidden until enabled in settings).
         self.chartVisibleByDefault = UserDefaults.standard.object(forKey: Self.chartVisibleKey) as? Bool ?? false
-
-        // Tag breakdown visibility - defaults to false (hidden until enabled in settings)
-        self.tagBreakdownVisible = UserDefaults.standard.object(forKey: Self.tagBreakdownVisibleKey) as? Bool ?? false
 
         // Trend line visibility - defaults to false (hidden until enabled in settings).
         self.showTrendLineByDefault = UserDefaults.standard.object(forKey: Self.showTrendLineKey) as? Bool ?? false

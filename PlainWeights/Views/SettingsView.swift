@@ -83,16 +83,6 @@ struct SettingsView: View {
                                 set: { themeManager.showTrendLineByDefault = $0 }
                             )
                         )
-
-                        settingsToggleRow(
-                            icon: "figure.strengthtraining.traditional",
-                            title: "Muscle breakdown",
-                            subtitle: "by default",
-                            isOn: Binding(
-                                get: { themeManager.tagBreakdownVisible },
-                                set: { themeManager.tagBreakdownVisible = $0 }
-                            )
-                        )
                     }
 
                     // Help section
@@ -318,7 +308,7 @@ struct SettingsView: View {
             }
             .frame(height: 31)
             .padding(16)
-            .background(tinted ? themeManager.effectiveTheme.primary.opacity(0.08) : themeManager.effectiveTheme.cardBackgroundColor)
+            .background(tinted ? Color.blue.opacity(0.10) : themeManager.effectiveTheme.cardBackgroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)

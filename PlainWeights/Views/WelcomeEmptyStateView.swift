@@ -54,7 +54,7 @@ struct WelcomeEmptyStateView: View {
 
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: "icloud.and.arrow.down")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 20))
                         .foregroundStyle(.blue)
                     Text("Returning user? Data may take a few minutes to sync from iCloud.")
                         .font(themeManager.effectiveTheme.interFont(size: 16, weight: .regular))

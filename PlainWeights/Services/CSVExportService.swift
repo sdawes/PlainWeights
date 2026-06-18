@@ -106,7 +106,7 @@ enum CSVExportService {
             }
         }
 
-        let fileName = "PlainWeights-Export-\(dateFormatter.string(from: Date()))-\(range.fileSuffix).csv"
+        let fileName = "Plainweights-Export-\(dateFormatter.string(from: Date()))-\(range.fileSuffix).csv"
         let fileURL = FileManager.default.temporaryDirectory.appending(path: fileName)
         try csv.write(to: fileURL, atomically: true, encoding: .utf8)
 

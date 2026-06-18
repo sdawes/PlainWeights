@@ -19,6 +19,8 @@ struct InlineTagSection<Accessory: View>: View {
     let isSecondary: Bool
     var suggestions: [String] = []
     var onSubmit: () -> Void = {}
+    /// When false, callers render the label outside the card themselves.
+    var showsTitle: Bool = true
     let titleAccessory: Accessory
 
     @State private var cachedFilteredSuggestions: [String] = []
@@ -35,19 +37,21 @@ struct InlineTagSection<Accessory: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Section label
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(dotColor)
-                    .frame(width: 6, height: 6)
-                Text(title)
-                    .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
-                    .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                    .textCase(.uppercase)
-                    .tracking(0.8)
-                titleAccessory
+            // Section label (suppressed when caller renders it externally)
+            if showsTitle {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(dotColor)
+                        .frame(width: 6, height: 6)
+                    Text(title)
+                        .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                        .textCase(.uppercase)
+                        .tracking(0.8)
+                    titleAccessory
+                }
+                .padding(.bottom, 8)
             }
-            .padding(.bottom, 8)
 
             // Tags + inline input (always show the text field so it's tappable)
             FlowLayout(spacing: 6) {
@@ -182,7 +186,8 @@ struct InlineTagSection<Accessory: View>: View {
 extension InlineTagSection where Accessory == EmptyView {
     init(title: String, emptyHint: String, tags: Binding<[String]>, input: Binding<String>,
          isFocused: FocusState<Bool>.Binding, isSecondary: Bool,
-         suggestions: [String] = [], onSubmit: @escaping () -> Void = {}) {
+         suggestions: [String] = [], onSubmit: @escaping () -> Void = {},
+         showsTitle: Bool = true) {
         self.title = title
         self.emptyHint = emptyHint
         self._tags = tags
@@ -191,6 +196,7 @@ extension InlineTagSection where Accessory == EmptyView {
         self.isSecondary = isSecondary
         self.suggestions = suggestions
         self.onSubmit = onSubmit
+        self.showsTitle = showsTitle
         self.titleAccessory = EmptyView()
     }
 }
@@ -200,6 +206,7 @@ extension InlineTagSection {
     init(title: String, emptyHint: String, tags: Binding<[String]>, input: Binding<String>,
          isFocused: FocusState<Bool>.Binding, isSecondary: Bool,
          suggestions: [String] = [], onSubmit: @escaping () -> Void = {},
+         showsTitle: Bool = true,
          @ViewBuilder titleAccessory: () -> Accessory) {
         self.title = title
         self.emptyHint = emptyHint
@@ -209,6 +216,7 @@ extension InlineTagSection {
         self.isSecondary = isSecondary
         self.suggestions = suggestions
         self.onSubmit = onSubmit
+        self.showsTitle = showsTitle
         self.titleAccessory = titleAccessory()
     }
 }

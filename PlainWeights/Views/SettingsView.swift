@@ -160,7 +160,7 @@ struct SettingsView: View {
 
                     // Footer
                     VStack(spacing: 4) {
-                        Text("PlainWeights v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                        Text("Plainweights v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                             .font(themeManager.effectiveTheme.interFont(size: 14, weight: .medium))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
                         Text("A simple workout tracking tool")

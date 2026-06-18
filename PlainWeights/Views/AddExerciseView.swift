@@ -83,19 +83,19 @@ struct AddExerciseView: View {
 
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
-                        // Name card
+                    VStack(alignment: .leading, spacing: 18) {
+                        // Name — label on grey surface, input alone in card
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Name")
-                                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
-                                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                                .textCase(.uppercase)
-                                .tracking(0.8)
+                            sectionLabel("Name")
 
                             TextField("", text: $name, prompt: Text("e.g. Romanian Deadlift").foregroundStyle(themeManager.effectiveTheme.primary.opacity(0.18)))
                                 .focused($nameFieldFocused)
                                 .font(themeManager.effectiveTheme.dataFont(size: 20))
                                 .foregroundStyle(themeManager.effectiveTheme.primaryText)
+                                .padding(16)
+                                .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+                                .background(themeManager.effectiveTheme.cardBackgroundColor)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .onSubmit { tagFieldFocused = true }
                                 .onChange(of: name) { _, newValue in
                                     if newValue.count > 50 { name = String(newValue.prefix(50)) }
@@ -106,24 +106,16 @@ struct AddExerciseView: View {
                                 Text("An exercise with this name already exists")
                                     .font(themeManager.effectiveTheme.captionFont)
                                     .foregroundStyle(.red)
+                                    .padding(.leading, 4)
                             }
                         }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(themeManager.effectiveTheme.cardBackgroundColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        // Primary muscles card
-                        InlineTagSection(
-                            title: "Primary Muscles",
-                            emptyHint: "tap to add primary muscles",
-                            tags: $tags,
-                            input: $tagInput,
-                            isFocused: $tagFieldFocused,
-                            isSecondary: false,
-                            suggestions: tagSuggestions,
-                            onSubmit: { tagFieldFocused = true },
-                            titleAccessory: {
+                        // Primary muscles — label outside (dot + title + info), tag input in card
+                        VStack(alignment: .leading, spacing: 8) {
+                            tagSectionLabel(
+                                title: "Primary Muscles",
+                                dotColor: themeManager.effectiveTheme.primaryTagText
+                            ) {
                                 Button {
                                     showingTagInfo = true
                                 } label: {
@@ -136,28 +128,48 @@ struct AddExerciseView: View {
                                     tagInfoPopover
                                 }
                             }
-                        )
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(themeManager.effectiveTheme.cardBackgroundColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        // Secondary muscles card
-                        InlineTagSection(
-                            title: "Secondary Muscles",
-                            emptyHint: "tap to add secondary muscles",
-                            tags: $secondaryTags,
-                            input: $secondaryTagInput,
-                            isFocused: $secondaryTagFieldFocused,
-                            isSecondary: true,
-                            suggestions: tagSuggestions,
-                            onSubmit: { secondaryTagFieldFocused = true }
-                        )
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(themeManager.effectiveTheme.cardBackgroundColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .id("secondaryTags")
+                            InlineTagSection(
+                                title: "Primary Muscles",
+                                emptyHint: "tap to add primary muscles",
+                                tags: $tags,
+                                input: $tagInput,
+                                isFocused: $tagFieldFocused,
+                                isSecondary: false,
+                                suggestions: tagSuggestions,
+                                onSubmit: { tagFieldFocused = true },
+                                showsTitle: false
+                            )
+                            .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(themeManager.effectiveTheme.cardBackgroundColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+
+                        // Secondary muscles — label outside (dot + title), tag input in card
+                        VStack(alignment: .leading, spacing: 8) {
+                            tagSectionLabel(
+                                title: "Secondary Muscles",
+                                dotColor: themeManager.effectiveTheme.secondaryTagText
+                            )
+
+                            InlineTagSection(
+                                title: "Secondary Muscles",
+                                emptyHint: "tap to add secondary muscles",
+                                tags: $secondaryTags,
+                                input: $secondaryTagInput,
+                                isFocused: $secondaryTagFieldFocused,
+                                isSecondary: true,
+                                suggestions: tagSuggestions,
+                                onSubmit: { secondaryTagFieldFocused = true },
+                                showsTitle: false
+                            )
+                            .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(themeManager.effectiveTheme.cardBackgroundColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .id("secondaryTags")
+                        }
                     }
                 }
                 .scrollDismissesKeyboard(.immediately)
@@ -180,6 +192,40 @@ struct AddExerciseView: View {
             nameFieldFocused = true
             tagSuggestions = ExerciseService.allUniqueTags(context: modelContext)
         }
+    }
+
+    // MARK: - Section Label Helpers
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+            .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+            .textCase(.uppercase)
+            .tracking(0.8)
+            .padding(.leading, 4)
+    }
+
+    private func tagSectionLabel(title: String, dotColor: Color) -> some View {
+        tagSectionLabel(title: title, dotColor: dotColor) { EmptyView() }
+    }
+
+    private func tagSectionLabel<Accessory: View>(
+        title: String,
+        dotColor: Color,
+        @ViewBuilder accessory: () -> Accessory
+    ) -> some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(dotColor)
+                .frame(width: 6, height: 6)
+            Text(title)
+                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+                .textCase(.uppercase)
+                .tracking(0.8)
+            accessory()
+        }
+        .padding(.leading, 4)
     }
 
     // MARK: - Actions

@@ -141,12 +141,12 @@ enum ExerciseService {
     /// Suggestion-only — these are NOT written to any Exercise, so they don't affect
     /// analytics, tag distribution, or search.
     static let defaultMuscleTags: [String] = [
-        "chest", "upper chest", "lower chest", "inner chest",
-        "delts", "front delts", "mid delts", "rear delts",
-        "back", "lats", "upper back", "traps", "lower back",
-        "biceps", "triceps", "forearms",
+        "chest", "pecs", "upper chest", "lower chest", "inner chest",
+        "shoulders", "delts", "front delts", "mid delts", "side delts", "rear delts", "rotator cuff",
+        "back", "lats", "upper back", "traps", "upper traps", "mid traps", "lower traps", "rhomboids", "lower back",
+        "biceps", "triceps", "forearms", "grip",
         "core", "abs", "upper abs", "lower abs", "obliques",
-        "quads", "hamstrings", "glutes", "calves", "hip flexors", "adductors", "neck"
+        "quads", "hamstrings", "glutes", "calves", "hip flexors", "adductors", "abductors", "inner thigh", "outer thigh", "neck"
     ]
 
     /// Fetch all unique tags for autocomplete suggestions, sorted alphabetically.

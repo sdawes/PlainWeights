@@ -53,9 +53,15 @@ struct ExerciseGroupsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
 
-    /// Most recently created groups first.
+    /// Raw fetch order is unimportant — we re-sort by session status
+    /// (in-session → completed today → idle) into `sortedGroups`.
     @Query(sort: \ExerciseGroup.createdDate, order: .reverse)
     private var groups: [ExerciseGroup]
+
+    /// Section-aware sorted list rendered by the ForEach. Rebuilt on appear,
+    /// when the `groups` array changes, and when set data changes via the
+    /// shared `.setDataChanged` notification.
+    @State private var sortedGroups: [ExerciseGroup] = []
 
     @Binding var navigationPath: NavigationPath
 
@@ -81,7 +87,7 @@ struct ExerciseGroupsView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 8) {
-                        ForEach(groups) { group in
+                        ForEach(sortedGroups) { group in
                             GroupCard(
                                 group: group,
                                 isExpanded: expandedGroupIDs.contains(group.id),
@@ -130,6 +136,60 @@ struct ExerciseGroupsView: View {
             // exercises) are left for explicit user action via Edit.
             autoClaimUnambiguousTodaysSets()
         }
+        .onAppear { rebuildSortedGroups() }
+        .onChange(of: groups) { _, _ in rebuildSortedGroups() }
+        .onReceive(NotificationCenter.default.publisher(for: .setDataChanged)) { _ in
+            rebuildSortedGroups()
+        }
+    }
+
+    // MARK: - Section-aware sort
+
+    /// Sort key for a single group. Lower `section` floats higher; within a
+    /// section newer `timestamp` floats higher.
+    private struct GroupSortKey {
+        let section: Int
+        let timestamp: Date
+    }
+
+    /// Recompute the sectioned order:
+    ///   0 — in session today (any sets logged today, but not all members done)
+    ///   1 — completed today (every member exercise has a set tagged today)
+    ///   2 — idle (no sets today; ranked by last touch, falling back to createdDate)
+    private func rebuildSortedGroups() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        sortedGroups = groups.sorted { lhs, rhs in
+            let lhsKey = sortKey(for: lhs, today: today, calendar: calendar)
+            let rhsKey = sortKey(for: rhs, today: today, calendar: calendar)
+            if lhsKey.section != rhsKey.section {
+                return lhsKey.section < rhsKey.section
+            }
+            return lhsKey.timestamp > rhsKey.timestamp
+        }
+    }
+
+    private func sortKey(for group: ExerciseGroup, today: Date, calendar: Calendar) -> GroupSortKey {
+        let exercises = group.exercises ?? []
+        let groupSets = group.groupSets ?? []
+        let todaysSets = groupSets.filter { calendar.startOfDay(for: $0.timestamp) == today }
+
+        if !exercises.isEmpty && !todaysSets.isEmpty {
+            let memberIDs = Set(exercises.map { $0.id })
+            let doneIDsToday = Set(todaysSets.compactMap { $0.exercise?.id })
+            let doneCount = memberIDs.intersection(doneIDsToday).count
+            let todaysMax = todaysSets.map(\.timestamp).max() ?? .distantPast
+
+            if doneCount >= exercises.count {
+                return GroupSortKey(section: 1, timestamp: todaysMax)   // completed today
+            } else if doneCount > 0 {
+                return GroupSortKey(section: 0, timestamp: todaysMax)   // in session
+            }
+        }
+
+        // Idle: latest historical set, or creation date when never touched.
+        let lastSet = groupSets.map(\.timestamp).max()
+        return GroupSortKey(section: 2, timestamp: lastSet ?? group.createdDate)
     }
 
     /// Sweep across all groups and stamp today's untagged sets onto

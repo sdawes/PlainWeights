@@ -35,11 +35,6 @@ struct GroupCard: View {
     /// exercise and adds it to this group in one flow.
     @State private var showingAddNewExercise = false
 
-    /// Fixed-width column for the "X exercises" count, so the trailing
-    /// separator dot, status icon, and status text line up across cards
-    /// regardless of how many exercises the group contains.
-    private let countColumnWidth: CGFloat = 90
-
     /// Cached sort + status derived from `group`. Computing these inline in
     /// `body` is expensive (lastWorkoutDate scans an exercise's sets for
     /// each comparison) and body fires on every theme/app-storage tick.
@@ -47,20 +42,38 @@ struct GroupCard: View {
     /// changes via the `.setDataChanged` notification.
     @State private var sortedExercises: [Exercise] = []
     @State private var doneExerciseIDsToday: Set<PersistentIdentifier> = []
-    @State private var cachedLastLoggedDate: Date? = nil
+    /// Summary of the most recent historical day with activity — drives the
+    /// idle pill's colour and label. Nil when the group has never been
+    /// touched. Only consulted in the `.idle` path; today's pill states use
+    /// the live status enum.
+    @State private var cachedIdleSummary: IdleSummary? = nil
+
+    /// One historical day's outcome — was that session a full completion or
+    /// a partial? Kept in the cache and consumed by `idleSubtitle`.
+    private struct IdleSummary: Equatable {
+        enum Kind { case completed, partial }
+        let kind: Kind
+        let date: Date
+        let doneCount: Int
+        let totalCount: Int
+    }
 
     var body: some View {
+        let status = groupSessionStatus(exercises: sortedExercises, doneIDsToday: doneExerciseIDsToday)
+
         VStack(alignment: .leading, spacing: 0) {
             // Header — split into expand tap target (name/count) and
             // ellipsis Menu (always visible, left of chevron).
-            HStack(alignment: .center, spacing: 0) {
+            HStack(alignment: .center, spacing: 14) {
                 // Name + count + staleness: tapping anywhere here toggles expansion.
                 Button(action: onToggle) {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 0) {
                         Text(group.name)
                             .font(themeManager.effectiveTheme.interFont(size: 18, weight: .semibold))
                             .foregroundStyle(themeManager.effectiveTheme.primaryText)
-                        subtitleRow(exercises: sortedExercises, doneIDsToday: doneExerciseIDsToday)
+
+                        subtitleRow(status: status, total: sortedExercises.count)
+                            .padding(.top, 6)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(.rect)
@@ -186,83 +199,116 @@ struct GroupCard: View {
                 .filter { calendar.startOfDay(for: $0.timestamp) == today }
                 .compactMap { $0.exercise?.id }
         )
-        cachedLastLoggedDate = groupSets.map(\.timestamp).max()
+        cachedIdleSummary = computeIdleSummary(
+            groupSets: groupSets,
+            members: sortedExercises,
+            calendar: calendar
+        )
+    }
+
+    /// Find the most recent historical day with any group-tagged set and
+    /// classify it as either a full completion (every member exercise logged)
+    /// or a partial session. Returns nil when there are no members or no
+    /// sets to summarise.
+    private func computeIdleSummary(groupSets: [ExerciseSet], members: [Exercise], calendar: Calendar) -> IdleSummary? {
+        let memberIDs = Set(members.map { $0.id })
+        guard !memberIDs.isEmpty, !groupSets.isEmpty else { return nil }
+
+        // Bucket every set's exercise into its calendar-day-start.
+        var doneByDay: [Date: Set<PersistentIdentifier>] = [:]
+        for set in groupSets {
+            guard let exerciseID = set.exercise?.id else { continue }
+            let day = calendar.startOfDay(for: set.timestamp)
+            doneByDay[day, default: []].insert(exerciseID)
+        }
+
+        guard let mostRecentDay = doneByDay.keys.max(),
+              let doneIDs = doneByDay[mostRecentDay] else {
+            return nil
+        }
+
+        let doneCount = memberIDs.intersection(doneIDs).count
+        let totalCount = memberIDs.count
+        let kind: IdleSummary.Kind = doneCount >= totalCount ? .completed : .partial
+        return IdleSummary(kind: kind, date: mostRecentDay, doneCount: doneCount, totalCount: totalCount)
     }
 
     // MARK: - Subtitle row
 
     @ViewBuilder
-    private func subtitleRow(exercises: [Exercise], doneIDsToday: Set<PersistentIdentifier>) -> some View {
-        let status = groupSessionStatus(exercises: exercises, doneIDsToday: doneIDsToday)
-        let lastDate = cachedLastLoggedDate
-
-        VStack(alignment: .leading, spacing: 6) {
-            // Primary status line — today's state
-            HStack(spacing: 6) {
-                switch status {
-                case .completedToday:
-                    Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
-                        .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        .frame(minWidth: countColumnWidth, alignment: .leading)
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.green)
-                    Text("\(exercises.count)/\(exercises.count) logged today")
-                        .font(themeManager.effectiveTheme.captionFont)
-                        .foregroundStyle(.green)
-
-                case .inProgress(let done, let total):
-                    Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
-                        .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        .frame(minWidth: countColumnWidth, alignment: .leading)
-                    Image(systemName: "arrow.right.circle.fill")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.orange)
-                    Text("\(done)/\(total) logged today")
-                        .font(themeManager.effectiveTheme.captionFont)
-                        .foregroundStyle(.orange)
-
-                case .idle:
-                    Text("\(exercises.count) \(exercises.count == 1 ? "exercise" : "exercises")")
-                        .font(themeManager.effectiveTheme.interFont(size: 12, weight: .medium))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                        .frame(minWidth: countColumnWidth, alignment: .leading)
-
-                    if !exercises.isEmpty {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.red)
-                        Text(lastDate == nil ? "Nothing logged yet" : "Nothing logged today")
-                            .font(themeManager.effectiveTheme.captionFont)
-                            .foregroundStyle(.red)
-                    }
-                }
+    private func subtitleRow(status: GroupSessionStatus, total: Int) -> some View {
+        if total == 0 {
+            // Empty group — italic muted text, no pill (a "0 / 0" pill would be confusing).
+            Text("No exercises yet")
+                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .medium))
+                .italic()
+                .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
+        } else {
+            switch status {
+            case .idle:
+                idlePill(total: total)
+            case .inProgress(let done, let totalCount):
+                statusPill(accent: .orange, label: "\(done) / \(totalCount) TODAY")
+            case .completedToday:
+                statusPill(accent: .green, label: "\(total) / \(total) TODAY")
             }
+        }
+    }
 
-            // Secondary line — when this group was last touched at all.
-            // Shown for every state when there's any history, so every
-            // card has the same two-line shape (count + status, then
-            // last-logged date). Small green dot in front of the date,
-            // editorial information-design pattern borrowed from the
-            // museum reference.
-            if let date = lastDate {
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(.green)
-                        .frame(width: 5, height: 5)
-                    Text("Last logged \(relativeDateString(for: date))")
-                        .font(themeManager.effectiveTheme.interFont(size: 11, weight: .regular))
-                        .foregroundStyle(themeManager.effectiveTheme.mutedForeground)
-                }
-            }
+    /// Idle pill — derived from `cachedIdleSummary`. Grey "0 / N" when the
+    /// group has never been touched, amber when the last activity day was
+    /// partial, green when it was a full completion. Date suffix shows when
+    /// the most recent activity day was.
+    @ViewBuilder
+    private func idlePill(total: Int) -> some View {
+        if let summary = cachedIdleSummary {
+            let accent: Color = summary.kind == .completed ? .green : .orange
+            statusPill(
+                accent: accent,
+                label: "\(summary.doneCount) / \(summary.totalCount) \(dateLabel(for: summary.date))"
+            )
+        } else {
+            statusPill(
+                accent: themeManager.effectiveTheme.mutedForeground,
+                label: "0 / \(total)"
+            )
+        }
+    }
+
+    /// Single source of pill styling — accent-coloured dot + tracked label
+    /// inside a capsule background tinted with the accent at 18% opacity.
+    @ViewBuilder
+    private func statusPill(accent: Color, label: String) -> some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(accent)
+                .frame(width: 6, height: 6)
+            Text(label)
+                .font(themeManager.effectiveTheme.interFont(size: 11, weight: .semibold))
+                .tracking(0.4)
+        }
+        .foregroundStyle(accent)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 3)
+        .background(accent.opacity(0.18))
+        .clipShape(.capsule)
+    }
+
+    /// Format a historical date as a pill suffix: "YESTERDAY" or "· ND AGO".
+    /// "TODAY" is included defensively but the idle path only runs when
+    /// there's no activity today, so it won't normally surface.
+    private func dateLabel(for date: Date) -> String {
+        let days = Calendar.current.dateComponents([.day], from: date, to: .now).day ?? 0
+        switch days {
+        case 0: return "TODAY"
+        case 1: return "YESTERDAY"
+        default: return "· \(days)D AGO"
         }
     }
 
     // MARK: - Group session status
 
-    private enum GroupSessionStatus {
+    private enum GroupSessionStatus: Equatable {
         case idle
         case inProgress(done: Int, total: Int)
         case completedToday
@@ -277,17 +323,6 @@ struct GroupCard: View {
         if doneCount == 0 { return .idle }
         if doneCount >= allIDs.count { return .completedToday }
         return .inProgress(done: doneCount, total: allIDs.count)
-    }
-
-    // MARK: - Date helpers
-
-    private func relativeDateString(for date: Date) -> String {
-        let days = Calendar.current.dateComponents([.day], from: date, to: .now).day ?? 0
-        switch days {
-        case 0: return "today"
-        case 1: return "yesterday"
-        default: return "\(days) days ago"
-        }
     }
 
     // MARK: - Actions

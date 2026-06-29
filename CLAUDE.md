@@ -1402,7 +1402,20 @@ The app does **not** use AI features of any kind. Earlier versions briefly inclu
 
 ## Pre-Release Checklist
 
-**Before submitting to App Store, complete these steps:**
+**Before submitting to App Store, complete these steps.**
+
+### Release sequence — do these in order
+
+The subsections below document each step in detail; this is the order to perform them:
+
+1. **Bump the build number** (and `MARKETING_VERSION` if the user-facing version changed) — see *Build Numbers & Archiving*.
+2. **Deploy CloudKit schema changes** if any `@Model` changed this release — see *CloudKit Schema Deployment*. (Skip if no model changes.)
+3. **Test on real devices** — see *Testing*. Do this on a Debug build *before* the production swap, while `aps-environment` is still `development`.
+4. **Swap `aps-environment` to `production`** — see *Swap aps-environment to production*.
+5. **Archive** (Product → Archive). The `verify-release-config.sh` build phase gates this — a Release build with `aps-environment = development` will fail here by design.
+6. **Distribute & upload** the archive to App Store Connect — see *Archive & Upload*.
+7. **Swap `aps-environment` back to `development`** immediately after the archive completes (step 6 of *Swap aps-environment*).
+8. **Finish App Store Connect** metadata and submit for review — see *App Store Connect*.
 
 ### Swap aps-environment to production
 1. Open `PlainWeights/PlainWeights.entitlements`
@@ -1431,6 +1444,18 @@ The `Scripts/verify-release-config.sh` Build Phase guard will catch step 1 if yo
 - If an archive is trashed and re-uploaded with the same build number, it will be rejected. Always bump the build number
 - Xcode may auto-increment the build number during upload — check what was actually uploaded
 - Build processing takes 5-30 minutes before it appears in App Store Connect
+
+### Archive & Upload
+
+Performed after the `aps-environment` swap to `production` (step 4 of the release sequence):
+
+1. Select **Any iOS Device (arm64)** as the run destination (you cannot archive against a Simulator).
+2. **Product → Archive**. The `verify-release-config.sh` build phase runs first — if it fails with a red error, fix the flagged config and re-archive; do not work around it.
+3. When the **Organizer** opens, select the new archive and click **Distribute App**.
+4. Choose **App Store Connect → Upload**, accept the default signing/symbols options, and click **Upload**.
+5. Confirm the build number that was actually uploaded (Xcode may have auto-incremented it).
+6. Immediately swap `aps-environment` back to `development` (see *Swap aps-environment*, step 6).
+7. Wait 5-30 minutes for build processing before the build appears in App Store Connect.
 
 ### App Store Connect
 - [ ] Create new version (click blue `+` next to iOS App) if version number changed

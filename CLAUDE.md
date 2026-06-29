@@ -843,7 +843,7 @@ chartColor4: Color(red: 0.95, green: 0.85, blue: 0.55)  // Pastel yellow (total 
 pbColor: Color(red: 0.980, green: 0.675, blue: 0.020)   // Gold #faac05
 ```
 
-### Session Comparison Card (VerticalBarComparison)
+### Session Comparison Card (SessionComparisonGauges)
 
 The session comparison card shows how the current workout compares to a reference (Last Session or All-Time Best). It has three sections:
 
@@ -872,7 +872,7 @@ The session comparison card shows how the current workout compares to a referenc
 - Reps delta checks if ANY set beat the reference reps (not just reps at max weight)
 - Footer hint shows "X reps to beat total volume" or "X reps over total volume" or "Total volume matched"
 
-**Key files:** `VerticalBarComparison.swift`, `ComparisonMetricsCard.swift`
+**Key files:** `SessionComparisonGauges.swift`, `ComparisonMetricsCard.swift`
 
 ### SwiftUI API Preferences
 **Always use `foregroundStyle()` instead of `foregroundColor()`** - the latter is deprecated.
@@ -1232,7 +1232,7 @@ When creating UI elements that may be reused (buttons, inputs, etc.), create the
 - `HistoricDayHeader.swift` - Historic day header for history view
 
 **Session Comparison:**
-- `VerticalBarComparison.swift` - Horizontal gauge bars comparing reference vs last set vs session best
+- `SessionComparisonGauges.swift` - Horizontal gauge bars comparing reference vs last set vs session best
 - `ComparisonMetricsCard.swift` - Session comparison card (Last Session / All-Time Best)
 
 **UI Controls:**
@@ -1300,7 +1300,7 @@ Build configuration:
 - `PlainWeightsApp.swift` - ModelContainer with CloudKit config (schema = `[Exercise, ExerciseSet, ExerciseGroup]`)
 - `Exercise.swift` - Model with CloudKit-compatible defaults
 - `ExerciseSet.swift` - Model with CloudKit-compatible defaults (includes `sourceGroup`, `isSuperset`)
-- `ExerciseGroup.swift` - Model with CloudKit-compatible defaults (added 2026-05; needs Production schema deploy before App Store submission)
+- `ExerciseGroup.swift` - Model with CloudKit-compatible defaults
 
 **Testing CloudKit:**
 1. Must test on real device (Simulator is unreliable)
@@ -1317,10 +1317,6 @@ Build configuration:
 - If a field needs changing, add a new field and deprecate the old one with a comment
 - Any model changes that add new properties will auto-deploy to Development on first run
 - New properties must be re-deployed to Production via CloudKit Dashboard before App Store submission
-
-**Outstanding before next App Store submission:**
-- `CD_ExerciseGroup` (added May 2026) and the `sourceGroup` field on `CD_ExerciseSet` need deploying to Production — they exist in Development from the first device launch but have not yet been pushed. Until that's done, App Store users won't get groups synced to iCloud.
-- `isSuperset` on `CD_ExerciseSet` (added later) needs the same Production deploy.
 
 **Schema Changes After Release — "Add-Only, No-Delete, No-Change":**
 - ✅ Can add new properties (must have default values)

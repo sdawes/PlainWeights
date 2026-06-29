@@ -259,8 +259,8 @@ struct ComparisonMetricsCard: View {
                 // Reference Metrics — the big values (Max Weight, Reps, Total Volume)
                 referenceValuesRow(metrics: metrics)
 
-                // Gauges + Deltas + Footer Hint (see VerticalBarComparison.swift)
-                VerticalBarComparison(
+                // Gauges + Deltas + Footer Hint (see SessionComparisonGauges.swift)
+                SessionComparisonGauges(
                     columns: buildBarColumns(from: metrics)
                 )
             } else {
@@ -346,7 +346,7 @@ struct ComparisonMetricsCard: View {
     // MARK: - Bar Chart Data Builder
 
     /// Label for the session best legend entry (e.g. "Best today (Set 2)")
-    /// Build the bar column data from cached metrics for the VerticalBarComparison
+    /// Build the bar column data from cached metrics for the SessionComparisonGauges
     private func buildBarColumns(from metrics: (date: Date?, maxWeight: Double, maxReps: Int, totalVolume: Double, totalReps: Int)) -> [BarColumnData] {
         let lastSet = mostRecentWorkingSet
         let workingSetCount = todaysSets.count

@@ -1,5 +1,5 @@
 //
-//  VerticalBarComparison.swift
+//  SessionComparisonGauges.swift
 //  PlainWeights
 //
 //  The gauge section of the Session Comparison Card. Sits below the reference
@@ -60,7 +60,7 @@ struct BarColumnData: Equatable {
 // MARK: - Session Comparison Gauges
 
 /// Horizontal gauge bars with aligned delta and footer hint rows
-struct VerticalBarComparison: View {
+struct SessionComparisonGauges: View {
     @Environment(ThemeManager.self) private var themeManager
     let columns: [BarColumnData]
 
@@ -141,11 +141,12 @@ struct VerticalBarComparison: View {
                     let barColor = data.barColor
 
                     // Session best shading — drawn FIRST so the colored fill overlaps it.
-                    // Only show when last set is under the reference (not when same/equal).
+                    // Shown whenever a higher session best exists, regardless of whether the
+                    // last set matches the reference — so the green record of beating the reps
+                    // earlier in the session survives when a later set drops back to match.
                     // Tint reflects how the session best compares to the reference:
                     // green if it exceeds, amber if matched, light red if still under.
                     if data.showSessionBest,
-                       !data.isSame,
                        let bestValue = data.sessionBestValue,
                        bestValue > lastValue {
                         let bestRatio = max(bestValue / maxVal, 0.02)

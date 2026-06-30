@@ -125,10 +125,9 @@ struct FilteredExerciseListView: View {
     @State private var showError = false
 
     // MARK: - Cached Data (for scroll performance)
-    /// Pre-computed staleness colors to avoid expensive Calendar operations during scroll
-    @State private var cachedStalenessColors: [PersistentIdentifier: Color?] = [:]
-    /// Pre-computed "done today" flags
-    @State private var cachedDoneToday: Set<PersistentIdentifier> = []
+    /// Pre-computed per-exercise card status (staleness level + "last done"
+    /// string) so each card does zero Calendar / set-scan work during scroll.
+    @State private var cachedCardStatus: [PersistentIdentifier: ExerciseCardStatus] = [:]
     /// Pre-sorted exercises to avoid expensive lastWorkoutDate lookups on every render
     @State private var cachedSortedExercises: [Exercise] = []
     /// Whether any exercise in the database has at least one set. Read by the
@@ -233,17 +232,14 @@ struct FilteredExerciseListView: View {
         }
     }
 
-    /// Rebuild the staleness cache - call when exercises change
-    private func rebuildStalenessCache() {
-        // Reuse calendar instance and pre-compute thresholds
+    /// Rebuild the per-exercise card status cache - call when exercises change.
+    /// Does all the Calendar math + `lastWorkoutDate` set scans up front, once,
+    /// so the cards render without touching either during scroll.
+    private func rebuildCardStatusCache() {
         let calendar = Calendar.current
-        let now = Date()
-        let twoWeeksAgo = calendar.date(byAdding: .day, value: -14, to: now) ?? now
-        let oneMonthAgo = calendar.date(byAdding: .day, value: -30, to: now) ?? now
-        let today = calendar.startOfDay(for: now)
+        let today = calendar.startOfDay(for: Date())
 
-        var colors: [PersistentIdentifier: Color?] = [:]
-        var doneToday: Set<PersistentIdentifier> = []
+        var status: [PersistentIdentifier: ExerciseCardStatus] = [:]
         var anyHasSets = false
 
         for exercise in exercises {
@@ -255,25 +251,32 @@ struct FilteredExerciseListView: View {
             // History toolbar button.
             if lastWorkout != nil { anyHasSets = true }
 
-            // Compute staleness color
+            // Bucket using day difference — mirrors the logic that used to
+            // run live inside ExerciseCard.liveStalenessInfo.
             if let lastWorkout {
-                if lastWorkout < oneMonthAgo {
-                    colors[id] = .red
-                } else if lastWorkout < twoWeeksAgo {
-                    colors[id] = .orange
-                } else if calendar.startOfDay(for: lastWorkout) == today {
-                    colors[id] = .green
-                    doneToday.insert(id)
+                let days = calendar.dateComponents(
+                    [.day],
+                    from: calendar.startOfDay(for: lastWorkout),
+                    to: today
+                ).day ?? 0
+                let level: ExerciseCardStatus.Level
+                if days == 0 {
+                    level = .today
+                } else if days >= 30 {
+                    level = .month
+                } else if days >= 14 {
+                    level = .twoWeeks
                 } else {
-                    colors[id] = nil
+                    level = .recent
                 }
+                let lastDoneString = level == .today ? "" : Formatters.formatExerciseLastDone(lastWorkout)
+                status[id] = ExerciseCardStatus(level: level, lastDoneString: lastDoneString)
             } else {
-                colors[id] = nil
+                status[id] = ExerciseCardStatus(level: .noSets, lastDoneString: "")
             }
         }
 
-        cachedStalenessColors = colors
-        cachedDoneToday = doneToday
+        cachedCardStatus = status
         cachedAnyExerciseHasSets = anyHasSets
     }
 
@@ -428,11 +431,11 @@ struct FilteredExerciseListView: View {
         }
         .onAppear {
             rebuildSortedExercisesCache()
-            rebuildStalenessCache()
+            rebuildCardStatusCache()
         }
         .onChange(of: exercises) { _, _ in
             rebuildSortedExercisesCache()
-            rebuildStalenessCache()
+            rebuildCardStatusCache()
         }
         .onChange(of: searchText) { _, _ in
             rebuildSortedExercisesCache()
@@ -448,7 +451,7 @@ struct FilteredExerciseListView: View {
     @ViewBuilder
     private func exerciseRow(_ exercise: Exercise) -> some View {
         let isSelected = selectedGroupingIDs.contains(exercise.persistentModelID)
-        let cachedDone = cachedDoneToday.contains(exercise.persistentModelID)
+        let status = cachedCardStatus[exercise.persistentModelID]
         let inSelectionMode = mode.isSelectingForGroup
 
         HStack(spacing: 12) {
@@ -466,7 +469,7 @@ struct FilteredExerciseListView: View {
 
             ExerciseCard(
                 exercise: exercise,
-                cachedIsDoneToday: cachedDone,
+                status: status,
                 nameAttributed: searchText.isEmpty ? nil : highlightedName(exercise.name),
                 tagHighlight: searchScope == .tags ? searchText : "",
                 compact: false

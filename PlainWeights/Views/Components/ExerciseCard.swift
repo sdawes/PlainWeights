@@ -30,6 +30,12 @@ struct ExerciseCard: View {
     /// contexts. nil → computed live from the exercise.
     var cachedIsDoneToday: Bool? = nil
 
+    /// Pre-computed staleness level + "last done" string from the caller's
+    /// batched cache. When supplied, the card renders the last-done line
+    /// from this and does zero Calendar / set-scan work during scroll.
+    /// nil → computed live from the exercise (small-N callers).
+    var status: ExerciseCardStatus? = nil
+
     /// If set, render the name as the supplied `AttributedString`
     /// (used by the main list's search bar to highlight matches).
     /// nil → render `exercise.name` plainly.
@@ -44,9 +50,6 @@ struct ExerciseCard: View {
     var compact: Bool = false
 
     var body: some View {
-        let isDoneToday = cachedIsDoneToday ?? exercise.wasWorkedOutToday
-        let info = liveStalenessInfo()
-
         VStack(alignment: .leading, spacing: 0) {
             // Name (with optional search highlight)
             if let nameAttributed {
@@ -72,15 +75,90 @@ struct ExerciseCard: View {
             // Last workout line with optional staleness dot — green (today),
             // orange (14+ days), red (30+ days). The 1-13 days "no callout"
             // range and the no-sets case both render no dot.
-            HStack(spacing: 6) {
-                if let info {
-                    Circle()
-                        .fill(info.color)
-                        .frame(width: 6, height: 6)
-                }
-                lastDoneText(isDoneToday: isDoneToday, info: info)
+            statusLine
+                .padding(.top, compact ? 8 : 12)
+        }
+    }
+
+    // MARK: - Status line
+
+    /// Renders from the caller's precomputed status when available (the
+    /// scroll-perf path), otherwise falls back to live computation.
+    @ViewBuilder
+    private var statusLine: some View {
+        if let status {
+            cachedStatusLine(status)
+        } else {
+            liveStatusLine
+        }
+    }
+
+    /// Last-done line built from precomputed status. Colours are resolved
+    /// here (live, from the current theme) so theme switches stay instant;
+    /// only the expensive Calendar / set-scan work was moved upstream.
+    private func cachedStatusLine(_ status: ExerciseCardStatus) -> some View {
+        let isDark = themeManager.currentTheme == .dark
+        let green: Color = isDark ? Color(red: 0.40, green: 0.90, blue: 0.50) : .green
+        let orange: Color = isDark ? Color(red: 1.0, green: 0.70, blue: 0.30) : .orange
+        let red: Color = isDark ? Color(red: 1.0, green: 0.40, blue: 0.40) : .red
+
+        let dotColor: Color?
+        let text: String
+        let textColor: Color
+        let usesSmallFont: Bool
+        switch status.level {
+        case .today:
+            dotColor = green
+            text = "Last logged today"
+            textColor = green
+            usesSmallFont = false
+        case .recent:
+            dotColor = nil
+            text = "Last logged \(status.lastDoneString)"
+            textColor = themeManager.effectiveTheme.mutedForeground
+            usesSmallFont = true
+        case .twoWeeks:
+            dotColor = orange
+            text = "Last logged \(status.lastDoneString)"
+            textColor = orange
+            usesSmallFont = false
+        case .month:
+            dotColor = red
+            text = "Last logged \(status.lastDoneString)"
+            textColor = red
+            usesSmallFont = false
+        case .noSets:
+            dotColor = nil
+            text = "No sets recorded"
+            textColor = red
+            usesSmallFont = false
+        }
+
+        return HStack(spacing: 6) {
+            if let dotColor {
+                Circle()
+                    .fill(dotColor)
+                    .frame(width: 6, height: 6)
             }
-            .padding(.top, compact ? 8 : 12)
+            Text(text)
+                .font(usesSmallFont ? lastDoneFontSmall : lastDoneFontRegular)
+                .foregroundStyle(textColor)
+        }
+    }
+
+    /// Live fallback — original per-render computation, used when no cached
+    /// status is supplied (small-N callers).
+    @ViewBuilder
+    private var liveStatusLine: some View {
+        let isDoneToday = cachedIsDoneToday ?? exercise.wasWorkedOutToday
+        let info = liveStalenessInfo()
+        HStack(spacing: 6) {
+            if let info {
+                Circle()
+                    .fill(info.color)
+                    .frame(width: 6, height: 6)
+            }
+            lastDoneText(isDoneToday: isDoneToday, info: info)
         }
     }
 

@@ -115,13 +115,11 @@ struct WelcomeEmptyStateView: View {
         let muted = themeManager.effectiveTheme.mutedForeground
         let primary = themeManager.effectiveTheme.primary
 
-        return Text("Add your first exercise by tapping the ")
-            .font(font)
-            .foregroundStyle(muted)
-            + Text(Image(systemName: "plus.circle.fill"))
-            .font(font)
-            .foregroundStyle(primary)
-            + Text(" at the bottom.")
+        // Tint only the inline symbol with the primary colour by interpolating
+        // a styled Text segment; the surrounding copy inherits the outer muted
+        // style. Replaces the deprecated Text + Text concatenation.
+        let icon = Text(Image(systemName: "plus.circle.fill")).foregroundStyle(primary)
+        return Text("Add your first exercise by tapping the \(icon) at the bottom.")
             .font(font)
             .foregroundStyle(muted)
     }
